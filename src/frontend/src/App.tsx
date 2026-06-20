@@ -14,7 +14,8 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   layoutRoute.addChildren([
     dashboardRoute,
-    bookRoute.addChildren([chapterRoute]),
+    bookRoute,
+    chapterRoute,
     statisticsRoute,
     adminRoute,
   ]),

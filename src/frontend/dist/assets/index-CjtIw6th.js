@@ -63823,8 +63823,8 @@ function ChapterEditorPage() {
   ] });
 }
 const chapterRoute = createRoute({
-  getParentRoute: () => bookRoute,
-  path: "chapters/$chapterId",
+  getParentRoute: () => layoutRoute,
+  path: "/books/$bookId/chapters/$chapterId",
   beforeLoad: () => {
     const { isAuthenticated } = useAppStore.getState();
     if (!isAuthenticated) {
@@ -69852,7 +69852,8 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   layoutRoute.addChildren([
     dashboardRoute,
-    bookRoute.addChildren([chapterRoute]),
+    bookRoute,
+    chapterRoute,
     statisticsRoute,
     adminRoute
   ])
