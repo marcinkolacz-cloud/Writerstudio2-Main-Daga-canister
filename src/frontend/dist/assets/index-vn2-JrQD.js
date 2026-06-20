@@ -37562,6 +37562,25 @@ ${history2}
 
 Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
 }
+async function getSynonyms(word, apiKey, provider) {
+  if (!word || word.trim().length === 0) {
+    return [];
+  }
+  const cleanWord = word.trim();
+  const prompt = `Podaj 5-8 synonimów polskiego słowa "${cleanWord}" w kontekście języka literackiego. Zwróć wynik jako JSON array zawierający tylko synonimy jako stringi. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  if (!Array.isArray(parsed)) {
+    throw new Error("Oczekiwano tablicy synonimów");
+  }
+  return parsed.map((item) => {
+    if (typeof item === "string") return item;
+    if (item && typeof item === "object" && "synonym" in item) {
+      return String(item.synonym);
+    }
+    return String(item);
+  }).filter((s2) => s2.length > 0);
+}
 async function chatWithBook(messages2, bookContext, apiKey, provider) {
   const prompt = buildChatPrompt(messages2, bookContext);
   return await callAi(prompt, apiKey, provider, false);
@@ -37671,12 +37690,36 @@ const createLucideIcon = (iconName, iconNode) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$p = [
+const __iconNode$r = [
   ["path", { d: "M15 12H3", key: "6jk70r" }],
   ["path", { d: "M17 18H3", key: "1amg6g" }],
   ["path", { d: "M21 6H3", key: "1jwq7v" }]
 ];
-const AlignLeft = createLucideIcon("align-left", __iconNode$p);
+const AlignLeft = createLucideIcon("align-left", __iconNode$r);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$q = [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+];
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$q);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$p = [
+  [
+    "path",
+    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
+  ]
+];
+const Bold$1 = createLucideIcon("bold", __iconNode$p);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -37684,30 +37727,6 @@ const AlignLeft = createLucideIcon("align-left", __iconNode$p);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$o = [
-  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
-  ["path", { d: "M19 12H5", key: "x3x0zl" }]
-];
-const ArrowLeft = createLucideIcon("arrow-left", __iconNode$o);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$n = [
-  [
-    "path",
-    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
-  ]
-];
-const Bold$1 = createLucideIcon("bold", __iconNode$n);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$m = [
   ["path", { d: "M12 7v14", key: "1akyts" }],
   [
     "path",
@@ -37717,31 +37736,61 @@ const __iconNode$m = [
     }
   ]
 ];
-const BookOpen = createLucideIcon("book-open", __iconNode$m);
+const BookOpen = createLucideIcon("book-open", __iconNode$o);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$l = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$l);
+const __iconNode$n = [
+  [
+    "path",
+    {
+      d: "M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20",
+      key: "k3hazp"
+    }
+  ],
+  ["path", { d: "M8 11h8", key: "vwpz6n" }],
+  ["path", { d: "M8 7h6", key: "1f0q6e" }]
+];
+const BookText = createLucideIcon("book-text", __iconNode$n);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$k = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$k);
+const __iconNode$m = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$m);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$j = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-const ChevronUp = createLucideIcon("chevron-up", __iconNode$j);
+const __iconNode$l = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$l);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$k = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+const ChevronUp = createLucideIcon("chevron-up", __iconNode$k);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$j = [
+  ["path", { d: "M12 15V3", key: "m9g1x1" }],
+  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
+  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
+];
+const Download = createLucideIcon("download", __iconNode$j);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -37749,11 +37798,13 @@ const ChevronUp = createLucideIcon("chevron-up", __iconNode$j);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$i = [
-  ["path", { d: "M12 15V3", key: "m9g1x1" }],
-  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
-  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
+  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
+  ["path", { d: "M10 9H8", key: "b1mrlr" }],
+  ["path", { d: "M16 13H8", key: "t4e002" }],
+  ["path", { d: "M16 17H8", key: "z1uh3a" }]
 ];
-const Download = createLucideIcon("download", __iconNode$i);
+const FileText = createLucideIcon("file-text", __iconNode$i);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -37761,25 +37812,19 @@ const Download = createLucideIcon("download", __iconNode$i);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$h = [
-  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
-  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
-  ["path", { d: "M10 9H8", key: "b1mrlr" }],
-  ["path", { d: "M16 13H8", key: "t4e002" }],
-  ["path", { d: "M16 17H8", key: "z1uh3a" }]
+  ["line", { x1: "19", x2: "10", y1: "4", y2: "4", key: "15jd3p" }],
+  ["line", { x1: "14", x2: "5", y1: "20", y2: "20", key: "bu0au3" }],
+  ["line", { x1: "15", x2: "9", y1: "4", y2: "20", key: "uljnxc" }]
 ];
-const FileText = createLucideIcon("file-text", __iconNode$h);
+const Italic$1 = createLucideIcon("italic", __iconNode$h);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$g = [
-  ["line", { x1: "19", x2: "10", y1: "4", y2: "4", key: "15jd3p" }],
-  ["line", { x1: "14", x2: "5", y1: "20", y2: "20", key: "bu0au3" }],
-  ["line", { x1: "15", x2: "9", y1: "4", y2: "20", key: "uljnxc" }]
-];
-const Italic$1 = createLucideIcon("italic", __iconNode$g);
+const __iconNode$g = [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]];
+const LoaderCircle = createLucideIcon("loader-circle", __iconNode$g);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -68164,6 +68209,93 @@ function RichTextEditor({
       placeholder && editor.isEmpty && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-[52px] left-4 text-muted-foreground pointer-events-none select-none", children: placeholder })
     ] })
   ] });
+}
+function SynonymPopup({
+  synonyms,
+  isLoading,
+  error,
+  onSelect,
+  onClose,
+  position
+}) {
+  const popupRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (popupRef.current && !popupRef.current.contains(e.target)) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
+  reactExports.useEffect(() => {
+    const handleKeyDown2 = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown2);
+    return () => document.removeEventListener("keydown", handleKeyDown2);
+  }, [onClose]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      ref: popupRef,
+      className: "fixed z-50 min-w-[180px] max-w-[280px] rounded-lg border border-border bg-popover shadow-elevated text-popover-foreground",
+      style: {
+        top: position.top,
+        left: position.left,
+        transform: "translateX(-50%)"
+      },
+      "data-ocid": "editor.synonym_popup",
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between px-3 py-2 border-b border-border", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs font-medium text-muted-foreground uppercase tracking-wider", children: "Synonimy" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "button",
+            {
+              type: "button",
+              onClick: onClose,
+              className: "inline-flex items-center justify-center w-5 h-5 rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
+              "aria-label": "Zamknij",
+              "data-ocid": "editor.synonym_close_button",
+              children: /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-3 w-3" })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "px-3 py-2.5", children: isLoading ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 py-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "h-3.5 w-3.5 animate-spin text-muted-foreground" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm text-muted-foreground", children: "Wyszukiwanie..." })
+        ] }) : error ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "p",
+          {
+            className: "text-sm text-destructive py-1",
+            "data-ocid": "editor.synonym_error_state",
+            children: error
+          }
+        ) : synonyms.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "p",
+          {
+            className: "text-sm text-muted-foreground py-1",
+            "data-ocid": "editor.synonym_empty_state",
+            children: "Brak synonimów"
+          }
+        ) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-1.5", children: synonyms.map((synonym, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => {
+              onSelect(synonym);
+              onClose();
+            },
+            className: "inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full\n                  bg-secondary text-secondary-foreground\n                  hover:bg-primary hover:text-primary-foreground\n                  active:scale-95\n                  transition-all duration-150",
+            "data-ocid": `editor.synonym_item.${idx + 1}`,
+            children: synonym
+          },
+          synonym
+        )) }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-popover border-r border-b border-border" })
+      ]
+    }
+  );
 }
 function createCollection(name) {
   const PROVIDER_NAME = name + "CollectionProvider";
@@ -100686,7 +100818,7 @@ function(t2) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DZBq108_.js"), true ? [] : void 0)).catch(function(t3) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DVnqZkbe.js"), true ? [] : void 0)).catch(function(t3) {
     return Promise.reject(new Error("Could not load canvg: " + t3));
   }).then(function(t3) {
     return t3.default ? t3.default : t3;
@@ -101573,6 +101705,13 @@ function ChapterEditorPage() {
   const [commentDialogOpen, setCommentDialogOpen] = reactExports.useState(false);
   const [selectedText, setSelectedText] = reactExports.useState("");
   const [floatingButtonPos, setFloatingButtonPos] = reactExports.useState(null);
+  const [synonymPopupOpen, setSynonymPopupOpen] = reactExports.useState(false);
+  const [synonymPopupPos, setSynonymPopupPos] = reactExports.useState(null);
+  const [synonyms, setSynonyms] = reactExports.useState([]);
+  const [synonymLoading, setSynonymLoading] = reactExports.useState(false);
+  const [synonymError, setSynonymError] = reactExports.useState(null);
+  const [selectedWord, setSelectedWord] = reactExports.useState("");
+  const synonymSelectionRef = reactExports.useRef(null);
   const [apiKey, setApiKey] = reactExports.useState(
     () => localStorage.getItem("ws_api_key") ?? ""
   );
@@ -102105,6 +102244,73 @@ ${ch.content}`).join("\n\n---\n\n");
         children: "Dodaj komentarz"
       }
     ),
+    synonymPopupPos && !synonymPopupOpen && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "button",
+      {
+        type: "button",
+        className: "fixed z-40 px-3 py-1.5 text-xs font-medium rounded-md bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 transition-colors",
+        style: {
+          left: synonymPopupPos.x,
+          top: synonymPopupPos.y - 36
+        },
+        onClick: async () => {
+          if (!editorRef.current || !selectedWord) return;
+          setSynonymPopupOpen(true);
+          setSynonymLoading(true);
+          setSynonymError(null);
+          try {
+            const results = await getSynonyms(
+              selectedWord,
+              apiKey.trim(),
+              provider
+            );
+            setSynonyms(results);
+          } catch (err) {
+            setSynonymError(
+              err instanceof Error ? err.message : "Błąd wyszukiwania synonimów"
+            );
+          } finally {
+            setSynonymLoading(false);
+          }
+        },
+        "data-ocid": "chapter.synonym_floating_button",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(BookText, { className: "h-3 w-3 mr-1 inline" }),
+          "Synonimy"
+        ]
+      }
+    ),
+    synonymPopupOpen && synonymPopupPos && editorRef.current && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      SynonymPopup,
+      {
+        editor: editorRef.current,
+        word: selectedWord,
+        synonyms,
+        isLoading: synonymLoading,
+        error: synonymError,
+        onSelect: (synonym) => {
+          if (!editorRef.current || !synonymSelectionRef.current) return;
+          const { from: from2, to } = synonymSelectionRef.current;
+          editorRef.current.chain().focus().setTextSelection({ from: from2, to }).insertContent(synonym).run();
+          setSynonymPopupOpen(false);
+          setSynonymPopupPos(null);
+          setSynonyms([]);
+          setSelectedWord("");
+          synonymSelectionRef.current = null;
+        },
+        onClose: () => {
+          setSynonymPopupOpen(false);
+          setSynonymPopupPos(null);
+          setSynonyms([]);
+          setSelectedWord("");
+          synonymSelectionRef.current = null;
+        },
+        position: {
+          top: (synonymPopupPos.y ?? 0) - 40,
+          left: synonymPopupPos.x ?? 0
+        }
+      }
+    ),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       CommentDialog,
       {
@@ -102169,7 +102375,35 @@ ${ch.content}`).join("\n\n---\n\n");
                     });
                   }
                 };
+                const handleDoubleClick2 = () => {
+                  const { from: from2, to } = editor.state.selection;
+                  if (from2 === to) {
+                    setSynonymPopupPos(null);
+                    return;
+                  }
+                  const text = editor.state.doc.textBetween(from2, to, " ");
+                  const trimmed = text.replace(
+                    /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,
+                    ""
+                  );
+                  if (!trimmed.trim()) {
+                    setSynonymPopupPos(null);
+                    return;
+                  }
+                  setSelectedWord(trimmed);
+                  synonymSelectionRef.current = { from: from2, to };
+                  const selection = window.getSelection();
+                  if (selection && selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+                    setSynonymPopupPos({
+                      x: rect.left + rect.width / 2,
+                      y: rect.top
+                    });
+                  }
+                };
                 dom.addEventListener("mouseup", handleMouseUp);
+                dom.addEventListener("dblclick", handleDoubleClick2);
               }
             }
           )

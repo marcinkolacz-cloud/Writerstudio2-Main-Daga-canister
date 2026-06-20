@@ -1,3 +1,4 @@
+import { useRef } from "react";
 export interface Annotation {
   text: string;
   color: "yellow" | "red" | "blue" | "orange" | "purple";
@@ -255,6 +256,32 @@ HISTORIA ROZMOWY:
 ${history}
 
 Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
+}
+
+export async function getSynonyms(
+  word: string,
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<string[]> {
+  if (!word || word.trim().length === 0) {
+    return [];
+  }
+  const cleanWord = word.trim();
+  const prompt = `Podaj 5-8 synonimów polskiego słowa "${cleanWord}" w kontekście języka literackiego. Zwróć wynik jako JSON array zawierający tylko synonimy jako stringi. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  if (!Array.isArray(parsed)) {
+    throw new Error("Oczekiwano tablicy synonimów");
+  }
+  return parsed
+    .map((item) => {
+      if (typeof item === "string") return item;
+      if (item && typeof item === "object" && "synonym" in item) {
+        return String((item as Record<string, unknown>).synonym);
+      }
+      return String(item);
+    })
+    .filter((s) => s.length > 0);
 }
 
 export async function chatWithBook(

@@ -1,6 +1,7 @@
 import { CommentDialog } from "@/components/editor/CommentDialog";
 import { CommentsPanel } from "@/components/editor/CommentsPanel";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
+import { SynonymPopup } from "@/components/editor/SynonymPopup";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -42,6 +43,7 @@ import {
   analyzeGrammarStyle,
   analyzeWithContext,
   generateSummary,
+  getSynonyms,
 } from "@/lib/aiAnalysis";
 import type { Annotation } from "@/lib/aiAnalysis";
 import { exportToDOCX, exportToPDF } from "@/lib/exportChapter";
@@ -51,6 +53,7 @@ import {
   AlignLeft,
   ArrowLeft,
   BookOpen,
+  BookText,
   Check,
   Download,
   FileText,
@@ -189,6 +192,18 @@ export function ChapterEditorPage() {
     x: number;
     y: number;
   } | null>(null);
+
+  // Synonym state
+  const [synonymPopupOpen, setSynonymPopupOpen] = useState(false);
+  const [synonymPopupPos, setSynonymPopupPos] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [synonyms, setSynonyms] = useState<string[]>([]);
+  const [synonymLoading, setSynonymLoading] = useState(false);
+  const [synonymError, setSynonymError] = useState<string | null>(null);
+  const [selectedWord, setSelectedWord] = useState("");
+  const synonymSelectionRef = useRef<{ from: number; to: number } | null>(null);
   const [apiKey, setApiKey] = useState(
     () => localStorage.getItem("ws_api_key") ?? "",
   );
@@ -750,6 +765,81 @@ export function ChapterEditorPage() {
         </button>
       )}
 
+      {/* Floating "Synonimy" button on double-click word selection */}
+      {synonymPopupPos && !synonymPopupOpen && (
+        <button
+          type="button"
+          className="fixed z-40 px-3 py-1.5 text-xs font-medium rounded-md bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 transition-colors"
+          style={{
+            left: synonymPopupPos.x,
+            top: synonymPopupPos.y - 36,
+          }}
+          onClick={async () => {
+            if (!editorRef.current || !selectedWord) return;
+            setSynonymPopupOpen(true);
+            setSynonymLoading(true);
+            setSynonymError(null);
+            try {
+              const results = await getSynonyms(
+                selectedWord,
+                apiKey.trim(),
+                provider,
+              );
+              setSynonyms(results);
+            } catch (err) {
+              setSynonymError(
+                err instanceof Error
+                  ? err.message
+                  : "Błąd wyszukiwania synonimów",
+              );
+            } finally {
+              setSynonymLoading(false);
+            }
+          }}
+          data-ocid="chapter.synonym_floating_button"
+        >
+          <BookText className="h-3 w-3 mr-1 inline" />
+          Synonimy
+        </button>
+      )}
+
+      {/* Synonym popup */}
+      {synonymPopupOpen && synonymPopupPos && editorRef.current && (
+        <SynonymPopup
+          editor={editorRef.current}
+          word={selectedWord}
+          synonyms={synonyms}
+          isLoading={synonymLoading}
+          error={synonymError}
+          onSelect={(synonym) => {
+            if (!editorRef.current || !synonymSelectionRef.current) return;
+            const { from, to } = synonymSelectionRef.current;
+            editorRef.current
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .insertContent(synonym)
+              .run();
+            setSynonymPopupOpen(false);
+            setSynonymPopupPos(null);
+            setSynonyms([]);
+            setSelectedWord("");
+            synonymSelectionRef.current = null;
+          }}
+          onClose={() => {
+            setSynonymPopupOpen(false);
+            setSynonymPopupPos(null);
+            setSynonyms([]);
+            setSelectedWord("");
+            synonymSelectionRef.current = null;
+          }}
+          position={{
+            top: (synonymPopupPos.y ?? 0) - 40,
+            left: synonymPopupPos.x ?? 0,
+          }}
+        />
+      )}
+
       {/* Comment dialog */}
       <CommentDialog
         open={commentDialogOpen}
@@ -833,7 +923,38 @@ export function ChapterEditorPage() {
                 }
               };
 
+              const handleDoubleClick = () => {
+                const { from, to } = editor.state.selection;
+                if (from === to) {
+                  setSynonymPopupPos(null);
+                  return;
+                }
+                const text = editor.state.doc.textBetween(from, to, " ");
+                // Trim punctuation from word boundaries
+                const trimmed = text.replace(
+                  /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,
+                  "",
+                );
+                if (!trimmed.trim()) {
+                  setSynonymPopupPos(null);
+                  return;
+                }
+                setSelectedWord(trimmed);
+                synonymSelectionRef.current = { from, to };
+
+                const selection = window.getSelection();
+                if (selection && selection.rangeCount > 0) {
+                  const range = selection.getRangeAt(0);
+                  const rect = range.getBoundingClientRect();
+                  setSynonymPopupPos({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top,
+                  });
+                }
+              };
+
               dom.addEventListener("mouseup", handleMouseUp);
+              dom.addEventListener("dblclick", handleDoubleClick);
             }}
           />
         </div>
