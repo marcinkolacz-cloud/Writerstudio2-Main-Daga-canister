@@ -8,6 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -38,6 +44,7 @@ import {
   generateSummary,
 } from "@/lib/aiAnalysis";
 import type { Annotation } from "@/lib/aiAnalysis";
+import { exportToDOCX, exportToPDF } from "@/lib/exportChapter";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { Editor } from "@tiptap/core";
 import {
@@ -45,6 +52,8 @@ import {
   ArrowLeft,
   BookOpen,
   Check,
+  Download,
+  FileText,
   MessageCircle,
   MessageSquare,
   Save,
@@ -594,6 +603,50 @@ export function ChapterEditorPage() {
           <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
           Komentarze
         </Button>
+        <div className="w-px h-6 bg-border hidden sm:block" />
+        {/* Export dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="sm"
+              variant="outline"
+              data-ocid="chapter.export_dropdown_trigger"
+            >
+              <Download className="h-3.5 w-3.5 mr-1.5" />
+              Eksportuj
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              onClick={() => {
+                if (editorRef.current) {
+                  exportToPDF(title, editorRef.current.getHTML());
+                }
+              }}
+              data-ocid="chapter.export_pdf_item"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Eksportuj do PDF
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                if (editorRef.current) {
+                  exportToDOCX(
+                    title,
+                    editorRef.current.getHTML(),
+                    indentLeft,
+                    indentRight,
+                    indentFirstLine,
+                  );
+                }
+              }}
+              data-ocid="chapter.export_docx_item"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Eksportuj do DOCX
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <div className="w-px h-6 bg-border hidden sm:block" />
 
