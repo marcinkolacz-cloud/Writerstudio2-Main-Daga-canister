@@ -1,3 +1,5 @@
+import { CommentDialog } from "@/components/editor/CommentDialog";
+import { CommentsPanel } from "@/components/editor/CommentsPanel";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +23,9 @@ import {
   useBook,
   useChapter,
   useChapters,
+  useComments,
+  useCreateComment,
+  useDeleteComment,
   useSaveAnalysis,
   useSaveAnnotations,
   useUpdateChapter,
@@ -41,6 +46,7 @@ import {
   BookOpen,
   Check,
   MessageCircle,
+  MessageSquare,
   Save,
   Sparkles,
   Wand2,
@@ -142,6 +148,9 @@ export function ChapterEditorPage() {
   const { data: chapter, isLoading: chapterLoading } = useChapter(chapterId);
   const { data: chapters } = useChapters(bookId);
   const { data: bookAnalyses } = useAnalysesByBook(bookId);
+  const { data: comments } = useComments(chapterId);
+  const createComment = useCreateComment();
+  const deleteComment = useDeleteComment();
 
   const updateChapter = useUpdateChapter();
   const saveAnalysis = useSaveAnalysis();
@@ -162,6 +171,15 @@ export function ChapterEditorPage() {
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("grammar");
   const [summaryType, setSummaryType] = useState<SummaryType>("short");
   const [summaryResult, setSummaryResult] = useState<string | null>(null);
+
+  // Comments state
+  const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+  const [floatingButtonPos, setFloatingButtonPos] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const [apiKey, setApiKey] = useState(
     () => localStorage.getItem("ws_api_key") ?? "",
   );
@@ -566,6 +584,19 @@ export function ChapterEditorPage() {
 
         <div className="w-px h-6 bg-border hidden sm:block" />
 
+        {/* Comments toggle */}
+        <Button
+          size="sm"
+          variant={commentsPanelOpen ? "default" : "outline"}
+          onClick={() => setCommentsPanelOpen((v) => !v)}
+          data-ocid="chapter.comments_toggle_button"
+        >
+          <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
+          Komentarze
+        </Button>
+
+        <div className="w-px h-6 bg-border hidden sm:block" />
+
         {/* Indent section */}
         <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">
           <Save className="h-3.5 w-3.5" />
@@ -647,23 +678,158 @@ export function ChapterEditorPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Rich text editor with indent-aware padding */}
-      <div
-        className="flex-1 min-h-0"
-        style={{
-          paddingLeft: `${indentLeft}px`,
-          paddingRight: `${indentRight}px`,
-        }}
-        data-ocid="chapter.editor_wrapper"
-      >
-        <RichTextEditor
-          value={content}
-          onChange={handleContentChange}
-          placeholder="Zacznij pisać..."
-          onEditorReady={(editor) => {
-            editorRef.current = editor;
+      {/* Floating "Add comment" button on text selection */}
+      {floatingButtonPos && (
+        <button
+          type="button"
+          className="fixed z-40 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+          style={{
+            left: floatingButtonPos.x,
+            top: floatingButtonPos.y - 36,
           }}
-        />
+          onClick={() => {
+            setCommentDialogOpen(true);
+            setFloatingButtonPos(null);
+          }}
+          data-ocid="chapter.add_comment_floating_button"
+        >
+          Dodaj komentarz
+        </button>
+      )}
+
+      {/* Comment dialog */}
+      <CommentDialog
+        open={commentDialogOpen}
+        onOpenChange={setCommentDialogOpen}
+        anchorText={selectedText}
+        onSave={async (commentContent) => {
+          if (!editorRef.current || !chapter) return;
+          const editor = editorRef.current;
+          const { from, to } = editor.state.selection;
+
+          // Apply comment mark
+          editor
+            .chain()
+            .focus()
+            .setTextSelection({ from, to })
+            .setMark("comment", {})
+            .run();
+
+          // Save to backend
+          const commentId = await createComment.mutateAsync({
+            chapterId: chapter.id,
+            anchorText: selectedText,
+            content: commentContent,
+          });
+
+          // Update mark with data-comment-id
+          editor
+            .chain()
+            .focus()
+            .setTextSelection({ from, to })
+            .setMark("comment", {
+              "data-comment-id": String(commentId),
+            })
+            .run();
+        }}
+      />
+
+      {/* Editor + Comments panel */}
+      <div className="flex flex-1 min-h-0 gap-0">
+        <div
+          className="flex-1 min-h-0"
+          style={{
+            paddingLeft: `${indentLeft}px`,
+            paddingRight: `${indentRight}px`,
+          }}
+          data-ocid="chapter.editor_wrapper"
+        >
+          <RichTextEditor
+            value={content}
+            onChange={handleContentChange}
+            placeholder="Zacznij pisać..."
+            onEditorReady={(editor) => {
+              editorRef.current = editor;
+
+              // Listen for text selection to show floating button
+              const view = editor.view;
+              const dom = view.dom as HTMLElement;
+
+              const handleMouseUp = () => {
+                const { from, to } = editor.state.selection;
+                if (from === to) {
+                  setFloatingButtonPos(null);
+                  return;
+                }
+                const text = editor.state.doc.textBetween(from, to, " ");
+                if (!text.trim()) {
+                  setFloatingButtonPos(null);
+                  return;
+                }
+                setSelectedText(text);
+
+                // Get selection rect
+                const selection = window.getSelection();
+                if (selection && selection.rangeCount > 0) {
+                  const range = selection.getRangeAt(0);
+                  const rect = range.getBoundingClientRect();
+                  setFloatingButtonPos({
+                    x: rect.left + rect.width / 2,
+                    y: rect.top,
+                  });
+                }
+              };
+
+              dom.addEventListener("mouseup", handleMouseUp);
+            }}
+          />
+        </div>
+
+        {commentsPanelOpen && (
+          <CommentsPanel
+            comments={comments ?? []}
+            onDelete={(id) => {
+              deleteComment.mutate({ id });
+              // Remove mark from editor
+              if (editorRef.current) {
+                const editor = editorRef.current;
+                editor.state.doc.descendants((node, pos) => {
+                  if (!node.isText) return false;
+                  const mark = node.marks.find(
+                    (m) =>
+                      m.type.name === "comment" &&
+                      m.attrs["data-comment-id"] === String(id),
+                  );
+                  if (mark) {
+                    editor
+                      .chain()
+                      .focus()
+                      .setTextSelection({ from: pos, to: pos + node.nodeSize })
+                      .unsetMark("comment")
+                      .run();
+                  }
+                  return false;
+                });
+              }
+            }}
+            onHighlight={(anchorText) => {
+              if (!editorRef.current) return;
+              const editor = editorRef.current;
+              const docText = editor.getText();
+              const idx = docText.indexOf(anchorText);
+              if (idx === -1) return;
+              const from = editor.state.doc.resolve(idx);
+              const to = editor.state.doc.resolve(idx + anchorText.length);
+              editor
+                .chain()
+                .focus()
+                .setTextSelection({ from: from.pos, to: to.pos })
+                .scrollIntoView()
+                .run();
+            }}
+            onClose={() => setCommentsPanelOpen(false)}
+          />
+        )}
       </div>
     </div>
   );

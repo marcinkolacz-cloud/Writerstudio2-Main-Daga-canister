@@ -1,5 +1,11 @@
-import { type ChatMessage, createActor } from "@/backend";
-import type { Analysis, Book, Chapter, TextAnnotation } from "@/backend";
+import { type Comment, createActor } from "@/backend";
+import type {
+  Analysis,
+  Book,
+  Chapter,
+  ChatMessage,
+  TextAnnotation,
+} from "@/backend";
 import { useActor } from "@caffeineai/core-infrastructure";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -308,6 +314,60 @@ export function useDeleteMessage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chat"] });
+    },
+  });
+}
+
+export function useComments(chapterId: string | number) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(chapterId);
+  return useQuery<Comment[]>({
+    queryKey: ["comments", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      const comments = await actor.listCommentsByChapter(id);
+      return comments.sort((a, b) => Number(a.createdAt - b.createdAt));
+    },
+    enabled: !!actor && !!chapterId,
+  });
+}
+
+export function useCreateComment() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      chapterId,
+      anchorText,
+      content,
+    }: {
+      chapterId: bigint;
+      anchorText: string;
+      content: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.createComment(chapterId, anchorText, content);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["comments", variables.chapterId],
+      });
+    },
+  });
+}
+
+export function useDeleteComment() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id }: { id: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteComment(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments"] });
     },
   });
 }

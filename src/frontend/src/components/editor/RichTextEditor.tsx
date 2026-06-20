@@ -6,6 +6,7 @@ import {
   annotationRed,
   annotationYellow,
 } from "@/components/editor/extensions/AnnotationMark";
+import { commentMark } from "@/components/editor/extensions/CommentMark";
 import { useAnnotationTooltip } from "@/components/editor/hooks/useAnnotationTooltip";
 import { cn } from "@/lib/utils";
 import Underline from "@tiptap/extension-underline";
@@ -45,6 +46,7 @@ export function RichTextEditor({
       annotationOrange,
       annotationPurple,
       annotationApplied,
+      commentMark,
     ],
     content: value,
     onUpdate: ({ editor }) => {
