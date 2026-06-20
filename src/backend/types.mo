@@ -25,4 +25,23 @@ module {
     createdAt : Int;
     updatedAt : Int;
   };
+
+  public type Analysis = {
+    id : Nat;
+    bookId : Nat;
+    chapterId : ?Nat;
+    analysisType : Text;
+    provider : Text;
+    resultContent : Text;
+    createdAt : Int;
+  };
+
+  public type TextAnnotation = {
+    id : Nat;
+    analysisId : Nat;
+    text : Text;
+    color : Text;
+    explanation : Text;
+    proposal : Text;
+  };
 };

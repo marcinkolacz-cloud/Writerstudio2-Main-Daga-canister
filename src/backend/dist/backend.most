@@ -1,4 +1,24 @@
 // Version: 4.0.0
+type Analysis__50785574 =
+  {
+    analysisType : Text;
+    bookId : Nat;
+    chapterId : ?Nat;
+    createdAt : Int;
+    id : Nat;
+    provider : Text;
+    resultContent : Text
+  };
+type Analysis__819022578 =
+  {
+    analysisType : Text;
+    bookId : Nat;
+    chapterId : ?Nat;
+    createdAt : Int;
+    id : Nat;
+    provider : Text;
+    resultContent : Text
+  };
 type Book__668250280 =
   {
     category : Text;
@@ -72,6 +92,27 @@ type NewActor__152089560 =
     nextChapterId : Nat
   };
 type NewActor__277487213 = {};
+type NewActor__561368971 =
+  {
+    analyses : Map__222667396<Nat, Analysis__819022578>;
+    annotations : Map__222667396<Nat, TextAnnotation__849925922>;
+    books : Map__222667396<Nat, NewBook__21960049>;
+    chapters : Map__222667396<Nat, NewChapter__810776573>;
+    nextAnalysisId : Nat;
+    nextAnnotationId : Nat;
+    nextBookId : Nat;
+    nextChapterId : Nat
+  };
+type NewBook__21960049 =
+  {
+    category : Text;
+    createdAt : Int;
+    description : Text;
+    id : Nat;
+    ownerId : Principal;
+    title : Text;
+    updatedAt : Int
+  };
 type NewBook__65226796 =
   {
     category : Text;
@@ -97,6 +138,21 @@ type NewChapter__103669124 =
     updatedAt : Int;
     wordCount : Nat
   };
+type NewChapter__810776573 =
+  {
+    bookId : Nat;
+    charCount : Nat;
+    content : Text;
+    createdAt : Int;
+    id : Nat;
+    indentFirstLine : Nat;
+    indentLeft : Nat;
+    indentRight : Nat;
+    orderIndex : Nat;
+    title : Text;
+    updatedAt : Int;
+    wordCount : Nat
+  };
 type Node__1000929467<K, V> =
   {#internal : Internal__41346355<K, V>; #leaf : Leaf__712614010<K, V>};
 type OldActor__317883801 =
@@ -108,6 +164,23 @@ type OldActor__317883801 =
   };
 type OldActor__45539797 = {};
 type OldActor__531157147 = {};
+type OldActor__982370003 =
+  {
+    books : Map__222667396<Nat, OldBook__1036629683>;
+    chapters : Map__222667396<Nat, OldChapter__228755124>;
+    nextBookId : Nat;
+    nextChapterId : Nat
+  };
+type OldBook__1036629683 =
+  {
+    category : Text;
+    createdAt : Int;
+    description : Text;
+    id : Nat;
+    ownerId : Principal;
+    title : Text;
+    updatedAt : Int
+  };
 type OldBook__699076268 =
   {
     category : Text;
@@ -117,6 +190,21 @@ type OldBook__699076268 =
     ownerId : Principal;
     title : Text;
     updatedAt : Int
+  };
+type OldChapter__228755124 =
+  {
+    bookId : Nat;
+    charCount : Nat;
+    content : Text;
+    createdAt : Int;
+    id : Nat;
+    indentFirstLine : Nat;
+    indentLeft : Nat;
+    indentRight : Nat;
+    orderIndex : Nat;
+    title : Text;
+    updatedAt : Int;
+    wordCount : Nat
   };
 type OldChapter__803095218 =
   {
@@ -130,15 +218,45 @@ type OldChapter__803095218 =
     updatedAt : Int;
     wordCount : Nat
   };
+type TextAnnotation__564580974 =
+  {
+    analysisId : Nat;
+    color : Text;
+    explanation : Text;
+    id : Nat;
+    proposal : Text;
+    text : Text
+  };
+type TextAnnotation__849925922 =
+  {
+    analysisId : Nat;
+    color : Text;
+    explanation : Text;
+    id : Nat;
+    proposal : Text;
+    text : Text
+  };
 {
   "20260620_000000_Initial" :
     (_old : OldActor__531157147) -> NewActor__277487213;
   "20260620_140000_AddBookChapterState" :
     (_old : OldActor__45539797) -> NewActor__1000285290;
   "20260620_150000_AddChapterIndents" :
-    (old : OldActor__317883801) -> NewActor__152089560
+    (old : OldActor__317883801) -> NewActor__152089560;
+  "20260620_160000_AddAnalysisState" :
+    (old : OldActor__982370003) -> NewActor__561368971
 }
 actor  {
+  stable analyses :
+    {
+      var root : Node__1000929467<Nat, Analysis__50785574>;
+      var size : Nat__1040412405
+    };
+  stable annotations :
+    {
+      var root : Node__1000929467<Nat, TextAnnotation__564580974>;
+      var size : Nat__1040412405
+    };
   stable books :
     {
       var root : Node__1000929467<Nat, Book__668250280>;
@@ -149,6 +267,8 @@ actor  {
       var root : Node__1000929467<Nat, Chapter__479822198>;
       var size : Nat__1040412405
     };
+  stable var nextAnalysisId : Nat;
+  stable var nextAnnotationId : Nat;
   stable var nextBookId : Nat;
   stable var nextChapterId : Nat
 };

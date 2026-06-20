@@ -1,3 +1,12 @@
+type TextAnnotation = 
+ record {
+   analysisId: nat;
+   color: text;
+   explanation: text;
+   id: nat;
+   proposal: text;
+   "text": text;
+ };
 type Chapter = 
  record {
    bookId: nat;
@@ -23,7 +32,27 @@ type Book =
    title: text;
    updatedAt: int;
  };
+type Analysis = 
+ record {
+   analysisType: text;
+   bookId: nat;
+   chapterId: opt nat;
+   createdAt: int;
+   id: nat;
+   provider: text;
+   resultContent: text;
+ };
 service : {
+  __analyses: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          Analysis;
+        }) query;
+  __annotations: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          TextAnnotation;
+        }) query;
   __books: (ko: opt nat, count: opt nat) -> (vec record {
                                                    nat;
                                                    Book;
@@ -33,17 +62,33 @@ service : {
           nat;
           Chapter;
         }) query;
+  __nextAnalysisId: () -> (nat) query;
+  __nextAnnotationId: () -> (nat) query;
   __nextBookId: () -> (nat) query;
   __nextChapterId: () -> (nat) query;
   createBook: (title: text, description: text, category: text) -> (nat);
   createChapter: (bookId: nat, title: text) -> (nat);
+  deleteAnalysis: (id: nat) -> (bool);
   deleteBook: (id: nat) -> (bool);
   deleteChapter: (id: nat) -> (bool);
+  getAnalysis: (id: nat) -> (opt Analysis);
+  getAnnotations: (analysisId: nat) -> (vec TextAnnotation);
   getBook: (id: nat) -> (opt Book);
   getChapter: (id: nat) -> (opt Chapter);
+  listAnalysesByBook: (bookId: nat) -> (vec Analysis);
+  listAnalysesByChapter: (chapterId: nat) -> (vec Analysis);
   listBooksByOwner: () -> (vec Book);
   listChaptersByBook: (bookId: nat) -> (vec Chapter);
   reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);
+  saveAnalysis: (bookId: nat, chapterId: opt nat, analysisType: text,
+   provider: text, resultContent: text) -> (nat);
+  saveAnnotations: (analysisId: nat, annotationData:
+   vec record {
+         color: text;
+         explanation: text;
+         proposal: text;
+         "text": text;
+       }) -> (bool);
   updateBook: (id: nat, title: text, description: text, category: text) ->
    (bool);
   updateChapter: (id: nat, title: text, content: text) -> (bool);

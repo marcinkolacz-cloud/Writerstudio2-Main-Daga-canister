@@ -10,6 +10,15 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface Analysis {
+  'id' : bigint,
+  'provider' : string,
+  'analysisType' : string,
+  'createdAt' : bigint,
+  'bookId' : bigint,
+  'chapterId' : [] | [bigint],
+  'resultContent' : string,
+}
 export interface Book {
   'id' : bigint,
   'title' : string,
@@ -33,7 +42,23 @@ export interface Chapter {
   'updatedAt' : bigint,
   'orderIndex' : bigint,
 }
+export interface TextAnnotation {
+  'id' : bigint,
+  'explanation' : string,
+  'color' : string,
+  'text' : string,
+  'analysisId' : bigint,
+  'proposal' : string,
+}
 export interface _SERVICE {
+  '__analyses' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, Analysis]>
+  >,
+  '__annotations' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, TextAnnotation]>
+  >,
   '__books' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Book]>
@@ -42,17 +67,42 @@ export interface _SERVICE {
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Chapter]>
   >,
+  '__nextAnalysisId' : ActorMethod<[], bigint>,
+  '__nextAnnotationId' : ActorMethod<[], bigint>,
   '__nextBookId' : ActorMethod<[], bigint>,
   '__nextChapterId' : ActorMethod<[], bigint>,
   'createBook' : ActorMethod<[string, string, string], bigint>,
   'createChapter' : ActorMethod<[bigint, string], bigint>,
+  'deleteAnalysis' : ActorMethod<[bigint], boolean>,
   'deleteBook' : ActorMethod<[bigint], boolean>,
   'deleteChapter' : ActorMethod<[bigint], boolean>,
+  'getAnalysis' : ActorMethod<[bigint], [] | [Analysis]>,
+  'getAnnotations' : ActorMethod<[bigint], Array<TextAnnotation>>,
   'getBook' : ActorMethod<[bigint], [] | [Book]>,
   'getChapter' : ActorMethod<[bigint], [] | [Chapter]>,
+  'listAnalysesByBook' : ActorMethod<[bigint], Array<Analysis>>,
+  'listAnalysesByChapter' : ActorMethod<[bigint], Array<Analysis>>,
   'listBooksByOwner' : ActorMethod<[], Array<Book>>,
   'listChaptersByBook' : ActorMethod<[bigint], Array<Chapter>>,
   'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
+  'saveAnalysis' : ActorMethod<
+    [bigint, [] | [bigint], string, string, string],
+    bigint
+  >,
+  'saveAnnotations' : ActorMethod<
+    [
+      bigint,
+      Array<
+        {
+          'explanation' : string,
+          'color' : string,
+          'text' : string,
+          'proposal' : string,
+        }
+      >,
+    ],
+    boolean
+  >,
   'updateBook' : ActorMethod<[bigint, string, string, string], boolean>,
   'updateChapter' : ActorMethod<[bigint, string, string], boolean>,
   'updateChapterIndents' : ActorMethod<

@@ -36520,6 +36520,23 @@ function Skeleton({ className, ...props }) {
     }
   );
 }
+const Analysis = Record({
+  "id": Nat,
+  "provider": Text$2,
+  "analysisType": Text$2,
+  "createdAt": Int,
+  "bookId": Nat,
+  "chapterId": Opt(Nat),
+  "resultContent": Text$2
+});
+const TextAnnotation = Record({
+  "id": Nat,
+  "explanation": Text$2,
+  "color": Text$2,
+  "text": Text$2,
+  "analysisId": Nat,
+  "proposal": Text$2
+});
 const Book = Record({
   "id": Nat,
   "title": Text$2,
@@ -36544,6 +36561,16 @@ const Chapter = Record({
   "orderIndex": Nat
 });
 Service({
+  "__analyses": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, Analysis))],
+    ["query"]
+  ),
+  "__annotations": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, TextAnnotation))],
+    ["query"]
+  ),
   "__books": Func(
     [Opt(Nat), Opt(Nat)],
     [Vec(Tuple(Nat, Book))],
@@ -36554,17 +36581,44 @@ Service({
     [Vec(Tuple(Nat, Chapter))],
     ["query"]
   ),
+  "__nextAnalysisId": Func([], [Nat], ["query"]),
+  "__nextAnnotationId": Func([], [Nat], ["query"]),
   "__nextBookId": Func([], [Nat], ["query"]),
   "__nextChapterId": Func([], [Nat], ["query"]),
   "createBook": Func([Text$2, Text$2, Text$2], [Nat], []),
   "createChapter": Func([Nat, Text$2], [Nat], []),
+  "deleteAnalysis": Func([Nat], [Bool], []),
   "deleteBook": Func([Nat], [Bool], []),
   "deleteChapter": Func([Nat], [Bool], []),
+  "getAnalysis": Func([Nat], [Opt(Analysis)], []),
+  "getAnnotations": Func([Nat], [Vec(TextAnnotation)], []),
   "getBook": Func([Nat], [Opt(Book)], []),
   "getChapter": Func([Nat], [Opt(Chapter)], []),
+  "listAnalysesByBook": Func([Nat], [Vec(Analysis)], []),
+  "listAnalysesByChapter": Func([Nat], [Vec(Analysis)], []),
   "listBooksByOwner": Func([], [Vec(Book)], []),
   "listChaptersByBook": Func([Nat], [Vec(Chapter)], []),
   "reorderChapters": Func([Nat, Vec(Nat)], [Bool], []),
+  "saveAnalysis": Func(
+    [Nat, Opt(Nat), Text$2, Text$2, Text$2],
+    [Nat],
+    []
+  ),
+  "saveAnnotations": Func(
+    [
+      Nat,
+      Vec(
+        Record({
+          "explanation": Text$2,
+          "color": Text$2,
+          "text": Text$2,
+          "proposal": Text$2
+        })
+      )
+    ],
+    [Bool],
+    []
+  ),
   "updateBook": Func(
     [Nat, Text$2, Text$2, Text$2],
     [Bool],
@@ -36578,6 +36632,23 @@ Service({
   )
 });
 const idlFactory = ({ IDL: IDL2 }) => {
+  const Analysis2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "provider": IDL2.Text,
+    "analysisType": IDL2.Text,
+    "createdAt": IDL2.Int,
+    "bookId": IDL2.Nat,
+    "chapterId": IDL2.Opt(IDL2.Nat),
+    "resultContent": IDL2.Text
+  });
+  const TextAnnotation2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "explanation": IDL2.Text,
+    "color": IDL2.Text,
+    "text": IDL2.Text,
+    "analysisId": IDL2.Nat,
+    "proposal": IDL2.Text
+  });
   const Book2 = IDL2.Record({
     "id": IDL2.Nat,
     "title": IDL2.Text,
@@ -36602,6 +36673,16 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "orderIndex": IDL2.Nat
   });
   return IDL2.Service({
+    "__analyses": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Analysis2))],
+      ["query"]
+    ),
+    "__annotations": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, TextAnnotation2))],
+      ["query"]
+    ),
     "__books": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Book2))],
@@ -36612,17 +36693,44 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Chapter2))],
       ["query"]
     ),
+    "__nextAnalysisId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__nextAnnotationId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextBookId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChapterId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "createBook": IDL2.Func([IDL2.Text, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "createChapter": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
+    "deleteAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteBook": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteChapter": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "getAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Opt(Analysis2)], []),
+    "getAnnotations": IDL2.Func([IDL2.Nat], [IDL2.Vec(TextAnnotation2)], []),
     "getBook": IDL2.Func([IDL2.Nat], [IDL2.Opt(Book2)], []),
     "getChapter": IDL2.Func([IDL2.Nat], [IDL2.Opt(Chapter2)], []),
+    "listAnalysesByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Analysis2)], []),
+    "listAnalysesByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Analysis2)], []),
     "listBooksByOwner": IDL2.Func([], [IDL2.Vec(Book2)], []),
     "listChaptersByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Chapter2)], []),
     "reorderChapters": IDL2.Func([IDL2.Nat, IDL2.Vec(IDL2.Nat)], [IDL2.Bool], []),
+    "saveAnalysis": IDL2.Func(
+      [IDL2.Nat, IDL2.Opt(IDL2.Nat), IDL2.Text, IDL2.Text, IDL2.Text],
+      [IDL2.Nat],
+      []
+    ),
+    "saveAnnotations": IDL2.Func(
+      [
+        IDL2.Nat,
+        IDL2.Vec(
+          IDL2.Record({
+            "explanation": IDL2.Text,
+            "color": IDL2.Text,
+            "text": IDL2.Text,
+            "proposal": IDL2.Text
+          })
+        )
+      ],
+      [IDL2.Bool],
+      []
+    ),
     "updateBook": IDL2.Func(
       [IDL2.Nat, IDL2.Text, IDL2.Text, IDL2.Text],
       [IDL2.Bool],
@@ -36644,12 +36752,43 @@ function candid_some(value) {
 function candid_none() {
   return [];
 }
+function record_opt_to_undefined(arg) {
+  return arg == null ? void 0 : arg;
+}
 class Backend {
   constructor(actor, _uploadFile, _downloadFile, processError2) {
     this.actor = actor;
     this._uploadFile = _uploadFile;
     this._downloadFile = _downloadFile;
     this.processError = processError2;
+  }
+  async __analyses(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__analyses(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return from_candid_vec_n2(this._uploadFile, this._downloadFile, result);
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__analyses(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return from_candid_vec_n2(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async __annotations(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__annotations(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__annotations(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
   }
   async __books(arg0, arg1) {
     if (this.processError) {
@@ -36676,6 +36815,34 @@ class Backend {
       }
     } else {
       const result = await this.actor.__chapters(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
+  async __nextAnalysisId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextAnalysisId();
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextAnalysisId();
+      return result;
+    }
+  }
+  async __nextAnnotationId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextAnnotationId();
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextAnnotationId();
       return result;
     }
   }
@@ -36735,6 +36902,20 @@ class Backend {
       return result;
     }
   }
+  async deleteAnalysis(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.deleteAnalysis(arg0);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.deleteAnalysis(arg0);
+      return result;
+    }
+  }
   async deleteBook(arg0) {
     if (this.processError) {
       try {
@@ -36763,32 +36944,88 @@ class Backend {
       return result;
     }
   }
+  async getAnalysis(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getAnalysis(arg0);
+        return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getAnalysis(arg0);
+      return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async getAnnotations(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getAnnotations(arg0);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getAnnotations(arg0);
+      return result;
+    }
+  }
   async getBook(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.getBook(arg0);
-        return from_candid_opt_n2(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
       } catch (e) {
         this.processError(e);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getBook(arg0);
-      return from_candid_opt_n2(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
     }
   }
   async getChapter(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.getChapter(arg0);
-        return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
       } catch (e) {
         this.processError(e);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getChapter(arg0);
-      return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async listAnalysesByBook(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.listAnalysesByBook(arg0);
+        return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.listAnalysesByBook(arg0);
+      return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async listAnalysesByChapter(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.listAnalysesByChapter(arg0);
+        return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.listAnalysesByChapter(arg0);
+      return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
     }
   }
   async listBooksByOwner() {
@@ -36830,6 +37067,34 @@ class Backend {
       }
     } else {
       const result = await this.actor.reorderChapters(arg0, arg1);
+      return result;
+    }
+  }
+  async saveAnalysis(arg0, arg1, arg2, arg3, arg4) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.saveAnalysis(arg0, to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1), arg2, arg3, arg4);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.saveAnalysis(arg0, to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1), arg2, arg3, arg4);
+      return result;
+    }
+  }
+  async saveAnnotations(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.saveAnnotations(arg0, arg1);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.saveAnnotations(arg0, arg1);
       return result;
     }
   }
@@ -36876,11 +37141,43 @@ class Backend {
     }
   }
 }
-function from_candid_opt_n2(_uploadFile, _downloadFile, value) {
+function from_candid_Analysis_n4(_uploadFile, _downloadFile, value) {
+  return from_candid_record_n5(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n6(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n3(_uploadFile, _downloadFile, value) {
+function from_candid_opt_n7(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : from_candid_Analysis_n4(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n8(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n9(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : value[0];
+}
+function from_candid_record_n5(_uploadFile, _downloadFile, value) {
+  return {
+    id: value.id,
+    provider: value.provider,
+    analysisType: value.analysisType,
+    createdAt: value.createdAt,
+    bookId: value.bookId,
+    chapterId: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.chapterId)),
+    resultContent: value.resultContent
+  };
+}
+function from_candid_tuple_n3(_uploadFile, _downloadFile, value) {
+  return [
+    value[0],
+    from_candid_Analysis_n4(_uploadFile, _downloadFile, value[1])
+  ];
+}
+function from_candid_vec_n10(_uploadFile, _downloadFile, value) {
+  return value.map((x2) => from_candid_Analysis_n4(_uploadFile, _downloadFile, x2));
+}
+function from_candid_vec_n2(_uploadFile, _downloadFile, value) {
+  return value.map((x2) => from_candid_tuple_n3(_uploadFile, _downloadFile, x2));
 }
 function to_candid_opt_n1(_uploadFile, _downloadFile, value) {
   return value === null ? candid_none() : candid_some(value);

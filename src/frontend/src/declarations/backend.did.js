@@ -8,6 +8,23 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const Analysis = IDL.Record({
+  'id' : IDL.Nat,
+  'provider' : IDL.Text,
+  'analysisType' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'bookId' : IDL.Nat,
+  'chapterId' : IDL.Opt(IDL.Nat),
+  'resultContent' : IDL.Text,
+});
+export const TextAnnotation = IDL.Record({
+  'id' : IDL.Nat,
+  'explanation' : IDL.Text,
+  'color' : IDL.Text,
+  'text' : IDL.Text,
+  'analysisId' : IDL.Nat,
+  'proposal' : IDL.Text,
+});
 export const Book = IDL.Record({
   'id' : IDL.Nat,
   'title' : IDL.Text,
@@ -33,6 +50,16 @@ export const Chapter = IDL.Record({
 });
 
 export const idlService = IDL.Service({
+  '__analyses' : IDL.Func(
+      [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, Analysis))],
+      ['query'],
+    ),
+  '__annotations' : IDL.Func(
+      [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, TextAnnotation))],
+      ['query'],
+    ),
   '__books' : IDL.Func(
       [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
       [IDL.Vec(IDL.Tuple(IDL.Nat, Book))],
@@ -43,17 +70,44 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Tuple(IDL.Nat, Chapter))],
       ['query'],
     ),
+  '__nextAnalysisId' : IDL.Func([], [IDL.Nat], ['query']),
+  '__nextAnnotationId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextBookId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextChapterId' : IDL.Func([], [IDL.Nat], ['query']),
   'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
   'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
+  'deleteAnalysis' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
+  'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
   'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
   'getChapter' : IDL.Func([IDL.Nat], [IDL.Opt(Chapter)], []),
+  'listAnalysesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
+  'listAnalysesByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
   'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
   'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
   'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
+  'saveAnalysis' : IDL.Func(
+      [IDL.Nat, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text],
+      [IDL.Nat],
+      [],
+    ),
+  'saveAnnotations' : IDL.Func(
+      [
+        IDL.Nat,
+        IDL.Vec(
+          IDL.Record({
+            'explanation' : IDL.Text,
+            'color' : IDL.Text,
+            'text' : IDL.Text,
+            'proposal' : IDL.Text,
+          })
+        ),
+      ],
+      [IDL.Bool],
+      [],
+    ),
   'updateBook' : IDL.Func(
       [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
       [IDL.Bool],
@@ -70,6 +124,23 @@ export const idlService = IDL.Service({
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const Analysis = IDL.Record({
+    'id' : IDL.Nat,
+    'provider' : IDL.Text,
+    'analysisType' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'bookId' : IDL.Nat,
+    'chapterId' : IDL.Opt(IDL.Nat),
+    'resultContent' : IDL.Text,
+  });
+  const TextAnnotation = IDL.Record({
+    'id' : IDL.Nat,
+    'explanation' : IDL.Text,
+    'color' : IDL.Text,
+    'text' : IDL.Text,
+    'analysisId' : IDL.Nat,
+    'proposal' : IDL.Text,
+  });
   const Book = IDL.Record({
     'id' : IDL.Nat,
     'title' : IDL.Text,
@@ -95,6 +166,16 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
+    '__analyses' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, Analysis))],
+        ['query'],
+      ),
+    '__annotations' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, TextAnnotation))],
+        ['query'],
+      ),
     '__books' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Book))],
@@ -105,17 +186,44 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, Chapter))],
         ['query'],
       ),
+    '__nextAnalysisId' : IDL.Func([], [IDL.Nat], ['query']),
+    '__nextAnnotationId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextBookId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextChapterId' : IDL.Func([], [IDL.Nat], ['query']),
     'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
     'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
+    'deleteAnalysis' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
+    'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
     'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
     'getChapter' : IDL.Func([IDL.Nat], [IDL.Opt(Chapter)], []),
+    'listAnalysesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
+    'listAnalysesByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
     'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
     'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
     'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
+    'saveAnalysis' : IDL.Func(
+        [IDL.Nat, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text],
+        [IDL.Nat],
+        [],
+      ),
+    'saveAnnotations' : IDL.Func(
+        [
+          IDL.Nat,
+          IDL.Vec(
+            IDL.Record({
+              'explanation' : IDL.Text,
+              'color' : IDL.Text,
+              'text' : IDL.Text,
+              'proposal' : IDL.Text,
+            })
+          ),
+        ],
+        [IDL.Bool],
+        [],
+      ),
     'updateBook' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
         [IDL.Bool],
