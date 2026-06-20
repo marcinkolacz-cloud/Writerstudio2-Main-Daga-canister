@@ -17,6 +17,11 @@ declare global {
 
 const queryClient = new QueryClient();
 
+const storedTheme = localStorage.getItem("writerstudio-theme");
+if (storedTheme === "dark") {
+  document.documentElement.classList.add("dark");
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
     <InternetIdentityProvider>
