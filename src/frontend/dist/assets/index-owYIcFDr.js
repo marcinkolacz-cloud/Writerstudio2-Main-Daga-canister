@@ -36271,7 +36271,18 @@ const createLucideIcon = (iconName, iconNode) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$7 = [
+const __iconNode$9 = [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+];
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$9);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$8 = [
   ["path", { d: "M12 7v14", key: "1akyts" }],
   [
     "path",
@@ -36281,31 +36292,45 @@ const __iconNode$7 = [
     }
   ]
 ];
-const BookOpen = createLucideIcon("book-open", __iconNode$7);
+const BookOpen = createLucideIcon("book-open", __iconNode$8);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$6 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$6);
+const __iconNode$7 = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$7);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$5 = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$5);
+const __iconNode$6 = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$6);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$4 = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-const ChevronUp = createLucideIcon("chevron-up", __iconNode$4);
+const __iconNode$5 = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+const ChevronUp = createLucideIcon("chevron-up", __iconNode$5);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$4 = [
+  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
+  ["path", { d: "M10 9H8", key: "b1mrlr" }],
+  ["path", { d: "M16 13H8", key: "t4e002" }],
+  ["path", { d: "M16 17H8", key: "z1uh3a" }]
+];
+const FileText = createLucideIcon("file-text", __iconNode$4);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -36409,13 +36434,598 @@ const adminRoute = createRoute({
   },
   component: AdminPage
 });
+function Skeleton({ className, ...props }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "div",
+    {
+      "data-slot": "skeleton",
+      className: cn("bg-accent animate-pulse rounded-md", className),
+      ...props
+    }
+  );
+}
+const Book = Record({
+  "id": Nat,
+  "title": Text,
+  "ownerId": Principal2,
+  "createdAt": Int,
+  "description": Text,
+  "updatedAt": Int,
+  "category": Text
+});
+const Chapter = Record({
+  "id": Nat,
+  "charCount": Nat,
+  "title": Text,
+  "content": Text,
+  "wordCount": Nat,
+  "createdAt": Int,
+  "bookId": Nat,
+  "updatedAt": Int,
+  "orderIndex": Nat
+});
+Service({
+  "__books": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, Book))],
+    ["query"]
+  ),
+  "__chapters": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, Chapter))],
+    ["query"]
+  ),
+  "__nextBookId": Func([], [Nat], ["query"]),
+  "__nextChapterId": Func([], [Nat], ["query"]),
+  "createBook": Func([Text, Text, Text], [Nat], []),
+  "createChapter": Func([Nat, Text], [Nat], []),
+  "deleteBook": Func([Nat], [Bool], []),
+  "deleteChapter": Func([Nat], [Bool], []),
+  "getBook": Func([Nat], [Opt(Book)], []),
+  "getChapter": Func([Nat], [Opt(Chapter)], []),
+  "listBooksByOwner": Func([], [Vec(Book)], []),
+  "listChaptersByBook": Func([Nat], [Vec(Chapter)], []),
+  "reorderChapters": Func([Nat, Vec(Nat)], [Bool], []),
+  "updateBook": Func(
+    [Nat, Text, Text, Text],
+    [Bool],
+    []
+  ),
+  "updateChapter": Func([Nat, Text, Text], [Bool], [])
+});
+const idlFactory = ({ IDL: IDL2 }) => {
+  const Book2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "title": IDL2.Text,
+    "ownerId": IDL2.Principal,
+    "createdAt": IDL2.Int,
+    "description": IDL2.Text,
+    "updatedAt": IDL2.Int,
+    "category": IDL2.Text
+  });
+  const Chapter2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "charCount": IDL2.Nat,
+    "title": IDL2.Text,
+    "content": IDL2.Text,
+    "wordCount": IDL2.Nat,
+    "createdAt": IDL2.Int,
+    "bookId": IDL2.Nat,
+    "updatedAt": IDL2.Int,
+    "orderIndex": IDL2.Nat
+  });
+  return IDL2.Service({
+    "__books": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Book2))],
+      ["query"]
+    ),
+    "__chapters": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Chapter2))],
+      ["query"]
+    ),
+    "__nextBookId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__nextChapterId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "createBook": IDL2.Func([IDL2.Text, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
+    "createChapter": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
+    "deleteBook": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "deleteChapter": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "getBook": IDL2.Func([IDL2.Nat], [IDL2.Opt(Book2)], []),
+    "getChapter": IDL2.Func([IDL2.Nat], [IDL2.Opt(Chapter2)], []),
+    "listBooksByOwner": IDL2.Func([], [IDL2.Vec(Book2)], []),
+    "listChaptersByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Chapter2)], []),
+    "reorderChapters": IDL2.Func([IDL2.Nat, IDL2.Vec(IDL2.Nat)], [IDL2.Bool], []),
+    "updateBook": IDL2.Func(
+      [IDL2.Nat, IDL2.Text, IDL2.Text, IDL2.Text],
+      [IDL2.Bool],
+      []
+    ),
+    "updateChapter": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Bool], [])
+  });
+};
+function candid_some(value) {
+  return [
+    value
+  ];
+}
+function candid_none() {
+  return [];
+}
+class Backend {
+  constructor(actor, _uploadFile, _downloadFile, processError2) {
+    this.actor = actor;
+    this._uploadFile = _uploadFile;
+    this._downloadFile = _downloadFile;
+    this.processError = processError2;
+  }
+  async __books(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__books(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__books(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
+  async __chapters(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__chapters(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__chapters(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
+  async __nextBookId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextBookId();
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextBookId();
+      return result;
+    }
+  }
+  async __nextChapterId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextChapterId();
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextChapterId();
+      return result;
+    }
+  }
+  async createBook(arg0, arg1, arg2) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.createBook(arg0, arg1, arg2);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.createBook(arg0, arg1, arg2);
+      return result;
+    }
+  }
+  async createChapter(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.createChapter(arg0, arg1);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.createChapter(arg0, arg1);
+      return result;
+    }
+  }
+  async deleteBook(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.deleteBook(arg0);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.deleteBook(arg0);
+      return result;
+    }
+  }
+  async deleteChapter(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.deleteChapter(arg0);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.deleteChapter(arg0);
+      return result;
+    }
+  }
+  async getBook(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getBook(arg0);
+        return from_candid_opt_n2(this._uploadFile, this._downloadFile, result);
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getBook(arg0);
+      return from_candid_opt_n2(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async getChapter(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getChapter(arg0);
+        return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getChapter(arg0);
+      return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async listBooksByOwner() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.listBooksByOwner();
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.listBooksByOwner();
+      return result;
+    }
+  }
+  async listChaptersByBook(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.listChaptersByBook(arg0);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.listChaptersByBook(arg0);
+      return result;
+    }
+  }
+  async reorderChapters(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.reorderChapters(arg0, arg1);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.reorderChapters(arg0, arg1);
+      return result;
+    }
+  }
+  async updateBook(arg0, arg1, arg2, arg3) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.updateBook(arg0, arg1, arg2, arg3);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.updateBook(arg0, arg1, arg2, arg3);
+      return result;
+    }
+  }
+  async updateChapter(arg0, arg1, arg2) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.updateChapter(arg0, arg1, arg2);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.updateChapter(arg0, arg1, arg2);
+      return result;
+    }
+  }
+}
+function from_candid_opt_n2(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n3(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : value[0];
+}
+function to_candid_opt_n1(_uploadFile, _downloadFile, value) {
+  return value === null ? candid_none() : candid_some(value);
+}
+function createActor(canisterId, _uploadFile, _downloadFile, options = {}) {
+  const agent = options.agent || HttpAgent.createSync({
+    ...options.agentOptions
+  });
+  if (options.agent && options.agentOptions) {
+    console.warn("Detected both agent and agentOptions passed to createActor. Ignoring agentOptions and proceeding with the provided agent.");
+  }
+  const actor = Actor.createActor(idlFactory, {
+    agent,
+    canisterId,
+    ...options.actorOptions
+  });
+  return new Backend(actor, _uploadFile, _downloadFile, options.processError);
+}
+function useBooks() {
+  const { actor } = useActor(createActor);
+  return useQuery({
+    queryKey: ["books"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listBooksByOwner();
+    },
+    enabled: !!actor
+  });
+}
+function useBook(bookId) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(bookId);
+  return useQuery({
+    queryKey: ["book", id],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getBook(id);
+    },
+    enabled: !!actor && !!bookId
+  });
+}
+function useChapters(bookId) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(bookId);
+  return useQuery({
+    queryKey: ["chapters", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      const chapters = await actor.listChaptersByBook(id);
+      return chapters.sort((a2, b2) => Number(a2.orderIndex - b2.orderIndex));
+    },
+    enabled: !!actor && !!bookId
+  });
+}
+function useCreateChapter() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      bookId,
+      title
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.createChapter(bookId, title);
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["chapters", variables.bookId]
+      });
+    }
+  });
+}
+function useCreateBook() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      title,
+      description,
+      category
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.createBook(title, description, category);
+    },
+    onSuccess: () => {
+      queryClient2.invalidateQueries({ queryKey: ["books"] });
+    }
+  });
+}
+function ChapterListItem({
+  chapter,
+  bookId,
+  index: index2
+}) {
+  const navigate = useNavigate();
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "button",
+    {
+      type: "button",
+      onClick: () => navigate({
+        to: "/books/$bookId/chapters/$chapterId",
+        params: { bookId, chapterId: String(chapter.id) }
+      }),
+      className: "w-full flex items-center gap-4 p-4 rounded-lg border border-border bg-card hover:bg-card/80 transition-colors text-left group",
+      "data-ocid": `chapter.item.${index2 + 1}`,
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-shrink-0 w-8 h-8 rounded-md bg-muted flex items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 text-muted-foreground" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-medium text-foreground truncate", children: chapter.title }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-muted-foreground", children: [
+            Number(chapter.wordCount),
+            " słów"
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity -rotate-180" })
+      ]
+    }
+  );
+}
 function BookOverviewPage() {
   const { bookId } = useParams({ from: "/layout/books/$bookId" });
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center justify-center h-full", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("h1", { className: "text-2xl font-display text-foreground", children: [
-    "Przegląd książki (ID: ",
-    bookId,
-    ")"
-  ] }) });
+  const navigate = useNavigate();
+  const {
+    data: book,
+    isLoading: bookLoading,
+    isError: bookError
+  } = useBook(bookId);
+  const { data: chapters, isLoading: chaptersLoading } = useChapters(bookId);
+  const createChapter = useCreateChapter();
+  const handleAddChapter = () => {
+    createChapter.mutate(
+      { bookId: BigInt(bookId), title: "Nowy rozdział" },
+      {
+        onSuccess: (chapterId) => {
+          ue.success("Rozdział został dodany");
+          navigate({
+            to: "/books/$bookId/chapters/$chapterId",
+            params: { bookId, chapterId: String(chapterId) }
+          });
+        },
+        onError: () => {
+          ue.error("Nie udało się dodać rozdziału");
+        }
+      }
+    );
+  };
+  const isLoading = bookLoading || chaptersLoading;
+  if (isLoading) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Skeleton, { className: "h-8 w-64" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Skeleton, { className: "h-4 w-full max-w-md" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-3", children: Array.from({ length: 3 }).map((_2, i) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Skeleton,
+        {
+          className: "h-16 w-full rounded-lg"
+        },
+        `ch-skeleton-${String(i)}`
+      )) })
+    ] });
+  }
+  if (bookError || !book) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center justify-center py-16 text-center", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-12 w-12 text-muted-foreground/40 mb-4" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold text-foreground mb-2", children: "Nie znaleziono książki" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-muted-foreground mb-6", children: "Książka o podanym identyfikatorze nie istnieje lub nie masz do niej dostępu." }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        Button,
+        {
+          variant: "outline",
+          onClick: () => navigate({ to: "/dashboard" }),
+          "data-ocid": "book.back_button",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-4 w-4 mr-2" }),
+            "Wróć do dashboardu"
+          ]
+        }
+      )
+    ] });
+  }
+  const hasChapters = chapters && chapters.length > 0;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start justify-between", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Button,
+          {
+            variant: "ghost",
+            size: "sm",
+            className: "-ml-2 text-muted-foreground hover:text-foreground",
+            onClick: () => navigate({ to: "/dashboard" }),
+            "data-ocid": "book.back_button",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-4 w-4 mr-1" }),
+              "Dashboard"
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-display font-semibold text-foreground", children: book.title }),
+        book.description && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-muted-foreground max-w-xl", children: book.description }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground", children: book.category })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        Button,
+        {
+          onClick: handleAddChapter,
+          disabled: createChapter.isPending,
+          "data-ocid": "chapter.add_button",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Plus, { className: "h-4 w-4 mr-2" }),
+            "Dodaj rozdział"
+          ]
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-sm font-semibold text-muted-foreground uppercase tracking-wider", children: "Rozdziały" }),
+      hasChapters ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2", children: chapters.map((chapter, index2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+        ChapterListItem,
+        {
+          chapter,
+          bookId,
+          index: index2
+        },
+        String(chapter.id)
+      )) }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          className: "flex flex-col items-center justify-center py-12 text-center border border-dashed border-border rounded-lg",
+          "data-ocid": "chapter.empty_state",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-10 w-10 text-muted-foreground/40 mb-3" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-base font-medium text-foreground mb-1", children: "Brak rozdziałów" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-muted-foreground mb-4", children: "Dodaj pierwszy rozdział, aby rozpocząć pisanie." }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                variant: "outline",
+                onClick: handleAddChapter,
+                disabled: createChapter.isPending,
+                "data-ocid": "chapter.add_button.empty",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Plus, { className: "h-4 w-4 mr-2" }),
+                  "Dodaj rozdział"
+                ]
+              }
+            )
+          ]
+        }
+      )
+    ] })
+  ] });
 }
 const bookRoute = createRoute({
   getParentRoute: () => layoutRoute,
@@ -42321,383 +42931,6 @@ function Textarea({ className, ...props }) {
     }
   );
 }
-const Book = Record({
-  "id": Nat,
-  "title": Text,
-  "ownerId": Principal2,
-  "createdAt": Int,
-  "description": Text,
-  "updatedAt": Int,
-  "category": Text
-});
-const Chapter = Record({
-  "id": Nat,
-  "charCount": Nat,
-  "title": Text,
-  "content": Text,
-  "wordCount": Nat,
-  "createdAt": Int,
-  "bookId": Nat,
-  "updatedAt": Int,
-  "orderIndex": Nat
-});
-Service({
-  "__books": Func(
-    [Opt(Nat), Opt(Nat)],
-    [Vec(Tuple(Nat, Book))],
-    ["query"]
-  ),
-  "__chapters": Func(
-    [Opt(Nat), Opt(Nat)],
-    [Vec(Tuple(Nat, Chapter))],
-    ["query"]
-  ),
-  "__nextBookId": Func([], [Nat], ["query"]),
-  "__nextChapterId": Func([], [Nat], ["query"]),
-  "createBook": Func([Text, Text, Text], [Nat], []),
-  "createChapter": Func([Nat, Text], [Nat], []),
-  "deleteBook": Func([Nat], [Bool], []),
-  "deleteChapter": Func([Nat], [Bool], []),
-  "getBook": Func([Nat], [Opt(Book)], []),
-  "getChapter": Func([Nat], [Opt(Chapter)], []),
-  "listBooksByOwner": Func([], [Vec(Book)], []),
-  "listChaptersByBook": Func([Nat], [Vec(Chapter)], []),
-  "reorderChapters": Func([Nat, Vec(Nat)], [Bool], []),
-  "updateBook": Func(
-    [Nat, Text, Text, Text],
-    [Bool],
-    []
-  ),
-  "updateChapter": Func([Nat, Text, Text], [Bool], [])
-});
-const idlFactory = ({ IDL: IDL2 }) => {
-  const Book2 = IDL2.Record({
-    "id": IDL2.Nat,
-    "title": IDL2.Text,
-    "ownerId": IDL2.Principal,
-    "createdAt": IDL2.Int,
-    "description": IDL2.Text,
-    "updatedAt": IDL2.Int,
-    "category": IDL2.Text
-  });
-  const Chapter2 = IDL2.Record({
-    "id": IDL2.Nat,
-    "charCount": IDL2.Nat,
-    "title": IDL2.Text,
-    "content": IDL2.Text,
-    "wordCount": IDL2.Nat,
-    "createdAt": IDL2.Int,
-    "bookId": IDL2.Nat,
-    "updatedAt": IDL2.Int,
-    "orderIndex": IDL2.Nat
-  });
-  return IDL2.Service({
-    "__books": IDL2.Func(
-      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
-      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Book2))],
-      ["query"]
-    ),
-    "__chapters": IDL2.Func(
-      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
-      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Chapter2))],
-      ["query"]
-    ),
-    "__nextBookId": IDL2.Func([], [IDL2.Nat], ["query"]),
-    "__nextChapterId": IDL2.Func([], [IDL2.Nat], ["query"]),
-    "createBook": IDL2.Func([IDL2.Text, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
-    "createChapter": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
-    "deleteBook": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
-    "deleteChapter": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
-    "getBook": IDL2.Func([IDL2.Nat], [IDL2.Opt(Book2)], []),
-    "getChapter": IDL2.Func([IDL2.Nat], [IDL2.Opt(Chapter2)], []),
-    "listBooksByOwner": IDL2.Func([], [IDL2.Vec(Book2)], []),
-    "listChaptersByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Chapter2)], []),
-    "reorderChapters": IDL2.Func([IDL2.Nat, IDL2.Vec(IDL2.Nat)], [IDL2.Bool], []),
-    "updateBook": IDL2.Func(
-      [IDL2.Nat, IDL2.Text, IDL2.Text, IDL2.Text],
-      [IDL2.Bool],
-      []
-    ),
-    "updateChapter": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Bool], [])
-  });
-};
-function candid_some(value) {
-  return [
-    value
-  ];
-}
-function candid_none() {
-  return [];
-}
-class Backend {
-  constructor(actor, _uploadFile, _downloadFile, processError2) {
-    this.actor = actor;
-    this._uploadFile = _uploadFile;
-    this._downloadFile = _downloadFile;
-    this.processError = processError2;
-  }
-  async __books(arg0, arg1) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.__books(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.__books(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-      return result;
-    }
-  }
-  async __chapters(arg0, arg1) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.__chapters(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.__chapters(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-      return result;
-    }
-  }
-  async __nextBookId() {
-    if (this.processError) {
-      try {
-        const result = await this.actor.__nextBookId();
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.__nextBookId();
-      return result;
-    }
-  }
-  async __nextChapterId() {
-    if (this.processError) {
-      try {
-        const result = await this.actor.__nextChapterId();
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.__nextChapterId();
-      return result;
-    }
-  }
-  async createBook(arg0, arg1, arg2) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.createBook(arg0, arg1, arg2);
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.createBook(arg0, arg1, arg2);
-      return result;
-    }
-  }
-  async createChapter(arg0, arg1) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.createChapter(arg0, arg1);
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.createChapter(arg0, arg1);
-      return result;
-    }
-  }
-  async deleteBook(arg0) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.deleteBook(arg0);
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.deleteBook(arg0);
-      return result;
-    }
-  }
-  async deleteChapter(arg0) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.deleteChapter(arg0);
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.deleteChapter(arg0);
-      return result;
-    }
-  }
-  async getBook(arg0) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.getBook(arg0);
-        return from_candid_opt_n2(this._uploadFile, this._downloadFile, result);
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.getBook(arg0);
-      return from_candid_opt_n2(this._uploadFile, this._downloadFile, result);
-    }
-  }
-  async getChapter(arg0) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.getChapter(arg0);
-        return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.getChapter(arg0);
-      return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
-    }
-  }
-  async listBooksByOwner() {
-    if (this.processError) {
-      try {
-        const result = await this.actor.listBooksByOwner();
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.listBooksByOwner();
-      return result;
-    }
-  }
-  async listChaptersByBook(arg0) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.listChaptersByBook(arg0);
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.listChaptersByBook(arg0);
-      return result;
-    }
-  }
-  async reorderChapters(arg0, arg1) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.reorderChapters(arg0, arg1);
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.reorderChapters(arg0, arg1);
-      return result;
-    }
-  }
-  async updateBook(arg0, arg1, arg2, arg3) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.updateBook(arg0, arg1, arg2, arg3);
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.updateBook(arg0, arg1, arg2, arg3);
-      return result;
-    }
-  }
-  async updateChapter(arg0, arg1, arg2) {
-    if (this.processError) {
-      try {
-        const result = await this.actor.updateChapter(arg0, arg1, arg2);
-        return result;
-      } catch (e) {
-        this.processError(e);
-        throw new Error("unreachable");
-      }
-    } else {
-      const result = await this.actor.updateChapter(arg0, arg1, arg2);
-      return result;
-    }
-  }
-}
-function from_candid_opt_n2(_uploadFile, _downloadFile, value) {
-  return value.length === 0 ? null : value[0];
-}
-function from_candid_opt_n3(_uploadFile, _downloadFile, value) {
-  return value.length === 0 ? null : value[0];
-}
-function to_candid_opt_n1(_uploadFile, _downloadFile, value) {
-  return value === null ? candid_none() : candid_some(value);
-}
-function createActor(canisterId, _uploadFile, _downloadFile, options = {}) {
-  const agent = options.agent || HttpAgent.createSync({
-    ...options.agentOptions
-  });
-  if (options.agent && options.agentOptions) {
-    console.warn("Detected both agent and agentOptions passed to createActor. Ignoring agentOptions and proceeding with the provided agent.");
-  }
-  const actor = Actor.createActor(idlFactory, {
-    agent,
-    canisterId,
-    ...options.actorOptions
-  });
-  return new Backend(actor, _uploadFile, _downloadFile, options.processError);
-}
-function useBooks() {
-  const { actor } = useActor(createActor);
-  return useQuery({
-    queryKey: ["books"],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.listBooksByOwner();
-    },
-    enabled: !!actor
-  });
-}
-function useCreateBook() {
-  const { actor } = useActor(createActor);
-  const queryClient2 = useQueryClient();
-  return useMutation({
-    mutationFn: async ({
-      title,
-      description,
-      category
-    }) => {
-      if (!actor) throw new Error("Actor not available");
-      return actor.createBook(title, description, category);
-    },
-    onSuccess: () => {
-      queryClient2.invalidateQueries({ queryKey: ["books"] });
-    }
-  });
-}
 const CATEGORIES = [
   "młodzieżowa",
   "fantasy",
@@ -42815,16 +43048,6 @@ function CreateBookDialog({
       ] })
     ] }) })
   ] });
-}
-function Skeleton({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "div",
-    {
-      "data-slot": "skeleton",
-      className: cn("bg-accent animate-pulse rounded-md", className),
-      ...props
-    }
-  );
 }
 function DashboardPage() {
   const { data: books, isLoading } = useBooks();
