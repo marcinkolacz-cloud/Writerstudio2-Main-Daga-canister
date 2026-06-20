@@ -1,5 +1,6 @@
 import { CommentDialog } from "@/components/editor/CommentDialog";
 import { CommentsPanel } from "@/components/editor/CommentsPanel";
+import { LektorPanel } from "@/components/editor/LektorPanel";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { SynonymPopup } from "@/components/editor/SynonymPopup";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ import {
   MessageSquare,
   Save,
   Sparkles,
+  Volume2,
   Wand2,
   X,
 } from "lucide-react";
@@ -186,6 +188,7 @@ export function ChapterEditorPage() {
 
   // Comments state
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
+  const [lektorPanelOpen, setLektorPanelOpen] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedText, setSelectedText] = useState("");
   const [floatingButtonPos, setFloatingButtonPos] = useState<{
@@ -608,6 +611,20 @@ export function ChapterEditorPage() {
 
         <div className="w-px h-6 bg-border hidden sm:block" />
 
+        {/* Lektor toggle */}
+        <Button
+          size="sm"
+          variant={lektorPanelOpen ? "default" : "outline"}
+          onClick={() => setLektorPanelOpen((v) => !v)}
+          disabled={provider === "claude"}
+          data-ocid="chapter.lektor_toggle_button"
+        >
+          <Volume2 className="h-3.5 w-3.5 mr-1.5" />
+          Lektor
+        </Button>
+
+        <div className="w-px h-6 bg-border hidden sm:block" />
+
         {/* Comments toggle */}
         <Button
           size="sm"
@@ -713,6 +730,20 @@ export function ChapterEditorPage() {
           dataOcid="chapter.indent_first_line_input"
         />
       </div>
+
+      {/* Lektor panel */}
+      {lektorPanelOpen && (
+        <div data-ocid="chapter.lektor_panel_container">
+          {provider === "claude" ? (
+            <div className="shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border">
+              Lektor wymaga klucza API OpenAI. Przełącz provider na OpenAI lub
+              wprowadź klucz OpenAI.
+            </div>
+          ) : (
+            <LektorPanel editor={editorRef.current} apiKey={apiKey} />
+          )}
+        </div>
+      )}
 
       {analysisStatus === "error" && analysisError && (
         <div
