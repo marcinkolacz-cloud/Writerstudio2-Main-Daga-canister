@@ -20,8 +20,11 @@ export interface Chapter {
     id: bigint;
     charCount: bigint;
     title: string;
+    indentFirstLine: bigint;
     content: string;
+    indentRight: bigint;
     wordCount: bigint;
+    indentLeft: bigint;
     createdAt: bigint;
     bookId: bigint;
     updatedAt: bigint;
@@ -39,4 +42,5 @@ export interface backendInterface {
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
+    updateChapterIndents(id: bigint, indentLeft: bigint, indentRight: bigint, indentFirstLine: bigint): Promise<boolean>;
 }

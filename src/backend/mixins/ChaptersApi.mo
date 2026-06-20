@@ -113,6 +113,27 @@ mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>)
     }
   };
 
+  public shared ({ caller }) func updateChapterIndents(id : Nat, indentLeft : Nat, indentRight : Nat, indentFirstLine : Nat) : async Bool {
+    switch (chapters.get(id)) {
+      case (?chapter) {
+        if (isChapterOwner(chapter, caller)) {
+          let updated = {
+            chapter with
+            indentLeft;
+            indentRight;
+            indentFirstLine;
+            updatedAt = Time.now();
+          };
+          chapters.add(id, updated);
+          true
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
   public shared ({ caller }) func reorderChapters(bookId : Nat, orderedIds : [Nat]) : async Bool {
     switch (getBookOwner(bookId)) {
       case (?ownerId) {

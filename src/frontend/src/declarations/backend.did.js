@@ -21,8 +21,11 @@ export const Chapter = IDL.Record({
   'id' : IDL.Nat,
   'charCount' : IDL.Nat,
   'title' : IDL.Text,
+  'indentFirstLine' : IDL.Nat,
   'content' : IDL.Text,
+  'indentRight' : IDL.Nat,
   'wordCount' : IDL.Nat,
+  'indentLeft' : IDL.Nat,
   'createdAt' : IDL.Int,
   'bookId' : IDL.Nat,
   'updatedAt' : IDL.Int,
@@ -57,6 +60,11 @@ export const idlService = IDL.Service({
       [],
     ),
   'updateChapter' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Bool], []),
+  'updateChapterIndents' : IDL.Func(
+      [IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+      [IDL.Bool],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
@@ -75,8 +83,11 @@ export const idlFactory = ({ IDL }) => {
     'id' : IDL.Nat,
     'charCount' : IDL.Nat,
     'title' : IDL.Text,
+    'indentFirstLine' : IDL.Nat,
     'content' : IDL.Text,
+    'indentRight' : IDL.Nat,
     'wordCount' : IDL.Nat,
+    'indentLeft' : IDL.Nat,
     'createdAt' : IDL.Int,
     'bookId' : IDL.Nat,
     'updatedAt' : IDL.Int,
@@ -111,6 +122,11 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateChapter' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Bool], []),
+    'updateChapterIndents' : IDL.Func(
+        [IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+        [IDL.Bool],
+        [],
+      ),
   });
 };
 

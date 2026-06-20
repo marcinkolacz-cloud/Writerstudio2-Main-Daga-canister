@@ -5,6 +5,9 @@ type Chapter =
    content: text;
    createdAt: int;
    id: nat;
+   indentFirstLine: nat;
+   indentLeft: nat;
+   indentRight: nat;
    orderIndex: nat;
    title: text;
    updatedAt: int;
@@ -44,4 +47,6 @@ service : {
   updateBook: (id: nat, title: text, description: text, category: text) ->
    (bool);
   updateChapter: (id: nat, title: text, content: text) -> (bool);
+  updateChapterIndents: (id: nat, indentLeft: nat, indentRight: nat,
+   indentFirstLine: nat) -> (bool);
 }

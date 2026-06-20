@@ -102,8 +102,11 @@ export interface Chapter {
     id: bigint;
     charCount: bigint;
     title: string;
+    indentFirstLine: bigint;
     content: string;
+    indentRight: bigint;
     wordCount: bigint;
+    indentLeft: bigint;
     createdAt: bigint;
     bookId: bigint;
     updatedAt: bigint;
@@ -125,6 +128,7 @@ export interface backendInterface {
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
+    updateChapterIndents(id: bigint, indentLeft: bigint, indentRight: bigint, indentFirstLine: bigint): Promise<boolean>;
 }
 import type { Book as _Book, Chapter as _Chapter } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -336,6 +340,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updateChapter(arg0, arg1, arg2);
+            return result;
+        }
+    }
+    async updateChapterIndents(arg0: bigint, arg1: bigint, arg2: bigint, arg3: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateChapterIndents(arg0, arg1, arg2, arg3);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateChapterIndents(arg0, arg1, arg2, arg3);
             return result;
         }
     }

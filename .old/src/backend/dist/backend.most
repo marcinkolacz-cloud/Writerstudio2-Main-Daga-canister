@@ -26,6 +26,9 @@ type Chapter__479822198 =
     content : Text;
     createdAt : Int;
     id : Nat;
+    indentFirstLine : Nat;
+    indentLeft : Nat;
+    indentRight : Nat;
     orderIndex : Nat;
     title : Text;
     updatedAt : Int;
@@ -61,16 +64,79 @@ type NewActor__1000285290 =
     nextBookId : Nat;
     nextChapterId : Nat
   };
+type NewActor__152089560 =
+  {
+    books : Map__222667396<Nat, NewBook__65226796>;
+    chapters : Map__222667396<Nat, NewChapter__103669124>;
+    nextBookId : Nat;
+    nextChapterId : Nat
+  };
 type NewActor__277487213 = {};
+type NewBook__65226796 =
+  {
+    category : Text;
+    createdAt : Int;
+    description : Text;
+    id : Nat;
+    ownerId : Principal;
+    title : Text;
+    updatedAt : Int
+  };
+type NewChapter__103669124 =
+  {
+    bookId : Nat;
+    charCount : Nat;
+    content : Text;
+    createdAt : Int;
+    id : Nat;
+    indentFirstLine : Nat;
+    indentLeft : Nat;
+    indentRight : Nat;
+    orderIndex : Nat;
+    title : Text;
+    updatedAt : Int;
+    wordCount : Nat
+  };
 type Node__1000929467<K, V> =
   {#internal : Internal__41346355<K, V>; #leaf : Leaf__712614010<K, V>};
+type OldActor__317883801 =
+  {
+    books : Map__222667396<Nat, OldBook__699076268>;
+    chapters : Map__222667396<Nat, OldChapter__803095218>;
+    nextBookId : Nat;
+    nextChapterId : Nat
+  };
 type OldActor__45539797 = {};
 type OldActor__531157147 = {};
+type OldBook__699076268 =
+  {
+    category : Text;
+    createdAt : Int;
+    description : Text;
+    id : Nat;
+    ownerId : Principal;
+    title : Text;
+    updatedAt : Int
+  };
+type OldChapter__803095218 =
+  {
+    bookId : Nat;
+    charCount : Nat;
+    content : Text;
+    createdAt : Int;
+    id : Nat;
+    orderIndex : Nat;
+    title : Text;
+    updatedAt : Int;
+    wordCount : Nat
+  };
 {
   "20260620_000000_Initial" :
     (_old : OldActor__531157147) -> NewActor__277487213;
   "20260620_140000_AddBookChapterState" :
-    (_old : OldActor__45539797) -> NewActor__1000285290
+    (_old : OldActor__45539797) -> NewActor__1000285290;
+  "20260620_150000_AddChapterIndents" :
+    (old : OldActor__317883801) -> NewActor__152089560
 }
 actor  {
   stable books :

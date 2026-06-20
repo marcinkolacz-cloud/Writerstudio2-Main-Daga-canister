@@ -23,8 +23,11 @@ export interface Chapter {
   'id' : bigint,
   'charCount' : bigint,
   'title' : string,
+  'indentFirstLine' : bigint,
   'content' : string,
+  'indentRight' : bigint,
   'wordCount' : bigint,
+  'indentLeft' : bigint,
   'createdAt' : bigint,
   'bookId' : bigint,
   'updatedAt' : bigint,
@@ -52,6 +55,10 @@ export interface _SERVICE {
   'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
   'updateBook' : ActorMethod<[bigint, string, string, string], boolean>,
   'updateChapter' : ActorMethod<[bigint, string, string], boolean>,
+  'updateChapterIndents' : ActorMethod<
+    [bigint, bigint, bigint, bigint],
+    boolean
+  >,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

@@ -19,6 +19,9 @@ module {
     orderIndex : Nat;
     wordCount : Nat;
     charCount : Nat;
+    indentLeft : Nat;
+    indentRight : Nat;
+    indentFirstLine : Nat;
     createdAt : Int;
     updatedAt : Int;
   };

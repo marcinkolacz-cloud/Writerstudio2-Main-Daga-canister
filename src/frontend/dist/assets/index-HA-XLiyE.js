@@ -36457,8 +36457,11 @@ const Chapter = Record({
   "id": Nat,
   "charCount": Nat,
   "title": Text,
+  "indentFirstLine": Nat,
   "content": Text,
+  "indentRight": Nat,
   "wordCount": Nat,
+  "indentLeft": Nat,
   "createdAt": Int,
   "bookId": Nat,
   "updatedAt": Int,
@@ -36491,7 +36494,12 @@ Service({
     [Bool],
     []
   ),
-  "updateChapter": Func([Nat, Text, Text], [Bool], [])
+  "updateChapter": Func([Nat, Text, Text], [Bool], []),
+  "updateChapterIndents": Func(
+    [Nat, Nat, Nat, Nat],
+    [Bool],
+    []
+  )
 });
 const idlFactory = ({ IDL: IDL2 }) => {
   const Book2 = IDL2.Record({
@@ -36507,8 +36515,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "id": IDL2.Nat,
     "charCount": IDL2.Nat,
     "title": IDL2.Text,
+    "indentFirstLine": IDL2.Nat,
     "content": IDL2.Text,
+    "indentRight": IDL2.Nat,
     "wordCount": IDL2.Nat,
+    "indentLeft": IDL2.Nat,
     "createdAt": IDL2.Int,
     "bookId": IDL2.Nat,
     "updatedAt": IDL2.Int,
@@ -36541,7 +36552,12 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Bool],
       []
     ),
-    "updateChapter": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Bool], [])
+    "updateChapter": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Bool], []),
+    "updateChapterIndents": IDL2.Func(
+      [IDL2.Nat, IDL2.Nat, IDL2.Nat, IDL2.Nat],
+      [IDL2.Bool],
+      []
+    )
   });
 };
 function candid_some(value) {
@@ -36766,6 +36782,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.updateChapter(arg0, arg1, arg2);
+      return result;
+    }
+  }
+  async updateChapterIndents(arg0, arg1, arg2, arg3) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.updateChapterIndents(arg0, arg1, arg2, arg3);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.updateChapterIndents(arg0, arg1, arg2, arg3);
       return result;
     }
   }

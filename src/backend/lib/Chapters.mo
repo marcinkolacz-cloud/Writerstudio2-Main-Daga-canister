@@ -37,6 +37,9 @@ module {
       orderIndex;
       wordCount = 0;
       charCount = 0;
+      indentLeft = 0;
+      indentRight = 0;
+      indentFirstLine = 0;
       createdAt = now;
       updatedAt = now;
     }
