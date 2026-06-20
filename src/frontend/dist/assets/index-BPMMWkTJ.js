@@ -69455,7 +69455,7 @@ async function analyzeGrammarStyle(text, apiKey, provider) {
         "anthropic-dangerous-direct-browser-access": "true"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 8e3,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3
