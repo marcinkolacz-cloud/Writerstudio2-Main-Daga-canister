@@ -36540,9 +36540,11 @@ function CardContent({ className, ...props }) {
   );
 }
 function BookCard({ book, index: index2 }) {
+  const navigate = useNavigate();
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     Card,
     {
+      onClick: () => navigate({ to: "/books/$bookId", params: { bookId: String(book.id) } }),
       className: "hover:shadow-subtle transition-smooth cursor-pointer border-border bg-card",
       "data-ocid": `book.item.${index2 + 1}`,
       children: [

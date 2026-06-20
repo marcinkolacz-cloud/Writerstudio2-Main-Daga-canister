@@ -1,6 +1,7 @@
 import type { Book } from "@/backend";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "@tanstack/react-router";
 import { BookOpen } from "lucide-react";
 
 interface BookCardProps {
@@ -9,8 +10,13 @@ interface BookCardProps {
 }
 
 export function BookCard({ book, index }: BookCardProps) {
+  const navigate = useNavigate();
+
   return (
     <Card
+      onClick={() =>
+        navigate({ to: "/books/$bookId", params: { bookId: String(book.id) } })
+      }
       className="hover:shadow-subtle transition-smooth cursor-pointer border-border bg-card"
       data-ocid={`book.item.${index + 1}`}
     >
