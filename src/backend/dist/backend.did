@@ -7,6 +7,14 @@ type TextAnnotation =
    proposal: text;
    "text": text;
  };
+type Comment = 
+ record {
+   anchorText: text;
+   chapterId: nat;
+   content: text;
+   createdAt: int;
+   id: nat;
+ };
 type ChatMessage = 
  record {
    bookId: nat;
@@ -76,17 +84,25 @@ service : {
           nat;
           ChatMessage;
         }) query;
+  __comments: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          Comment;
+        }) query;
   __nextAnalysisId: () -> (nat) query;
   __nextAnnotationId: () -> (nat) query;
   __nextBookId: () -> (nat) query;
   __nextChapterId: () -> (nat) query;
   __nextChatMessageId: () -> (nat) query;
+  __nextCommentId: () -> (nat) query;
   clearChat: (bookId: nat) -> (bool);
   createBook: (title: text, description: text, category: text) -> (nat);
   createChapter: (bookId: nat, title: text) -> (nat);
+  createComment: (chapterId: nat, anchorText: text, content: text) -> (nat);
   deleteAnalysis: (id: nat) -> (bool);
   deleteBook: (id: nat) -> (bool);
   deleteChapter: (id: nat) -> (bool);
+  deleteComment: (id: nat) -> (bool);
   deleteMessage: (id: nat) -> (bool);
   getAnalysis: (id: nat) -> (opt Analysis);
   getAnnotations: (analysisId: nat) -> (vec TextAnnotation);
@@ -96,6 +112,7 @@ service : {
   listAnalysesByChapter: (chapterId: nat) -> (vec Analysis);
   listBooksByOwner: () -> (vec Book);
   listChaptersByBook: (bookId: nat) -> (vec Chapter);
+  listCommentsByChapter: (chapterId: nat) -> (vec Comment);
   listMessagesByBook: (bookId: nat) -> (vec ChatMessage);
   reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);
   saveAnalysis: (bookId: nat, chapterId: opt nat, analysisType: text,

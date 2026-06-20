@@ -36214,6 +36214,13 @@ const ChatMessage = Record({
   "role": Text$2,
   "bookId": Nat
 });
+const Comment = Record({
+  "id": Nat,
+  "content": Text$2,
+  "createdAt": Int,
+  "chapterId": Nat,
+  "anchorText": Text$2
+});
 Service({
   "__analyses": Func(
     [Opt(Nat), Opt(Nat)],
@@ -36240,17 +36247,25 @@ Service({
     [Vec(Tuple(Nat, ChatMessage))],
     ["query"]
   ),
+  "__comments": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, Comment))],
+    ["query"]
+  ),
   "__nextAnalysisId": Func([], [Nat], ["query"]),
   "__nextAnnotationId": Func([], [Nat], ["query"]),
   "__nextBookId": Func([], [Nat], ["query"]),
   "__nextChapterId": Func([], [Nat], ["query"]),
   "__nextChatMessageId": Func([], [Nat], ["query"]),
+  "__nextCommentId": Func([], [Nat], ["query"]),
   "clearChat": Func([Nat], [Bool], []),
   "createBook": Func([Text$2, Text$2, Text$2], [Nat], []),
   "createChapter": Func([Nat, Text$2], [Nat], []),
+  "createComment": Func([Nat, Text$2, Text$2], [Nat], []),
   "deleteAnalysis": Func([Nat], [Bool], []),
   "deleteBook": Func([Nat], [Bool], []),
   "deleteChapter": Func([Nat], [Bool], []),
+  "deleteComment": Func([Nat], [Bool], []),
   "deleteMessage": Func([Nat], [Bool], []),
   "getAnalysis": Func([Nat], [Opt(Analysis)], []),
   "getAnnotations": Func([Nat], [Vec(TextAnnotation)], []),
@@ -36260,6 +36275,7 @@ Service({
   "listAnalysesByChapter": Func([Nat], [Vec(Analysis)], []),
   "listBooksByOwner": Func([], [Vec(Book)], []),
   "listChaptersByBook": Func([Nat], [Vec(Chapter)], []),
+  "listCommentsByChapter": Func([Nat], [Vec(Comment)], []),
   "listMessagesByBook": Func([Nat], [Vec(ChatMessage)], []),
   "reorderChapters": Func([Nat, Vec(Nat)], [Bool], []),
   "saveAnalysis": Func(
@@ -36348,6 +36364,13 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "role": IDL2.Text,
     "bookId": IDL2.Nat
   });
+  const Comment2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "content": IDL2.Text,
+    "createdAt": IDL2.Int,
+    "chapterId": IDL2.Nat,
+    "anchorText": IDL2.Text
+  });
   return IDL2.Service({
     "__analyses": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
@@ -36374,17 +36397,25 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, ChatMessage2))],
       ["query"]
     ),
+    "__comments": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Comment2))],
+      ["query"]
+    ),
     "__nextAnalysisId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextAnnotationId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextBookId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChapterId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChatMessageId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__nextCommentId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "clearChat": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "createBook": IDL2.Func([IDL2.Text, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "createChapter": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
+    "createComment": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "deleteAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteBook": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteChapter": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "deleteComment": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteMessage": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "getAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Opt(Analysis2)], []),
     "getAnnotations": IDL2.Func([IDL2.Nat], [IDL2.Vec(TextAnnotation2)], []),
@@ -36394,6 +36425,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "listAnalysesByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Analysis2)], []),
     "listBooksByOwner": IDL2.Func([], [IDL2.Vec(Book2)], []),
     "listChaptersByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Chapter2)], []),
+    "listCommentsByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Comment2)], []),
     "listMessagesByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(ChatMessage2)], []),
     "reorderChapters": IDL2.Func([IDL2.Nat, IDL2.Vec(IDL2.Nat)], [IDL2.Bool], []),
     "saveAnalysis": IDL2.Func(
@@ -36522,6 +36554,20 @@ class Backend {
       return result;
     }
   }
+  async __comments(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__comments(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__comments(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
   async __nextAnalysisId() {
     if (this.processError) {
       try {
@@ -36592,6 +36638,20 @@ class Backend {
       return result;
     }
   }
+  async __nextCommentId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextCommentId();
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextCommentId();
+      return result;
+    }
+  }
   async clearChat(arg0) {
     if (this.processError) {
       try {
@@ -36634,6 +36694,20 @@ class Backend {
       return result;
     }
   }
+  async createComment(arg0, arg1, arg2) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.createComment(arg0, arg1, arg2);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.createComment(arg0, arg1, arg2);
+      return result;
+    }
+  }
   async deleteAnalysis(arg0) {
     if (this.processError) {
       try {
@@ -36673,6 +36747,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.deleteChapter(arg0);
+      return result;
+    }
+  }
+  async deleteComment(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.deleteComment(arg0);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.deleteComment(arg0);
       return result;
     }
   }
@@ -36799,6 +36887,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.listChaptersByBook(arg0);
+      return result;
+    }
+  }
+  async listCommentsByChapter(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.listCommentsByChapter(arg0);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.listCommentsByChapter(arg0);
       return result;
     }
   }

@@ -46,6 +46,14 @@ module {
     proposal : Text;
   };
 
+  public type Comment = {
+    id : Nat;
+    chapterId : Nat;
+    anchorText : Text;
+    content : Text;
+    createdAt : Int;
+  };
+
   public type ChatMessage = {
     id : Nat;
     bookId : Nat;

@@ -114,6 +114,13 @@ export interface ChatMessage {
     role: string;
     bookId: bigint;
 }
+export interface Comment {
+    id: bigint;
+    content: string;
+    createdAt: bigint;
+    chapterId: bigint;
+    anchorText: string;
+}
 export interface Analysis {
     id: bigint;
     provider: string;
@@ -143,17 +150,21 @@ export interface backendInterface {
     __books(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Book]>>;
     __chapters(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Chapter]>>;
     __chatMessages(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, ChatMessage]>>;
+    __comments(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Comment]>>;
     __nextAnalysisId(): Promise<bigint>;
     __nextAnnotationId(): Promise<bigint>;
     __nextBookId(): Promise<bigint>;
     __nextChapterId(): Promise<bigint>;
     __nextChatMessageId(): Promise<bigint>;
+    __nextCommentId(): Promise<bigint>;
     clearChat(bookId: bigint): Promise<boolean>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
+    createComment(chapterId: bigint, anchorText: string, content: string): Promise<bigint>;
     deleteAnalysis(id: bigint): Promise<boolean>;
     deleteBook(id: bigint): Promise<boolean>;
     deleteChapter(id: bigint): Promise<boolean>;
+    deleteComment(id: bigint): Promise<boolean>;
     deleteMessage(id: bigint): Promise<boolean>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
@@ -163,6 +174,7 @@ export interface backendInterface {
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listBooksByOwner(): Promise<Array<Book>>;
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
+    listCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
     listMessagesByBook(bookId: bigint): Promise<Array<ChatMessage>>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
@@ -250,6 +262,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async __comments(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, Comment]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__comments(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__comments(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
     async __nextAnalysisId(): Promise<bigint> {
         if (this.processError) {
             try {
@@ -320,6 +346,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async __nextCommentId(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__nextCommentId();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__nextCommentId();
+            return result;
+        }
+    }
     async clearChat(arg0: bigint): Promise<boolean> {
         if (this.processError) {
             try {
@@ -362,6 +402,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async createComment(arg0: bigint, arg1: string, arg2: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createComment(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createComment(arg0, arg1, arg2);
+            return result;
+        }
+    }
     async deleteAnalysis(arg0: bigint): Promise<boolean> {
         if (this.processError) {
             try {
@@ -401,6 +455,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.deleteChapter(arg0);
+            return result;
+        }
+    }
+    async deleteComment(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteComment(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteComment(arg0);
             return result;
         }
     }
@@ -527,6 +595,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.listChaptersByBook(arg0);
+            return result;
+        }
+    }
+    async listCommentsByChapter(arg0: bigint): Promise<Array<Comment>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listCommentsByChapter(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listCommentsByChapter(arg0);
             return result;
         }
     }

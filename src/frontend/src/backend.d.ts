@@ -32,6 +32,13 @@ export interface ChatMessage {
     role: string;
     bookId: bigint;
 }
+export interface Comment {
+    id: bigint;
+    content: string;
+    createdAt: bigint;
+    chapterId: bigint;
+    anchorText: string;
+}
 export interface Analysis {
     id: bigint;
     provider: string;
@@ -59,9 +66,11 @@ export interface backendInterface {
     clearChat(bookId: bigint): Promise<boolean>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
+    createComment(chapterId: bigint, anchorText: string, content: string): Promise<bigint>;
     deleteAnalysis(id: bigint): Promise<boolean>;
     deleteBook(id: bigint): Promise<boolean>;
     deleteChapter(id: bigint): Promise<boolean>;
+    deleteComment(id: bigint): Promise<boolean>;
     deleteMessage(id: bigint): Promise<boolean>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
@@ -71,6 +80,7 @@ export interface backendInterface {
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listBooksByOwner(): Promise<Array<Book>>;
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
+    listCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
     listMessagesByBook(bookId: bigint): Promise<Array<ChatMessage>>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;

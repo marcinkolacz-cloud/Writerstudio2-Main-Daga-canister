@@ -50,6 +50,13 @@ export interface ChatMessage {
   'role' : string,
   'bookId' : bigint,
 }
+export interface Comment {
+  'id' : bigint,
+  'content' : string,
+  'createdAt' : bigint,
+  'chapterId' : bigint,
+  'anchorText' : string,
+}
 export interface TextAnnotation {
   'id' : bigint,
   'explanation' : string,
@@ -79,17 +86,24 @@ export interface _SERVICE {
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, ChatMessage]>
   >,
+  '__comments' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, Comment]>
+  >,
   '__nextAnalysisId' : ActorMethod<[], bigint>,
   '__nextAnnotationId' : ActorMethod<[], bigint>,
   '__nextBookId' : ActorMethod<[], bigint>,
   '__nextChapterId' : ActorMethod<[], bigint>,
   '__nextChatMessageId' : ActorMethod<[], bigint>,
+  '__nextCommentId' : ActorMethod<[], bigint>,
   'clearChat' : ActorMethod<[bigint], boolean>,
   'createBook' : ActorMethod<[string, string, string], bigint>,
   'createChapter' : ActorMethod<[bigint, string], bigint>,
+  'createComment' : ActorMethod<[bigint, string, string], bigint>,
   'deleteAnalysis' : ActorMethod<[bigint], boolean>,
   'deleteBook' : ActorMethod<[bigint], boolean>,
   'deleteChapter' : ActorMethod<[bigint], boolean>,
+  'deleteComment' : ActorMethod<[bigint], boolean>,
   'deleteMessage' : ActorMethod<[bigint], boolean>,
   'getAnalysis' : ActorMethod<[bigint], [] | [Analysis]>,
   'getAnnotations' : ActorMethod<[bigint], Array<TextAnnotation>>,
@@ -99,6 +113,7 @@ export interface _SERVICE {
   'listAnalysesByChapter' : ActorMethod<[bigint], Array<Analysis>>,
   'listBooksByOwner' : ActorMethod<[], Array<Book>>,
   'listChaptersByBook' : ActorMethod<[bigint], Array<Chapter>>,
+  'listCommentsByChapter' : ActorMethod<[bigint], Array<Comment>>,
   'listMessagesByBook' : ActorMethod<[bigint], Array<ChatMessage>>,
   'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
   'saveAnalysis' : ActorMethod<
