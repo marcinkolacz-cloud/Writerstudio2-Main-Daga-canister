@@ -1,0 +1,18 @@
+{
+  "overview": "WriterStudio TipTap - a skeleton writing app with routing, layout, and placeholder pages",
+  "features": [
+    "TanStack Router with multiple routes",
+    "Layout with top bar and sidebar",
+    "Placeholder pages for dashboard, books, chapters, statistics, admin",
+    "Login page with centered form",
+    "Zustand store and TanStack Query installed"
+  ],
+  "category": "writing-app",
+  "tags": [
+    "writing",
+    "skeleton",
+    "router",
+    "layout"
+  ],
+  "last_updated": "2026-06-20T05:37:52.652Z"
+}
