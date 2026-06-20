@@ -1,14 +1,26 @@
+import { ChatBotPanel } from "@/components/chat/ChatBotPanel";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/store/useAppStore";
 import { useInternetIdentity } from "@caffeineai/core-infrastructure";
-import { Outlet, useNavigate } from "@tanstack/react-router";
+import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { BookOpen, LogOut, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+
+function useActiveBookId(): string | null {
+  const routerState = useRouterState();
+  const pathname = routerState.location.pathname;
+
+  const bookMatch = pathname.match(/\/books\/([^\/]+)/);
+  if (bookMatch) return bookMatch[1];
+
+  return null;
+}
 
 export function Layout() {
   const navigate = useNavigate();
   const { isAuthenticated, clearAuth } = useAppStore();
   const { clear } = useInternetIdentity();
+  const activeBookId = useActiveBookId();
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     const stored = localStorage.getItem("writerstudio-theme");
     if (stored === "dark") return "dark";
@@ -95,6 +107,11 @@ export function Layout() {
         <main className="flex-1 overflow-auto p-6">
           <Outlet />
         </main>
+
+        {/* Floating chatbot — only on book/chapter routes */}
+        {isAuthenticated && activeBookId && (
+          <ChatBotPanel bookId={activeBookId} />
+        )}
       </div>
     </div>
   );

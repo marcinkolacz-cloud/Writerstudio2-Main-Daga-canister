@@ -1,5 +1,5 @@
-import { type Analysis, type TextAnnotation, createActor } from "@/backend";
-import type { Book, Chapter } from "@/backend";
+import { type ChatMessage, createActor } from "@/backend";
+import type { Analysis, Book, Chapter, TextAnnotation } from "@/backend";
 import { useActor } from "@caffeineai/core-infrastructure";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -252,6 +252,79 @@ export function useCreateBook() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["books"] });
+    },
+  });
+}
+
+export function useChatMessages(bookId: string | number) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(bookId);
+  return useQuery<ChatMessage[]>({
+    queryKey: ["chat", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      const messages = await actor.listMessagesByBook(id);
+      return messages.sort((a, b) => Number(a.createdAt - b.createdAt));
+    },
+    enabled: !!actor && !!bookId,
+  });
+}
+
+export function useSendMessage() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      bookId,
+      role,
+      content,
+      provider,
+    }: {
+      bookId: bigint;
+      role: string;
+      content: string;
+      provider: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.sendMessage(bookId, role, content, provider);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chat", variables.bookId],
+      });
+    },
+  });
+}
+
+export function useDeleteMessage() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id }: { id: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteMessage(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat"] });
+    },
+  });
+}
+
+export function useClearChat() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ bookId }: { bookId: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.clearChat(bookId);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chat", variables.bookId],
+      });
     },
   });
 }

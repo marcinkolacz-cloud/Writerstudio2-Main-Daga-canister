@@ -1,17 +1,21 @@
 {
-  "overview": "WriterStudio TipTap — rozszerzenie panelu AI o trzy nowe tryby analizy (kontekst, dialogi, streszczenie)",
+  "overview": "WriterStudio TipTap — aplikacja do pisania książek z edytorem TipTap, analizami AI i chatbotem per-książka",
   "features": [
-    "Rozszerzenie biblioteki AI o analyzeWithContext, analyzeDialogue, generateSummary",
-    "Dropdown w ChapterEditorPage z czterema trybami analizy",
-    "Modal wyświetlający wygenerowane streszczenie",
-    "Integracja z istniejącym backendem AnalysesApi"
+    "Edytor tekstu TipTap z formatowaniem",
+    "Analizy AI gramatyki, stylu, dialogów i streszczeń",
+    "Floating chatbot per-książka z kontekstem",
+    "Zarządzanie książkami i rozdziałami",
+    "Wcięcia akapitowe",
+    "Przełącznik motywu jasny/ciemny"
   ],
   "category": "productivity",
   "tags": [
     "writing",
-    "ai",
     "editor",
-    "analysis"
+    "ai",
+    "chatbot",
+    "books",
+    "chapters"
   ],
-  "last_updated": "2026-06-20T17:13:23.259Z"
+  "last_updated": "2026-06-20T18:08:55.807Z"
 }

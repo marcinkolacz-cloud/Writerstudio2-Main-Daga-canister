@@ -36166,483 +36166,6 @@ function Button({
     }
   );
 }
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const toKebabCase = (string) => string.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
-const toCamelCase = (string) => string.replace(
-  /^([A-Z])|[\s-_]+(\w)/g,
-  (match, p1, p2) => p2 ? p2.toUpperCase() : p1.toLowerCase()
-);
-const toPascalCase = (string) => {
-  const camelCase = toCamelCase(string);
-  return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
-};
-const mergeClasses = (...classes) => classes.filter((className, index2, array) => {
-  return Boolean(className) && className.trim() !== "" && array.indexOf(className) === index2;
-}).join(" ").trim();
-const hasA11yProp = (props) => {
-  for (const prop in props) {
-    if (prop.startsWith("aria-") || prop === "role" || prop === "title") {
-      return true;
-    }
-  }
-};
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-var defaultAttributes = {
-  xmlns: "http://www.w3.org/2000/svg",
-  width: 24,
-  height: 24,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: 2,
-  strokeLinecap: "round",
-  strokeLinejoin: "round"
-};
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const Icon$1 = reactExports.forwardRef(
-  ({
-    color = "currentColor",
-    size: size2 = 24,
-    strokeWidth = 2,
-    absoluteStrokeWidth,
-    className = "",
-    children,
-    iconNode,
-    ...rest
-  }, ref) => reactExports.createElement(
-    "svg",
-    {
-      ref,
-      ...defaultAttributes,
-      width: size2,
-      height: size2,
-      stroke: color,
-      strokeWidth: absoluteStrokeWidth ? Number(strokeWidth) * 24 / Number(size2) : strokeWidth,
-      className: mergeClasses("lucide", className),
-      ...!children && !hasA11yProp(rest) && { "aria-hidden": "true" },
-      ...rest
-    },
-    [
-      ...iconNode.map(([tag, attrs]) => reactExports.createElement(tag, attrs)),
-      ...Array.isArray(children) ? children : [children]
-    ]
-  )
-);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const createLucideIcon = (iconName, iconNode) => {
-  const Component2 = reactExports.forwardRef(
-    ({ className, ...props }, ref) => reactExports.createElement(Icon$1, {
-      ref,
-      iconNode,
-      className: mergeClasses(
-        `lucide-${toKebabCase(toPascalCase(iconName))}`,
-        `lucide-${iconName}`,
-        className
-      ),
-      ...props
-    })
-  );
-  Component2.displayName = toPascalCase(iconName);
-  return Component2;
-};
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$l = [
-  ["path", { d: "M15 12H3", key: "6jk70r" }],
-  ["path", { d: "M17 18H3", key: "1amg6g" }],
-  ["path", { d: "M21 6H3", key: "1jwq7v" }]
-];
-const AlignLeft = createLucideIcon("align-left", __iconNode$l);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$k = [
-  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
-  ["path", { d: "M19 12H5", key: "x3x0zl" }]
-];
-const ArrowLeft = createLucideIcon("arrow-left", __iconNode$k);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$j = [
-  [
-    "path",
-    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
-  ]
-];
-const Bold$1 = createLucideIcon("bold", __iconNode$j);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$i = [
-  ["path", { d: "M12 7v14", key: "1akyts" }],
-  [
-    "path",
-    {
-      d: "M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z",
-      key: "ruj8y"
-    }
-  ]
-];
-const BookOpen = createLucideIcon("book-open", __iconNode$i);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$h = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$h);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$g = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$g);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$f = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-const ChevronUp = createLucideIcon("chevron-up", __iconNode$f);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$e = [
-  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
-  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
-  ["path", { d: "M10 9H8", key: "b1mrlr" }],
-  ["path", { d: "M16 13H8", key: "t4e002" }],
-  ["path", { d: "M16 17H8", key: "z1uh3a" }]
-];
-const FileText = createLucideIcon("file-text", __iconNode$e);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$d = [
-  ["line", { x1: "19", x2: "10", y1: "4", y2: "4", key: "15jd3p" }],
-  ["line", { x1: "14", x2: "5", y1: "20", y2: "20", key: "bu0au3" }],
-  ["line", { x1: "15", x2: "9", y1: "4", y2: "20", key: "uljnxc" }]
-];
-const Italic$1 = createLucideIcon("italic", __iconNode$d);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$c = [
-  ["path", { d: "m10 17 5-5-5-5", key: "1bsop3" }],
-  ["path", { d: "M15 12H3", key: "6jk70r" }],
-  ["path", { d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4", key: "u53s6r" }]
-];
-const LogIn = createLucideIcon("log-in", __iconNode$c);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$b = [
-  ["path", { d: "m16 17 5-5-5-5", key: "1bji2h" }],
-  ["path", { d: "M21 12H9", key: "dn1m92" }],
-  ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
-];
-const LogOut = createLucideIcon("log-out", __iconNode$b);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$a = [
-  ["path", { d: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z", key: "vv11sd" }]
-];
-const MessageCircle = createLucideIcon("message-circle", __iconNode$a);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$9 = [
-  ["path", { d: "M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z", key: "a7tn18" }]
-];
-const Moon = createLucideIcon("moon", __iconNode$9);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$8 = [
-  ["path", { d: "M5 12h14", key: "1ays0h" }],
-  ["path", { d: "M12 5v14", key: "s699le" }]
-];
-const Plus = createLucideIcon("plus", __iconNode$8);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$7 = [
-  ["path", { d: "M21 7v6h-6", key: "3ptur4" }],
-  ["path", { d: "M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7", key: "1kgawr" }]
-];
-const Redo = createLucideIcon("redo", __iconNode$7);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$6 = [
-  [
-    "path",
-    {
-      d: "M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",
-      key: "1c8476"
-    }
-  ],
-  ["path", { d: "M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7", key: "1ydtos" }],
-  ["path", { d: "M7 3v4a1 1 0 0 0 1 1h7", key: "t51u73" }]
-];
-const Save = createLucideIcon("save", __iconNode$6);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$5 = [
-  [
-    "path",
-    {
-      d: "M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z",
-      key: "4pj2yx"
-    }
-  ],
-  ["path", { d: "M20 3v4", key: "1olli1" }],
-  ["path", { d: "M22 5h-4", key: "1gvqau" }],
-  ["path", { d: "M4 17v2", key: "vumght" }],
-  ["path", { d: "M5 18H3", key: "zchphs" }]
-];
-const Sparkles = createLucideIcon("sparkles", __iconNode$5);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$4 = [
-  ["circle", { cx: "12", cy: "12", r: "4", key: "4exip2" }],
-  ["path", { d: "M12 2v2", key: "tus03m" }],
-  ["path", { d: "M12 20v2", key: "1lh1kg" }],
-  ["path", { d: "m4.93 4.93 1.41 1.41", key: "149t6j" }],
-  ["path", { d: "m17.66 17.66 1.41 1.41", key: "ptbguv" }],
-  ["path", { d: "M2 12h2", key: "1t8f8n" }],
-  ["path", { d: "M20 12h2", key: "1q8mjw" }],
-  ["path", { d: "m6.34 17.66-1.41 1.41", key: "1m8zz5" }],
-  ["path", { d: "m19.07 4.93-1.41 1.41", key: "1shlcs" }]
-];
-const Sun = createLucideIcon("sun", __iconNode$4);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$3 = [
-  ["path", { d: "M6 4v6a6 6 0 0 0 12 0V4", key: "9kb039" }],
-  ["line", { x1: "4", x2: "20", y1: "20", y2: "20", key: "nun2al" }]
-];
-const Underline$1 = createLucideIcon("underline", __iconNode$3);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$2 = [
-  ["path", { d: "M3 7v6h6", key: "1v2h90" }],
-  ["path", { d: "M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13", key: "1r6uu6" }]
-];
-const Undo = createLucideIcon("undo", __iconNode$2);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$1 = [
-  [
-    "path",
-    {
-      d: "m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72",
-      key: "ul74o6"
-    }
-  ],
-  ["path", { d: "m14 7 3 3", key: "1r5n42" }],
-  ["path", { d: "M5 6v4", key: "ilb8ba" }],
-  ["path", { d: "M19 14v4", key: "blhpug" }],
-  ["path", { d: "M10 2v2", key: "7u0qdc" }],
-  ["path", { d: "M7 8H3", key: "zfb6yr" }],
-  ["path", { d: "M21 16h-4", key: "1cnmox" }],
-  ["path", { d: "M11 3H9", key: "1obp7u" }]
-];
-const WandSparkles = createLucideIcon("wand-sparkles", __iconNode$1);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode = [
-  ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
-  ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
-];
-const X = createLucideIcon("x", __iconNode);
-function Layout() {
-  const navigate = useNavigate();
-  const { isAuthenticated, clearAuth } = useAppStore();
-  const { clear } = useInternetIdentity();
-  const [theme, setTheme] = reactExports.useState(() => {
-    const stored = localStorage.getItem("writerstudio-theme");
-    if (stored === "dark") return "dark";
-    return "light";
-  });
-  reactExports.useEffect(() => {
-    const root2 = document.documentElement;
-    if (theme === "dark") {
-      root2.classList.add("dark");
-    } else {
-      root2.classList.remove("dark");
-    }
-    localStorage.setItem("writerstudio-theme", theme);
-  }, [theme]);
-  const toggleTheme = () => {
-    setTheme((prev) => prev === "light" ? "dark" : "light");
-  };
-  const handleLogout = () => {
-    clear();
-    clearAuth();
-    navigate({ to: "/login" });
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex h-screen w-full bg-background", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { className: "w-[240px] flex-shrink-0 border-r border-border bg-sidebar flex flex-col", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b border-sidebar-border", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-sm font-semibold text-sidebar-foreground uppercase tracking-wider", children: "Lista rozdziałów" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-sidebar-foreground/60", children: "Tutaj pojawi się lista rozdziałów..." }) })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 flex flex-col min-w-0", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "h-14 border-b border-border bg-card flex items-center px-6 flex-shrink-0 justify-between", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-5 w-5 text-primary" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-display text-lg font-semibold text-foreground", children: "WriterStudio TipTap" })
-        ] }),
-        isAuthenticated && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Button,
-            {
-              variant: "ghost",
-              size: "sm",
-              onClick: toggleTheme,
-              "aria-label": theme === "light" ? "Włącz ciemny motyw" : "Włącz jasny motyw",
-              "data-ocid": "theme.toggle_button",
-              children: theme === "light" ? /* @__PURE__ */ jsxRuntimeExports.jsx(Moon, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Sun, { className: "h-4 w-4" })
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Button,
-            {
-              variant: "ghost",
-              size: "sm",
-              onClick: handleLogout,
-              "data-ocid": "auth.logout_button",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "h-4 w-4 mr-2" }),
-                "Wyloguj się"
-              ]
-            }
-          )
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "flex-1 overflow-auto p-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) })
-    ] })
-  ] });
-}
-const rootRoute = createRootRoute({
-  component: () => /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {})
-});
-const layoutRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  id: "layout",
-  component: Layout
-});
-const adminRoute = createRoute({
-  getParentRoute: () => layoutRoute,
-  path: "/admin",
-  beforeLoad: () => {
-    const { isAuthenticated } = useAppStore.getState();
-    if (!isAuthenticated) {
-      throw redirect({ to: "/login" });
-    }
-  },
-  component: AdminPage
-});
-function Skeleton({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "div",
-    {
-      "data-slot": "skeleton",
-      className: cn("bg-accent animate-pulse rounded-md", className),
-      ...props
-    }
-  );
-}
 const Analysis = Record({
   "id": Nat,
   "provider": Text$2,
@@ -37638,6 +37161,1148 @@ function useCreateBook() {
       queryClient2.invalidateQueries({ queryKey: ["books"] });
     }
   });
+}
+function useChatMessages(bookId) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(bookId);
+  return useQuery({
+    queryKey: ["chat", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      const messages = await actor.listMessagesByBook(id);
+      return messages.sort((a2, b2) => Number(a2.createdAt - b2.createdAt));
+    },
+    enabled: !!actor && !!bookId
+  });
+}
+function useSendMessage() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      bookId,
+      role,
+      content,
+      provider
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.sendMessage(bookId, role, content, provider);
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["chat", variables.bookId]
+      });
+    }
+  });
+}
+function useDeleteMessage() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteMessage(id);
+    },
+    onSuccess: () => {
+      queryClient2.invalidateQueries({ queryKey: ["chat"] });
+    }
+  });
+}
+function useClearChat() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ bookId }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.clearChat(bookId);
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["chat", variables.bookId]
+      });
+    }
+  });
+}
+function buildGrammarPrompt(text) {
+  return `Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+function buildContextPrompt(text, previousSummaries) {
+  const summariesBlock = previousSummaries.length > 0 ? previousSummaries.map((s, i) => `Streszczenie rozdziału ${i + 1}:
+${s}`).join("\n\n") : "Brak wcześniejszych rozdziałów.";
+  return `Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+
+KONTEKST POPRZEDNICH ROZDZIAŁÓW:
+${summariesBlock}
+
+BIĄŻĄCY ROZDZIAŁ DO ANALIZY:
+"""
+${text}
+"""`;
+}
+function buildDialoguePrompt(text) {
+  return `Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+function buildSummaryPrompt(allChaptersText, summaryType) {
+  const typeInstructions = {
+    short: "Napisz KRÓTKIE streszczenie książki w 3-5 zdaniach, zachowując główne wątki i konflikt.",
+    long: "Napisz SZCZEGÓŁOWE streszczenie książki, obejmujące wszystkie główne wątki, rozwój postaci, zwroty akcji i zakończenie. Format: kilka akapitów.",
+    hooks: "Wymyśl 5-7 CHWYTliwych zdań (tzw. 'hooks') do promocji książki w mediach społecznościowych. Każde zdanie powinno być intrygujące, emocjonalne i zachęcać do przeczytania. Zwróć je jako listę punktowaną."
+  };
+  return `${typeInstructions[summaryType]}
+
+Oto pełny tekst wszystkich rozdziałów książki:
+"""
+${allChaptersText}
+"""`;
+}
+function extractJsonArray(text) {
+  const match = text.match(/\[[\s\S]*\]/);
+  if (match) {
+    return JSON.parse(match[0]);
+  }
+  const objMatch = text.match(/\{[\s\S]*\}/);
+  if (objMatch) {
+    const parsed = JSON.parse(objMatch[0]);
+    if (Array.isArray(parsed)) return parsed;
+    if (parsed && typeof parsed === "object" && "annotations" in parsed) {
+      return parsed.annotations;
+    }
+  }
+  throw new Error("Nie udało się wyciągnąć JSON z odpowiedzi AI");
+}
+function validateAnnotations(data) {
+  if (!Array.isArray(data)) {
+    throw new Error("Oczekiwano tablicy adnotacji");
+  }
+  const validColors = /* @__PURE__ */ new Set([
+    "yellow",
+    "red",
+    "blue",
+    "orange",
+    "purple"
+  ]);
+  return data.map((item, idx) => {
+    if (!item || typeof item !== "object") {
+      throw new Error(`Element ${idx} nie jest obiektem`);
+    }
+    const text = item.text;
+    const color = item.color;
+    const explanation = item.explanation;
+    const proposal = item.proposal;
+    if (typeof text !== "string" || typeof explanation !== "string" || typeof proposal !== "string") {
+      throw new Error(`Element ${idx} ma nieprawidłowy typ pól`);
+    }
+    const colorStr = String(color);
+    if (!validColors.has(colorStr)) {
+      throw new Error(`Element ${idx} ma nieprawidłowy kolor: ${colorStr}`);
+    }
+    return {
+      text,
+      color: colorStr,
+      explanation,
+      proposal
+    };
+  });
+}
+async function callAi(prompt, apiKey, provider, expectJson) {
+  var _a2, _b2, _c2, _d2, _e2;
+  if (provider === "openai") {
+    const body = {
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 8e3,
+      temperature: 0.3
+    };
+    if (expectJson) {
+      body.response_format = { type: "json_object" };
+    }
+    const res2 = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res2.ok) {
+      const err = await res2.text();
+      throw new Error(`OpenAI error ${res2.status}: ${err}`);
+    }
+    const data2 = await res2.json();
+    return ((_c2 = (_b2 = (_a2 = data2.choices) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.message) == null ? void 0 : _c2.content) ?? "";
+  }
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 8e3,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3
+    })
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Claude error ${res.status}: ${err}`);
+  }
+  const data = await res.json();
+  return ((_e2 = (_d2 = data.content) == null ? void 0 : _d2.find((c2) => c2.type === "text")) == null ? void 0 : _e2.text) ?? "";
+}
+async function analyzeGrammarStyle(text, apiKey, provider) {
+  if (text.length > 8e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildGrammarPrompt(text);
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  return validateAnnotations(parsed);
+}
+async function analyzeWithContext(currentChapterText, previousChaptersSummaries, apiKey, provider) {
+  if (currentChapterText.length > 8e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildContextPrompt(
+    currentChapterText,
+    previousChaptersSummaries
+  );
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  return validateAnnotations(parsed);
+}
+async function analyzeDialogue(text, apiKey, provider) {
+  if (text.length > 8e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildDialoguePrompt(text);
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  return validateAnnotations(parsed);
+}
+async function generateSummary(allChaptersText, summaryType, apiKey, provider) {
+  if (allChaptersText.length > 12e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildSummaryPrompt(allChaptersText, summaryType);
+  return await callAi(prompt, apiKey, provider, false);
+}
+function buildChatPrompt(messages, bookContext) {
+  const history2 = messages.map(
+    (m2) => `${m2.role === "user" ? "Użytkownik" : "Asystent"}: ${m2.content}`
+  ).join("\n\n");
+  return `Jesteś asystentem pisarskim dla pisarza. Pomagasz w tworzeniu powieści, odpowiadasz na pytania, proponujesz pomysły na fabułę, postacie, dialogi i rozwój wątków.
+
+KONTEKST KSIĄŻKI:
+${bookContext}
+
+HISTORIA ROZMOWY:
+${history2}
+
+Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
+}
+async function chatWithBook(messages, bookContext, apiKey, provider) {
+  const prompt = buildChatPrompt(messages, bookContext);
+  return await callAi(prompt, apiKey, provider, false);
+}
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const toKebabCase = (string) => string.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+const toCamelCase = (string) => string.replace(
+  /^([A-Z])|[\s-_]+(\w)/g,
+  (match, p1, p2) => p2 ? p2.toUpperCase() : p1.toLowerCase()
+);
+const toPascalCase = (string) => {
+  const camelCase = toCamelCase(string);
+  return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
+};
+const mergeClasses = (...classes) => classes.filter((className, index2, array) => {
+  return Boolean(className) && className.trim() !== "" && array.indexOf(className) === index2;
+}).join(" ").trim();
+const hasA11yProp = (props) => {
+  for (const prop in props) {
+    if (prop.startsWith("aria-") || prop === "role" || prop === "title") {
+      return true;
+    }
+  }
+};
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+var defaultAttributes = {
+  xmlns: "http://www.w3.org/2000/svg",
+  width: 24,
+  height: 24,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round"
+};
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const Icon$1 = reactExports.forwardRef(
+  ({
+    color = "currentColor",
+    size: size2 = 24,
+    strokeWidth = 2,
+    absoluteStrokeWidth,
+    className = "",
+    children,
+    iconNode,
+    ...rest
+  }, ref) => reactExports.createElement(
+    "svg",
+    {
+      ref,
+      ...defaultAttributes,
+      width: size2,
+      height: size2,
+      stroke: color,
+      strokeWidth: absoluteStrokeWidth ? Number(strokeWidth) * 24 / Number(size2) : strokeWidth,
+      className: mergeClasses("lucide", className),
+      ...!children && !hasA11yProp(rest) && { "aria-hidden": "true" },
+      ...rest
+    },
+    [
+      ...iconNode.map(([tag, attrs]) => reactExports.createElement(tag, attrs)),
+      ...Array.isArray(children) ? children : [children]
+    ]
+  )
+);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const createLucideIcon = (iconName, iconNode) => {
+  const Component2 = reactExports.forwardRef(
+    ({ className, ...props }, ref) => reactExports.createElement(Icon$1, {
+      ref,
+      iconNode,
+      className: mergeClasses(
+        `lucide-${toKebabCase(toPascalCase(iconName))}`,
+        `lucide-${iconName}`,
+        className
+      ),
+      ...props
+    })
+  );
+  Component2.displayName = toPascalCase(iconName);
+  return Component2;
+};
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$n = [
+  ["path", { d: "M15 12H3", key: "6jk70r" }],
+  ["path", { d: "M17 18H3", key: "1amg6g" }],
+  ["path", { d: "M21 6H3", key: "1jwq7v" }]
+];
+const AlignLeft = createLucideIcon("align-left", __iconNode$n);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$m = [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+];
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$m);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$l = [
+  [
+    "path",
+    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
+  ]
+];
+const Bold$1 = createLucideIcon("bold", __iconNode$l);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$k = [
+  ["path", { d: "M12 7v14", key: "1akyts" }],
+  [
+    "path",
+    {
+      d: "M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z",
+      key: "ruj8y"
+    }
+  ]
+];
+const BookOpen = createLucideIcon("book-open", __iconNode$k);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$j = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$j);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$i = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$i);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$h = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+const ChevronUp = createLucideIcon("chevron-up", __iconNode$h);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$g = [
+  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
+  ["path", { d: "M10 9H8", key: "b1mrlr" }],
+  ["path", { d: "M16 13H8", key: "t4e002" }],
+  ["path", { d: "M16 17H8", key: "z1uh3a" }]
+];
+const FileText = createLucideIcon("file-text", __iconNode$g);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$f = [
+  ["line", { x1: "19", x2: "10", y1: "4", y2: "4", key: "15jd3p" }],
+  ["line", { x1: "14", x2: "5", y1: "20", y2: "20", key: "bu0au3" }],
+  ["line", { x1: "15", x2: "9", y1: "4", y2: "20", key: "uljnxc" }]
+];
+const Italic$1 = createLucideIcon("italic", __iconNode$f);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$e = [
+  ["path", { d: "m10 17 5-5-5-5", key: "1bsop3" }],
+  ["path", { d: "M15 12H3", key: "6jk70r" }],
+  ["path", { d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4", key: "u53s6r" }]
+];
+const LogIn = createLucideIcon("log-in", __iconNode$e);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$d = [
+  ["path", { d: "m16 17 5-5-5-5", key: "1bji2h" }],
+  ["path", { d: "M21 12H9", key: "dn1m92" }],
+  ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
+];
+const LogOut = createLucideIcon("log-out", __iconNode$d);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$c = [
+  ["path", { d: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z", key: "vv11sd" }]
+];
+const MessageCircle = createLucideIcon("message-circle", __iconNode$c);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$b = [
+  ["path", { d: "M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z", key: "a7tn18" }]
+];
+const Moon = createLucideIcon("moon", __iconNode$b);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$a = [
+  ["path", { d: "M5 12h14", key: "1ays0h" }],
+  ["path", { d: "M12 5v14", key: "s699le" }]
+];
+const Plus = createLucideIcon("plus", __iconNode$a);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$9 = [
+  ["path", { d: "M21 7v6h-6", key: "3ptur4" }],
+  ["path", { d: "M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7", key: "1kgawr" }]
+];
+const Redo = createLucideIcon("redo", __iconNode$9);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$8 = [
+  [
+    "path",
+    {
+      d: "M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",
+      key: "1c8476"
+    }
+  ],
+  ["path", { d: "M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7", key: "1ydtos" }],
+  ["path", { d: "M7 3v4a1 1 0 0 0 1 1h7", key: "t51u73" }]
+];
+const Save = createLucideIcon("save", __iconNode$8);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$7 = [
+  [
+    "path",
+    {
+      d: "M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z",
+      key: "1ffxy3"
+    }
+  ],
+  ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
+];
+const Send = createLucideIcon("send", __iconNode$7);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$6 = [
+  [
+    "path",
+    {
+      d: "M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z",
+      key: "4pj2yx"
+    }
+  ],
+  ["path", { d: "M20 3v4", key: "1olli1" }],
+  ["path", { d: "M22 5h-4", key: "1gvqau" }],
+  ["path", { d: "M4 17v2", key: "vumght" }],
+  ["path", { d: "M5 18H3", key: "zchphs" }]
+];
+const Sparkles = createLucideIcon("sparkles", __iconNode$6);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$5 = [
+  ["circle", { cx: "12", cy: "12", r: "4", key: "4exip2" }],
+  ["path", { d: "M12 2v2", key: "tus03m" }],
+  ["path", { d: "M12 20v2", key: "1lh1kg" }],
+  ["path", { d: "m4.93 4.93 1.41 1.41", key: "149t6j" }],
+  ["path", { d: "m17.66 17.66 1.41 1.41", key: "ptbguv" }],
+  ["path", { d: "M2 12h2", key: "1t8f8n" }],
+  ["path", { d: "M20 12h2", key: "1q8mjw" }],
+  ["path", { d: "m6.34 17.66-1.41 1.41", key: "1m8zz5" }],
+  ["path", { d: "m19.07 4.93-1.41 1.41", key: "1shlcs" }]
+];
+const Sun = createLucideIcon("sun", __iconNode$5);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$4 = [
+  ["path", { d: "M3 6h18", key: "d0wm0j" }],
+  ["path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6", key: "4alrt4" }],
+  ["path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2", key: "v07s0e" }],
+  ["line", { x1: "10", x2: "10", y1: "11", y2: "17", key: "1uufr5" }],
+  ["line", { x1: "14", x2: "14", y1: "11", y2: "17", key: "xtxkd" }]
+];
+const Trash2 = createLucideIcon("trash-2", __iconNode$4);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$3 = [
+  ["path", { d: "M6 4v6a6 6 0 0 0 12 0V4", key: "9kb039" }],
+  ["line", { x1: "4", x2: "20", y1: "20", y2: "20", key: "nun2al" }]
+];
+const Underline$1 = createLucideIcon("underline", __iconNode$3);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$2 = [
+  ["path", { d: "M3 7v6h6", key: "1v2h90" }],
+  ["path", { d: "M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13", key: "1r6uu6" }]
+];
+const Undo = createLucideIcon("undo", __iconNode$2);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$1 = [
+  [
+    "path",
+    {
+      d: "m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72",
+      key: "ul74o6"
+    }
+  ],
+  ["path", { d: "m14 7 3 3", key: "1r5n42" }],
+  ["path", { d: "M5 6v4", key: "ilb8ba" }],
+  ["path", { d: "M19 14v4", key: "blhpug" }],
+  ["path", { d: "M10 2v2", key: "7u0qdc" }],
+  ["path", { d: "M7 8H3", key: "zfb6yr" }],
+  ["path", { d: "M21 16h-4", key: "1cnmox" }],
+  ["path", { d: "M11 3H9", key: "1obp7u" }]
+];
+const WandSparkles = createLucideIcon("wand-sparkles", __iconNode$1);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode = [
+  ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
+  ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
+];
+const X = createLucideIcon("x", __iconNode);
+function ChatBotPanel({ bookId }) {
+  const [isOpen, setIsOpen] = reactExports.useState(() => {
+    const stored = localStorage.getItem("writerstudio-chat-open");
+    return stored === "true";
+  });
+  reactExports.useEffect(() => {
+    localStorage.setItem("writerstudio-chat-open", String(isOpen));
+  }, [isOpen]);
+  const { data: book } = useBook(bookId);
+  const { data: chapters } = useChapters(bookId);
+  const { data: messages, isLoading } = useChatMessages(bookId);
+  const sendMessage = useSendMessage();
+  const deleteMessage = useDeleteMessage();
+  const clearChat = useClearChat();
+  const [input, setInput] = reactExports.useState("");
+  const [isSending, setIsSending] = reactExports.useState(false);
+  const messagesEndRef = reactExports.useRef(null);
+  const textareaRef = reactExports.useRef(null);
+  const [pos, setPos] = reactExports.useState({ x: 0, y: 0 });
+  const [size2, setSize] = reactExports.useState({ w: 380, h: 520 });
+  const panelRef = reactExports.useRef(null);
+  const dragState = reactExports.useRef({
+    dragging: false,
+    startX: 0,
+    startY: 0,
+    startPx: 0,
+    startPy: 0
+  });
+  const resizeState = reactExports.useRef({
+    resizing: false,
+    startX: 0,
+    startY: 0,
+    startW: 380,
+    startH: 520
+  });
+  const scrollToBottom = reactExports.useCallback(() => {
+    var _a2;
+    (_a2 = messagesEndRef.current) == null ? void 0 : _a2.scrollIntoView({ behavior: "smooth" });
+  }, []);
+  const messageCountRef = reactExports.useRef((messages == null ? void 0 : messages.length) ?? 0);
+  reactExports.useEffect(() => {
+    const currentLength = (messages == null ? void 0 : messages.length) ?? 0;
+    if (isOpen && currentLength > messageCountRef.current) {
+      scrollToBottom();
+    }
+    messageCountRef.current = currentLength;
+  }, [isOpen, scrollToBottom, messages == null ? void 0 : messages.length]);
+  const onDragMouseDown = reactExports.useCallback(
+    (e) => {
+      if (e.target.closest("[data-chat-action]")) return;
+      dragState.current = {
+        dragging: true,
+        startX: e.clientX,
+        startY: e.clientY,
+        startPx: pos.x,
+        startPy: pos.y
+      };
+      e.preventDefault();
+    },
+    [pos.x, pos.y]
+  );
+  const onResizeMouseDown = reactExports.useCallback(
+    (e) => {
+      resizeState.current = {
+        resizing: true,
+        startX: e.clientX,
+        startY: e.clientY,
+        startW: size2.w,
+        startH: size2.h
+      };
+      e.preventDefault();
+      e.stopPropagation();
+    },
+    [size2.w, size2.h]
+  );
+  reactExports.useEffect(() => {
+    const onMouseMove = (e) => {
+      if (dragState.current.dragging) {
+        const dx = e.clientX - dragState.current.startX;
+        const dy = e.clientY - dragState.current.startY;
+        setPos({
+          x: dragState.current.startPx + dx,
+          y: dragState.current.startPy + dy
+        });
+      }
+      if (resizeState.current.resizing) {
+        const dx = e.clientX - resizeState.current.startX;
+        const dy = e.clientY - resizeState.current.startY;
+        setSize({
+          w: Math.max(280, resizeState.current.startW + dx),
+          h: Math.max(320, resizeState.current.startH + dy)
+        });
+      }
+    };
+    const onMouseUp = () => {
+      dragState.current.dragging = false;
+      resizeState.current.resizing = false;
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+  const handleSend = reactExports.useCallback(async () => {
+    const trimmed = input.trim();
+    if (!trimmed || isSending || !book) return;
+    const apiKey = localStorage.getItem("ws_api_key") ?? "";
+    const provider = localStorage.getItem("ws_api_provider") || "openai";
+    if (!apiKey.trim()) {
+      setInput("");
+      return;
+    }
+    setIsSending(true);
+    setInput("");
+    try {
+      await sendMessage.mutateAsync({
+        bookId: BigInt(bookId),
+        role: "user",
+        content: trimmed,
+        provider: ""
+      });
+      const chapterTitles = (chapters ?? []).sort((a2, b2) => Number(a2.orderIndex - b2.orderIndex)).map((ch) => `- ${ch.title}`).join("\n");
+      const bookContext = `Tytuł książki: ${book.title}
+Kategoria: ${book.category}
+Opis: ${book.description}
+
+Rozdziały:
+${chapterTitles}`;
+      const currentMessages = (messages ?? []).map((m2) => ({
+        role: m2.role === "user" ? "user" : "assistant",
+        content: m2.content
+      }));
+      currentMessages.push({ role: "user", content: trimmed });
+      const reply = await chatWithBook(
+        currentMessages,
+        bookContext,
+        apiKey.trim(),
+        provider
+      );
+      await sendMessage.mutateAsync({
+        bookId: BigInt(bookId),
+        role: "assistant",
+        content: reply,
+        provider
+      });
+    } catch {
+    } finally {
+      setIsSending(false);
+    }
+  }, [input, isSending, book, bookId, chapters, messages, sendMessage]);
+  const handleKeyDown2 = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+  const handleClear = () => {
+    if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
+      clearChat.mutate({ bookId: BigInt(bookId) });
+    }
+  };
+  if (!isOpen) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "button",
+      {
+        type: "button",
+        onClick: () => setIsOpen(true),
+        className: "fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-105 transition-transform",
+        "aria-label": "Otwórz czat",
+        "data-ocid": "chat.open_button",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-6 w-6" })
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      ref: panelRef,
+      className: "fixed z-50 flex flex-col rounded-xl border border-border bg-card shadow-elevated overflow-hidden",
+      style: {
+        right: 24 + pos.x,
+        bottom: 24 - pos.y,
+        width: size2.w,
+        height: size2.h
+      },
+      "data-ocid": "chat.panel",
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
+          {
+            className: "flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40 cursor-move select-none",
+            onMouseDown: onDragMouseDown,
+            "data-ocid": "chat.header",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-primary" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-foreground", children: "Asystent AI" }),
+                book && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate max-w-[120px]", children: book.title })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Button,
+                  {
+                    variant: "ghost",
+                    size: "sm",
+                    className: "h-7 w-7 p-0 text-muted-foreground hover:text-destructive",
+                    onClick: handleClear,
+                    title: "Wyczyść historię",
+                    "data-chat-action": true,
+                    "data-ocid": "chat.clear_button",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3.5 w-3.5" })
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Button,
+                  {
+                    variant: "ghost",
+                    size: "sm",
+                    className: "h-7 w-7 p-0 text-muted-foreground hover:text-foreground",
+                    onClick: () => setIsOpen(false),
+                    title: "Zamknij",
+                    "data-chat-action": true,
+                    "data-ocid": "chat.close_button",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "h-3.5 w-3.5" })
+                  }
+                )
+              ] })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 space-y-3 min-h-0", children: [
+          isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "text-xs text-muted-foreground text-center py-4",
+              "data-ocid": "chat.loading_state",
+              children: "Ładowanie historii..."
+            }
+          ),
+          !isLoading && (!messages || messages.length === 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "text-xs text-muted-foreground text-center py-8",
+              "data-ocid": "chat.empty_state",
+              children: [
+                "Zacznij rozmowę z asystentem AI.",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+                "Możesz pytać o fabułę, postacie, dialogi i styl."
+              ]
+            }
+          ),
+          messages == null ? void 0 : messages.map((msg, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+            ChatMessageItem,
+            {
+              msg,
+              onDelete: () => deleteMessage.mutate({ id: msg.id })
+            },
+            `${msg.id}-${idx}`
+          )),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: messagesEndRef })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-t border-border p-3 bg-card", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-end gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "textarea",
+            {
+              ref: textareaRef,
+              value: input,
+              onChange: (e) => setInput(e.target.value),
+              onKeyDown: handleKeyDown2,
+              placeholder: "Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)",
+              className: "flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+              rows: 1,
+              "data-ocid": "chat.input"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Button,
+            {
+              size: "sm",
+              disabled: !input.trim() || isSending,
+              onClick: handleSend,
+              className: "h-9 w-9 p-0 shrink-0",
+              "data-ocid": "chat.send_button",
+              children: isSending ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Send, { className: "h-4 w-4" })
+            }
+          )
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            className: "absolute bottom-0 right-0 w-4 h-4 cursor-se-resize",
+            onMouseDown: onResizeMouseDown,
+            "data-ocid": "chat.resize_handle",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "svg",
+              {
+                role: "img",
+                "aria-label": "Resize handle",
+                width: "12",
+                height: "12",
+                viewBox: "0 0 12 12",
+                className: "absolute bottom-1 right-1 text-muted-foreground/40",
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "path",
+                  {
+                    d: "M8 12L12 8V12H8ZM4 12L12 4V8L8 12H4ZM0 12L12 0V4L4 12H0Z",
+                    fill: "currentColor"
+                  }
+                )
+              }
+            )
+          }
+        )
+      ]
+    }
+  );
+}
+function ChatMessageItem({
+  msg,
+  onDelete
+}) {
+  const isUser = msg.role === "user";
+  const [confirmDelete, setConfirmDelete] = reactExports.useState(false);
+  const timeoutRef = reactExports.useRef(null);
+  const handleDeleteClick = () => {
+    if (confirmDelete) {
+      onDelete();
+      setConfirmDelete(false);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    } else {
+      setConfirmDelete(true);
+      timeoutRef.current = setTimeout(() => setConfirmDelete(false), 2e3);
+    }
+  };
+  reactExports.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "div",
+    {
+      className: `group flex ${isUser ? "justify-end" : "justify-start"}`,
+      "data-ocid": `chat.message.${msg.id}`,
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          className: `relative max-w-[85%] rounded-lg px-3 py-2 text-sm ${isUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted text-foreground rounded-bl-none"}`,
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "whitespace-pre-wrap break-words", children: msg.content }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                onClick: handleDeleteClick,
+                className: `absolute -top-2 ${isUser ? "-left-2" : "-right-2"} h-5 w-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${confirmDelete ? "bg-destructive text-destructive-foreground" : "bg-card border border-border text-muted-foreground hover:text-destructive"}`,
+                title: confirmDelete ? "Kliknij ponownie, aby usunąć" : "Usuń wiadomość",
+                "data-ocid": `chat.delete_button.${msg.id}`,
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3 w-3" })
+              }
+            )
+          ]
+        }
+      )
+    }
+  );
+}
+function useActiveBookId() {
+  const routerState = useRouterState();
+  const pathname = routerState.location.pathname;
+  const bookMatch = pathname.match(/\/books\/([^\/]+)/);
+  if (bookMatch) return bookMatch[1];
+  return null;
+}
+function Layout() {
+  const navigate = useNavigate();
+  const { isAuthenticated, clearAuth } = useAppStore();
+  const { clear } = useInternetIdentity();
+  const activeBookId = useActiveBookId();
+  const [theme, setTheme] = reactExports.useState(() => {
+    const stored = localStorage.getItem("writerstudio-theme");
+    if (stored === "dark") return "dark";
+    return "light";
+  });
+  reactExports.useEffect(() => {
+    const root2 = document.documentElement;
+    if (theme === "dark") {
+      root2.classList.add("dark");
+    } else {
+      root2.classList.remove("dark");
+    }
+    localStorage.setItem("writerstudio-theme", theme);
+  }, [theme]);
+  const toggleTheme = () => {
+    setTheme((prev) => prev === "light" ? "dark" : "light");
+  };
+  const handleLogout = () => {
+    clear();
+    clearAuth();
+    navigate({ to: "/login" });
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex h-screen w-full bg-background", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { className: "w-[240px] flex-shrink-0 border-r border-border bg-sidebar flex flex-col", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b border-sidebar-border", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-sm font-semibold text-sidebar-foreground uppercase tracking-wider", children: "Lista rozdziałów" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-sidebar-foreground/60", children: "Tutaj pojawi się lista rozdziałów..." }) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 flex flex-col min-w-0", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "h-14 border-b border-border bg-card flex items-center px-6 flex-shrink-0 justify-between", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-5 w-5 text-primary" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-display text-lg font-semibold text-foreground", children: "WriterStudio TipTap" })
+        ] }),
+        isAuthenticated && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Button,
+            {
+              variant: "ghost",
+              size: "sm",
+              onClick: toggleTheme,
+              "aria-label": theme === "light" ? "Włącz ciemny motyw" : "Włącz jasny motyw",
+              "data-ocid": "theme.toggle_button",
+              children: theme === "light" ? /* @__PURE__ */ jsxRuntimeExports.jsx(Moon, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Sun, { className: "h-4 w-4" })
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              variant: "ghost",
+              size: "sm",
+              onClick: handleLogout,
+              "data-ocid": "auth.logout_button",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "h-4 w-4 mr-2" }),
+                "Wyloguj się"
+              ]
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "flex-1 overflow-auto p-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) }),
+      isAuthenticated && activeBookId && /* @__PURE__ */ jsxRuntimeExports.jsx(ChatBotPanel, { bookId: activeBookId })
+    ] })
+  ] });
+}
+const rootRoute = createRootRoute({
+  component: () => /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {})
+});
+const layoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "layout",
+  component: Layout
+});
+const adminRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/admin",
+  beforeLoad: () => {
+    const { isAuthenticated } = useAppStore.getState();
+    if (!isAuthenticated) {
+      throw redirect({ to: "/login" });
+    }
+  },
+  component: AdminPage
+});
+function Skeleton({ className, ...props }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "div",
+    {
+      "data-slot": "skeleton",
+      className: cn("bg-accent animate-pulse rounded-md", className),
+      ...props
+    }
+  );
 }
 function ChapterListItem({
   chapter,
@@ -70074,183 +70739,6 @@ function SelectScrollDownButton({
       children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "size-4" })
     }
   );
-}
-function buildGrammarPrompt(text) {
-  return `Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
-
-Tekst do analizy:
-"""
-${text}
-"""`;
-}
-function buildContextPrompt(text, previousSummaries) {
-  const summariesBlock = previousSummaries.length > 0 ? previousSummaries.map((s, i) => `Streszczenie rozdziału ${i + 1}:
-${s}`).join("\n\n") : "Brak wcześniejszych rozdziałów.";
-  return `Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
-
-KONTEKST POPRZEDNICH ROZDZIAŁÓW:
-${summariesBlock}
-
-BIĄŻĄCY ROZDZIAŁ DO ANALIZY:
-"""
-${text}
-"""`;
-}
-function buildDialoguePrompt(text) {
-  return `Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
-
-Tekst do analizy:
-"""
-${text}
-"""`;
-}
-function buildSummaryPrompt(allChaptersText, summaryType) {
-  const typeInstructions = {
-    short: "Napisz KRÓTKIE streszczenie książki w 3-5 zdaniach, zachowując główne wątki i konflikt.",
-    long: "Napisz SZCZEGÓŁOWE streszczenie książki, obejmujące wszystkie główne wątki, rozwój postaci, zwroty akcji i zakończenie. Format: kilka akapitów.",
-    hooks: "Wymyśl 5-7 CHWYTliwych zdań (tzw. 'hooks') do promocji książki w mediach społecznościowych. Każde zdanie powinno być intrygujące, emocjonalne i zachęcać do przeczytania. Zwróć je jako listę punktowaną."
-  };
-  return `${typeInstructions[summaryType]}
-
-Oto pełny tekst wszystkich rozdziałów książki:
-"""
-${allChaptersText}
-"""`;
-}
-function extractJsonArray(text) {
-  const match = text.match(/\[[\s\S]*\]/);
-  if (match) {
-    return JSON.parse(match[0]);
-  }
-  const objMatch = text.match(/\{[\s\S]*\}/);
-  if (objMatch) {
-    const parsed = JSON.parse(objMatch[0]);
-    if (Array.isArray(parsed)) return parsed;
-    if (parsed && typeof parsed === "object" && "annotations" in parsed) {
-      return parsed.annotations;
-    }
-  }
-  throw new Error("Nie udało się wyciągnąć JSON z odpowiedzi AI");
-}
-function validateAnnotations(data) {
-  if (!Array.isArray(data)) {
-    throw new Error("Oczekiwano tablicy adnotacji");
-  }
-  const validColors = /* @__PURE__ */ new Set([
-    "yellow",
-    "red",
-    "blue",
-    "orange",
-    "purple"
-  ]);
-  return data.map((item, idx) => {
-    if (!item || typeof item !== "object") {
-      throw new Error(`Element ${idx} nie jest obiektem`);
-    }
-    const text = item.text;
-    const color = item.color;
-    const explanation = item.explanation;
-    const proposal = item.proposal;
-    if (typeof text !== "string" || typeof explanation !== "string" || typeof proposal !== "string") {
-      throw new Error(`Element ${idx} ma nieprawidłowy typ pól`);
-    }
-    const colorStr = String(color);
-    if (!validColors.has(colorStr)) {
-      throw new Error(`Element ${idx} ma nieprawidłowy kolor: ${colorStr}`);
-    }
-    return {
-      text,
-      color: colorStr,
-      explanation,
-      proposal
-    };
-  });
-}
-async function callAi(prompt, apiKey, provider, expectJson) {
-  var _a2, _b2, _c2, _d2, _e2;
-  if (provider === "openai") {
-    const body = {
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 8e3,
-      temperature: 0.3
-    };
-    if (expectJson) {
-      body.response_format = { type: "json_object" };
-    }
-    const res2 = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify(body)
-    });
-    if (!res2.ok) {
-      const err = await res2.text();
-      throw new Error(`OpenAI error ${res2.status}: ${err}`);
-    }
-    const data2 = await res2.json();
-    return ((_c2 = (_b2 = (_a2 = data2.choices) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.message) == null ? void 0 : _c2.content) ?? "";
-  }
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true"
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 8e3,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3
-    })
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Claude error ${res.status}: ${err}`);
-  }
-  const data = await res.json();
-  return ((_e2 = (_d2 = data.content) == null ? void 0 : _d2.find((c2) => c2.type === "text")) == null ? void 0 : _e2.text) ?? "";
-}
-async function analyzeGrammarStyle(text, apiKey, provider) {
-  if (text.length > 8e3) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildGrammarPrompt(text);
-  const responseText = await callAi(prompt, apiKey, provider, true);
-  const parsed = extractJsonArray(responseText);
-  return validateAnnotations(parsed);
-}
-async function analyzeWithContext(currentChapterText, previousChaptersSummaries, apiKey, provider) {
-  if (currentChapterText.length > 8e3) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildContextPrompt(
-    currentChapterText,
-    previousChaptersSummaries
-  );
-  const responseText = await callAi(prompt, apiKey, provider, true);
-  const parsed = extractJsonArray(responseText);
-  return validateAnnotations(parsed);
-}
-async function analyzeDialogue(text, apiKey, provider) {
-  if (text.length > 8e3) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildDialoguePrompt(text);
-  const responseText = await callAi(prompt, apiKey, provider, true);
-  const parsed = extractJsonArray(responseText);
-  return validateAnnotations(parsed);
-}
-async function generateSummary(allChaptersText, summaryType, apiKey, provider) {
-  if (allChaptersText.length > 12e3) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildSummaryPrompt(allChaptersText, summaryType);
-  return await callAi(prompt, apiKey, provider, false);
 }
 function SaveIndicator({ status }) {
   const labels = {

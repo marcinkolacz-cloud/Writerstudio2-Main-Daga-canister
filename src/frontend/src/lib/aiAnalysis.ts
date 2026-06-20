@@ -233,3 +233,36 @@ export async function generateSummary(
   const prompt = buildSummaryPrompt(allChaptersText, summaryType);
   return await callAi(prompt, apiKey, provider, false);
 }
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+function buildChatPrompt(messages: ChatMessage[], bookContext: string): string {
+  const history = messages
+    .map(
+      (m) => `${m.role === "user" ? "Użytkownik" : "Asystent"}: ${m.content}`,
+    )
+    .join("\n\n");
+
+  return `Jesteś asystentem pisarskim dla pisarza. Pomagasz w tworzeniu powieści, odpowiadasz na pytania, proponujesz pomysły na fabułę, postacie, dialogi i rozwój wątków.
+
+KONTEKST KSIĄŻKI:
+${bookContext}
+
+HISTORIA ROZMOWY:
+${history}
+
+Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
+}
+
+export async function chatWithBook(
+  messages: ChatMessage[],
+  bookContext: string,
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<string> {
+  const prompt = buildChatPrompt(messages, bookContext);
+  return await callAi(prompt, apiKey, provider, false);
+}
