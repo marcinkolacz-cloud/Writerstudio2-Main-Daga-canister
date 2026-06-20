@@ -1,13 +1,15 @@
 import {
+  annotationApplied,
   annotationBlue,
   annotationOrange,
   annotationPurple,
   annotationRed,
   annotationYellow,
 } from "@/components/editor/extensions/AnnotationMark";
+import { useAnnotationTooltip } from "@/components/editor/hooks/useAnnotationTooltip";
 import { cn } from "@/lib/utils";
 import Underline from "@tiptap/extension-underline";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
   Bold,
@@ -16,17 +18,20 @@ import {
   Underline as UnderlineIcon,
   Undo,
 } from "lucide-react";
+import { useCallback } from "react";
 
 interface RichTextEditorProps {
   value: string;
   onChange: (html: string) => void;
   placeholder?: string;
+  onEditorReady?: (editor: Editor) => void;
 }
 
 export function RichTextEditor({
   value,
   onChange,
   placeholder,
+  onEditorReady,
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -37,10 +42,14 @@ export function RichTextEditor({
       annotationBlue,
       annotationOrange,
       annotationPurple,
+      annotationApplied,
     ],
     content: value,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
+    },
+    onCreate: ({ editor }) => {
+      onEditorReady?.(editor);
     },
     editorProps: {
       attributes: {
@@ -49,6 +58,27 @@ export function RichTextEditor({
       },
     },
   });
+
+  const handleApplyProposal = useCallback(
+    ({
+      from,
+      to,
+      proposal,
+    }: { from: number; to: number; proposal: string }) => {
+      if (!editor) return;
+      editor
+        .chain()
+        .focus()
+        .deleteRange({ from, to })
+        .insertContent(proposal)
+        .setMark("annotationApplied", {})
+        .run();
+    },
+    [editor],
+  );
+
+  const { tooltip, tooltipRef, handleApply, hideTooltip } =
+    useAnnotationTooltip(editor, handleApplyProposal);
 
   if (!editor) {
     return null;
@@ -117,6 +147,47 @@ export function RichTextEditor({
           </button>
         ))}
       </div>
+
+      {/* Annotation Tooltip */}
+      {tooltip && (
+        <div
+          ref={tooltipRef}
+          className="fixed z-50 max-w-xs p-3 rounded-lg border border-border bg-popover shadow-lg text-popover-foreground"
+          style={{
+            left: tooltip.rect.left + tooltip.rect.width / 2,
+            top: tooltip.rect.bottom + 8,
+            transform: "translateX(-50%)",
+          }}
+          onMouseEnter={hideTooltip}
+          data-ocid="editor.annotation_tooltip"
+        >
+          <div className="space-y-2">
+            {tooltip.explanation && (
+              <p className="text-sm">{tooltip.explanation}</p>
+            )}
+            {tooltip.proposal && (
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground uppercase">
+                  Propozycja:
+                </p>
+                <p className="text-sm font-medium text-primary">
+                  {tooltip.proposal}
+                </p>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={handleApply}
+              className="w-full mt-2 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              data-ocid="editor.apply_proposal_button"
+            >
+              Wstaw propozycję
+            </button>
+          </div>
+          {/* Arrow */}
+          <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-popover border-l border-t border-border" />
+        </div>
+      )}
 
       {/* Editor Content */}
       <div className="flex-1 overflow-auto">

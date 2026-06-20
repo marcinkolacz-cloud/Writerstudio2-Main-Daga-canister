@@ -88,3 +88,9 @@ export const annotationPurple = createAnnotationMark("annotationPurple", {
   bgClass: "bg-purple-400/20",
   underlineClass: "border-b-2 border-purple-400",
 });
+
+export const annotationApplied = createAnnotationMark("annotationApplied", {
+  color: "green",
+  bgClass: "bg-green-400/10",
+  underlineClass: "border-b-2 border-green-500",
+});

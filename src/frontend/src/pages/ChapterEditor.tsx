@@ -2,18 +2,31 @@ import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useBook,
   useChapter,
+  useSaveAnalysis,
+  useSaveAnnotations,
   useUpdateChapter,
   useUpdateChapterIndents,
 } from "@/hooks/useBackend";
+import type { Annotation } from "@/lib/aiAnalysis";
+import { analyzeGrammarStyle } from "@/lib/aiAnalysis";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { ArrowLeft, Save } from "lucide-react";
+import type { Editor } from "@tiptap/core";
+import { ArrowLeft, Check, Save, Sparkles, Wand2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type SaveStatus = "saved" | "saving" | "unsaved";
+type AnalysisStatus = "idle" | "loading" | "success" | "error";
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   const labels: Record<SaveStatus, string> = {
@@ -69,6 +82,31 @@ function IndentControl({
   );
 }
 
+function applyAnnotationsToEditor(editor: Editor, annotations: Annotation[]) {
+  const docText = editor.getText();
+
+  for (const ann of annotations) {
+    const idx = docText.indexOf(ann.text);
+    if (idx === -1) continue;
+
+    const from = editor.state.doc.resolve(idx);
+    const to = editor.state.doc.resolve(idx + ann.text.length);
+
+    editor
+      .chain()
+      .focus()
+      .setTextSelection({ from: from.pos, to: to.pos })
+      .setMark(
+        `annotation${ann.color.charAt(0).toUpperCase() + ann.color.slice(1)}`,
+        {
+          "data-explanation": ann.explanation,
+          "data-proposal": ann.proposal,
+        },
+      )
+      .run();
+  }
+}
+
 export function ChapterEditorPage() {
   const { bookId, chapterId } = useParams({
     from: "/layout/books/$bookId/chapters/$chapterId",
@@ -79,6 +117,8 @@ export function ChapterEditorPage() {
   const { data: chapter, isLoading: chapterLoading } = useChapter(chapterId);
 
   const updateChapter = useUpdateChapter();
+  const saveAnalysis = useSaveAnalysis();
+  const saveAnnotations = useSaveAnnotations();
   const updateIndents = useUpdateChapterIndents();
 
   const [title, setTitle] = useState("");
@@ -89,9 +129,30 @@ export function ChapterEditorPage() {
   const [indentRight, setIndentRight] = useState(0);
   const [indentFirstLine, setIndentFirstLine] = useState(0);
 
+  // AI analysis state
+  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle");
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState(
+    () => localStorage.getItem("ws_api_key") ?? "",
+  );
+  const [provider, setProvider] = useState<"openai" | "claude">(() => {
+    const saved = localStorage.getItem("ws_api_provider");
+    return saved === "claude" ? "claude" : "openai";
+  });
+  const editorRef = useRef<Editor | null>(null);
+
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const indentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Persist API key / provider to localStorage
+  useEffect(() => {
+    localStorage.setItem("ws_api_key", apiKey);
+  }, [apiKey]);
+
+  useEffect(() => {
+    localStorage.setItem("ws_api_provider", provider);
+  }, [provider]);
 
   // Sync from query data
   useEffect(() => {
@@ -246,14 +307,109 @@ export function ChapterEditorPage() {
         />
       </div>
 
-      {/* Indent controls */}
+      {/* Analysis + Indent controls */}
       <div
         className="shrink-0 flex flex-wrap items-center gap-4 p-3 rounded-lg border border-border bg-card"
-        data-ocid="chapter.indent_panel"
+        data-ocid="chapter.tools_panel"
       >
-        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        {/* Analysis section */}
+        <div className="flex items-center gap-2 flex-1 min-w-[280px]">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI
+          </div>
+          <Input
+            type="password"
+            placeholder="Klucz API"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            className="h-8 text-sm flex-1 min-w-[120px]"
+            data-ocid="chapter.api_key_input"
+          />
+          <Select
+            value={provider}
+            onValueChange={(v) => setProvider(v as "openai" | "claude")}
+          >
+            <SelectTrigger
+              className="h-8 w-[110px] text-sm"
+              data-ocid="chapter.provider_select"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="openai">OpenAI</SelectItem>
+              <SelectItem value="claude">Claude</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={analysisStatus === "loading" || !apiKey.trim()}
+            onClick={async () => {
+              if (!editorRef.current || !chapter || !book) return;
+              const text = editorRef.current.getText();
+              if (!text.trim()) {
+                setAnalysisError("Brak tekstu do analizy");
+                setAnalysisStatus("error");
+                return;
+              }
+              setAnalysisStatus("loading");
+              setAnalysisError(null);
+              try {
+                const annotations = await analyzeGrammarStyle(
+                  text,
+                  apiKey.trim(),
+                  provider,
+                );
+                applyAnnotationsToEditor(editorRef.current, annotations);
+                // Save analysis + annotations to backend
+                const analysisId = await saveAnalysis.mutateAsync({
+                  bookId: book.id,
+                  chapterId: chapter.id,
+                  analysisType: "grammar_style",
+                  provider,
+                  resultContent: JSON.stringify(annotations),
+                });
+                await saveAnnotations.mutateAsync({
+                  analysisId,
+                  annotations,
+                });
+                setAnalysisStatus("success");
+                setTimeout(() => setAnalysisStatus("idle"), 3000);
+              } catch (err) {
+                setAnalysisError(
+                  err instanceof Error ? err.message : "Błąd analizy",
+                );
+                setAnalysisStatus("error");
+              }
+            }}
+            data-ocid="chapter.analyze_button"
+          >
+            {analysisStatus === "loading" ? (
+              <>
+                <Wand2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                Analizowanie...
+              </>
+            ) : analysisStatus === "success" ? (
+              <>
+                <Check className="h-3.5 w-3.5 mr-1.5" />
+                Gotowe
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                Sprawdź gramatykę i styl
+              </>
+            )}
+          </Button>
+        </div>
+
+        <div className="w-px h-6 bg-border hidden sm:block" />
+
+        {/* Indent section */}
+        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">
           <Save className="h-3.5 w-3.5" />
-          Wcięcia akapitowe
+          Wcięcia
         </div>
         <IndentControl
           label="Lewe"
@@ -299,6 +455,15 @@ export function ChapterEditorPage() {
         />
       </div>
 
+      {analysisStatus === "error" && analysisError && (
+        <div
+          className="shrink-0 text-xs text-destructive bg-destructive/10 rounded-md px-3 py-2"
+          data-ocid="chapter.analysis_error"
+        >
+          {analysisError}
+        </div>
+      )}
+
       {/* Rich text editor with indent-aware padding */}
       <div
         className="flex-1 min-h-0"
@@ -312,6 +477,9 @@ export function ChapterEditorPage() {
           value={content}
           onChange={handleContentChange}
           placeholder="Zacznij pisać..."
+          onEditorReady={(editor) => {
+            editorRef.current = editor;
+          }}
         />
       </div>
     </div>
