@@ -48,6 +48,14 @@ export const Chapter = IDL.Record({
   'updatedAt' : IDL.Int,
   'orderIndex' : IDL.Nat,
 });
+export const ChatMessage = IDL.Record({
+  'id' : IDL.Nat,
+  'content' : IDL.Text,
+  'provider' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'role' : IDL.Text,
+  'bookId' : IDL.Nat,
+});
 
 export const idlService = IDL.Service({
   '__analyses' : IDL.Func(
@@ -70,15 +78,23 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Tuple(IDL.Nat, Chapter))],
       ['query'],
     ),
+  '__chatMessages' : IDL.Func(
+      [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, ChatMessage))],
+      ['query'],
+    ),
   '__nextAnalysisId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextAnnotationId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextBookId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextChapterId' : IDL.Func([], [IDL.Nat], ['query']),
+  '__nextChatMessageId' : IDL.Func([], [IDL.Nat], ['query']),
+  'clearChat' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
   'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
   'deleteAnalysis' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
   'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
   'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
@@ -87,6 +103,7 @@ export const idlService = IDL.Service({
   'listAnalysesByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
   'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
   'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
+  'listMessagesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(ChatMessage)], []),
   'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
   'saveAnalysis' : IDL.Func(
       [IDL.Nat, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text],
@@ -106,6 +123,11 @@ export const idlService = IDL.Service({
         ),
       ],
       [IDL.Bool],
+      [],
+    ),
+  'sendMessage' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
+      [IDL.Nat],
       [],
     ),
   'updateBook' : IDL.Func(
@@ -164,6 +186,14 @@ export const idlFactory = ({ IDL }) => {
     'updatedAt' : IDL.Int,
     'orderIndex' : IDL.Nat,
   });
+  const ChatMessage = IDL.Record({
+    'id' : IDL.Nat,
+    'content' : IDL.Text,
+    'provider' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'role' : IDL.Text,
+    'bookId' : IDL.Nat,
+  });
   
   return IDL.Service({
     '__analyses' : IDL.Func(
@@ -186,15 +216,23 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, Chapter))],
         ['query'],
       ),
+    '__chatMessages' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, ChatMessage))],
+        ['query'],
+      ),
     '__nextAnalysisId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextAnnotationId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextBookId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextChapterId' : IDL.Func([], [IDL.Nat], ['query']),
+    '__nextChatMessageId' : IDL.Func([], [IDL.Nat], ['query']),
+    'clearChat' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
     'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
     'deleteAnalysis' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
     'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
     'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
@@ -203,6 +241,7 @@ export const idlFactory = ({ IDL }) => {
     'listAnalysesByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
     'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
     'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
+    'listMessagesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(ChatMessage)], []),
     'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
     'saveAnalysis' : IDL.Func(
         [IDL.Nat, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text],
@@ -222,6 +261,11 @@ export const idlFactory = ({ IDL }) => {
           ),
         ],
         [IDL.Bool],
+        [],
+      ),
+    'sendMessage' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
+        [IDL.Nat],
         [],
       ),
     'updateBook' : IDL.Func(

@@ -24,6 +24,14 @@ export interface TextAnnotation {
     analysisId: bigint;
     proposal: string;
 }
+export interface ChatMessage {
+    id: bigint;
+    content: string;
+    provider: string;
+    createdAt: bigint;
+    role: string;
+    bookId: bigint;
+}
 export interface Analysis {
     id: bigint;
     provider: string;
@@ -48,11 +56,13 @@ export interface Chapter {
     orderIndex: bigint;
 }
 export interface backendInterface {
+    clearChat(bookId: bigint): Promise<boolean>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
     deleteAnalysis(id: bigint): Promise<boolean>;
     deleteBook(id: bigint): Promise<boolean>;
     deleteChapter(id: bigint): Promise<boolean>;
+    deleteMessage(id: bigint): Promise<boolean>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
     getBook(id: bigint): Promise<Book | null>;
@@ -61,6 +71,7 @@ export interface backendInterface {
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listBooksByOwner(): Promise<Array<Book>>;
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
+    listMessagesByBook(bookId: bigint): Promise<Array<ChatMessage>>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
     saveAnnotations(analysisId: bigint, annotationData: Array<{
@@ -69,6 +80,7 @@ export interface backendInterface {
         text: string;
         proposal: string;
     }>): Promise<boolean>;
+    sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
     updateChapterIndents(id: bigint, indentLeft: bigint, indentRight: bigint, indentFirstLine: bigint): Promise<boolean>;

@@ -42,6 +42,14 @@ export interface Chapter {
   'updatedAt' : bigint,
   'orderIndex' : bigint,
 }
+export interface ChatMessage {
+  'id' : bigint,
+  'content' : string,
+  'provider' : string,
+  'createdAt' : bigint,
+  'role' : string,
+  'bookId' : bigint,
+}
 export interface TextAnnotation {
   'id' : bigint,
   'explanation' : string,
@@ -67,15 +75,22 @@ export interface _SERVICE {
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Chapter]>
   >,
+  '__chatMessages' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, ChatMessage]>
+  >,
   '__nextAnalysisId' : ActorMethod<[], bigint>,
   '__nextAnnotationId' : ActorMethod<[], bigint>,
   '__nextBookId' : ActorMethod<[], bigint>,
   '__nextChapterId' : ActorMethod<[], bigint>,
+  '__nextChatMessageId' : ActorMethod<[], bigint>,
+  'clearChat' : ActorMethod<[bigint], boolean>,
   'createBook' : ActorMethod<[string, string, string], bigint>,
   'createChapter' : ActorMethod<[bigint, string], bigint>,
   'deleteAnalysis' : ActorMethod<[bigint], boolean>,
   'deleteBook' : ActorMethod<[bigint], boolean>,
   'deleteChapter' : ActorMethod<[bigint], boolean>,
+  'deleteMessage' : ActorMethod<[bigint], boolean>,
   'getAnalysis' : ActorMethod<[bigint], [] | [Analysis]>,
   'getAnnotations' : ActorMethod<[bigint], Array<TextAnnotation>>,
   'getBook' : ActorMethod<[bigint], [] | [Book]>,
@@ -84,6 +99,7 @@ export interface _SERVICE {
   'listAnalysesByChapter' : ActorMethod<[bigint], Array<Analysis>>,
   'listBooksByOwner' : ActorMethod<[], Array<Book>>,
   'listChaptersByBook' : ActorMethod<[bigint], Array<Chapter>>,
+  'listMessagesByBook' : ActorMethod<[bigint], Array<ChatMessage>>,
   'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
   'saveAnalysis' : ActorMethod<
     [bigint, [] | [bigint], string, string, string],
@@ -103,6 +119,7 @@ export interface _SERVICE {
     ],
     boolean
   >,
+  'sendMessage' : ActorMethod<[bigint, string, string, string], bigint>,
   'updateBook' : ActorMethod<[bigint, string, string, string], boolean>,
   'updateChapter' : ActorMethod<[bigint, string, string], boolean>,
   'updateChapterIndents' : ActorMethod<

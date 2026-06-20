@@ -36683,6 +36683,14 @@ const Chapter = Record({
   "updatedAt": Int,
   "orderIndex": Nat
 });
+const ChatMessage = Record({
+  "id": Nat,
+  "content": Text$2,
+  "provider": Text$2,
+  "createdAt": Int,
+  "role": Text$2,
+  "bookId": Nat
+});
 Service({
   "__analyses": Func(
     [Opt(Nat), Opt(Nat)],
@@ -36704,15 +36712,23 @@ Service({
     [Vec(Tuple(Nat, Chapter))],
     ["query"]
   ),
+  "__chatMessages": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, ChatMessage))],
+    ["query"]
+  ),
   "__nextAnalysisId": Func([], [Nat], ["query"]),
   "__nextAnnotationId": Func([], [Nat], ["query"]),
   "__nextBookId": Func([], [Nat], ["query"]),
   "__nextChapterId": Func([], [Nat], ["query"]),
+  "__nextChatMessageId": Func([], [Nat], ["query"]),
+  "clearChat": Func([Nat], [Bool], []),
   "createBook": Func([Text$2, Text$2, Text$2], [Nat], []),
   "createChapter": Func([Nat, Text$2], [Nat], []),
   "deleteAnalysis": Func([Nat], [Bool], []),
   "deleteBook": Func([Nat], [Bool], []),
   "deleteChapter": Func([Nat], [Bool], []),
+  "deleteMessage": Func([Nat], [Bool], []),
   "getAnalysis": Func([Nat], [Opt(Analysis)], []),
   "getAnnotations": Func([Nat], [Vec(TextAnnotation)], []),
   "getBook": Func([Nat], [Opt(Book)], []),
@@ -36721,6 +36737,7 @@ Service({
   "listAnalysesByChapter": Func([Nat], [Vec(Analysis)], []),
   "listBooksByOwner": Func([], [Vec(Book)], []),
   "listChaptersByBook": Func([Nat], [Vec(Chapter)], []),
+  "listMessagesByBook": Func([Nat], [Vec(ChatMessage)], []),
   "reorderChapters": Func([Nat, Vec(Nat)], [Bool], []),
   "saveAnalysis": Func(
     [Nat, Opt(Nat), Text$2, Text$2, Text$2],
@@ -36740,6 +36757,11 @@ Service({
       )
     ],
     [Bool],
+    []
+  ),
+  "sendMessage": Func(
+    [Nat, Text$2, Text$2, Text$2],
+    [Nat],
     []
   ),
   "updateBook": Func(
@@ -36795,6 +36817,14 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "updatedAt": IDL2.Int,
     "orderIndex": IDL2.Nat
   });
+  const ChatMessage2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "content": IDL2.Text,
+    "provider": IDL2.Text,
+    "createdAt": IDL2.Int,
+    "role": IDL2.Text,
+    "bookId": IDL2.Nat
+  });
   return IDL2.Service({
     "__analyses": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
@@ -36816,15 +36846,23 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Chapter2))],
       ["query"]
     ),
+    "__chatMessages": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, ChatMessage2))],
+      ["query"]
+    ),
     "__nextAnalysisId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextAnnotationId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextBookId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChapterId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__nextChatMessageId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "clearChat": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "createBook": IDL2.Func([IDL2.Text, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "createChapter": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
     "deleteAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteBook": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteChapter": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "deleteMessage": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "getAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Opt(Analysis2)], []),
     "getAnnotations": IDL2.Func([IDL2.Nat], [IDL2.Vec(TextAnnotation2)], []),
     "getBook": IDL2.Func([IDL2.Nat], [IDL2.Opt(Book2)], []),
@@ -36833,6 +36871,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "listAnalysesByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Analysis2)], []),
     "listBooksByOwner": IDL2.Func([], [IDL2.Vec(Book2)], []),
     "listChaptersByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Chapter2)], []),
+    "listMessagesByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(ChatMessage2)], []),
     "reorderChapters": IDL2.Func([IDL2.Nat, IDL2.Vec(IDL2.Nat)], [IDL2.Bool], []),
     "saveAnalysis": IDL2.Func(
       [IDL2.Nat, IDL2.Opt(IDL2.Nat), IDL2.Text, IDL2.Text, IDL2.Text],
@@ -36852,6 +36891,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
         )
       ],
       [IDL2.Bool],
+      []
+    ),
+    "sendMessage": IDL2.Func(
+      [IDL2.Nat, IDL2.Text, IDL2.Text, IDL2.Text],
+      [IDL2.Nat],
       []
     ),
     "updateBook": IDL2.Func(
@@ -36941,6 +36985,20 @@ class Backend {
       return result;
     }
   }
+  async __chatMessages(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__chatMessages(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__chatMessages(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
   async __nextAnalysisId() {
     if (this.processError) {
       try {
@@ -36994,6 +37052,34 @@ class Backend {
       }
     } else {
       const result = await this.actor.__nextChapterId();
+      return result;
+    }
+  }
+  async __nextChatMessageId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextChatMessageId();
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextChatMessageId();
+      return result;
+    }
+  }
+  async clearChat(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.clearChat(arg0);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.clearChat(arg0);
       return result;
     }
   }
@@ -37064,6 +37150,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.deleteChapter(arg0);
+      return result;
+    }
+  }
+  async deleteMessage(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.deleteMessage(arg0);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.deleteMessage(arg0);
       return result;
     }
   }
@@ -37179,6 +37279,20 @@ class Backend {
       return result;
     }
   }
+  async listMessagesByBook(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.listMessagesByBook(arg0);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.listMessagesByBook(arg0);
+      return result;
+    }
+  }
   async reorderChapters(arg0, arg1) {
     if (this.processError) {
       try {
@@ -37218,6 +37332,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.saveAnnotations(arg0, arg1);
+      return result;
+    }
+  }
+  async sendMessage(arg0, arg1, arg2, arg3) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3);
+        return result;
+      } catch (e) {
+        this.processError(e);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3);
       return result;
     }
   }

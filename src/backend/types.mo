@@ -1,4 +1,5 @@
 import Principal "mo:core/Principal";
+import Time "mo:core/Time";
 
 module {
   public type Book = {
@@ -43,5 +44,14 @@ module {
     color : Text;
     explanation : Text;
     proposal : Text;
+  };
+
+  public type ChatMessage = {
+    id : Nat;
+    bookId : Nat;
+    role : Text;
+    content : Text;
+    provider : Text;
+    createdAt : Int;
   };
 };
