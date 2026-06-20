@@ -1,18 +1,19 @@
 {
-  "overview": "WriterStudio TipTap - a skeleton writing app with routing, layout, and placeholder pages",
+  "overview": "WriterStudio TipTap — aplikacja do pisania ksiazek z edytorem TipTap, teraz z prawdziwym logowaniem Internet Identity i Dashboardem z lista ksiazek",
   "features": [
-    "TanStack Router with multiple routes",
-    "Layout with top bar and sidebar",
-    "Placeholder pages for dashboard, books, chapters, statistics, admin",
-    "Login page with centered form",
-    "Zustand store and TanStack Query installed"
+    "Logowanie Internet Identity przez @icp-sdk/auth",
+    "Ochrona tras auth guard",
+    "Dashboard z siatka BookCard",
+    "Tworzenie ksiazek przez dialog",
+    "Pobieranie listy ksiazek z backendu CRUD"
   ],
-  "category": "writing-app",
+  "category": "productivity",
   "tags": [
     "writing",
-    "skeleton",
-    "router",
-    "layout"
+    "books",
+    "internet-identity",
+    "dashboard",
+    "crud"
   ],
-  "last_updated": "2026-06-20T05:37:52.652Z"
+  "last_updated": "2026-06-20T07:35:09.383Z"
 }

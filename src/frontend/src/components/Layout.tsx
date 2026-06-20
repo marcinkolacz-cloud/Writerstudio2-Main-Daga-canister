@@ -1,7 +1,20 @@
-import { Outlet } from "@tanstack/react-router";
-import { BookOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAppStore } from "@/store/useAppStore";
+import { useInternetIdentity } from "@caffeineai/core-infrastructure";
+import { Outlet, useNavigate } from "@tanstack/react-router";
+import { BookOpen, LogOut } from "lucide-react";
 
 export function Layout() {
+  const navigate = useNavigate();
+  const { isAuthenticated, clearAuth } = useAppStore();
+  const { clear } = useInternetIdentity();
+
+  const handleLogout = () => {
+    clear();
+    clearAuth();
+    navigate({ to: "/login" });
+  };
+
   return (
     <div className="flex h-screen w-full bg-background">
       {/* Sidebar */}
@@ -21,13 +34,24 @@ export function Layout() {
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-14 border-b border-border bg-card flex items-center px-6 flex-shrink-0">
+        <header className="h-14 border-b border-border bg-card flex items-center px-6 flex-shrink-0 justify-between">
           <div className="flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-primary" />
             <span className="font-display text-lg font-semibold text-foreground">
               WriterStudio TipTap
             </span>
           </div>
+          {isAuthenticated && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              data-ocid="auth.logout_button"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Wyloguj się
+            </Button>
+          )}
         </header>
 
         {/* Page content */}

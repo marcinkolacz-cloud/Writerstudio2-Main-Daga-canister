@@ -6,18 +6,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useAppStore } from "@/store/useAppStore";
+import { useInternetIdentity } from "@caffeineai/core-infrastructure";
 import { useNavigate } from "@tanstack/react-router";
-import { BookOpen } from "lucide-react";
+import { BookOpen, LogIn } from "lucide-react";
+import { useEffect } from "react";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { login, loginStatus, identity } = useInternetIdentity();
+  const { setPrincipal, isAuthenticated } = useAppStore();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Placeholder — no actual login logic yet
-    navigate({ to: "/dashboard" });
+  useEffect(() => {
+    if (identity && loginStatus === "success" && !isAuthenticated) {
+      setPrincipal(identity.getPrincipal());
+      navigate({ to: "/dashboard" });
+    }
+  }, [identity, loginStatus, isAuthenticated, setPrincipal, navigate]);
+
+  const handleLogin = async () => {
+    await login();
   };
 
   return (
@@ -33,33 +41,17 @@ export function LoginPage() {
           <CardDescription>Zaloguj się, aby kontynuować</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="twoj@email.com"
-                data-ocid="login.email_input"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Hasło</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                data-ocid="login.password_input"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="w-full"
-              data-ocid="login.submit_button"
-            >
-              Zaloguj się
-            </Button>
-          </form>
+          <Button
+            onClick={handleLogin}
+            className="w-full"
+            disabled={loginStatus === "logging-in"}
+            data-ocid="login.submit_button"
+          >
+            <LogIn className="h-4 w-4 mr-2" />
+            {loginStatus === "logging-in"
+              ? "Logowanie..."
+              : "Zaloguj się przez Internet Identity"}
+          </Button>
         </CardContent>
       </Card>
     </div>
