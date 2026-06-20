@@ -1,5 +1,5 @@
-import { type Chapter, createActor } from "@/backend";
-import type { Book } from "@/backend";
+import { type Analysis, type TextAnnotation, createActor } from "@/backend";
+import type { Book, Chapter } from "@/backend";
 import { useActor } from "@caffeineai/core-infrastructure";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -133,6 +133,74 @@ export function useUpdateChapterIndents() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["chapter", variables.id],
+      });
+    },
+  });
+}
+
+export function useSaveAnalysis() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      bookId,
+      chapterId,
+      analysisType,
+      provider,
+      resultContent,
+    }: {
+      bookId: bigint;
+      chapterId: bigint | null;
+      analysisType: string;
+      provider: string;
+      resultContent: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.saveAnalysis(
+        bookId,
+        chapterId,
+        analysisType,
+        provider,
+        resultContent,
+      );
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["analyses", variables.bookId],
+      });
+      if (variables.chapterId) {
+        queryClient.invalidateQueries({
+          queryKey: ["analyses", "chapter", variables.chapterId],
+        });
+      }
+    },
+  });
+}
+
+export function useSaveAnnotations() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      analysisId,
+      annotations,
+    }: {
+      analysisId: bigint;
+      annotations: Array<{
+        text: string;
+        color: string;
+        explanation: string;
+        proposal: string;
+      }>;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.saveAnnotations(analysisId, annotations);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["annotations", variables.analysisId],
       });
     },
   });

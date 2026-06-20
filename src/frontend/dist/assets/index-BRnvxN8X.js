@@ -55279,6 +55279,79 @@ function markPasteRule(config) {
     }
   });
 }
+function createAnnotationMark(name, options) {
+  return Mark2.create({
+    name,
+    addOptions() {
+      return options;
+    },
+    addAttributes() {
+      return {
+        "data-explanation": {
+          default: null,
+          parseHTML: (element) => element.getAttribute("data-explanation"),
+          renderHTML: (attributes) => {
+            if (!attributes["data-explanation"]) return {};
+            return { "data-explanation": attributes["data-explanation"] };
+          }
+        },
+        "data-proposal": {
+          default: null,
+          parseHTML: (element) => element.getAttribute("data-proposal"),
+          renderHTML: (attributes) => {
+            if (!attributes["data-proposal"]) return {};
+            return { "data-proposal": attributes["data-proposal"] };
+          }
+        }
+      };
+    },
+    parseHTML() {
+      return [
+        {
+          tag: `span[data-annotation="${name}"]`
+        }
+      ];
+    },
+    renderHTML({ HTMLAttributes }) {
+      return [
+        "span",
+        mergeAttributes(
+          {
+            "data-annotation": name,
+            class: `${options.bgClass} ${options.underlineClass} rounded-sm px-0.5`
+          },
+          HTMLAttributes
+        ),
+        0
+      ];
+    }
+  });
+}
+const annotationYellow = createAnnotationMark("annotationYellow", {
+  color: "yellow",
+  bgClass: "bg-yellow-400/20",
+  underlineClass: "border-b-2 border-yellow-400"
+});
+const annotationRed = createAnnotationMark("annotationRed", {
+  color: "red",
+  bgClass: "bg-red-400/20",
+  underlineClass: "border-b-2 border-red-400"
+});
+const annotationBlue = createAnnotationMark("annotationBlue", {
+  color: "blue",
+  bgClass: "bg-blue-400/20",
+  underlineClass: "border-b-2 border-blue-400"
+});
+const annotationOrange = createAnnotationMark("annotationOrange", {
+  color: "orange",
+  bgClass: "bg-orange-400/20",
+  underlineClass: "border-b-2 border-orange-400"
+});
+const annotationPurple = createAnnotationMark("annotationPurple", {
+  color: "purple",
+  bgClass: "bg-purple-400/20",
+  underlineClass: "border-b-2 border-purple-400"
+});
 var Underline = Mark2.create({
   name: "underline",
   addOptions() {
@@ -63681,7 +63754,15 @@ function RichTextEditor({
   placeholder
 }) {
   const editor = useEditor({
-    extensions: [index_default, index_default$1],
+    extensions: [
+      index_default,
+      index_default$1,
+      annotationYellow,
+      annotationRed,
+      annotationBlue,
+      annotationOrange,
+      annotationPurple
+    ],
     content: value,
     onUpdate: ({ editor: editor2 }) => {
       onChange(editor2.getHTML());

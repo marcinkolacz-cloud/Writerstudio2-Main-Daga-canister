@@ -1,3 +1,10 @@
+import {
+  annotationBlue,
+  annotationOrange,
+  annotationPurple,
+  annotationRed,
+  annotationYellow,
+} from "@/components/editor/extensions/AnnotationMark";
 import { cn } from "@/lib/utils";
 import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -22,7 +29,15 @@ export function RichTextEditor({
   placeholder,
 }: RichTextEditorProps) {
   const editor = useEditor({
-    extensions: [StarterKit, Underline],
+    extensions: [
+      StarterKit,
+      Underline,
+      annotationYellow,
+      annotationRed,
+      annotationBlue,
+      annotationOrange,
+      annotationPurple,
+    ],
     content: value,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());

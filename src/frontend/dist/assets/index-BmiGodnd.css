@@ -2016,6 +2016,9 @@ video {
 .border-b {
   border-bottom-width: 1px;
 }
+.border-b-2 {
+  border-bottom-width: 2px;
+}
 .border-l {
   border-left-width: 1px;
 }
@@ -2028,21 +2031,41 @@ video {
 .border-dashed {
   border-style: dashed;
 }
+.border-blue-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(96 165 250 / var(--tw-border-opacity, 1));
+}
 .border-border {
   border-color: oklch(var(--border));
 }
 .border-input {
   border-color: oklch(var(--input));
 }
+.border-orange-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(251 146 60 / var(--tw-border-opacity, 1));
+}
 .border-primary {
   --tw-border-opacity: 1;
   border-color: oklch(var(--primary) / var(--tw-border-opacity, 1));
+}
+.border-purple-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(192 132 252 / var(--tw-border-opacity, 1));
+}
+.border-red-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(248 113 113 / var(--tw-border-opacity, 1));
 }
 .border-sidebar-border {
   border-color: oklch(var(--sidebar-border));
 }
 .border-transparent {
   border-color: transparent;
+}
+.border-yellow-400 {
+  --tw-border-opacity: 1;
+  border-color: rgb(250 204 21 / var(--tw-border-opacity, 1));
 }
 .border-l-transparent {
   border-left-color: transparent;
@@ -2059,6 +2082,9 @@ video {
 }
 .bg-black\/50 {
   background-color: rgb(0 0 0 / 0.5);
+}
+.bg-blue-400\/20 {
+  background-color: rgb(96 165 250 / 0.2);
 }
 .bg-border {
   background-color: oklch(var(--border));
@@ -2080,6 +2106,9 @@ video {
 .bg-muted\/50 {
   background-color: oklch(var(--muted) / 0.5);
 }
+.bg-orange-400\/20 {
+  background-color: rgb(251 146 60 / 0.2);
+}
 .bg-popover {
   background-color: oklch(var(--popover));
 }
@@ -2089,6 +2118,12 @@ video {
 }
 .bg-primary\/20 {
   background-color: oklch(var(--primary) / 0.2);
+}
+.bg-purple-400\/20 {
+  background-color: rgb(192 132 252 / 0.2);
+}
+.bg-red-400\/20 {
+  background-color: rgb(248 113 113 / 0.2);
 }
 .bg-secondary {
   --tw-bg-opacity: 1;
@@ -2102,6 +2137,9 @@ video {
 }
 .bg-transparent {
   background-color: transparent;
+}
+.bg-yellow-400\/20 {
+  background-color: rgb(250 204 21 / 0.2);
 }
 .fill-current {
   fill: currentColor;
@@ -2136,6 +2174,10 @@ video {
 .px-0 {
   padding-left: 0px;
   padding-right: 0px;
+}
+.px-0\.5 {
+  padding-left: 0.125rem;
+  padding-right: 0.125rem;
 }
 .px-1 {
   padding-left: 0.25rem;

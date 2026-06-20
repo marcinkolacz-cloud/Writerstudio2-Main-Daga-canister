@@ -1,19 +1,17 @@
 {
-  "overview": "WriterStudio TipTap — aplikacja do pisania ksiazek z edytorem TipTap, teraz z prawdziwym logowaniem Internet Identity i Dashboardem z lista ksiazek",
+  "overview": "WriterStudio TipTap — rozszerzenie edytora o kolorowe adnotacje i analizę AI gramatyki/stylu.",
   "features": [
-    "Logowanie Internet Identity przez @icp-sdk/auth",
-    "Ochrona tras auth guard",
-    "Dashboard z siatka BookCard",
-    "Tworzenie ksiazek przez dialog",
-    "Pobieranie listy ksiazek z backendu CRUD"
+    "Pięć custom TipTap Marks do adnotacji kolorystycznych",
+    "Funkcja analizy AI Gramatyka i styl (OpenAI/Claude)",
+    "Zapis wyników analizy do backendu"
   ],
   "category": "productivity",
   "tags": [
     "writing",
-    "books",
-    "internet-identity",
-    "dashboard",
-    "crud"
+    "editor",
+    "ai",
+    "annotations",
+    "tiptap"
   ],
-  "last_updated": "2026-06-20T07:35:09.383Z"
+  "last_updated": "2026-06-20T12:59:54.826Z"
 }
