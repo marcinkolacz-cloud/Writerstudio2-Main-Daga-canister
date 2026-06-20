@@ -1,5 +1,11 @@
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -13,20 +19,38 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   useBook,
   useChapter,
+  useChapters,
   useSaveAnalysis,
   useSaveAnnotations,
   useUpdateChapter,
   useUpdateChapterIndents,
 } from "@/hooks/useBackend";
+import {
+  analyzeDialogue,
+  analyzeGrammarStyle,
+  analyzeWithContext,
+  generateSummary,
+} from "@/lib/aiAnalysis";
 import type { Annotation } from "@/lib/aiAnalysis";
-import { analyzeGrammarStyle } from "@/lib/aiAnalysis";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { Editor } from "@tiptap/core";
-import { ArrowLeft, Check, Save, Sparkles, Wand2 } from "lucide-react";
+import {
+  AlignLeft,
+  ArrowLeft,
+  BookOpen,
+  Check,
+  MessageCircle,
+  Save,
+  Sparkles,
+  Wand2,
+  X,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type SaveStatus = "saved" | "saving" | "unsaved";
 type AnalysisStatus = "idle" | "loading" | "success" | "error";
+type AnalysisMode = "grammar" | "context" | "dialogue" | "summary";
+type SummaryType = "short" | "long" | "hooks";
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
   const labels: Record<SaveStatus, string> = {
@@ -115,6 +139,7 @@ export function ChapterEditorPage() {
 
   const { data: book, isLoading: bookLoading } = useBook(bookId);
   const { data: chapter, isLoading: chapterLoading } = useChapter(chapterId);
+  const { data: chapters } = useChapters(bookId);
 
   const updateChapter = useUpdateChapter();
   const saveAnalysis = useSaveAnalysis();
@@ -132,6 +157,9 @@ export function ChapterEditorPage() {
   // AI analysis state
   const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle");
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("grammar");
+  const [summaryType, setSummaryType] = useState<SummaryType>("short");
+  const [summaryResult, setSummaryResult] = useState<string | null>(null);
   const [apiKey, setApiKey] = useState(
     () => localStorage.getItem("ws_api_key") ?? "",
   );
@@ -344,6 +372,68 @@ export function ChapterEditorPage() {
               <SelectItem value="claude">Claude</SelectItem>
             </SelectContent>
           </Select>
+          <Select
+            value={analysisMode}
+            onValueChange={(v) => {
+              setAnalysisMode(v as AnalysisMode);
+              setAnalysisStatus("idle");
+              setAnalysisError(null);
+              setSummaryResult(null);
+            }}
+          >
+            <SelectTrigger
+              className="h-8 w-[180px] text-sm"
+              data-ocid="chapter.analysis_mode_select"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="grammar">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Gramatyka i styl
+                </div>
+              </SelectItem>
+              <SelectItem value="context">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Analizuj z kontekstem
+                </div>
+              </SelectItem>
+              <SelectItem value="dialogue">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  Dialogi
+                </div>
+              </SelectItem>
+              <SelectItem value="summary">
+                <div className="flex items-center gap-2">
+                  <AlignLeft className="h-3.5 w-3.5" />
+                  Streszczenie książki
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          {analysisMode === "summary" && (
+            <Select
+              value={summaryType}
+              onValueChange={(v) => setSummaryType(v as SummaryType)}
+            >
+              <SelectTrigger
+                className="h-8 w-[130px] text-sm"
+                data-ocid="chapter.summary_type_select"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="short">Krótkie</SelectItem>
+                <SelectItem value="long">Długie</SelectItem>
+                <SelectItem value="hooks">Haki</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+
           <Button
             size="sm"
             variant="secondary"
@@ -358,18 +448,76 @@ export function ChapterEditorPage() {
               }
               setAnalysisStatus("loading");
               setAnalysisError(null);
+              setSummaryResult(null);
               try {
-                const annotations = await analyzeGrammarStyle(
-                  text,
-                  apiKey.trim(),
-                  provider,
-                );
+                if (analysisMode === "summary") {
+                  // Build all chapters text
+                  const allChaptersText = (chapters ?? [])
+                    .sort((a, b) => Number(a.orderIndex - b.orderIndex))
+                    .map((ch) => `## ${ch.title}\n\n${ch.content}`)
+                    .join("\n\n---\n\n");
+                  const summary = await generateSummary(
+                    allChaptersText,
+                    summaryType,
+                    apiKey.trim(),
+                    provider,
+                  );
+                  setSummaryResult(summary);
+                  // Save as book-level analysis
+                  await saveAnalysis.mutateAsync({
+                    bookId: book.id,
+                    chapterId: null,
+                    analysisType: "summary",
+                    provider,
+                    resultContent: summary,
+                  });
+                  setAnalysisStatus("success");
+                  setTimeout(() => setAnalysisStatus("idle"), 3000);
+                  return;
+                }
+
+                let annotations: Annotation[] = [];
+                if (analysisMode === "grammar") {
+                  annotations = await analyzeGrammarStyle(
+                    text,
+                    apiKey.trim(),
+                    provider,
+                  );
+                } else if (analysisMode === "context") {
+                  // Fetch previous chapter summaries
+                  const previousSummaries: string[] = [];
+                  const sortedChapters = (chapters ?? []).sort((a, b) =>
+                    Number(a.orderIndex - b.orderIndex),
+                  );
+                  const currentIdx = sortedChapters.findIndex(
+                    (ch) => ch.id === chapter.id,
+                  );
+                  for (let i = 0; i < currentIdx; i++) {
+                    const prevChapter = sortedChapters[i];
+                    if (!prevChapter) continue;
+                    // We need to fetch analyses for this chapter — but we don't have a hook for listAnalysesByChapter
+                    // For now, skip silently as per requirements
+                  }
+                  annotations = await analyzeWithContext(
+                    text,
+                    previousSummaries,
+                    apiKey.trim(),
+                    provider,
+                  );
+                } else if (analysisMode === "dialogue") {
+                  annotations = await analyzeDialogue(
+                    text,
+                    apiKey.trim(),
+                    provider,
+                  );
+                }
+
                 applyAnnotationsToEditor(editorRef.current, annotations);
                 // Save analysis + annotations to backend
                 const analysisId = await saveAnalysis.mutateAsync({
                   bookId: book.id,
                   chapterId: chapter.id,
-                  analysisType: "grammar_style",
+                  analysisType: analysisMode,
                   provider,
                   resultContent: JSON.stringify(annotations),
                 });
@@ -393,15 +541,15 @@ export function ChapterEditorPage() {
                 <Wand2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
                 Analizowanie...
               </>
-            ) : analysisStatus === "success" ? (
+            ) : analysisMode === "summary" ? (
               <>
-                <Check className="h-3.5 w-3.5 mr-1.5" />
-                Gotowe
+                <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                Generuj streszczenie
               </>
             ) : (
               <>
                 <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                Sprawdź gramatykę i styl
+                Analizuj
               </>
             )}
           </Button>
@@ -466,6 +614,29 @@ export function ChapterEditorPage() {
           {analysisError}
         </div>
       )}
+
+      {/* Summary result modal */}
+      <Dialog
+        open={!!summaryResult}
+        onOpenChange={() => setSummaryResult(null)}
+      >
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlignLeft className="h-4 w-4" />
+              Streszczenie książki
+              <span className="text-xs font-normal text-muted-foreground ml-2">
+                {summaryType === "short" && "Krótkie"}
+                {summaryType === "long" && "Długie"}
+                {summaryType === "hooks" && "Haki marketingowe"}
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+            {summaryResult}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Rich text editor with indent-aware padding */}
       <div

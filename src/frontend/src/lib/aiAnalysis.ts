@@ -5,12 +5,60 @@ export interface Annotation {
   proposal: string;
 }
 
-function buildPrompt(text: string): string {
+function buildGrammarPrompt(text: string): string {
   return `Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
 ${text}
+"""`;
+}
+
+function buildContextPrompt(text: string, previousSummaries: string[]): string {
+  const summariesBlock =
+    previousSummaries.length > 0
+      ? previousSummaries
+          .map((s, i) => `Streszczenie rozdziału ${i + 1}:\n${s}`)
+          .join("\n\n")
+      : "Brak wcześniejszych rozdziałów.";
+
+  return `Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+
+KONTEKST POPRZEDNICH ROZDZIAŁÓW:
+${summariesBlock}
+
+BIĄŻĄCY ROZDZIAŁ DO ANALIZY:
+"""
+${text}
+"""`;
+}
+
+function buildDialoguePrompt(text: string): string {
+  return `Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+
+function buildSummaryPrompt(
+  allChaptersText: string,
+  summaryType: "short" | "long" | "hooks",
+): string {
+  const typeInstructions: Record<string, string> = {
+    short:
+      "Napisz KRÓTKIE streszczenie książki w 3-5 zdaniach, zachowując główne wątki i konflikt.",
+    long: "Napisz SZCZEGÓŁOWE streszczenie książki, obejmujące wszystkie główne wątki, rozwój postaci, zwroty akcji i zakończenie. Format: kilka akapitów.",
+    hooks:
+      "Wymyśl 5-7 CHWYTliwych zdań (tzw. 'hooks') do promocji książki w mediach społecznościowych. Każde zdanie powinno być intrygujące, emocjonalne i zachęcać do przeczytania. Zwróć je jako listę punktowaną.",
+  };
+
+  return `${typeInstructions[summaryType]}
+
+Oto pełny tekst wszystkich rozdziałów książki:
+"""
+${allChaptersText}
 """`;
 }
 
@@ -69,33 +117,29 @@ function validateAnnotations(data: unknown): Annotation[] {
   });
 }
 
-export async function analyzeGrammarStyle(
-  text: string,
+async function callAi(
+  prompt: string,
   apiKey: string,
   provider: "openai" | "claude",
-): Promise<Annotation[]> {
-  if (text.length > 8000) {
-    throw new Error("Tekst za długi");
-  }
-
-  const prompt = buildPrompt(text);
-
-  let responseText: string;
-
+  expectJson: boolean,
+): Promise<string> {
   if (provider === "openai") {
+    const body: Record<string, unknown> = {
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 8000,
+      temperature: 0.3,
+    };
+    if (expectJson) {
+      body.response_format = { type: "json_object" };
+    }
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 8000,
-        temperature: 0.3,
-        response_format: { type: "json_object" },
-      }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       const err = await res.text();
@@ -104,33 +148,88 @@ export async function analyzeGrammarStyle(
     const data = (await res.json()) as {
       choices?: Array<{ message?: { content?: string } }>;
     };
-    responseText = data.choices?.[0]?.message?.content ?? "";
-  } else {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 8000,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.3,
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Claude error ${res.status}: ${err}`);
-    }
-    const data = (await res.json()) as {
-      content?: Array<{ type?: string; text?: string }>;
-    };
-    responseText = data.content?.find((c) => c.type === "text")?.text ?? "";
+    return data.choices?.[0]?.message?.content ?? "";
   }
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 8000,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Claude error ${res.status}: ${err}`);
+  }
+  const data = (await res.json()) as {
+    content?: Array<{ type?: string; text?: string }>;
+  };
+  return data.content?.find((c) => c.type === "text")?.text ?? "";
+}
 
+export async function analyzeGrammarStyle(
+  text: string,
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<Annotation[]> {
+  if (text.length > 8000) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildGrammarPrompt(text);
+  const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   return validateAnnotations(parsed);
+}
+
+export async function analyzeWithContext(
+  currentChapterText: string,
+  previousChaptersSummaries: string[],
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<Annotation[]> {
+  if (currentChapterText.length > 8000) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildContextPrompt(
+    currentChapterText,
+    previousChaptersSummaries,
+  );
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  return validateAnnotations(parsed);
+}
+
+export async function analyzeDialogue(
+  text: string,
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<Annotation[]> {
+  if (text.length > 8000) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildDialoguePrompt(text);
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  return validateAnnotations(parsed);
+}
+
+export async function generateSummary(
+  allChaptersText: string,
+  summaryType: "short" | "long" | "hooks",
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<string> {
+  if (allChaptersText.length > 12000) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildSummaryPrompt(allChaptersText, summaryType);
+  return await callAi(prompt, apiKey, provider, false);
 }

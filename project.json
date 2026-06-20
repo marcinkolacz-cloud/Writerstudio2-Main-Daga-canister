@@ -1,17 +1,17 @@
 {
-  "overview": "WriterStudio TipTap — rozszerzenie edytora o kolorowe adnotacje i analizę AI gramatyki/stylu.",
+  "overview": "WriterStudio TipTap — rozszerzenie panelu AI o trzy nowe tryby analizy (kontekst, dialogi, streszczenie)",
   "features": [
-    "Pięć custom TipTap Marks do adnotacji kolorystycznych",
-    "Funkcja analizy AI Gramatyka i styl (OpenAI/Claude)",
-    "Zapis wyników analizy do backendu"
+    "Rozszerzenie biblioteki AI o analyzeWithContext, analyzeDialogue, generateSummary",
+    "Dropdown w ChapterEditorPage z czterema trybami analizy",
+    "Modal wyświetlający wygenerowane streszczenie",
+    "Integracja z istniejącym backendem AnalysesApi"
   ],
   "category": "productivity",
   "tags": [
     "writing",
-    "editor",
     "ai",
-    "annotations",
-    "tiptap"
+    "editor",
+    "analysis"
   ],
-  "last_updated": "2026-06-20T12:59:54.826Z"
+  "last_updated": "2026-06-20T17:13:23.259Z"
 }
