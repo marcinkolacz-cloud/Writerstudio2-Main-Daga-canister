@@ -2,6 +2,7 @@ import { type Analysis, type TextAnnotation, createActor } from "@/backend";
 import type { Book, Chapter } from "@/backend";
 import { useActor } from "@caffeineai/core-infrastructure";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export function useBooks() {
   const { actor } = useActor(createActor);
@@ -203,6 +204,32 @@ export function useSaveAnnotations() {
         queryKey: ["annotations", variables.analysisId],
       });
     },
+  });
+}
+
+export function useAnalysesByChapter(chapterId: string | number) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(chapterId);
+  return useQuery<Analysis[]>({
+    queryKey: ["analyses", "chapter", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listAnalysesByChapter(id);
+    },
+    enabled: !!actor && !!chapterId,
+  });
+}
+
+export function useAnalysesByBook(bookId: string | number) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(bookId);
+  return useQuery<Analysis[]>({
+    queryKey: ["analyses", "book", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listAnalysesByBook(id);
+    },
+    enabled: !!actor && !!bookId,
   });
 }
 

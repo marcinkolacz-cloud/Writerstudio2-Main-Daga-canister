@@ -37482,6 +37482,18 @@ function useSaveAnnotations() {
     }
   });
 }
+function useAnalysesByBook(bookId) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(bookId);
+  return useQuery({
+    queryKey: ["analyses", "book", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listAnalysesByBook(id);
+    },
+    enabled: !!actor && !!bookId
+  });
+}
 function useCreateBook() {
   const { actor } = useActor(createActor);
   const queryClient2 = useQueryClient();
@@ -70182,6 +70194,7 @@ function ChapterEditorPage() {
   const { data: book, isLoading: bookLoading } = useBook(bookId);
   const { data: chapter, isLoading: chapterLoading } = useChapter(chapterId);
   const { data: chapters } = useChapters(bookId);
+  const { data: bookAnalyses } = useAnalysesByBook(bookId);
   const updateChapter = useUpdateChapter();
   const saveAnalysis = useSaveAnalysis();
   const saveAnnotations = useSaveAnnotations();
@@ -70509,6 +70522,13 @@ ${ch.content}`).join("\n\n---\n\n");
                       for (let i = 0; i < currentIdx; i++) {
                         const prevChapter = sortedChapters[i];
                         if (!prevChapter) continue;
+                        const prevChapterId = prevChapter.id;
+                        const matchingAnalyses = (bookAnalyses ?? []).filter(
+                          (a2) => a2.analysisType === "summary" && (a2.chapterId === null || a2.chapterId === prevChapterId)
+                        );
+                        for (const analysis of matchingAnalyses) {
+                          previousSummaries.push(analysis.resultContent);
+                        }
                       }
                       annotations = await analyzeWithContext(
                         text,

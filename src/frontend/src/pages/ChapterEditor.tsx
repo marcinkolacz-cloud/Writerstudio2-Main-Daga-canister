@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  useAnalysesByBook,
   useBook,
   useChapter,
   useChapters,
@@ -140,6 +141,7 @@ export function ChapterEditorPage() {
   const { data: book, isLoading: bookLoading } = useBook(bookId);
   const { data: chapter, isLoading: chapterLoading } = useChapter(chapterId);
   const { data: chapters } = useChapters(bookId);
+  const { data: bookAnalyses } = useAnalysesByBook(bookId);
 
   const updateChapter = useUpdateChapter();
   const saveAnalysis = useSaveAnalysis();
@@ -495,8 +497,15 @@ export function ChapterEditorPage() {
                   for (let i = 0; i < currentIdx; i++) {
                     const prevChapter = sortedChapters[i];
                     if (!prevChapter) continue;
-                    // We need to fetch analyses for this chapter — but we don't have a hook for listAnalysesByChapter
-                    // For now, skip silently as per requirements
+                    const prevChapterId = prevChapter.id;
+                    const matchingAnalyses = (bookAnalyses ?? []).filter(
+                      (a) =>
+                        a.analysisType === "summary" &&
+                        (a.chapterId === null || a.chapterId === prevChapterId),
+                    );
+                    for (const analysis of matchingAnalyses) {
+                      previousSummaries.push(analysis.resultContent);
+                    }
                   }
                   annotations = await analyzeWithContext(
                     text,
