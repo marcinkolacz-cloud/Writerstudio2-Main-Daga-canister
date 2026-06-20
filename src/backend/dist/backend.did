@@ -107,7 +107,20 @@ service : {
   getAnalysis: (id: nat) -> (opt Analysis);
   getAnnotations: (analysisId: nat) -> (vec TextAnnotation);
   getBook: (id: nat) -> (opt Book);
+  getBookStats: (bookId: nat) ->
+   (record {
+      avgWordsPerChapter: nat;
+      chapterCount: nat;
+      totalChars: nat;
+      totalWords: nat;
+    });
   getChapter: (id: nat) -> (opt Chapter);
+  getOverallStats: () ->
+   (record {
+      totalBooks: nat;
+      totalChapters: nat;
+      totalWords: nat;
+    });
   listAnalysesByBook: (bookId: nat) -> (vec Analysis);
   listAnalysesByChapter: (chapterId: nat) -> (vec Analysis);
   listBooksByOwner: () -> (vec Book);

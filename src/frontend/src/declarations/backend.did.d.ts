@@ -108,7 +108,20 @@ export interface _SERVICE {
   'getAnalysis' : ActorMethod<[bigint], [] | [Analysis]>,
   'getAnnotations' : ActorMethod<[bigint], Array<TextAnnotation>>,
   'getBook' : ActorMethod<[bigint], [] | [Book]>,
+  'getBookStats' : ActorMethod<
+    [bigint],
+    {
+      'totalChars' : bigint,
+      'avgWordsPerChapter' : bigint,
+      'chapterCount' : bigint,
+      'totalWords' : bigint,
+    }
+  >,
   'getChapter' : ActorMethod<[bigint], [] | [Chapter]>,
+  'getOverallStats' : ActorMethod<
+    [],
+    { 'totalBooks' : bigint, 'totalChapters' : bigint, 'totalWords' : bigint }
+  >,
   'listAnalysesByBook' : ActorMethod<[bigint], Array<Analysis>>,
   'listAnalysesByChapter' : ActorMethod<[bigint], Array<Analysis>>,
   'listBooksByOwner' : ActorMethod<[], Array<Book>>,

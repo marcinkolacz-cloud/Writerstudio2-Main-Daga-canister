@@ -169,7 +169,18 @@ export interface backendInterface {
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
     getBook(id: bigint): Promise<Book | null>;
+    getBookStats(bookId: bigint): Promise<{
+        totalChars: bigint;
+        avgWordsPerChapter: bigint;
+        chapterCount: bigint;
+        totalWords: bigint;
+    }>;
     getChapter(id: bigint): Promise<Chapter | null>;
+    getOverallStats(): Promise<{
+        totalBooks: bigint;
+        totalChapters: bigint;
+        totalWords: bigint;
+    }>;
     listAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listBooksByOwner(): Promise<Array<Book>>;
@@ -528,6 +539,25 @@ export class Backend implements backendInterface {
             return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getBookStats(arg0: bigint): Promise<{
+        totalChars: bigint;
+        avgWordsPerChapter: bigint;
+        chapterCount: bigint;
+        totalWords: bigint;
+    }> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getBookStats(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getBookStats(arg0);
+            return result;
+        }
+    }
     async getChapter(arg0: bigint): Promise<Chapter | null> {
         if (this.processError) {
             try {
@@ -540,6 +570,24 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getChapter(arg0);
             return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getOverallStats(): Promise<{
+        totalBooks: bigint;
+        totalChapters: bigint;
+        totalWords: bigint;
+    }> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getOverallStats();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getOverallStats();
+            return result;
         }
     }
     async listAnalysesByBook(arg0: bigint): Promise<Array<Analysis>> {

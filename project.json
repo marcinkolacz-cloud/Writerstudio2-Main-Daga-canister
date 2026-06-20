@@ -1,21 +1,21 @@
 {
-  "overview": "WriterStudio TipTap — aplikacja do pisania książek z edytorem TipTap, analizami AI i chatbotem per-książka",
+  "overview": "WriterStudio TipTap — aplikacja do pisania książek z edytorem TipTap, AI, chatbotem i statystykami pisarskimi.",
   "features": [
-    "Edytor tekstu TipTap z formatowaniem",
-    "Analizy AI gramatyki, stylu, dialogów i streszczeń",
-    "Floating chatbot per-książka z kontekstem",
     "Zarządzanie książkami i rozdziałami",
-    "Wcięcia akapitowe",
-    "Przełącznik motywu jasny/ciemny"
+    "Edytor tekstu TipTap z AI",
+    "Chatbot AI per książka",
+    "Statystyki pisarskie z wykresami",
+    "Eksport do PDF/DOCX",
+    "Komentarze inline",
+    "Lektor OpenAI TTS"
   ],
   "category": "productivity",
   "tags": [
     "writing",
+    "books",
     "editor",
     "ai",
-    "chatbot",
-    "books",
-    "chapters"
+    "statistics"
   ],
-  "last_updated": "2026-06-20T18:08:55.807Z"
+  "last_updated": "2026-06-20T20:02:59.609Z"
 }

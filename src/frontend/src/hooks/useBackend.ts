@@ -1,9 +1,10 @@
-import { type Comment, createActor } from "@/backend";
+import { createActor } from "@/backend";
 import type {
   Analysis,
   Book,
   Chapter,
   ChatMessage,
+  Comment,
   TextAnnotation,
 } from "@/backend";
 import { useActor } from "@caffeineai/core-infrastructure";
@@ -369,6 +370,50 @@ export function useDeleteComment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["comments"] });
     },
+  });
+}
+
+interface OverallStats {
+  totalBooks: bigint;
+  totalWords: bigint;
+  totalChapters: bigint;
+}
+
+interface BookStats {
+  totalWords: bigint;
+  totalChars: bigint;
+  chapterCount: bigint;
+  avgWordsPerChapter: bigint;
+}
+
+export function useOverallStats() {
+  const { actor } = useActor(createActor);
+  return useQuery<OverallStats>({
+    queryKey: ["overallStats"],
+    queryFn: async () => {
+      if (!actor) return { totalBooks: 0n, totalWords: 0n, totalChapters: 0n };
+      return actor.getOverallStats();
+    },
+    enabled: !!actor,
+  });
+}
+
+export function useBookStats(bookId: string | number) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(bookId);
+  return useQuery<BookStats>({
+    queryKey: ["bookStats", id],
+    queryFn: async () => {
+      if (!actor)
+        return {
+          totalWords: 0n,
+          totalChars: 0n,
+          chapterCount: 0n,
+          avgWordsPerChapter: 0n,
+        };
+      return actor.getBookStats(id);
+    },
+    enabled: !!actor && !!bookId,
   });
 }
 

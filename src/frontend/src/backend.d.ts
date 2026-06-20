@@ -75,7 +75,18 @@ export interface backendInterface {
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
     getBook(id: bigint): Promise<Book | null>;
+    getBookStats(bookId: bigint): Promise<{
+        totalChars: bigint;
+        avgWordsPerChapter: bigint;
+        chapterCount: bigint;
+        totalWords: bigint;
+    }>;
     getChapter(id: bigint): Promise<Chapter | null>;
+    getOverallStats(): Promise<{
+        totalBooks: bigint;
+        totalChapters: bigint;
+        totalWords: bigint;
+    }>;
     listAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listBooksByOwner(): Promise<Array<Book>>;

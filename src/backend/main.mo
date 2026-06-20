@@ -8,6 +8,7 @@ import AnalysesApi "mixins/AnalysesApi";
 import TextAnnotationsApi "mixins/TextAnnotationsApi";
 import ChatApi "mixins/ChatApi";
 import CommentsApi "mixins/CommentsApi";
+import StatsApi "mixins/StatsApi";
 
 actor {
   let books : Map.Map<Nat, Types.Book>;
@@ -31,4 +32,5 @@ actor {
   include TextAnnotationsApi(books, analyses, annotations);
   include ChatApi(books, chatMessages);
   include CommentsApi(books, chapters, comments);
+  include StatsApi(books, chapters);
 };

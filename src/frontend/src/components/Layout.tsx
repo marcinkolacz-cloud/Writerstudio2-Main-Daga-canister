@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/store/useAppStore";
 import { useInternetIdentity } from "@caffeineai/core-infrastructure";
 import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { BookOpen, LogOut, Moon, Sun } from "lucide-react";
+import { BarChart3, BookOpen, LogOut, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
 function useActiveBookId(): string | null {
@@ -56,10 +56,25 @@ export function Layout() {
             Lista rozdziałów
           </h2>
         </div>
-        <div className="flex-1 p-4">
-          <p className="text-sm text-sidebar-foreground/60">
-            Tutaj pojawi się lista rozdziałów...
-          </p>
+        <div className="flex-1 p-4 space-y-2">
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/dashboard" })}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            data-ocid="nav.dashboard_link"
+          >
+            <BookOpen className="h-4 w-4" />
+            Dashboard
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/statistics" })}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            data-ocid="nav.statistics_link"
+          >
+            <BarChart3 className="h-4 w-4" />
+            Statystyki
+          </button>
         </div>
       </aside>
 

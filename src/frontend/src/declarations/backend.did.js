@@ -113,7 +113,30 @@ export const idlService = IDL.Service({
   'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
   'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
   'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
+  'getBookStats' : IDL.Func(
+      [IDL.Nat],
+      [
+        IDL.Record({
+          'totalChars' : IDL.Nat,
+          'avgWordsPerChapter' : IDL.Nat,
+          'chapterCount' : IDL.Nat,
+          'totalWords' : IDL.Nat,
+        }),
+      ],
+      [],
+    ),
   'getChapter' : IDL.Func([IDL.Nat], [IDL.Opt(Chapter)], []),
+  'getOverallStats' : IDL.Func(
+      [],
+      [
+        IDL.Record({
+          'totalBooks' : IDL.Nat,
+          'totalChapters' : IDL.Nat,
+          'totalWords' : IDL.Nat,
+        }),
+      ],
+      [],
+    ),
   'listAnalysesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
   'listAnalysesByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
   'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
@@ -267,7 +290,30 @@ export const idlFactory = ({ IDL }) => {
     'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
     'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
     'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
+    'getBookStats' : IDL.Func(
+        [IDL.Nat],
+        [
+          IDL.Record({
+            'totalChars' : IDL.Nat,
+            'avgWordsPerChapter' : IDL.Nat,
+            'chapterCount' : IDL.Nat,
+            'totalWords' : IDL.Nat,
+          }),
+        ],
+        [],
+      ),
     'getChapter' : IDL.Func([IDL.Nat], [IDL.Opt(Chapter)], []),
+    'getOverallStats' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'totalBooks' : IDL.Nat,
+            'totalChapters' : IDL.Nat,
+            'totalWords' : IDL.Nat,
+          }),
+        ],
+        [],
+      ),
     'listAnalysesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
     'listAnalysesByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
     'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
