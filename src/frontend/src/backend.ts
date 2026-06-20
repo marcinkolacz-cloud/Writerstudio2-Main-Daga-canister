@@ -89,10 +89,265 @@ export class ExternalBlob {
         return this;
     }
 }
-export interface backendInterface {
+export interface Book {
+    id: bigint;
+    title: string;
+    ownerId: Principal;
+    createdAt: bigint;
+    description: string;
+    updatedAt: bigint;
+    category: string;
 }
+export interface Chapter {
+    id: bigint;
+    charCount: bigint;
+    title: string;
+    content: string;
+    wordCount: bigint;
+    createdAt: bigint;
+    bookId: bigint;
+    updatedAt: bigint;
+    orderIndex: bigint;
+}
+export interface backendInterface {
+    __books(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Book]>>;
+    __chapters(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Chapter]>>;
+    __nextBookId(): Promise<bigint>;
+    __nextChapterId(): Promise<bigint>;
+    createBook(title: string, description: string, category: string): Promise<bigint>;
+    createChapter(bookId: bigint, title: string): Promise<bigint>;
+    deleteBook(id: bigint): Promise<boolean>;
+    deleteChapter(id: bigint): Promise<boolean>;
+    getBook(id: bigint): Promise<Book | null>;
+    getChapter(id: bigint): Promise<Chapter | null>;
+    listBooksByOwner(): Promise<Array<Book>>;
+    listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
+    reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
+    updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
+    updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
+}
+import type { Book as _Book, Chapter as _Chapter } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
+    async __books(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, Book]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__books(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__books(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async __chapters(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, Chapter]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__chapters(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__chapters(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async __nextBookId(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__nextBookId();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__nextBookId();
+            return result;
+        }
+    }
+    async __nextChapterId(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__nextChapterId();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__nextChapterId();
+            return result;
+        }
+    }
+    async createBook(arg0: string, arg1: string, arg2: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createBook(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createBook(arg0, arg1, arg2);
+            return result;
+        }
+    }
+    async createChapter(arg0: bigint, arg1: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createChapter(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createChapter(arg0, arg1);
+            return result;
+        }
+    }
+    async deleteBook(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteBook(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteBook(arg0);
+            return result;
+        }
+    }
+    async deleteChapter(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteChapter(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteChapter(arg0);
+            return result;
+        }
+    }
+    async getBook(arg0: bigint): Promise<Book | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getBook(arg0);
+                return from_candid_opt_n2(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getBook(arg0);
+            return from_candid_opt_n2(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getChapter(arg0: bigint): Promise<Chapter | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getChapter(arg0);
+                return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getChapter(arg0);
+            return from_candid_opt_n3(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async listBooksByOwner(): Promise<Array<Book>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listBooksByOwner();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listBooksByOwner();
+            return result;
+        }
+    }
+    async listChaptersByBook(arg0: bigint): Promise<Array<Chapter>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listChaptersByBook(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listChaptersByBook(arg0);
+            return result;
+        }
+    }
+    async reorderChapters(arg0: bigint, arg1: Array<bigint>): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.reorderChapters(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.reorderChapters(arg0, arg1);
+            return result;
+        }
+    }
+    async updateBook(arg0: bigint, arg1: string, arg2: string, arg3: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateBook(arg0, arg1, arg2, arg3);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateBook(arg0, arg1, arg2, arg3);
+            return result;
+        }
+    }
+    async updateChapter(arg0: bigint, arg1: string, arg2: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateChapter(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateChapter(arg0, arg1, arg2);
+            return result;
+        }
+    }
+}
+function from_candid_opt_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Book]): Book | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Chapter]): Chapter | null {
+    return value.length === 0 ? null : value[0];
+}
+function to_candid_opt_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: bigint | null): [] | [bigint] {
+    return value === null ? candid_none() : candid_some(value);
 }
 export interface CreateActorOptions {
     agent?: Agent;

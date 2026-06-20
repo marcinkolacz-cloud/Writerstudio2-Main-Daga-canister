@@ -10,7 +10,49 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface _SERVICE {}
+export interface Book {
+  'id' : bigint,
+  'title' : string,
+  'ownerId' : Principal,
+  'createdAt' : bigint,
+  'description' : string,
+  'updatedAt' : bigint,
+  'category' : string,
+}
+export interface Chapter {
+  'id' : bigint,
+  'charCount' : bigint,
+  'title' : string,
+  'content' : string,
+  'wordCount' : bigint,
+  'createdAt' : bigint,
+  'bookId' : bigint,
+  'updatedAt' : bigint,
+  'orderIndex' : bigint,
+}
+export interface _SERVICE {
+  '__books' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, Book]>
+  >,
+  '__chapters' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, Chapter]>
+  >,
+  '__nextBookId' : ActorMethod<[], bigint>,
+  '__nextChapterId' : ActorMethod<[], bigint>,
+  'createBook' : ActorMethod<[string, string, string], bigint>,
+  'createChapter' : ActorMethod<[bigint, string], bigint>,
+  'deleteBook' : ActorMethod<[bigint], boolean>,
+  'deleteChapter' : ActorMethod<[bigint], boolean>,
+  'getBook' : ActorMethod<[bigint], [] | [Book]>,
+  'getChapter' : ActorMethod<[bigint], [] | [Chapter]>,
+  'listBooksByOwner' : ActorMethod<[], Array<Book>>,
+  'listChaptersByBook' : ActorMethod<[bigint], Array<Chapter>>,
+  'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
+  'updateBook' : ActorMethod<[bigint, string, string, string], boolean>,
+  'updateChapter' : ActorMethod<[bigint, string, string], boolean>,
+}
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];
 export declare const idlFactory: IDL.InterfaceFactory;

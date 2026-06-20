@@ -1,2 +1,47 @@
+type Chapter = 
+ record {
+   bookId: nat;
+   charCount: nat;
+   content: text;
+   createdAt: int;
+   id: nat;
+   orderIndex: nat;
+   title: text;
+   updatedAt: int;
+   wordCount: nat;
+ };
+type Book = 
+ record {
+   category: text;
+   createdAt: int;
+   description: text;
+   id: nat;
+   ownerId: principal;
+   title: text;
+   updatedAt: int;
+ };
 service : {
+  __books: (ko: opt nat, count: opt nat) -> (vec record {
+                                                   nat;
+                                                   Book;
+                                                 }) query;
+  __chapters: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          Chapter;
+        }) query;
+  __nextBookId: () -> (nat) query;
+  __nextChapterId: () -> (nat) query;
+  createBook: (title: text, description: text, category: text) -> (nat);
+  createChapter: (bookId: nat, title: text) -> (nat);
+  deleteBook: (id: nat) -> (bool);
+  deleteChapter: (id: nat) -> (bool);
+  getBook: (id: nat) -> (opt Book);
+  getChapter: (id: nat) -> (opt Chapter);
+  listBooksByOwner: () -> (vec Book);
+  listChaptersByBook: (bookId: nat) -> (vec Chapter);
+  reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);
+  updateBook: (id: nat, title: text, description: text, category: text) ->
+   (bool);
+  updateChapter: (id: nat, title: text, content: text) -> (bool);
 }

@@ -8,10 +8,110 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const idlService = IDL.Service({});
+export const Book = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'ownerId' : IDL.Principal,
+  'createdAt' : IDL.Int,
+  'description' : IDL.Text,
+  'updatedAt' : IDL.Int,
+  'category' : IDL.Text,
+});
+export const Chapter = IDL.Record({
+  'id' : IDL.Nat,
+  'charCount' : IDL.Nat,
+  'title' : IDL.Text,
+  'content' : IDL.Text,
+  'wordCount' : IDL.Nat,
+  'createdAt' : IDL.Int,
+  'bookId' : IDL.Nat,
+  'updatedAt' : IDL.Int,
+  'orderIndex' : IDL.Nat,
+});
+
+export const idlService = IDL.Service({
+  '__books' : IDL.Func(
+      [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, Book))],
+      ['query'],
+    ),
+  '__chapters' : IDL.Func(
+      [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, Chapter))],
+      ['query'],
+    ),
+  '__nextBookId' : IDL.Func([], [IDL.Nat], ['query']),
+  '__nextChapterId' : IDL.Func([], [IDL.Nat], ['query']),
+  'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
+  'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
+  'deleteBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'deleteChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
+  'getChapter' : IDL.Func([IDL.Nat], [IDL.Opt(Chapter)], []),
+  'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
+  'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
+  'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
+  'updateBook' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
+      [IDL.Bool],
+      [],
+    ),
+  'updateChapter' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Bool], []),
+});
 
 export const idlInitArgs = [];
 
-export const idlFactory = ({ IDL }) => { return IDL.Service({}); };
+export const idlFactory = ({ IDL }) => {
+  const Book = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'ownerId' : IDL.Principal,
+    'createdAt' : IDL.Int,
+    'description' : IDL.Text,
+    'updatedAt' : IDL.Int,
+    'category' : IDL.Text,
+  });
+  const Chapter = IDL.Record({
+    'id' : IDL.Nat,
+    'charCount' : IDL.Nat,
+    'title' : IDL.Text,
+    'content' : IDL.Text,
+    'wordCount' : IDL.Nat,
+    'createdAt' : IDL.Int,
+    'bookId' : IDL.Nat,
+    'updatedAt' : IDL.Int,
+    'orderIndex' : IDL.Nat,
+  });
+  
+  return IDL.Service({
+    '__books' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, Book))],
+        ['query'],
+      ),
+    '__chapters' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, Chapter))],
+        ['query'],
+      ),
+    '__nextBookId' : IDL.Func([], [IDL.Nat], ['query']),
+    '__nextChapterId' : IDL.Func([], [IDL.Nat], ['query']),
+    'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
+    'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
+    'deleteBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'deleteChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
+    'getChapter' : IDL.Func([IDL.Nat], [IDL.Opt(Chapter)], []),
+    'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
+    'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
+    'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
+    'updateBook' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
+        [IDL.Bool],
+        [],
+      ),
+    'updateChapter' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Bool], []),
+  });
+};
 
 export const init = ({ IDL }) => { return []; };
