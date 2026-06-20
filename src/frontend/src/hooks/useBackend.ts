@@ -65,6 +65,79 @@ export function useCreateChapter() {
   });
 }
 
+export function useChapter(chapterId: string | number) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(chapterId);
+  return useQuery<Chapter | null>({
+    queryKey: ["chapter", id],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getChapter(id);
+    },
+    enabled: !!actor && !!chapterId,
+  });
+}
+
+export function useUpdateChapter() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      title,
+      content,
+    }: {
+      id: bigint;
+      title: string;
+      content: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.updateChapter(id, title, content);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chapter", variables.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["chapters"],
+      });
+    },
+  });
+}
+
+export function useUpdateChapterIndents() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      indentLeft,
+      indentRight,
+      indentFirstLine,
+    }: {
+      id: bigint;
+      indentLeft: bigint;
+      indentRight: bigint;
+      indentFirstLine: bigint;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.updateChapterIndents(
+        id,
+        indentLeft,
+        indentRight,
+        indentFirstLine,
+      );
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chapter", variables.id],
+      });
+    },
+  });
+}
+
 export function useCreateBook() {
   const { actor } = useActor(createActor);
   const queryClient = useQueryClient();
