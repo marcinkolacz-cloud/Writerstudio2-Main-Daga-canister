@@ -148,5 +148,6 @@ export function useAnnotationTooltip(
     tooltipRef,
     handleApply,
     hideTooltip,
+    clearHideTimeout,
   };
 }

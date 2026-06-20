@@ -55609,7 +55609,8 @@ function useAnnotationTooltip(editor, onApplyProposal) {
     tooltip,
     tooltipRef,
     handleApply,
-    hideTooltip
+    hideTooltip,
+    clearHideTimeout
   };
 }
 var Underline = Mark2.create({
@@ -64014,6 +64015,7 @@ function RichTextEditor({
   placeholder,
   onEditorReady
 }) {
+  const lastEmittedValue = reactExports.useRef(value);
   const editor = useEditor({
     extensions: [
       index_default,
@@ -64027,6 +64029,7 @@ function RichTextEditor({
     ],
     content: value,
     onUpdate: ({ editor: editor2 }) => {
+      lastEmittedValue.current = editor2.getHTML();
       onChange(editor2.getHTML());
     },
     onCreate: ({ editor: editor2 }) => {
@@ -64049,7 +64052,13 @@ function RichTextEditor({
     },
     [editor]
   );
-  const { tooltip, tooltipRef, handleApply, hideTooltip } = useAnnotationTooltip(editor, handleApplyProposal);
+  const { tooltip, tooltipRef, handleApply, clearHideTimeout } = useAnnotationTooltip(editor, handleApplyProposal);
+  reactExports.useEffect(() => {
+    if (editor && value !== lastEmittedValue.current) {
+      editor.commands.setContent(value, { emitUpdate: false });
+      lastEmittedValue.current = value;
+    }
+  }, [value, editor]);
   if (!editor) {
     return null;
   }
@@ -64119,7 +64128,7 @@ function RichTextEditor({
           top: tooltip.rect.bottom + 8,
           transform: "translateX(-50%)"
         },
-        onMouseEnter: hideTooltip,
+        onMouseEnter: clearHideTimeout,
         "data-ocid": "editor.annotation_tooltip",
         children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
@@ -69555,6 +69564,7 @@ function ChapterEditorPage() {
   const [apiKey, setApiKey] = reactExports.useState(
     () => localStorage.getItem("ws_api_key") ?? ""
   );
+  const [_apiKeyFocused, setApiKeyFocused] = reactExports.useState(false);
   const [provider, setProvider] = reactExports.useState(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
@@ -69716,6 +69726,8 @@ function ChapterEditorPage() {
                 placeholder: "Klucz API",
                 value: apiKey,
                 onChange: (e) => setApiKey(e.target.value),
+                onFocus: () => setApiKeyFocused(true),
+                onBlur: () => setApiKeyFocused(false),
                 className: "h-8 text-sm flex-1 min-w-[120px]",
                 "data-ocid": "chapter.api_key_input"
               }

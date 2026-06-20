@@ -135,6 +135,7 @@ export function ChapterEditorPage() {
   const [apiKey, setApiKey] = useState(
     () => localStorage.getItem("ws_api_key") ?? "",
   );
+  const [_apiKeyFocused, setApiKeyFocused] = useState(false);
   const [provider, setProvider] = useState<"openai" | "claude">(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
@@ -323,6 +324,8 @@ export function ChapterEditorPage() {
             placeholder="Klucz API"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
+            onFocus={() => setApiKeyFocused(true)}
+            onBlur={() => setApiKeyFocused(false)}
             className="h-8 text-sm flex-1 min-w-[120px]"
             data-ocid="chapter.api_key_input"
           />

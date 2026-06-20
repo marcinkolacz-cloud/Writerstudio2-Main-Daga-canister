@@ -18,7 +18,7 @@ import {
   Underline as UnderlineIcon,
   Undo,
 } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface RichTextEditorProps {
   value: string;
@@ -33,6 +33,8 @@ export function RichTextEditor({
   placeholder,
   onEditorReady,
 }: RichTextEditorProps) {
+  const lastEmittedValue = useRef(value);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -46,6 +48,7 @@ export function RichTextEditor({
     ],
     content: value,
     onUpdate: ({ editor }) => {
+      lastEmittedValue.current = editor.getHTML();
       onChange(editor.getHTML());
     },
     onCreate: ({ editor }) => {
@@ -77,8 +80,15 @@ export function RichTextEditor({
     [editor],
   );
 
-  const { tooltip, tooltipRef, handleApply, hideTooltip } =
+  const { tooltip, tooltipRef, handleApply, clearHideTimeout } =
     useAnnotationTooltip(editor, handleApplyProposal);
+
+  useEffect(() => {
+    if (editor && value !== lastEmittedValue.current) {
+      editor.commands.setContent(value, { emitUpdate: false });
+      lastEmittedValue.current = value;
+    }
+  }, [value, editor]);
 
   if (!editor) {
     return null;
@@ -158,7 +168,7 @@ export function RichTextEditor({
             top: tooltip.rect.bottom + 8,
             transform: "translateX(-50%)",
           }}
-          onMouseEnter={hideTooltip}
+          onMouseEnter={clearHideTimeout}
           data-ocid="editor.annotation_tooltip"
         >
           <div className="space-y-2">
