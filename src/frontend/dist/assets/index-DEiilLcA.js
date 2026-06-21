@@ -36355,7 +36355,7 @@ Service({
         })
       )
     ],
-    [Bool],
+    [Vec(Nat)],
     []
   ),
   "saveRecording": Func(
@@ -36570,7 +36570,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
           })
         )
       ],
-      [IDL2.Bool],
+      [IDL2.Vec(IDL2.Nat)],
       []
     ),
     "saveRecording": IDL2.Func(
@@ -37512,10 +37512,7 @@ function useSaveAnnotations() {
   const { actor } = useActor(createActor);
   const queryClient2 = useQueryClient();
   return useMutation({
-    mutationFn: async ({
-      analysisId,
-      annotations
-    }) => {
+    mutationFn: async ({ analysisId, annotations }) => {
       if (!actor) throw new Error("Actor not available");
       return actor.saveAnnotations(analysisId, annotations);
     },
@@ -102529,7 +102526,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BBnxkoBO.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CwSFQqnK.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -103791,10 +103788,16 @@ ${ch.content}`).join("\n\n---\n\n");
                       provider,
                       resultContent: JSON.stringify(annotations)
                     });
-                    await saveAnnotations.mutateAsync({
+                    const newIds = await saveAnnotations.mutateAsync({
                       analysisId,
                       annotations
                     });
+                    for (let i2 = 0; i2 < annotations.length; i2++) {
+                      if (newIds[i2] !== void 0) {
+                        annotations[i2].id = newIds[i2];
+                      }
+                    }
+                    applyAnnotationsToEditor(editorRef.current, annotations);
                     setAnalysisStatus("success");
                     setTimeout(() => setAnalysisStatus("idle"), 3e3);
                   } catch (err) {

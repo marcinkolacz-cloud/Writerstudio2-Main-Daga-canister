@@ -162,7 +162,7 @@ service : {
          explanation: text;
          proposal: text;
          "text": text;
-       }) -> (bool);
+       }) -> (vec nat);
   saveRecording: (chapterId: nat, bookId: nat, voice: text, audioData:
    blob) -> (nat);
   sendMessage: (bookId: nat, role: text, content: text, provider: text) ->

@@ -190,11 +190,10 @@ export function useSaveAnnotations() {
   const { actor } = useActor(createActor);
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async ({
-      analysisId,
-      annotations,
-    }: {
+  return useMutation<
+    bigint[],
+    Error,
+    {
       analysisId: bigint;
       annotations: Array<{
         text: string;
@@ -202,7 +201,9 @@ export function useSaveAnnotations() {
         explanation: string;
         proposal: string;
       }>;
-    }) => {
+    }
+  >({
+    mutationFn: async ({ analysisId, annotations }) => {
       if (!actor) throw new Error("Actor not available");
       return actor.saveAnnotations(analysisId, annotations);
     },

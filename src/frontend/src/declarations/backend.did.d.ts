@@ -167,7 +167,7 @@ export interface _SERVICE {
         }
       >,
     ],
-    boolean
+    Array<bigint>
   >,
   'saveRecording' : ActorMethod<[bigint, bigint, string, Uint8Array], bigint>,
   'sendMessage' : ActorMethod<[bigint, string, string, string], bigint>,

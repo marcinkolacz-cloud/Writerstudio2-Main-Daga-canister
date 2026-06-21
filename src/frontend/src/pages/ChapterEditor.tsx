@@ -624,10 +624,17 @@ export function ChapterEditorPage() {
                   provider,
                   resultContent: JSON.stringify(annotations),
                 });
-                await saveAnnotations.mutateAsync({
+                const newIds = await saveAnnotations.mutateAsync({
                   analysisId,
                   annotations,
                 });
+                // Assign returned IDs to annotations and re-apply marks with real IDs
+                for (let i = 0; i < annotations.length; i++) {
+                  if (newIds[i] !== undefined) {
+                    annotations[i].id = newIds[i];
+                  }
+                }
+                applyAnnotationsToEditor(editorRef.current, annotations);
                 setAnalysisStatus("success");
                 setTimeout(() => setAnalysisStatus("idle"), 3000);
               } catch (err) {

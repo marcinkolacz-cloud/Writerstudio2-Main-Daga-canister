@@ -197,7 +197,7 @@ export const idlService = IDL.Service({
           })
         ),
       ],
-      [IDL.Bool],
+      [IDL.Vec(IDL.Nat)],
       [],
     ),
   'saveRecording' : IDL.Func(
@@ -416,7 +416,7 @@ export const idlFactory = ({ IDL }) => {
             })
           ),
         ],
-        [IDL.Bool],
+        [IDL.Vec(IDL.Nat)],
         [],
       ),
     'saveRecording' : IDL.Func(

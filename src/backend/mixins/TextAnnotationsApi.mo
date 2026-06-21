@@ -39,7 +39,7 @@ mixin (
   public shared ({ caller }) func saveAnnotations(
     analysisId : Nat,
     annotationData : [{ text : Text; color : Text; explanation : Text; proposal : Text }],
-  ) : async Bool {
+  ) : async [Nat] {
     switch (annotationsGetAnalysisBookId(analysisId)) {
       case (?bookId) {
         switch (annotationsGetBookOwner(bookId)) {
@@ -61,7 +61,8 @@ mixin (
                 i += 1;
               };
 
-              // Add new annotations
+              // Add new annotations and collect their IDs
+              var newIds = List.empty<Nat>();
               for (data in annotationData.vals()) {
                 let newId = TextAnnotationsLib.getNextId(annotations);
                 let annotation = TextAnnotationsLib.createAnnotationRecord(
@@ -73,16 +74,17 @@ mixin (
                   data.proposal,
                 );
                 annotations.add(newId, annotation);
+                newIds.add(newId);
               };
-              true
+              newIds.toArray()
             } else {
-              false
+              []
             }
           };
-          case null { false }
+          case null { [] }
         }
       };
-      case null { false }
+      case null { [] }
     }
   };
 

@@ -118,7 +118,7 @@ export interface backendInterface {
         color: string;
         text: string;
         proposal: string;
-    }>): Promise<boolean>;
+    }>): Promise<Array<bigint>>;
     saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
     sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
     updateAnnotationApproved(id: bigint, approved: boolean): Promise<boolean>;
