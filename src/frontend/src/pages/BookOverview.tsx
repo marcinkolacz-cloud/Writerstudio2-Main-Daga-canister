@@ -1,8 +1,10 @@
+import { BookSettingsTab } from "@/components/book/BookSettingsTab";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBook, useChapters, useCreateChapter } from "@/hooks/useBackend";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { ArrowLeft, BookOpen, FileText, Plus } from "lucide-react";
+import { ArrowLeft, BookOpen, FileText, Plus, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 function ChapterListItem({
@@ -159,47 +161,72 @@ export function BookOverviewPage() {
         </Button>
       </div>
 
-      {/* Chapter list */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Rozdziały
-        </h2>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="overview" data-ocid="book.tab.overview">
+            Przegląd
+          </TabsTrigger>
+          <TabsTrigger value="settings" data-ocid="book.tab.settings">
+            <Settings className="h-3.5 w-3.5 mr-1.5" />
+            Ustawienia
+          </TabsTrigger>
+        </TabsList>
 
-        {hasChapters ? (
-          <div className="space-y-2">
-            {chapters.map((chapter, index) => (
-              <ChapterListItem
-                key={String(chapter.id)}
-                chapter={chapter}
-                bookId={bookId}
-                index={index}
-              />
-            ))}
+        <TabsContent value="overview" className="space-y-6">
+          {/* Chapter list */}
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Rozdziały
+            </h2>
+
+            {hasChapters ? (
+              <div className="space-y-2">
+                {chapters.map((chapter, index) => (
+                  <ChapterListItem
+                    key={String(chapter.id)}
+                    chapter={chapter}
+                    bookId={bookId}
+                    index={index}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div
+                className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border rounded-lg"
+                data-ocid="chapter.empty_state"
+              >
+                <FileText className="h-10 w-10 text-muted-foreground/40 mb-3" />
+                <h3 className="text-base font-medium text-foreground mb-1">
+                  Brak rozdziałów
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Dodaj pierwszy rozdział, aby rozpocząć pisanie.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={handleAddChapter}
+                  disabled={createChapter.isPending}
+                  data-ocid="chapter.add_button.empty"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Dodaj rozdział
+                </Button>
+              </div>
+            )}
           </div>
-        ) : (
-          <div
-            className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border rounded-lg"
-            data-ocid="chapter.empty_state"
-          >
-            <FileText className="h-10 w-10 text-muted-foreground/40 mb-3" />
-            <h3 className="text-base font-medium text-foreground mb-1">
-              Brak rozdziałów
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Dodaj pierwszy rozdział, aby rozpocząć pisanie.
-            </p>
-            <Button
-              variant="outline"
-              onClick={handleAddChapter}
-              disabled={createChapter.isPending}
-              data-ocid="chapter.add_button.empty"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Dodaj rozdział
-            </Button>
-          </div>
-        )}
-      </div>
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <BookSettingsTab
+            bookId={book.id}
+            ageCategory={book.ageCategory}
+            authorSummary={book.authorSummary}
+            keyContext={book.keyContext}
+            themes={book.themes}
+            writingStyle={book.writingStyle}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

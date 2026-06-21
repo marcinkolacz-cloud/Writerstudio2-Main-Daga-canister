@@ -544,6 +544,44 @@ export function useDeleteAnalysis() {
   });
 }
 
+export function useUpdateBookMetadata() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ageCategory,
+      authorSummary,
+      keyContext,
+      themes,
+      writingStyle,
+    }: {
+      id: bigint;
+      ageCategory: string;
+      authorSummary: string;
+      keyContext: string;
+      themes: string;
+      writingStyle: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.updateBookMetadata(
+        id,
+        ageCategory,
+        authorSummary,
+        keyContext,
+        themes,
+        writingStyle,
+      );
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["book", variables.id],
+      });
+    },
+  });
+}
+
 export function useClearChat() {
   const { actor } = useActor(createActor);
   const queryClient = useQueryClient();

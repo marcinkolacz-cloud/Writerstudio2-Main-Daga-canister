@@ -1,18 +1,22 @@
 {
-  "overview": "WriterStudio TipTap — edytor rozdziałów z panelem historii analiz AI",
+  "overview": "WriterStudio TipTap — aplikacja do wspólnego pisania książek z edytorem TipTap, analizami AI, czatem i eksportem.",
   "features": [
-    "Panel historii analiz AI z zakładkami Ten rozdział i Cała książka",
-    "Ładowanie starych analiz z powrotem do edytora",
-    "Otwieranie streszczeń w modalu",
-    "Usuwanie analiz z historii"
+    "Zarządzanie książkami i rozdziałami",
+    "Edytor TipTap z adnotacjami AI i komentarzami",
+    "Panel czatu AI per książka",
+    "Eksport do PDF/DOCX",
+    "Statystyki pisarskie",
+    "System kodów zaproszeń",
+    "Lektor TTS i zapisywanie nagrań",
+    "Zakładka ustawień książki z kontekstem dla AI"
   ],
   "category": "productivity",
   "tags": [
     "writing",
+    "books",
     "editor",
     "ai",
-    "analysis",
-    "history"
+    "collaboration"
   ],
-  "last_updated": "2026-06-21T06:38:00.514Z"
+  "last_updated": "2026-06-21T07:36:46.165Z"
 }
