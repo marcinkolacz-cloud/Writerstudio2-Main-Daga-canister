@@ -114,6 +114,32 @@ function applyAnnotationsToEditor(
 ) {
   const docText = editor.getText();
 
+  // 1. Remove ALL existing annotation marks from the entire document
+  const annotationMarkNames = [
+    "annotationYellow",
+    "annotationRed",
+    "annotationBlue",
+    "annotationOrange",
+    "annotationPurple",
+  ];
+
+  editor.state.doc.descendants((node, pos) => {
+    if (!node.isText) return false;
+    for (const markName of annotationMarkNames) {
+      const mark = node.marks.find((m) => m.type.name === markName);
+      if (mark) {
+        editor
+          .chain()
+          .focus()
+          .setTextSelection({ from: pos, to: pos + node.nodeSize })
+          .unsetMark(markName)
+          .run();
+      }
+    }
+    return false;
+  });
+
+  // 2. Apply new annotation marks
   for (const ann of annotations) {
     // Skip approved annotations (they are already part of normal text)
     if (options?.skipApproved && ann.approved) continue;
@@ -371,236 +397,241 @@ export function ChapterEditorPage() {
         data-ocid="chapter.tools_panel"
       >
         {/* Analysis section */}
-        <div className="flex items-center gap-2 flex-1 min-w-[280px]">
-          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">
-            <Sparkles className="h-3.5 w-3.5" />
-            AI
-          </div>
-          <Input
-            type="password"
-            placeholder="Klucz API"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            onFocus={() => setApiKeyFocused(true)}
-            onBlur={() => setApiKeyFocused(false)}
-            className="h-8 text-sm flex-1 min-w-[120px]"
-            data-ocid="chapter.api_key_input"
-          />
-          {!apiKeyFocused && apiKey.trim().length > 0 && (
-            <span className="text-[10px] text-muted-foreground/60 mt-0.5 ml-0.5">
-              {apiKey.slice(0, 8)}...
-            </span>
-          )}
-          <Select
-            value={provider}
-            onValueChange={(v) => setProvider(v as "openai" | "claude")}
-          >
-            <SelectTrigger
-              className="h-8 w-[110px] text-sm"
-              data-ocid="chapter.provider_select"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="openai">OpenAI</SelectItem>
-              <SelectItem value="claude">Claude</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={analysisMode}
-            onValueChange={(v) => {
-              setAnalysisMode(v as AnalysisMode);
-              setAnalysisStatus("idle");
-              setAnalysisError(null);
-              setSummaryResult(null);
-            }}
-          >
-            <SelectTrigger
-              className="h-8 w-[180px] text-sm"
-              data-ocid="chapter.analysis_mode_select"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="grammar">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  Gramatyka i styl
-                </div>
-              </SelectItem>
-              <SelectItem value="context">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-3.5 w-3.5" />
-                  Analizuj z kontekstem
-                </div>
-              </SelectItem>
-              <SelectItem value="dialogue">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="h-3.5 w-3.5" />
-                  Dialogi
-                </div>
-              </SelectItem>
-              <SelectItem value="summary">
-                <div className="flex items-center gap-2">
-                  <AlignLeft className="h-3.5 w-3.5" />
-                  Streszczenie książki
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          {analysisMode === "summary" && (
+        <div className="flex flex-col gap-1 flex-1 min-w-[280px]">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">
+              <Sparkles className="h-3.5 w-3.5" />
+              AI
+            </div>
+            <div className="relative flex-1 min-w-[120px]">
+              <Input
+                type="password"
+                placeholder="Klucz API"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                onFocus={() => setApiKeyFocused(true)}
+                onBlur={() => setApiKeyFocused(false)}
+                className="h-8 text-sm w-full"
+                data-ocid="chapter.api_key_input"
+              />
+              {!apiKeyFocused && apiKey.trim().length > 0 && (
+                <span className="absolute left-0 -bottom-4 text-[10px] text-muted-foreground/60 whitespace-nowrap">
+                  {apiKey.slice(0, 8)}...
+                </span>
+              )}
+            </div>
             <Select
-              value={summaryType}
-              onValueChange={(v) => setSummaryType(v as SummaryType)}
+              value={provider}
+              onValueChange={(v) => setProvider(v as "openai" | "claude")}
             >
               <SelectTrigger
-                className="h-8 w-[130px] text-sm"
-                data-ocid="chapter.summary_type_select"
+                className="h-8 w-[110px] text-sm"
+                data-ocid="chapter.provider_select"
               >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="short">Krótkie</SelectItem>
-                <SelectItem value="long">Długie</SelectItem>
-                <SelectItem value="hooks">Haki</SelectItem>
+                <SelectItem value="openai">OpenAI</SelectItem>
+                <SelectItem value="claude">Claude</SelectItem>
               </SelectContent>
             </Select>
-          )}
+            <Select
+              value={analysisMode}
+              onValueChange={(v) => {
+                setAnalysisMode(v as AnalysisMode);
+                setAnalysisStatus("idle");
+                setAnalysisError(null);
+                setSummaryResult(null);
+              }}
+            >
+              <SelectTrigger
+                className="h-8 w-[180px] text-sm"
+                data-ocid="chapter.analysis_mode_select"
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="grammar">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Gramatyka i styl
+                  </div>
+                </SelectItem>
+                <SelectItem value="context">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    Analizuj z kontekstem
+                  </div>
+                </SelectItem>
+                <SelectItem value="dialogue">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="h-3.5 w-3.5" />
+                    Dialogi
+                  </div>
+                </SelectItem>
+                <SelectItem value="summary">
+                  <div className="flex items-center gap-2">
+                    <AlignLeft className="h-3.5 w-3.5" />
+                    Streszczenie książki
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
 
-          <Button
-            size="sm"
-            variant="secondary"
-            disabled={analysisStatus === "loading" || !apiKey.trim()}
-            onClick={async () => {
-              if (!editorRef.current || !chapter || !book) return;
-              const text = editorRef.current.getText();
-              if (!text.trim()) {
-                setAnalysisError("Brak tekstu do analizy");
-                setAnalysisStatus("error");
-                return;
-              }
-              setAnalysisStatus("loading");
-              setAnalysisError(null);
-              setSummaryResult(null);
-              try {
-                if (analysisMode === "summary") {
-                  // Build all chapters text
-                  const allChaptersText = (chapters ?? [])
-                    .sort((a, b) => Number(a.orderIndex - b.orderIndex))
-                    .map((ch) => `## ${ch.title}\n\n${ch.content}`)
-                    .join("\n\n---\n\n");
-                  const summary = await generateSummary(
-                    allChaptersText,
-                    summaryType,
-                    apiKey.trim(),
-                    provider,
-                  );
-                  setSummaryResult(summary);
-                  // Save as book-level analysis
-                  await saveAnalysis.mutateAsync({
-                    bookId: book.id,
-                    chapterId: null,
-                    analysisType: "summary",
-                    provider,
-                    resultContent: summary,
-                  });
-                  setAnalysisStatus("success");
-                  setTimeout(() => setAnalysisStatus("idle"), 3000);
+            {analysisMode === "summary" && (
+              <Select
+                value={summaryType}
+                onValueChange={(v) => setSummaryType(v as SummaryType)}
+              >
+                <SelectTrigger
+                  className="h-8 w-[130px] text-sm"
+                  data-ocid="chapter.summary_type_select"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="short">Krótkie</SelectItem>
+                  <SelectItem value="long">Długie</SelectItem>
+                  <SelectItem value="hooks">Haki</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={analysisStatus === "loading" || !apiKey.trim()}
+              onClick={async () => {
+                if (!editorRef.current || !chapter || !book) return;
+                const text = editorRef.current.getText();
+                if (!text.trim()) {
+                  setAnalysisError("Brak tekstu do analizy");
+                  setAnalysisStatus("error");
                   return;
                 }
-
-                let annotations: Annotation[] = [];
-                if (analysisMode === "grammar") {
-                  annotations = await analyzeGrammarStyle(
-                    text,
-                    apiKey.trim(),
-                    provider,
-                  );
-                } else if (analysisMode === "context") {
-                  // Fetch previous chapter summaries
-                  const previousSummaries: string[] = [];
-                  const sortedChapters = (chapters ?? []).sort((a, b) =>
-                    Number(a.orderIndex - b.orderIndex),
-                  );
-                  const currentIdx = sortedChapters.findIndex(
-                    (ch) => ch.id === chapter.id,
-                  );
-                  for (let i = 0; i < currentIdx; i++) {
-                    const prevChapter = sortedChapters[i];
-                    if (!prevChapter) continue;
-                    const prevChapterId = prevChapter.id;
-                    const matchingAnalyses = (bookAnalyses ?? []).filter(
-                      (a) =>
-                        a.analysisType === "summary" &&
-                        (a.chapterId === null || a.chapterId === prevChapterId),
+                setAnalysisStatus("loading");
+                setAnalysisError(null);
+                setSummaryResult(null);
+                try {
+                  if (analysisMode === "summary") {
+                    // Build all chapters text
+                    const allChaptersText = (chapters ?? [])
+                      .sort((a, b) => Number(a.orderIndex - b.orderIndex))
+                      .map((ch) => `## ${ch.title}\n\n${ch.content}`)
+                      .join("\n\n---\n\n");
+                    const summary = await generateSummary(
+                      allChaptersText,
+                      summaryType,
+                      apiKey.trim(),
+                      provider,
                     );
-                    for (const analysis of matchingAnalyses) {
-                      previousSummaries.push(analysis.resultContent);
+                    setSummaryResult(summary);
+                    // Save as book-level analysis
+                    await saveAnalysis.mutateAsync({
+                      bookId: book.id,
+                      chapterId: null,
+                      analysisType: "summary",
+                      provider,
+                      resultContent: summary,
+                    });
+                    setAnalysisStatus("success");
+                    setTimeout(() => setAnalysisStatus("idle"), 3000);
+                    return;
+                  }
+
+                  let annotations: Annotation[] = [];
+                  if (analysisMode === "grammar") {
+                    annotations = await analyzeGrammarStyle(
+                      text,
+                      apiKey.trim(),
+                      provider,
+                    );
+                  } else if (analysisMode === "context") {
+                    // Fetch previous chapter summaries
+                    const previousSummaries: string[] = [];
+                    const sortedChapters = (chapters ?? []).sort((a, b) =>
+                      Number(a.orderIndex - b.orderIndex),
+                    );
+                    const currentIdx = sortedChapters.findIndex(
+                      (ch) => ch.id === chapter.id,
+                    );
+                    for (let i = 0; i < currentIdx; i++) {
+                      const prevChapter = sortedChapters[i];
+                      if (!prevChapter) continue;
+                      const prevChapterId = prevChapter.id;
+                      const matchingAnalyses = (bookAnalyses ?? []).filter(
+                        (a) =>
+                          a.analysisType === "summary" &&
+                          (a.chapterId === null ||
+                            a.chapterId === prevChapterId),
+                      );
+                      for (const analysis of matchingAnalyses) {
+                        previousSummaries.push(analysis.resultContent);
+                      }
+                    }
+                    annotations = await analyzeWithContext(
+                      text,
+                      previousSummaries,
+                      apiKey.trim(),
+                      provider,
+                    );
+                  } else if (analysisMode === "dialogue") {
+                    annotations = await analyzeDialogue(
+                      text,
+                      apiKey.trim(),
+                      provider,
+                    );
+                  }
+
+                  applyAnnotationsToEditor(editorRef.current, annotations);
+                  // Save analysis + annotations to backend
+                  const analysisId = await saveAnalysis.mutateAsync({
+                    bookId: book.id,
+                    chapterId: chapter.id,
+                    analysisType: analysisMode,
+                    provider,
+                    resultContent: JSON.stringify(annotations),
+                  });
+                  const newIds = await saveAnnotations.mutateAsync({
+                    analysisId,
+                    annotations,
+                  });
+                  // Assign returned IDs to annotations and re-apply marks with real IDs
+                  for (let i = 0; i < annotations.length; i++) {
+                    if (newIds[i] !== undefined) {
+                      annotations[i].id = newIds[i];
                     }
                   }
-                  annotations = await analyzeWithContext(
-                    text,
-                    previousSummaries,
-                    apiKey.trim(),
-                    provider,
+                  applyAnnotationsToEditor(editorRef.current, annotations);
+                  setAnalysisStatus("success");
+                  setTimeout(() => setAnalysisStatus("idle"), 3000);
+                } catch (err) {
+                  setAnalysisError(
+                    err instanceof Error ? err.message : "Błąd analizy",
                   );
-                } else if (analysisMode === "dialogue") {
-                  annotations = await analyzeDialogue(
-                    text,
-                    apiKey.trim(),
-                    provider,
-                  );
+                  setAnalysisStatus("error");
                 }
-
-                applyAnnotationsToEditor(editorRef.current, annotations);
-                // Save analysis + annotations to backend
-                const analysisId = await saveAnalysis.mutateAsync({
-                  bookId: book.id,
-                  chapterId: chapter.id,
-                  analysisType: analysisMode,
-                  provider,
-                  resultContent: JSON.stringify(annotations),
-                });
-                const newIds = await saveAnnotations.mutateAsync({
-                  analysisId,
-                  annotations,
-                });
-                // Assign returned IDs to annotations and re-apply marks with real IDs
-                for (let i = 0; i < annotations.length; i++) {
-                  if (newIds[i] !== undefined) {
-                    annotations[i].id = newIds[i];
-                  }
-                }
-                applyAnnotationsToEditor(editorRef.current, annotations);
-                setAnalysisStatus("success");
-                setTimeout(() => setAnalysisStatus("idle"), 3000);
-              } catch (err) {
-                setAnalysisError(
-                  err instanceof Error ? err.message : "Błąd analizy",
-                );
-                setAnalysisStatus("error");
-              }
-            }}
-            data-ocid="chapter.analyze_button"
-          >
-            {analysisStatus === "loading" ? (
-              <>
-                <Wand2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                Analizowanie...
-              </>
-            ) : analysisMode === "summary" ? (
-              <>
-                <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                Generuj streszczenie
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                Analizuj
-              </>
-            )}
-          </Button>
+              }}
+              data-ocid="chapter.analyze_button"
+            >
+              {analysisStatus === "loading" ? (
+                <>
+                  <Wand2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                  Analizowanie...
+                </>
+              ) : analysisMode === "summary" ? (
+                <>
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                  Generuj streszczenie
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                  Analizuj
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         <div className="w-px h-6 bg-border hidden sm:block" />

@@ -9,7 +9,6 @@ import { commentMark } from "@/components/editor/extensions/CommentMark";
 import { useAnnotationTooltip } from "@/components/editor/hooks/useAnnotationTooltip";
 import { useUpdateAnnotationApproved } from "@/hooks/useBackend";
 import { cn } from "@/lib/utils";
-import Underline from "@tiptap/extension-underline";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
@@ -41,7 +40,7 @@ export function RichTextEditor({
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Underline,
+
       annotationYellow,
       annotationRed,
       annotationBlue,

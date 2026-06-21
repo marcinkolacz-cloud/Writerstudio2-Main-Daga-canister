@@ -1272,6 +1272,9 @@ video {
 .-bottom-12 {
   bottom: -3rem;
 }
+.-bottom-4 {
+  bottom: -1rem;
+}
 .-left-12 {
   left: -3rem;
 }
@@ -1455,9 +1458,6 @@ video {
 }
 .mb-6 {
   margin-bottom: 1.5rem;
-}
-.ml-0\.5 {
-  margin-left: 0.125rem;
 }
 .ml-1 {
   margin-left: 0.25rem;
@@ -2400,6 +2400,9 @@ video {
 }
 .bg-sidebar {
   background-color: oklch(var(--sidebar));
+}
+.bg-sidebar-accent {
+  background-color: oklch(var(--sidebar-accent));
 }
 .bg-sidebar-border {
   background-color: oklch(var(--sidebar-border));

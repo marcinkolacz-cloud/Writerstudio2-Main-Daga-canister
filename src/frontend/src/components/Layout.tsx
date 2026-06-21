@@ -1,10 +1,16 @@
 import { ChatBotPanel } from "@/components/chat/ChatBotPanel";
 import { Button } from "@/components/ui/button";
+import { useChapters } from "@/hooks/useBackend";
 import { useAppStore } from "@/store/useAppStore";
 import { useInternetIdentity } from "@caffeineai/core-infrastructure";
-import { Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { BarChart3, BookOpen, LogOut, Moon, Sun } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  Outlet,
+  useNavigate,
+  useParams,
+  useRouterState,
+} from "@tanstack/react-router";
+import { BarChart3, BookOpen, FileText, LogOut, Moon, Sun } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 function useActiveBookId(): string | null {
   const routerState = useRouterState();
@@ -16,11 +22,18 @@ function useActiveBookId(): string | null {
   return null;
 }
 
+function useActiveChapterId(): string | null {
+  const params = useParams({ strict: false });
+  return (params as Record<string, string | undefined>).chapterId ?? null;
+}
+
 export function Layout() {
   const navigate = useNavigate();
   const { isAuthenticated, clearAuth } = useAppStore();
   const { clear } = useInternetIdentity();
   const activeBookId = useActiveBookId();
+  const activeChapterId = useActiveChapterId();
+  const { data: chapters } = useChapters(activeBookId ?? "");
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     const stored = localStorage.getItem("writerstudio-theme");
     if (stored === "dark") return "dark";
@@ -56,25 +69,61 @@ export function Layout() {
             Lista rozdziałów
           </h2>
         </div>
-        <div className="flex-1 p-4 space-y-2">
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/dashboard" })}
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
-            data-ocid="nav.dashboard_link"
-          >
-            <BookOpen className="h-4 w-4" />
-            Dashboard
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/statistics" })}
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
-            data-ocid="nav.statistics_link"
-          >
-            <BarChart3 className="h-4 w-4" />
-            Statystyki
-          </button>
+        <div className="flex-1 p-4 space-y-2 overflow-y-auto">
+          {activeBookId && chapters && chapters.length > 0 && (
+            <div className="space-y-1">
+              {chapters.map((chapter) => {
+                const isActive = activeChapterId === String(chapter.id);
+                return (
+                  <button
+                    key={String(chapter.id)}
+                    type="button"
+                    onClick={() =>
+                      navigate({
+                        to: "/books/$bookId/chapters/$chapterId",
+                        params: {
+                          bookId: activeBookId,
+                          chapterId: String(chapter.id),
+                        },
+                      })
+                    }
+                    className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors ${
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-foreground font-medium"
+                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                    }`}
+                    data-ocid={`nav.chapter_link.item.${Number(chapter.orderIndex) + 1}`}
+                  >
+                    <FileText className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{chapter.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {(!activeBookId || !chapters || chapters.length === 0) && (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/dashboard" })}
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                data-ocid="nav.dashboard_link"
+              >
+                <BookOpen className="h-4 w-4" />
+                Dashboard
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/statistics" })}
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                data-ocid="nav.statistics_link"
+              >
+                <BarChart3 className="h-4 w-4" />
+                Statystyki
+              </button>
+            </>
+          )}
         </div>
       </aside>
 

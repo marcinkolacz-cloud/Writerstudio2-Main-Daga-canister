@@ -39273,11 +39273,17 @@ function useActiveBookId() {
   if (bookMatch) return bookMatch[1];
   return null;
 }
+function useActiveChapterId() {
+  const params = useParams({ strict: false });
+  return params.chapterId ?? null;
+}
 function Layout() {
   const navigate = useNavigate();
   const { isAuthenticated, clearAuth } = useAppStore();
   const { clear } = useInternetIdentity();
   const activeBookId = useActiveBookId();
+  const activeChapterId = useActiveChapterId();
+  const { data: chapters } = useChapters(activeBookId ?? "");
   const [theme, setTheme] = reactExports.useState(() => {
     const stored = localStorage.getItem("writerstudio-theme");
     if (stored === "dark") return "dark";
@@ -39303,33 +39309,58 @@ function Layout() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex h-screen w-full bg-background", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { className: "w-[240px] flex-shrink-0 border-r border-border bg-sidebar flex flex-col", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b border-sidebar-border", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-sm font-semibold text-sidebar-foreground uppercase tracking-wider", children: "Lista rozdziałów" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 p-4 space-y-2", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "button",
-          {
-            type: "button",
-            onClick: () => navigate({ to: "/dashboard" }),
-            className: "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
-            "data-ocid": "nav.dashboard_link",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-4 w-4" }),
-              "Dashboard"
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "button",
-          {
-            type: "button",
-            onClick: () => navigate({ to: "/statistics" }),
-            className: "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
-            "data-ocid": "nav.statistics_link",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(ChartColumn, { className: "h-4 w-4" }),
-              "Statystyki"
-            ]
-          }
-        )
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 p-4 space-y-2 overflow-y-auto", children: [
+        activeBookId && chapters && chapters.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-1", children: chapters.map((chapter) => {
+          const isActive2 = activeChapterId === String(chapter.id);
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: () => navigate({
+                to: "/books/$bookId/chapters/$chapterId",
+                params: {
+                  bookId: activeBookId,
+                  chapterId: String(chapter.id)
+                }
+              }),
+              className: `flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors ${isActive2 ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"}`,
+              "data-ocid": `nav.chapter_link.item.${Number(chapter.orderIndex) + 1}`,
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 shrink-0" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: chapter.title })
+              ]
+            },
+            String(chapter.id)
+          );
+        }) }),
+        (!activeBookId || !chapters || chapters.length === 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: () => navigate({ to: "/dashboard" }),
+              className: "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+              "data-ocid": "nav.dashboard_link",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-4 w-4" }),
+                "Dashboard"
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: () => navigate({ to: "/statistics" }),
+              className: "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+              "data-ocid": "nav.statistics_link",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(ChartColumn, { className: "h-4 w-4" }),
+                "Statystyki"
+              ]
+            }
+          )
+        ] })
       ] })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 flex flex-col min-w-0", children: [
@@ -66088,76 +66119,6 @@ function useAnnotationTooltip(editor, onApplyProposal, onRevertProposal) {
     clearHideTimeout
   };
 }
-var Underline = Mark2.create({
-  name: "underline",
-  addOptions() {
-    return {
-      HTMLAttributes: {}
-    };
-  },
-  parseHTML() {
-    return [
-      {
-        tag: "u"
-      },
-      {
-        style: "text-decoration",
-        consuming: false,
-        getAttrs: (style2) => style2.includes("underline") ? {} : false
-      }
-    ];
-  },
-  renderHTML({ HTMLAttributes }) {
-    return ["u", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
-  },
-  parseMarkdown(token, helpers) {
-    return helpers.applyMark(this.name || "underline", helpers.parseInline(token.tokens || []));
-  },
-  renderMarkdown(node, helpers) {
-    return `++${helpers.renderChildren(node)}++`;
-  },
-  markdownTokenizer: {
-    name: "underline",
-    level: "inline",
-    start(src) {
-      return src.indexOf("++");
-    },
-    tokenize(src, _tokens, lexer) {
-      const rule = /^(\+\+)([\s\S]+?)(\+\+)/;
-      const match = rule.exec(src);
-      if (!match) {
-        return void 0;
-      }
-      const innerContent = match[2].trim();
-      return {
-        type: "underline",
-        raw: match[0],
-        text: innerContent,
-        tokens: lexer.inlineTokens(innerContent)
-      };
-    }
-  },
-  addCommands() {
-    return {
-      setUnderline: () => ({ commands }) => {
-        return commands.setMark(this.name);
-      },
-      toggleUnderline: () => ({ commands }) => {
-        return commands.toggleMark(this.name);
-      },
-      unsetUnderline: () => ({ commands }) => {
-        return commands.unsetMark(this.name);
-      }
-    };
-  },
-  addKeyboardShortcuts() {
-    return {
-      "Mod-u": () => this.editor.commands.toggleUnderline(),
-      "Mod-U": () => this.editor.commands.toggleUnderline()
-    };
-  }
-});
-var index_default$1 = Underline;
 const { getOwnPropertyNames, getOwnPropertySymbols } = Object;
 const { hasOwnProperty: hasOwnProperty$a } = Object.prototype;
 function combineComparators(comparatorA, comparatorB) {
@@ -72934,6 +72895,75 @@ var Text$2 = Node3.create({
   },
   renderMarkdown: (node) => node.text || ""
 });
+var Underline = Mark2.create({
+  name: "underline",
+  addOptions() {
+    return {
+      HTMLAttributes: {}
+    };
+  },
+  parseHTML() {
+    return [
+      {
+        tag: "u"
+      },
+      {
+        style: "text-decoration",
+        consuming: false,
+        getAttrs: (style2) => style2.includes("underline") ? {} : false
+      }
+    ];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ["u", mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
+  },
+  parseMarkdown(token, helpers) {
+    return helpers.applyMark(this.name || "underline", helpers.parseInline(token.tokens || []));
+  },
+  renderMarkdown(node, helpers) {
+    return `++${helpers.renderChildren(node)}++`;
+  },
+  markdownTokenizer: {
+    name: "underline",
+    level: "inline",
+    start(src) {
+      return src.indexOf("++");
+    },
+    tokenize(src, _tokens, lexer) {
+      const rule = /^(\+\+)([\s\S]+?)(\+\+)/;
+      const match = rule.exec(src);
+      if (!match) {
+        return void 0;
+      }
+      const innerContent = match[2].trim();
+      return {
+        type: "underline",
+        raw: match[0],
+        text: innerContent,
+        tokens: lexer.inlineTokens(innerContent)
+      };
+    }
+  },
+  addCommands() {
+    return {
+      setUnderline: () => ({ commands }) => {
+        return commands.setMark(this.name);
+      },
+      toggleUnderline: () => ({ commands }) => {
+        return commands.toggleMark(this.name);
+      },
+      unsetUnderline: () => ({ commands }) => {
+        return commands.unsetMark(this.name);
+      }
+    };
+  },
+  addKeyboardShortcuts() {
+    return {
+      "Mod-u": () => this.editor.commands.toggleUnderline(),
+      "Mod-U": () => this.editor.commands.toggleUnderline()
+    };
+  }
+});
 function dropCursor(options = {}) {
   return new Plugin({
     view(editorView) {
@@ -74494,7 +74524,6 @@ function RichTextEditor({
   const editor = useEditor({
     extensions: [
       index_default,
-      index_default$1,
       annotationYellow,
       annotationRed,
       annotationBlue,
@@ -103455,7 +103484,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Bo2gRKQ1.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Cfy9U6Ac.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -104464,6 +104493,23 @@ function SaveIndicator({ status }) {
 }
 function applyAnnotationsToEditor(editor, annotations, options) {
   const docText = editor.getText();
+  const annotationMarkNames = [
+    "annotationYellow",
+    "annotationRed",
+    "annotationBlue",
+    "annotationOrange",
+    "annotationPurple"
+  ];
+  editor.state.doc.descendants((node, pos) => {
+    if (!node.isText) return false;
+    for (const markName of annotationMarkNames) {
+      const mark = node.marks.find((m2) => m2.type.name === markName);
+      if (mark) {
+        editor.chain().focus().setTextSelection({ from: pos, to: pos + node.nodeSize }).unsetMark(markName).run();
+      }
+    }
+    return false;
+  });
   for (const ann of annotations) {
     if ((options == null ? void 0 : options.skipApproved) && ann.approved) continue;
     const idx = docText.indexOf(ann.text);
@@ -104663,27 +104709,29 @@ function ChapterEditorPage() {
         className: "shrink-0 flex flex-wrap items-center gap-4 p-3 rounded-lg border border-border bg-card",
         "data-ocid": "chapter.tools_panel",
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 flex-1 min-w-[280px]", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col gap-1 flex-1 min-w-[280px]", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "h-3.5 w-3.5" }),
               "AI"
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              Input,
-              {
-                type: "password",
-                placeholder: "Klucz API",
-                value: apiKey,
-                onChange: (e3) => setApiKey(e3.target.value),
-                onFocus: () => setApiKeyFocused(true),
-                onBlur: () => setApiKeyFocused(false),
-                className: "h-8 text-sm flex-1 min-w-[120px]",
-                "data-ocid": "chapter.api_key_input"
-              }
-            ),
-            !apiKeyFocused && apiKey.trim().length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-[10px] text-muted-foreground/60 mt-0.5 ml-0.5", children: [
-              apiKey.slice(0, 8),
-              "..."
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative flex-1 min-w-[120px]", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Input,
+                {
+                  type: "password",
+                  placeholder: "Klucz API",
+                  value: apiKey,
+                  onChange: (e3) => setApiKey(e3.target.value),
+                  onFocus: () => setApiKeyFocused(true),
+                  onBlur: () => setApiKeyFocused(false),
+                  className: "h-8 text-sm w-full",
+                  "data-ocid": "chapter.api_key_input"
+                }
+              ),
+              !apiKeyFocused && apiKey.trim().length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "absolute left-0 -bottom-4 text-[10px] text-muted-foreground/60 whitespace-nowrap", children: [
+                apiKey.slice(0, 8),
+                "..."
+              ] })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs(
               Select,
@@ -104887,7 +104935,7 @@ ${ch.content}`).join("\n\n---\n\n");
                 ] })
               }
             )
-          ] }),
+          ] }) }),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs(
             Button,
