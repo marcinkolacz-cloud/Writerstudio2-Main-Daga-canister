@@ -42,7 +42,6 @@ import {
   useSaveAnnotations,
   useUpdateAnnotationApproved,
   useUpdateChapter,
-  useUpdateChapterIndents,
 } from "@/hooks/useBackend";
 import {
   analyzeDialogue,
@@ -74,6 +73,10 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  IndentRuler,
+  getGlobalIndents,
+} from "../components/editor/IndentRuler";
 
 type SaveStatus = "saved" | "saving" | "unsaved";
 type AnalysisStatus = "idle" | "loading" | "success" | "error";
@@ -100,36 +103,6 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
     >
       <span className={`h-2 w-2 rounded-full ${dotColors[status]}`} />
       <span>{labels[status]}</span>
-    </div>
-  );
-}
-
-function IndentControl({
-  label,
-  value,
-  onChange,
-  dataOcid,
-}: {
-  label: string;
-  value: number;
-  onChange: (val: number) => void;
-  dataOcid: string;
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <Label className="text-xs text-muted-foreground w-24 shrink-0">
-        {label}
-      </Label>
-      <Input
-        type="number"
-        min={0}
-        max={100}
-        value={value}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value)))}
-        className="h-8 w-20 text-sm"
-        data-ocid={dataOcid}
-      />
-      <span className="text-xs text-muted-foreground">px</span>
     </div>
   );
 }
@@ -195,15 +168,10 @@ export function ChapterEditorPage() {
   const updateChapter = useUpdateChapter();
   const saveAnalysis = useSaveAnalysis();
   const saveAnnotations = useSaveAnnotations();
-  const updateIndents = useUpdateChapterIndents();
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
-
-  const [indentLeft, setIndentLeft] = useState(0);
-  const [indentRight, setIndentRight] = useState(0);
-  const [indentFirstLine, setIndentFirstLine] = useState(0);
 
   // AI analysis state
   const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle");
@@ -247,7 +215,6 @@ export function ChapterEditorPage() {
 
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const indentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Persist API key / provider to localStorage
   useEffect(() => {
@@ -263,9 +230,7 @@ export function ChapterEditorPage() {
     if (chapter) {
       setTitle(chapter.title);
       setContent(chapter.content);
-      setIndentLeft(Number(chapter.indentLeft));
-      setIndentRight(Number(chapter.indentRight));
-      setIndentFirstLine(Number(chapter.indentFirstLine));
+
       setSaveStatus("saved");
     }
   }, [chapter]);
@@ -330,36 +295,6 @@ export function ChapterEditorPage() {
       }, 3000);
     },
     [title, doSave],
-  );
-
-  const doSaveIndents = useCallback(
-    (left: number, right: number, first: number) => {
-      if (!chapter) return;
-      updateIndents.mutate({
-        id: chapter.id,
-        indentLeft: BigInt(left),
-        indentRight: BigInt(right),
-        indentFirstLine: BigInt(first),
-      });
-    },
-    [chapter, updateIndents],
-  );
-
-  const handleIndentChange = useCallback(
-    (
-      setter: React.Dispatch<React.SetStateAction<number>>,
-      val: number,
-      currentLeft: number,
-      currentRight: number,
-      currentFirst: number,
-    ) => {
-      setter(val);
-      if (indentDebounceRef.current) clearTimeout(indentDebounceRef.current);
-      indentDebounceRef.current = setTimeout(() => {
-        doSaveIndents(currentLeft, currentRight, currentFirst);
-      }, 800);
-    },
-    [doSaveIndents],
   );
 
   const isLoading = bookLoading || chapterLoading;
@@ -748,12 +683,13 @@ export function ChapterEditorPage() {
             <DropdownMenuItem
               onClick={() => {
                 if (editorRef.current) {
+                  const indents = getGlobalIndents();
                   exportToDOCX(
                     title,
                     editorRef.current.getHTML(),
-                    indentLeft,
-                    indentRight,
-                    indentFirstLine,
+                    indents.left,
+                    indents.right,
+                    indents.firstLine,
                   );
                 }
               }}
@@ -766,54 +702,6 @@ export function ChapterEditorPage() {
         </DropdownMenu>
 
         <div className="w-px h-6 bg-border hidden sm:block" />
-
-        {/* Indent section */}
-        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">
-          <Save className="h-3.5 w-3.5" />
-          Wcięcia
-        </div>
-        <IndentControl
-          label="Lewe"
-          value={indentLeft}
-          onChange={(val) =>
-            handleIndentChange(
-              setIndentLeft,
-              val,
-              val,
-              indentRight,
-              indentFirstLine,
-            )
-          }
-          dataOcid="chapter.indent_left_input"
-        />
-        <IndentControl
-          label="Prawe"
-          value={indentRight}
-          onChange={(val) =>
-            handleIndentChange(
-              setIndentRight,
-              val,
-              indentLeft,
-              val,
-              indentFirstLine,
-            )
-          }
-          dataOcid="chapter.indent_right_input"
-        />
-        <IndentControl
-          label="Pierwsza linia"
-          value={indentFirstLine}
-          onChange={(val) =>
-            handleIndentChange(
-              setIndentFirstLine,
-              val,
-              indentLeft,
-              indentRight,
-              val,
-            )
-          }
-          dataOcid="chapter.indent_first_line_input"
-        />
       </div>
 
       {/* Lektor panel */}
@@ -1025,13 +913,16 @@ export function ChapterEditorPage() {
         }}
       />
 
+      {/* Indent ruler */}
+      <IndentRuler />
+
       {/* Editor + Comments panel */}
       <div className="flex flex-1 min-h-0 gap-0">
         <div
           className="flex-1 min-h-0"
           style={{
-            paddingLeft: `${indentLeft}px`,
-            paddingRight: `${indentRight}px`,
+            paddingLeft: `${getGlobalIndents().left}px`,
+            paddingRight: `${getGlobalIndents().right}px`,
           }}
           data-ocid="chapter.editor_wrapper"
         >

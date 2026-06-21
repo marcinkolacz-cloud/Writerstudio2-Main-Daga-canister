@@ -37694,31 +37694,6 @@ function useUpdateChapter() {
     }
   });
 }
-function useUpdateChapterIndents() {
-  const { actor } = useActor(createActor);
-  const queryClient2 = useQueryClient();
-  return useMutation({
-    mutationFn: async ({
-      id,
-      indentLeft,
-      indentRight,
-      indentFirstLine
-    }) => {
-      if (!actor) throw new Error("Actor not available");
-      return actor.updateChapterIndents(
-        id,
-        indentLeft,
-        indentRight,
-        indentFirstLine
-      );
-    },
-    onSuccess: (_2, variables) => {
-      queryClient2.invalidateQueries({
-        queryKey: ["chapter", variables.id]
-      });
-    }
-  });
-}
 function useSaveAnalysis() {
   const { actor } = useActor(createActor);
   const queryClient2 = useQueryClient();
@@ -103480,7 +103455,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CB8UPi9F.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Bo2gRKQ1.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -104274,6 +104249,196 @@ function exportToDOCX(title, contentHtml, indentLeft, indentRight, indentFirstLi
     URL.revokeObjectURL(url);
   });
 }
+const STORAGE_KEYS = {
+  left: "ws_indent_left",
+  right: "ws_indent_right",
+  firstLine: "ws_indent_first_line"
+};
+const MAX_INDENT = 150;
+function getStoredIndent(key) {
+  const stored = localStorage.getItem(key);
+  if (stored === null) return 0;
+  const val = Number.parseInt(stored, 10);
+  return Number.isNaN(val) ? 0 : Math.max(0, Math.min(MAX_INDENT, val));
+}
+function setStoredIndent(key, value) {
+  localStorage.setItem(key, String(Math.max(0, Math.min(MAX_INDENT, value))));
+}
+function IndentRuler({ onChange }) {
+  const [left, setLeft] = reactExports.useState(() => getStoredIndent(STORAGE_KEYS.left));
+  const [right, setRight] = reactExports.useState(() => getStoredIndent(STORAGE_KEYS.right));
+  const [firstLine, setFirstLine] = reactExports.useState(
+    () => getStoredIndent(STORAGE_KEYS.firstLine)
+  );
+  const trackRef = reactExports.useRef(null);
+  const dragTarget = reactExports.useRef(null);
+  const debounceRef = reactExports.useRef(null);
+  const saveToStorage = reactExports.useCallback((l2, r2, f2) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setStoredIndent(STORAGE_KEYS.left, l2);
+      setStoredIndent(STORAGE_KEYS.right, r2);
+      setStoredIndent(STORAGE_KEYS.firstLine, f2);
+    }, 500);
+  }, []);
+  const updateValues = reactExports.useCallback(
+    (l2, r2, f2) => {
+      setLeft(l2);
+      setRight(r2);
+      setFirstLine(f2);
+      saveToStorage(l2, r2, f2);
+      onChange == null ? void 0 : onChange(l2, r2, f2);
+    },
+    [onChange, saveToStorage]
+  );
+  const handleMouseDown = reactExports.useCallback(
+    (target) => (e3) => {
+      e3.preventDefault();
+      dragTarget.current = target;
+    },
+    []
+  );
+  reactExports.useEffect(() => {
+    const handleMouseMove = (e3) => {
+      if (!dragTarget.current || !trackRef.current) return;
+      const rect = trackRef.current.getBoundingClientRect();
+      const x3 = e3.clientX - rect.left;
+      const px = Math.max(0, Math.min(MAX_INDENT, Math.round(x3)));
+      switch (dragTarget.current) {
+        case "left":
+          updateValues(px, right, firstLine);
+          break;
+        case "right":
+          updateValues(left, px, firstLine);
+          break;
+        case "firstLine":
+          updateValues(left, right, px);
+          break;
+      }
+    };
+    const handleMouseUp = () => {
+      dragTarget.current = null;
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [left, right, firstLine, updateValues]);
+  reactExports.useEffect(() => {
+    const handleStorage = (e3) => {
+      if (e3.key === STORAGE_KEYS.left) {
+        setLeft(getStoredIndent(STORAGE_KEYS.left));
+      } else if (e3.key === STORAGE_KEYS.right) {
+        setRight(getStoredIndent(STORAGE_KEYS.right));
+      } else if (e3.key === STORAGE_KEYS.firstLine) {
+        setFirstLine(getStoredIndent(STORAGE_KEYS.firstLine));
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+  const trackWidth = MAX_INDENT + 40;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full select-none", "data-ocid": "editor.indent_ruler", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        ref: trackRef,
+        className: "relative h-6 bg-muted/30 border border-border rounded-md cursor-default",
+        style: { width: `${trackWidth}px`, maxWidth: "100%" },
+        children: [
+          Array.from({ length: 16 }, (_2, i2) => i2 * 10).map((tick) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "absolute top-0 h-2 border-l border-border/60",
+              style: { left: `${tick}px` }
+            },
+            tick
+          )),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-primary cursor-ew-resize hover:scale-110 transition-transform",
+              style: { left: `${left - 6}px`, top: "2px" },
+              onMouseDown: handleMouseDown("left"),
+              title: `Lewe wcięcie: ${left}px`,
+              "data-ocid": "editor.indent_left_handle"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "absolute top-3 w-px bg-primary/30 pointer-events-none",
+              style: { left: `${left}px`, height: "calc(100% - 12px)" }
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "absolute top-0 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[9px] border-t-accent cursor-ew-resize hover:scale-110 transition-transform",
+              style: { left: `${firstLine - 5}px`, top: "14px" },
+              onMouseDown: handleMouseDown("firstLine"),
+              title: `Wcięcie pierwszej linii: ${firstLine}px`,
+              "data-ocid": "editor.indent_first_line_handle"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "absolute top-3 w-px bg-accent/30 pointer-events-none",
+              style: { left: `${firstLine}px`, height: "calc(100% - 12px)" }
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-secondary-foreground cursor-ew-resize hover:scale-110 transition-transform",
+              style: { left: `${trackWidth - 40 - right - 6}px`, top: "2px" },
+              onMouseDown: handleMouseDown("right"),
+              title: `Prawe wcięcie: ${right}px`,
+              "data-ocid": "editor.indent_right_handle"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "absolute top-3 w-px bg-secondary-foreground/30 pointer-events-none",
+              style: {
+                left: `${trackWidth - 40 - right}px`,
+                height: "calc(100% - 12px)"
+              }
+            }
+          )
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4 mt-1 text-[10px] text-muted-foreground/60", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+        "L: ",
+        left,
+        "px"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+        "P: ",
+        right,
+        "px"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+        "1L: ",
+        firstLine,
+        "px"
+      ] })
+    ] })
+  ] });
+}
+function getGlobalIndents() {
+  return {
+    left: getStoredIndent(STORAGE_KEYS.left),
+    right: getStoredIndent(STORAGE_KEYS.right),
+    firstLine: getStoredIndent(STORAGE_KEYS.firstLine)
+  };
+}
 function SaveIndicator({ status }) {
   const labels = {
     saved: "Zapisano",
@@ -104296,29 +104461,6 @@ function SaveIndicator({ status }) {
       ]
     }
   );
-}
-function IndentControl({
-  label,
-  value,
-  onChange,
-  dataOcid
-}) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { className: "text-xs text-muted-foreground w-24 shrink-0", children: label }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Input,
-      {
-        type: "number",
-        min: 0,
-        max: 100,
-        value,
-        onChange: (e3) => onChange(Math.max(0, Number(e3.target.value))),
-        className: "h-8 w-20 text-sm",
-        "data-ocid": dataOcid
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground", children: "px" })
-  ] });
 }
 function applyAnnotationsToEditor(editor, annotations, options) {
   const docText = editor.getText();
@@ -104359,13 +104501,9 @@ function ChapterEditorPage() {
   const updateChapter = useUpdateChapter();
   const saveAnalysis = useSaveAnalysis();
   const saveAnnotations = useSaveAnnotations();
-  const updateIndents = useUpdateChapterIndents();
   const [title, setTitle] = reactExports.useState("");
   const [content, setContent2] = reactExports.useState("");
   const [saveStatus, setSaveStatus] = reactExports.useState("saved");
-  const [indentLeft, setIndentLeft] = reactExports.useState(0);
-  const [indentRight, setIndentRight] = reactExports.useState(0);
-  const [indentFirstLine, setIndentFirstLine] = reactExports.useState(0);
   const [analysisStatus, setAnalysisStatus] = reactExports.useState("idle");
   const [analysisError, setAnalysisError] = reactExports.useState(null);
   const [analysisMode, setAnalysisMode] = reactExports.useState("grammar");
@@ -104396,7 +104534,6 @@ function ChapterEditorPage() {
   const editorRef = reactExports.useRef(null);
   const titleDebounceRef = reactExports.useRef(null);
   const contentDebounceRef = reactExports.useRef(null);
-  const indentDebounceRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
     localStorage.setItem("ws_api_key", apiKey);
   }, [apiKey]);
@@ -104407,9 +104544,6 @@ function ChapterEditorPage() {
     if (chapter) {
       setTitle(chapter.title);
       setContent2(chapter.content);
-      setIndentLeft(Number(chapter.indentLeft));
-      setIndentRight(Number(chapter.indentRight));
-      setIndentFirstLine(Number(chapter.indentFirstLine));
       setSaveStatus("saved");
     }
   }, [chapter]);
@@ -104465,28 +104599,6 @@ function ChapterEditorPage() {
       }, 3e3);
     },
     [title, doSave]
-  );
-  const doSaveIndents = reactExports.useCallback(
-    (left, right, first2) => {
-      if (!chapter) return;
-      updateIndents.mutate({
-        id: chapter.id,
-        indentLeft: BigInt(left),
-        indentRight: BigInt(right),
-        indentFirstLine: BigInt(first2)
-      });
-    },
-    [chapter, updateIndents]
-  );
-  const handleIndentChange = reactExports.useCallback(
-    (setter, val, currentLeft, currentRight, currentFirst) => {
-      setter(val);
-      if (indentDebounceRef.current) clearTimeout(indentDebounceRef.current);
-      indentDebounceRef.current = setTimeout(() => {
-        doSaveIndents(currentLeft, currentRight, currentFirst);
-      }, 800);
-    },
-    [doSaveIndents]
   );
   const isLoading = bookLoading || chapterLoading;
   if (isLoading) {
@@ -104868,12 +104980,13 @@ ${ch.content}`).join("\n\n---\n\n");
                 {
                   onClick: () => {
                     if (editorRef.current) {
+                      const indents = getGlobalIndents();
                       exportToDOCX(
                         title,
                         editorRef.current.getHTML(),
-                        indentLeft,
-                        indentRight,
-                        indentFirstLine
+                        indents.left,
+                        indents.right,
+                        indents.firstLine
                       );
                     }
                   },
@@ -104886,56 +104999,7 @@ ${ch.content}`).join("\n\n---\n\n");
               )
             ] })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Save, { className: "h-3.5 w-3.5" }),
-            "Wcięcia"
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            IndentControl,
-            {
-              label: "Lewe",
-              value: indentLeft,
-              onChange: (val) => handleIndentChange(
-                setIndentLeft,
-                val,
-                val,
-                indentRight,
-                indentFirstLine
-              ),
-              dataOcid: "chapter.indent_left_input"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            IndentControl,
-            {
-              label: "Prawe",
-              value: indentRight,
-              onChange: (val) => handleIndentChange(
-                setIndentRight,
-                val,
-                indentLeft,
-                val,
-                indentFirstLine
-              ),
-              dataOcid: "chapter.indent_right_input"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            IndentControl,
-            {
-              label: "Pierwsza linia",
-              value: indentFirstLine,
-              onChange: (val) => handleIndentChange(
-                setIndentFirstLine,
-                val,
-                indentLeft,
-                indentRight,
-                val
-              ),
-              dataOcid: "chapter.indent_first_line_input"
-            }
-          )
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" })
         ]
       }
     ),
@@ -105099,14 +105163,15 @@ ${ch.content}`).join("\n\n---\n\n");
         }
       }
     ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(IndentRuler, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-1 min-h-0 gap-0", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         "div",
         {
           className: "flex-1 min-h-0",
           style: {
-            paddingLeft: `${indentLeft}px`,
-            paddingRight: `${indentRight}px`
+            paddingLeft: `${getGlobalIndents().left}px`,
+            paddingRight: `${getGlobalIndents().right}px`
           },
           "data-ocid": "chapter.editor_wrapper",
           children: /* @__PURE__ */ jsxRuntimeExports.jsx(

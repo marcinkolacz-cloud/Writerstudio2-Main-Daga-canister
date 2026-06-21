@@ -1344,6 +1344,9 @@ video {
 .top-1\/2 {
   top: 50%;
 }
+.top-3 {
+  top: 0.75rem;
+}
 .top-3\.5 {
   top: 0.875rem;
 }
@@ -1582,6 +1585,9 @@ video {
 .size-full {
   width: 100%;
   height: 100%;
+}
+.h-0 {
+  height: 0px;
 }
 .h-1\.5 {
   height: 0.375rem;
@@ -1966,6 +1972,9 @@ video {
 .cursor-default {
   cursor: default;
 }
+.cursor-ew-resize {
+  cursor: ew-resize;
+}
 .cursor-move {
   cursor: move;
 }
@@ -2212,14 +2221,32 @@ video {
 .border-b-2 {
   border-bottom-width: 2px;
 }
+.border-b-\[10px\] {
+  border-bottom-width: 10px;
+}
 .border-l {
   border-left-width: 1px;
+}
+.border-l-\[5px\] {
+  border-left-width: 5px;
+}
+.border-l-\[6px\] {
+  border-left-width: 6px;
 }
 .border-r {
   border-right-width: 1px;
 }
+.border-r-\[5px\] {
+  border-right-width: 5px;
+}
+.border-r-\[6px\] {
+  border-right-width: 6px;
+}
 .border-t {
   border-top-width: 1px;
+}
+.border-t-\[9px\] {
+  border-top-width: 9px;
 }
 .border-dashed {
   border-style: dashed;
@@ -2271,8 +2298,22 @@ video {
   --tw-border-opacity: 1;
   border-color: rgb(234 179 8 / var(--tw-border-opacity, 1));
 }
+.border-b-primary {
+  --tw-border-opacity: 1;
+  border-bottom-color: oklch(var(--primary) / var(--tw-border-opacity, 1));
+}
+.border-b-secondary-foreground {
+  border-bottom-color: oklch(var(--secondary-foreground));
+}
 .border-l-transparent {
   border-left-color: transparent;
+}
+.border-r-transparent {
+  border-right-color: transparent;
+}
+.border-t-accent {
+  --tw-border-opacity: 1;
+  border-top-color: oklch(var(--accent) / var(--tw-border-opacity, 1));
 }
 .border-t-primary-foreground {
   border-top-color: oklch(var(--primary-foreground));
@@ -2283,6 +2324,9 @@ video {
 .bg-accent {
   --tw-bg-opacity: 1;
   background-color: oklch(var(--accent) / var(--tw-bg-opacity, 1));
+}
+.bg-accent\/30 {
+  background-color: oklch(var(--accent) / 0.3);
 }
 .bg-background {
   background-color: oklch(var(--background));
@@ -2340,6 +2384,9 @@ video {
 }
 .bg-primary\/20 {
   background-color: oklch(var(--primary) / 0.2);
+}
+.bg-primary\/30 {
+  background-color: oklch(var(--primary) / 0.3);
 }
 .bg-purple-500\/25 {
   background-color: rgb(168 85 247 / 0.25);
@@ -3157,6 +3204,12 @@ video {
 .hover\:scale-105:hover {
   --tw-scale-x: 1.05;
   --tw-scale-y: 1.05;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.hover\:scale-110:hover {
+  --tw-scale-x: 1.1;
+  --tw-scale-y: 1.1;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
