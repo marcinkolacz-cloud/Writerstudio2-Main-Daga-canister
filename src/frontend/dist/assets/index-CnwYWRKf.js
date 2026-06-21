@@ -103492,7 +103492,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DpptQ7Lh.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-bapcXy-F.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -104310,6 +104310,8 @@ function IndentRuler({ onChange }) {
   const [trackWidth, setTrackWidth] = reactExports.useState(0);
   const trackRef = reactExports.useRef(null);
   const wrapperRef = reactExports.useRef(null);
+  const INSET_TOTAL = 68;
+  const INSET_PER_SIDE = 34;
   const dragTarget = reactExports.useRef(null);
   const debounceRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
@@ -104317,7 +104319,7 @@ function IndentRuler({ onChange }) {
     const el = wrapperRef.current;
     const updateWidth = () => {
       const rect = el.getBoundingClientRect();
-      setTrackWidth(Math.max(0, rect.width));
+      setTrackWidth(Math.max(0, rect.width - INSET_TOTAL));
     };
     updateWidth();
     const ro = new ResizeObserver(updateWidth);
@@ -104399,6 +104401,7 @@ function IndentRuler({ onChange }) {
     if (trackWidth <= 0) return val;
     return val / MAX_INDENT * trackWidth;
   };
+  const effectiveTrackWidth = Math.max(0, trackWidth);
   const tickCount = trackWidth > 0 ? Math.floor(trackWidth / 20) : 16;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
@@ -104411,11 +104414,15 @@ function IndentRuler({ onChange }) {
           "div",
           {
             ref: trackRef,
-            className: "relative h-6 bg-muted/30 border border-border rounded-md cursor-default w-full",
+            className: "relative h-6 bg-muted/30 border border-border rounded-md cursor-default",
+            style: {
+              marginLeft: `${INSET_PER_SIDE}px`,
+              width: `${effectiveTrackWidth}px`
+            },
             children: [
               Array.from({ length: Math.max(0, tickCount) }, (_2, i2) => i2).map(
                 (i2) => {
-                  const leftPos = i2 / Math.max(1, tickCount - 1) * trackWidth;
+                  const leftPos = i2 / Math.max(1, tickCount - 1) * effectiveTrackWidth;
                   return /* @__PURE__ */ jsxRuntimeExports.jsx(
                     "div",
                     {
@@ -104430,7 +104437,10 @@ function IndentRuler({ onChange }) {
                 "div",
                 {
                   className: "absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-primary cursor-ew-resize hover:scale-110 transition-transform",
-                  style: { left: `${toVisualPos(left) - 6}px`, top: "2px" },
+                  style: {
+                    left: `${toVisualPos(left) - 6 + INSET_PER_SIDE}px`,
+                    top: "2px"
+                  },
                   onMouseDown: handleMouseDown("left"),
                   title: `Lewe wcięcie: ${left}px`,
                   "data-ocid": "editor.indent_left_handle"
@@ -104441,7 +104451,7 @@ function IndentRuler({ onChange }) {
                 {
                   className: "absolute top-3 w-px bg-primary/30 pointer-events-none",
                   style: {
-                    left: `${toVisualPos(left)}px`,
+                    left: `${toVisualPos(left) + INSET_PER_SIDE}px`,
                     height: "calc(100% - 12px)"
                   }
                 }
@@ -104450,7 +104460,10 @@ function IndentRuler({ onChange }) {
                 "div",
                 {
                   className: "absolute top-0 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[9px] border-t-accent cursor-ew-resize hover:scale-110 transition-transform",
-                  style: { left: `${toVisualPos(firstLine) - 5}px`, top: "14px" },
+                  style: {
+                    left: `${toVisualPos(firstLine) - 5 + INSET_PER_SIDE}px`,
+                    top: "14px"
+                  },
                   onMouseDown: handleMouseDown("firstLine"),
                   title: `Wcięcie pierwszej linii: ${firstLine}px`,
                   "data-ocid": "editor.indent_first_line_handle"
@@ -104461,7 +104474,7 @@ function IndentRuler({ onChange }) {
                 {
                   className: "absolute top-3 w-px bg-accent/30 pointer-events-none",
                   style: {
-                    left: `${toVisualPos(firstLine)}px`,
+                    left: `${toVisualPos(firstLine) + INSET_PER_SIDE}px`,
                     height: "calc(100% - 12px)"
                   }
                 }
@@ -104471,7 +104484,7 @@ function IndentRuler({ onChange }) {
                 {
                   className: "absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-secondary-foreground cursor-ew-resize hover:scale-110 transition-transform",
                   style: {
-                    left: `${toVisualPos(MAX_INDENT - right) - 6}px`,
+                    left: `${toVisualPos(MAX_INDENT - right) - 6 + INSET_PER_SIDE}px`,
                     top: "2px"
                   },
                   onMouseDown: handleMouseDown("right"),
@@ -104484,7 +104497,7 @@ function IndentRuler({ onChange }) {
                 {
                   className: "absolute top-3 w-px bg-secondary-foreground/30 pointer-events-none",
                   style: {
-                    left: `${toVisualPos(MAX_INDENT - right)}px`,
+                    left: `${toVisualPos(MAX_INDENT - right) + INSET_PER_SIDE}px`,
                     height: "calc(100% - 12px)"
                   }
                 }
@@ -105312,9 +105325,8 @@ ${ch.content}`).join("\n\n---\n\n");
         }
       }
     ),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(IndentRuler, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-1 min-h-0 gap-0", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
         "div",
         {
           className: "flex-1 min-h-0",
@@ -105323,42 +105335,45 @@ ${ch.content}`).join("\n\n---\n\n");
             paddingRight: `${getGlobalIndents().right}px`
           },
           "data-ocid": "chapter.editor_wrapper",
-          children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            RichTextEditor,
-            {
-              value: content,
-              onChange: handleContentChange,
-              placeholder: "Zacznij pisać...",
-              onEditorReady: (editor) => {
-                editorRef.current = editor;
-                const view = editor.view;
-                const dom = view.dom;
-                const handleMouseUp = () => {
-                  const { from: from2, to } = editor.state.selection;
-                  if (from2 === to) {
-                    setFloatingButtonPos(null);
-                    return;
-                  }
-                  const text = editor.state.doc.textBetween(from2, to, " ");
-                  if (!text.trim()) {
-                    setFloatingButtonPos(null);
-                    return;
-                  }
-                  setSelectedText(text);
-                  const selection = window.getSelection();
-                  if (selection && selection.rangeCount > 0) {
-                    const range3 = selection.getRangeAt(0);
-                    const rect = range3.getBoundingClientRect();
-                    setFloatingButtonPos({
-                      x: rect.left + rect.width / 2,
-                      y: rect.top
-                    });
-                  }
-                };
-                dom.addEventListener("mouseup", handleMouseUp);
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(IndentRuler, {}),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              RichTextEditor,
+              {
+                value: content,
+                onChange: handleContentChange,
+                placeholder: "Zacznij pisać...",
+                onEditorReady: (editor) => {
+                  editorRef.current = editor;
+                  const view = editor.view;
+                  const dom = view.dom;
+                  const handleMouseUp = () => {
+                    const { from: from2, to } = editor.state.selection;
+                    if (from2 === to) {
+                      setFloatingButtonPos(null);
+                      return;
+                    }
+                    const text = editor.state.doc.textBetween(from2, to, " ");
+                    if (!text.trim()) {
+                      setFloatingButtonPos(null);
+                      return;
+                    }
+                    setSelectedText(text);
+                    const selection = window.getSelection();
+                    if (selection && selection.rangeCount > 0) {
+                      const range3 = selection.getRangeAt(0);
+                      const rect = range3.getBoundingClientRect();
+                      setFloatingButtonPos({
+                        x: rect.left + rect.width / 2,
+                        y: rect.top
+                      });
+                    }
+                  };
+                  dom.addEventListener("mouseup", handleMouseUp);
+                }
               }
-            }
-          )
+            )
+          ]
         }
       ),
       commentsPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx(

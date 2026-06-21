@@ -998,9 +998,6 @@ export function ChapterEditorPage() {
         }}
       />
 
-      {/* Indent ruler */}
-      <IndentRuler />
-
       {/* Editor + Comments panel */}
       <div className="flex flex-1 min-h-0 gap-0">
         <div
@@ -1011,6 +1008,9 @@ export function ChapterEditorPage() {
           }}
           data-ocid="chapter.editor_wrapper"
         >
+          {/* Indent ruler */}
+          <IndentRuler />
+
           <RichTextEditor
             value={content}
             onChange={handleContentChange}

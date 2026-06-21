@@ -35,6 +35,12 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
 
   const trackRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Fixed inset compensation for RichTextEditor:
+  // border 1px each side = 2px, prose content padding 16px each side = 32px
+  // Total per side = 34px, both sides = 68px
+  const INSET_TOTAL = 68;
+  const INSET_PER_SIDE = 34;
   const dragTarget = useRef<DragTarget>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -45,7 +51,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
 
     const updateWidth = () => {
       const rect = el.getBoundingClientRect();
-      setTrackWidth(Math.max(0, rect.width));
+      setTrackWidth(Math.max(0, rect.width - INSET_TOTAL));
     };
 
     updateWidth();
@@ -143,6 +149,8 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
     return (val / MAX_INDENT) * trackWidth;
   };
 
+  const effectiveTrackWidth = Math.max(0, trackWidth);
+
   const tickCount = trackWidth > 0 ? Math.floor(trackWidth / 20) : 16;
 
   return (
@@ -154,12 +162,17 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
       {/* Ruler track */}
       <div
         ref={trackRef}
-        className="relative h-6 bg-muted/30 border border-border rounded-md cursor-default w-full"
+        className="relative h-6 bg-muted/30 border border-border rounded-md cursor-default"
+        style={{
+          marginLeft: `${INSET_PER_SIDE}px`,
+          width: `${effectiveTrackWidth}px`,
+        }}
       >
         {/* Tick marks */}
         {Array.from({ length: Math.max(0, tickCount) }, (_, i) => i).map(
           (i) => {
-            const leftPos = (i / Math.max(1, tickCount - 1)) * trackWidth;
+            const leftPos =
+              (i / Math.max(1, tickCount - 1)) * effectiveTrackWidth;
             return (
               <div
                 key={i}
@@ -173,7 +186,10 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         {/* Left indent handle */}
         <div
           className="absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-primary cursor-ew-resize hover:scale-110 transition-transform"
-          style={{ left: `${toVisualPos(left) - 6}px`, top: "2px" }}
+          style={{
+            left: `${toVisualPos(left) - 6 + INSET_PER_SIDE}px`,
+            top: "2px",
+          }}
           onMouseDown={handleMouseDown("left")}
           title={`Lewe wcięcie: ${left}px`}
           data-ocid="editor.indent_left_handle"
@@ -182,7 +198,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-3 w-px bg-primary/30 pointer-events-none"
           style={{
-            left: `${toVisualPos(left)}px`,
+            left: `${toVisualPos(left) + INSET_PER_SIDE}px`,
             height: "calc(100% - 12px)",
           }}
         />
@@ -190,7 +206,10 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         {/* First line indent handle */}
         <div
           className="absolute top-0 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[9px] border-t-accent cursor-ew-resize hover:scale-110 transition-transform"
-          style={{ left: `${toVisualPos(firstLine) - 5}px`, top: "14px" }}
+          style={{
+            left: `${toVisualPos(firstLine) - 5 + INSET_PER_SIDE}px`,
+            top: "14px",
+          }}
           onMouseDown={handleMouseDown("firstLine")}
           title={`Wcięcie pierwszej linii: ${firstLine}px`}
           data-ocid="editor.indent_first_line_handle"
@@ -199,7 +218,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-3 w-px bg-accent/30 pointer-events-none"
           style={{
-            left: `${toVisualPos(firstLine)}px`,
+            left: `${toVisualPos(firstLine) + INSET_PER_SIDE}px`,
             height: "calc(100% - 12px)",
           }}
         />
@@ -208,7 +227,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-secondary-foreground cursor-ew-resize hover:scale-110 transition-transform"
           style={{
-            left: `${toVisualPos(MAX_INDENT - right) - 6}px`,
+            left: `${toVisualPos(MAX_INDENT - right) - 6 + INSET_PER_SIDE}px`,
             top: "2px",
           }}
           onMouseDown={handleMouseDown("right")}
@@ -219,7 +238,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-3 w-px bg-secondary-foreground/30 pointer-events-none"
           style={{
-            left: `${toVisualPos(MAX_INDENT - right)}px`,
+            left: `${toVisualPos(MAX_INDENT - right) + INSET_PER_SIDE}px`,
             height: "calc(100% - 12px)",
           }}
         />
