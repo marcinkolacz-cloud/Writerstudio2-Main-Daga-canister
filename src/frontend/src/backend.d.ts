@@ -37,6 +37,7 @@ export interface TextAnnotation {
     explanation: string;
     color: string;
     text: string;
+    approved: boolean;
     analysisId: bigint;
     proposal: string;
 }
@@ -82,6 +83,7 @@ export interface backendInterface {
     deleteMessage(id: bigint): Promise<boolean>;
     deleteRecording(id: bigint): Promise<boolean>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
+    getAnnotation(id: bigint): Promise<TextAnnotation | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
     getBook(id: bigint): Promise<Book | null>;
     getBookStats(bookId: bigint): Promise<{
@@ -99,6 +101,7 @@ export interface backendInterface {
     getRecordingAudio(id: bigint): Promise<Uint8Array | null>;
     listAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
+    listAnnotationsByAnalysis(analysisId: bigint): Promise<Array<TextAnnotation>>;
     listBooksByOwner(): Promise<Array<Book>>;
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
     listCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
@@ -118,6 +121,7 @@ export interface backendInterface {
     }>): Promise<boolean>;
     saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
     sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
+    updateAnnotationApproved(id: bigint, approved: boolean): Promise<boolean>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
     updateChapterIndents(id: bigint, indentLeft: bigint, indentRight: bigint, indentFirstLine: bigint): Promise<boolean>;

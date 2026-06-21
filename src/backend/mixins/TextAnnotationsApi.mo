@@ -86,6 +86,52 @@ mixin (
     }
   };
 
+  public shared ({ caller }) func getAnnotation(id : Nat) : async ?Types.TextAnnotation {
+    switch (annotations.get(id)) {
+      case (?annotation) {
+        if (isAnnotationOwner(annotation, caller)) {
+          ?annotation
+        } else {
+          null
+        }
+      };
+      case null { null }
+    }
+  };
+
+  public shared ({ caller }) func listAnnotationsByAnalysis(analysisId : Nat) : async [Types.TextAnnotation] {
+    switch (annotationsGetAnalysisBookId(analysisId)) {
+      case (?bookId) {
+        switch (annotationsGetBookOwner(bookId)) {
+          case (?ownerId) {
+            if (Principal.equal(ownerId, caller)) {
+              TextAnnotationsLib.filterByAnalysis(annotations, analysisId)
+            } else {
+              []
+            }
+          };
+          case null { [] }
+        }
+      };
+      case null { [] }
+    }
+  };
+
+  public shared ({ caller }) func updateAnnotationApproved(id : Nat, approved : Bool) : async Bool {
+    switch (annotations.get(id)) {
+      case (?annotation) {
+        if (isAnnotationOwner(annotation, caller)) {
+          let updated = { annotation with approved = approved };
+          annotations.add(id, updated);
+          true
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
   public shared ({ caller }) func getAnnotations(analysisId : Nat) : async [Types.TextAnnotation] {
     switch (annotationsGetAnalysisBookId(analysisId)) {
       case (?bookId) {

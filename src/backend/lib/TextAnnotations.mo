@@ -26,6 +26,7 @@ module {
       color;
       explanation;
       proposal;
+      approved = false;
     }
   };
 

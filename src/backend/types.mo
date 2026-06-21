@@ -44,6 +44,7 @@ module {
     color : Text;
     explanation : Text;
     proposal : Text;
+    approved : Bool;
   };
 
   public type Comment = {

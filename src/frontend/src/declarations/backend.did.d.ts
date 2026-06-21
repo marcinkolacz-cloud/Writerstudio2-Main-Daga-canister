@@ -70,6 +70,7 @@ export interface TextAnnotation {
   'explanation' : string,
   'color' : string,
   'text' : string,
+  'approved' : boolean,
   'analysisId' : bigint,
   'proposal' : string,
 }
@@ -120,6 +121,7 @@ export interface _SERVICE {
   'deleteMessage' : ActorMethod<[bigint], boolean>,
   'deleteRecording' : ActorMethod<[bigint], boolean>,
   'getAnalysis' : ActorMethod<[bigint], [] | [Analysis]>,
+  'getAnnotation' : ActorMethod<[bigint], [] | [TextAnnotation]>,
   'getAnnotations' : ActorMethod<[bigint], Array<TextAnnotation>>,
   'getBook' : ActorMethod<[bigint], [] | [Book]>,
   'getBookStats' : ActorMethod<
@@ -139,6 +141,7 @@ export interface _SERVICE {
   'getRecordingAudio' : ActorMethod<[bigint], [] | [Uint8Array]>,
   'listAnalysesByBook' : ActorMethod<[bigint], Array<Analysis>>,
   'listAnalysesByChapter' : ActorMethod<[bigint], Array<Analysis>>,
+  'listAnnotationsByAnalysis' : ActorMethod<[bigint], Array<TextAnnotation>>,
   'listBooksByOwner' : ActorMethod<[], Array<Book>>,
   'listChaptersByBook' : ActorMethod<[bigint], Array<Chapter>>,
   'listCommentsByChapter' : ActorMethod<[bigint], Array<Comment>>,
@@ -168,6 +171,7 @@ export interface _SERVICE {
   >,
   'saveRecording' : ActorMethod<[bigint, bigint, string, Uint8Array], bigint>,
   'sendMessage' : ActorMethod<[bigint, string, string, string], bigint>,
+  'updateAnnotationApproved' : ActorMethod<[bigint, boolean], boolean>,
   'updateBook' : ActorMethod<[bigint, string, string, string], boolean>,
   'updateChapter' : ActorMethod<[bigint, string, string], boolean>,
   'updateChapterIndents' : ActorMethod<

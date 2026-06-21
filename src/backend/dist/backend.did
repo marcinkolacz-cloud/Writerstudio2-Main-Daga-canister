@@ -1,6 +1,7 @@
 type TextAnnotation = 
  record {
    analysisId: nat;
+   approved: bool;
    color: text;
    explanation: text;
    id: nat;
@@ -121,6 +122,7 @@ service : {
   deleteMessage: (id: nat) -> (bool);
   deleteRecording: (id: nat) -> (bool);
   getAnalysis: (id: nat) -> (opt Analysis);
+  getAnnotation: (id: nat) -> (opt TextAnnotation);
   getAnnotations: (analysisId: nat) -> (vec TextAnnotation);
   getBook: (id: nat) -> (opt Book);
   getBookStats: (bookId: nat) ->
@@ -140,6 +142,7 @@ service : {
   getRecordingAudio: (id: nat) -> (opt blob);
   listAnalysesByBook: (bookId: nat) -> (vec Analysis);
   listAnalysesByChapter: (chapterId: nat) -> (vec Analysis);
+  listAnnotationsByAnalysis: (analysisId: nat) -> (vec TextAnnotation);
   listBooksByOwner: () -> (vec Book);
   listChaptersByBook: (bookId: nat) -> (vec Chapter);
   listCommentsByChapter: (chapterId: nat) -> (vec Comment);
@@ -164,6 +167,7 @@ service : {
    blob) -> (nat);
   sendMessage: (bookId: nat, role: text, content: text, provider: text) ->
    (nat);
+  updateAnnotationApproved: (id: nat, approved: bool) -> (bool);
   updateBook: (id: nat, title: text, description: text, category: text) ->
    (bool);
   updateChapter: (id: nat, title: text, content: text) -> (bool);

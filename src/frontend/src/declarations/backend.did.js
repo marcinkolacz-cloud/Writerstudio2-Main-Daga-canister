@@ -22,6 +22,7 @@ export const TextAnnotation = IDL.Record({
   'explanation' : IDL.Text,
   'color' : IDL.Text,
   'text' : IDL.Text,
+  'approved' : IDL.Bool,
   'analysisId' : IDL.Nat,
   'proposal' : IDL.Text,
 });
@@ -126,6 +127,7 @@ export const idlService = IDL.Service({
   'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
+  'getAnnotation' : IDL.Func([IDL.Nat], [IDL.Opt(TextAnnotation)], []),
   'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
   'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
   'getBookStats' : IDL.Func(
@@ -155,6 +157,11 @@ export const idlService = IDL.Service({
   'getRecordingAudio' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Vec(IDL.Nat8))], []),
   'listAnalysesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
   'listAnalysesByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
+  'listAnnotationsByAnalysis' : IDL.Func(
+      [IDL.Nat],
+      [IDL.Vec(TextAnnotation)],
+      [],
+    ),
   'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
   'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
   'listCommentsByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Comment)], []),
@@ -203,6 +210,7 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'updateAnnotationApproved' : IDL.Func([IDL.Nat, IDL.Bool], [IDL.Bool], []),
   'updateBook' : IDL.Func(
       [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
       [IDL.Bool],
@@ -233,6 +241,7 @@ export const idlFactory = ({ IDL }) => {
     'explanation' : IDL.Text,
     'color' : IDL.Text,
     'text' : IDL.Text,
+    'approved' : IDL.Bool,
     'analysisId' : IDL.Nat,
     'proposal' : IDL.Text,
   });
@@ -337,6 +346,7 @@ export const idlFactory = ({ IDL }) => {
     'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
+    'getAnnotation' : IDL.Func([IDL.Nat], [IDL.Opt(TextAnnotation)], []),
     'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
     'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
     'getBookStats' : IDL.Func(
@@ -366,6 +376,11 @@ export const idlFactory = ({ IDL }) => {
     'getRecordingAudio' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Vec(IDL.Nat8))], []),
     'listAnalysesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
     'listAnalysesByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
+    'listAnnotationsByAnalysis' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(TextAnnotation)],
+        [],
+      ),
     'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
     'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
     'listCommentsByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Comment)], []),
@@ -414,6 +429,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat],
         [],
       ),
+    'updateAnnotationApproved' : IDL.Func([IDL.Nat, IDL.Bool], [IDL.Bool], []),
     'updateBook' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
         [IDL.Bool],

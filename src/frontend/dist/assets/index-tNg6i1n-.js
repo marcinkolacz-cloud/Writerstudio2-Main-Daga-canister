@@ -36181,6 +36181,7 @@ const TextAnnotation = Record({
   "explanation": Text$4,
   "color": Text$4,
   "text": Text$4,
+  "approved": Bool,
   "analysisId": Nat,
   "proposal": Text$4
 });
@@ -36284,6 +36285,7 @@ Service({
   "deleteMessage": Func([Nat], [Bool], []),
   "deleteRecording": Func([Nat], [Bool], []),
   "getAnalysis": Func([Nat], [Opt(Analysis)], []),
+  "getAnnotation": Func([Nat], [Opt(TextAnnotation)], []),
   "getAnnotations": Func([Nat], [Vec(TextAnnotation)], []),
   "getBook": Func([Nat], [Opt(Book)], []),
   "getBookStats": Func(
@@ -36313,6 +36315,11 @@ Service({
   "getRecordingAudio": Func([Nat], [Opt(Vec(Nat8))], []),
   "listAnalysesByBook": Func([Nat], [Vec(Analysis)], []),
   "listAnalysesByChapter": Func([Nat], [Vec(Analysis)], []),
+  "listAnnotationsByAnalysis": Func(
+    [Nat],
+    [Vec(TextAnnotation)],
+    []
+  ),
   "listBooksByOwner": Func([], [Vec(Book)], []),
   "listChaptersByBook": Func([Nat], [Vec(Chapter)], []),
   "listCommentsByChapter": Func([Nat], [Vec(Comment$1)], []),
@@ -36361,6 +36368,7 @@ Service({
     [Nat],
     []
   ),
+  "updateAnnotationApproved": Func([Nat, Bool], [Bool], []),
   "updateBook": Func(
     [Nat, Text$4, Text$4, Text$4],
     [Bool],
@@ -36388,6 +36396,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "explanation": IDL2.Text,
     "color": IDL2.Text,
     "text": IDL2.Text,
+    "approved": IDL2.Bool,
     "analysisId": IDL2.Nat,
     "proposal": IDL2.Text
   });
@@ -36491,6 +36500,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "deleteMessage": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteRecording": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "getAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Opt(Analysis2)], []),
+    "getAnnotation": IDL2.Func([IDL2.Nat], [IDL2.Opt(TextAnnotation2)], []),
     "getAnnotations": IDL2.Func([IDL2.Nat], [IDL2.Vec(TextAnnotation2)], []),
     "getBook": IDL2.Func([IDL2.Nat], [IDL2.Opt(Book2)], []),
     "getBookStats": IDL2.Func(
@@ -36520,6 +36530,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "getRecordingAudio": IDL2.Func([IDL2.Nat], [IDL2.Opt(IDL2.Vec(IDL2.Nat8))], []),
     "listAnalysesByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Analysis2)], []),
     "listAnalysesByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Analysis2)], []),
+    "listAnnotationsByAnalysis": IDL2.Func(
+      [IDL2.Nat],
+      [IDL2.Vec(TextAnnotation2)],
+      []
+    ),
     "listBooksByOwner": IDL2.Func([], [IDL2.Vec(Book2)], []),
     "listChaptersByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Chapter2)], []),
     "listCommentsByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Comment2)], []),
@@ -36568,6 +36583,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Nat],
       []
     ),
+    "updateAnnotationApproved": IDL2.Func([IDL2.Nat, IDL2.Bool], [IDL2.Bool], []),
     "updateBook": IDL2.Func(
       [IDL2.Nat, IDL2.Text, IDL2.Text, IDL2.Text],
       [IDL2.Bool],
@@ -36949,6 +36965,20 @@ class Backend {
       return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
     }
   }
+  async getAnnotation(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getAnnotation(arg0);
+        return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getAnnotation(arg0);
+      return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+    }
+  }
   async getAnnotations(arg0) {
     if (this.processError) {
       try {
@@ -36967,14 +36997,14 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.getBook(arg0);
-        return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getBook(arg0);
-      return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
     }
   }
   async getBookStats(arg0) {
@@ -36995,14 +37025,14 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.getChapter(arg0);
-        return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getChapter(arg0);
-      return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
     }
   }
   async getOverallStats() {
@@ -37023,42 +37053,56 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.getRecordingAudio(arg0);
-        return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getRecordingAudio(arg0);
-      return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
     }
   }
   async listAnalysesByBook(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.listAnalysesByBook(arg0);
-        return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+        return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listAnalysesByBook(arg0);
-      return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+      return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
     }
   }
   async listAnalysesByChapter(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.listAnalysesByChapter(arg0);
-        return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+        return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listAnalysesByChapter(arg0);
-      return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+      return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async listAnnotationsByAnalysis(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.listAnnotationsByAnalysis(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.listAnnotationsByAnalysis(arg0);
+      return result;
     }
   }
   async listBooksByOwner() {
@@ -37201,6 +37245,20 @@ class Backend {
       return result;
     }
   }
+  async updateAnnotationApproved(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.updateAnnotationApproved(arg0, arg1);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.updateAnnotationApproved(arg0, arg1);
+      return result;
+    }
+  }
   async updateBook(arg0, arg1, arg2, arg3) {
     if (this.processError) {
       try {
@@ -37250,6 +37308,9 @@ function from_candid_Analysis_n4(_uploadFile, _downloadFile, value) {
 function from_candid_opt_n10(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
+function from_candid_opt_n11(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : value[0];
+}
 function from_candid_opt_n6(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
@@ -37279,7 +37340,7 @@ function from_candid_tuple_n3(_uploadFile, _downloadFile, value) {
     from_candid_Analysis_n4(_uploadFile, _downloadFile, value[1])
   ];
 }
-function from_candid_vec_n11(_uploadFile, _downloadFile, value) {
+function from_candid_vec_n12(_uploadFile, _downloadFile, value) {
   return value.map((x3) => from_candid_Analysis_n4(_uploadFile, _downloadFile, x3));
 }
 function from_candid_vec_n2(_uploadFile, _downloadFile, value) {
@@ -102330,7 +102391,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BDlFGa93.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-lzZy384F.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

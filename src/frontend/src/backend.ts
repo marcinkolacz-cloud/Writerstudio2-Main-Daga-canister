@@ -119,6 +119,7 @@ export interface TextAnnotation {
     explanation: string;
     color: string;
     text: string;
+    approved: boolean;
     analysisId: bigint;
     proposal: string;
 }
@@ -178,6 +179,7 @@ export interface backendInterface {
     deleteMessage(id: bigint): Promise<boolean>;
     deleteRecording(id: bigint): Promise<boolean>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
+    getAnnotation(id: bigint): Promise<TextAnnotation | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
     getBook(id: bigint): Promise<Book | null>;
     getBookStats(bookId: bigint): Promise<{
@@ -195,6 +197,7 @@ export interface backendInterface {
     getRecordingAudio(id: bigint): Promise<Uint8Array | null>;
     listAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
+    listAnnotationsByAnalysis(analysisId: bigint): Promise<Array<TextAnnotation>>;
     listBooksByOwner(): Promise<Array<Book>>;
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
     listCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
@@ -214,11 +217,12 @@ export interface backendInterface {
     }>): Promise<boolean>;
     saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
     sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
+    updateAnnotationApproved(id: bigint, approved: boolean): Promise<boolean>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
     updateChapterIndents(id: bigint, indentLeft: bigint, indentRight: bigint, indentFirstLine: bigint): Promise<boolean>;
 }
-import type { Analysis as _Analysis, Book as _Book, Chapter as _Chapter } from "./declarations/backend.did.d.ts";
+import type { Analysis as _Analysis, Book as _Book, Chapter as _Chapter, TextAnnotation as _TextAnnotation } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async __analyses(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, Analysis]>> {
@@ -571,6 +575,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getAnnotation(arg0: bigint): Promise<TextAnnotation | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAnnotation(arg0);
+                return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAnnotation(arg0);
+            return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getAnnotations(arg0: bigint): Promise<Array<TextAnnotation>> {
         if (this.processError) {
             try {
@@ -589,14 +607,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getBook(arg0);
-                return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getBook(arg0);
-            return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
         }
     }
     async getBookStats(arg0: bigint): Promise<{
@@ -622,14 +640,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getChapter(arg0);
-                return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getChapter(arg0);
-            return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
         }
     }
     async getOverallStats(): Promise<{
@@ -654,42 +672,56 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getRecordingAudio(arg0);
-                return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getRecordingAudio(arg0);
-            return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
         }
     }
     async listAnalysesByBook(arg0: bigint): Promise<Array<Analysis>> {
         if (this.processError) {
             try {
                 const result = await this.actor.listAnalysesByBook(arg0);
-                return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.listAnalysesByBook(arg0);
-            return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
         }
     }
     async listAnalysesByChapter(arg0: bigint): Promise<Array<Analysis>> {
         if (this.processError) {
             try {
                 const result = await this.actor.listAnalysesByChapter(arg0);
-                return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.listAnalysesByChapter(arg0);
-            return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async listAnnotationsByAnalysis(arg0: bigint): Promise<Array<TextAnnotation>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listAnnotationsByAnalysis(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listAnnotationsByAnalysis(arg0);
+            return result;
         }
     }
     async listBooksByOwner(): Promise<Array<Book>> {
@@ -841,6 +873,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async updateAnnotationApproved(arg0: bigint, arg1: boolean): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateAnnotationApproved(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateAnnotationApproved(arg0, arg1);
+            return result;
+        }
+    }
     async updateBook(arg0: bigint, arg1: string, arg2: string, arg3: string): Promise<boolean> {
         if (this.processError) {
             try {
@@ -887,7 +933,10 @@ export class Backend implements backendInterface {
 function from_candid_Analysis_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Analysis): Analysis {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [Uint8Array]): Uint8Array | null {
+function from_candid_opt_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Chapter]): Chapter | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [Uint8Array]): Uint8Array | null {
     return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
@@ -896,10 +945,10 @@ function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
 function from_candid_opt_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Analysis]): Analysis | null {
     return value.length === 0 ? null : from_candid_Analysis_n4(_uploadFile, _downloadFile, value[0]);
 }
-function from_candid_opt_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Book]): Book | null {
+function from_candid_opt_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_TextAnnotation]): TextAnnotation | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Chapter]): Chapter | null {
+function from_candid_opt_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Book]): Book | null {
     return value.length === 0 ? null : value[0];
 }
 function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -935,7 +984,7 @@ function from_candid_tuple_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         from_candid_Analysis_n4(_uploadFile, _downloadFile, value[1])
     ];
 }
-function from_candid_vec_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Analysis>): Array<Analysis> {
+function from_candid_vec_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Analysis>): Array<Analysis> {
     return value.map((x)=>from_candid_Analysis_n4(_uploadFile, _downloadFile, x));
 }
 function from_candid_vec_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[bigint, _Analysis]>): Array<[bigint, Analysis]> {
