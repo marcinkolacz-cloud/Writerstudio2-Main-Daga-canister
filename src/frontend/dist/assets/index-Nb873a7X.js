@@ -66138,6 +66138,22 @@ function createAnnotationMark(name, options) {
               "data-alternative-proposal": attributes["data-alternative-proposal"]
             };
           }
+        },
+        "data-annotation-id": {
+          default: null,
+          parseHTML: (element) => element.getAttribute("data-annotation-id"),
+          renderHTML: (attributes) => {
+            if (!attributes["data-annotation-id"]) return {};
+            return { "data-annotation-id": attributes["data-annotation-id"] };
+          }
+        },
+        "data-approved": {
+          default: null,
+          parseHTML: (element) => element.getAttribute("data-approved"),
+          renderHTML: (attributes) => {
+            if (!attributes["data-approved"]) return {};
+            return { "data-approved": attributes["data-approved"] };
+          }
         }
       };
     },
@@ -103800,7 +103816,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BiPlNKsP.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CpmKbLf_.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

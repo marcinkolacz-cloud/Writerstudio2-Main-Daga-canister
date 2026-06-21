@@ -44,6 +44,22 @@ function createAnnotationMark(name: string, options: AnnotationMarkOptions) {
             };
           },
         },
+        "data-annotation-id": {
+          default: null,
+          parseHTML: (element) => element.getAttribute("data-annotation-id"),
+          renderHTML: (attributes) => {
+            if (!attributes["data-annotation-id"]) return {};
+            return { "data-annotation-id": attributes["data-annotation-id"] };
+          },
+        },
+        "data-approved": {
+          default: null,
+          parseHTML: (element) => element.getAttribute("data-approved"),
+          renderHTML: (attributes) => {
+            if (!attributes["data-approved"]) return {};
+            return { "data-approved": attributes["data-approved"] };
+          },
+        },
       };
     },
 
