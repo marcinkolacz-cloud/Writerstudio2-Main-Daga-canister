@@ -136,6 +136,7 @@ function applyAnnotationsToEditor(
   },
 ) {
   // 1. Remove annotation marks — either in a specific range or entire document
+  // Build a single atomic transaction for all mark removals
   const annotationMarkNames = [
     "annotationYellow",
     "annotationRed",
@@ -143,6 +144,8 @@ function applyAnnotationsToEditor(
     "annotationOrange",
     "annotationPurple",
   ];
+
+  const tr = editor.state.tr;
 
   if (options?.clearRange) {
     const { from: clearFrom, to: clearTo } = options.clearRange;
@@ -156,12 +159,11 @@ function applyAnnotationsToEditor(
         for (const markName of annotationMarkNames) {
           const mark = node.marks.find((m) => m.type.name === markName);
           if (mark) {
-            editor
-              .chain()
-              .focus()
-              .setTextSelection({ from: overlapStart, to: overlapEnd })
-              .unsetMark(markName)
-              .run();
+            tr.removeMark(
+              overlapStart,
+              overlapEnd,
+              editor.schema.marks[markName],
+            );
           }
         }
       }
@@ -173,16 +175,20 @@ function applyAnnotationsToEditor(
       for (const markName of annotationMarkNames) {
         const mark = node.marks.find((m) => m.type.name === markName);
         if (mark) {
-          editor
-            .chain()
-            .focus()
-            .setTextSelection({ from: pos, to: pos + node.nodeSize })
-            .unsetMark(markName)
-            .run();
+          tr.removeMark(
+            pos,
+            pos + node.nodeSize,
+            editor.schema.marks[markName],
+          );
         }
       }
       return false;
     });
+  }
+
+  // Apply the clearing transaction once
+  if (tr.steps.length > 0) {
+    editor.view.dispatch(tr);
   }
 
   // 2. Compute ranges and resolve overlaps within this batch
@@ -218,24 +224,26 @@ function applyAnnotationsToEditor(
   }
 
   // 3. Apply marks only for accepted (non-overlapping) annotations
+  // Build a single atomic transaction for all mark additions
+  const markTr = editor.state.tr;
   for (const { ann, start, end } of accepted) {
-    const from = editor.state.doc.resolve(start);
-    const to = editor.state.doc.resolve(end);
-
-    editor
-      .chain()
-      .focus()
-      .setTextSelection({ from: from.pos, to: to.pos })
-      .setMark(
-        `annotation${ann.color.charAt(0).toUpperCase() + ann.color.slice(1)}`,
-        {
+    const markName = `annotation${ann.color.charAt(0).toUpperCase() + ann.color.slice(1)}`;
+    const markType = editor.schema.marks[markName];
+    if (markType) {
+      markTr.addMark(
+        start,
+        end,
+        markType.create({
           "data-explanation": ann.explanation,
           "data-proposal": ann.proposal,
           "data-annotation-id": String(ann.id),
           "data-approved": String(ann.approved),
-        },
-      )
-      .run();
+        }),
+      );
+    }
+  }
+  if (markTr.steps.length > 0) {
+    editor.view.dispatch(markTr);
   }
 }
 
@@ -342,11 +350,18 @@ export function ChapterEditorPage() {
   }, [chapter, chapterId]);
 
   // Apply persisted annotations (only non-approved ones) when editor is ready
+  // Guarded by annotationsVisible ref to avoid re-applying when user explicitly hid them
+  const annotationsVisibleRef = useRef(annotationsVisible);
+  useEffect(() => {
+    annotationsVisibleRef.current = annotationsVisible;
+  });
+
   useEffect(() => {
     if (
       editorRef.current &&
       persistedAnnotations &&
-      persistedAnnotations.length > 0
+      persistedAnnotations.length > 0 &&
+      annotationsVisibleRef.current
     ) {
       const anns: Annotation[] = persistedAnnotations.map((pa) => ({
         id: pa.id,

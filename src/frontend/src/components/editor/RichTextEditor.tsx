@@ -125,12 +125,39 @@ export function RichTextEditor({
         actualTo = match.to;
       }
 
-      editor
-        .chain()
-        .focus()
-        .deleteRange({ from: actualFrom, to: actualTo })
-        .insertContent(proposal)
-        .run();
+      // Read the existing mark and its attributes before deleting
+      let markTypeName = "";
+      let markAttrs: Record<string, unknown> = {};
+      editor.state.doc.nodesBetween(actualFrom, actualTo, (node) => {
+        if (!node.isText) return false;
+        for (const mark of node.marks) {
+          if (mark.type.name.startsWith("annotation")) {
+            markTypeName = mark.type.name;
+            markAttrs = { ...mark.attrs };
+            return false;
+          }
+        }
+        return false;
+      });
+
+      // Build the replacement text node with the preserved mark (updated data-approved)
+      const schema = editor.schema;
+      const markType = schema.marks[markTypeName];
+      const marksToApply = markType
+        ? [
+            markType.create({
+              ...markAttrs,
+              "data-approved": "true",
+            }),
+          ]
+        : [];
+      const textNode = schema.text(proposal, marksToApply);
+
+      // Replace range with the marked text node in a single transaction
+      const tr = editor.state.tr;
+      tr.replaceWith(actualFrom, actualTo, textNode);
+      editor.view.dispatch(tr);
+      editor.view.focus();
 
       // Update backend approval status and DOM attribute immediately
       if (id !== 0n) {
@@ -179,12 +206,39 @@ export function RichTextEditor({
         actualTo = match.to;
       }
 
-      editor
-        .chain()
-        .focus()
-        .deleteRange({ from: actualFrom, to: actualTo })
-        .insertContent(originalText)
-        .run();
+      // Read the existing mark and its attributes before deleting
+      let markTypeName = "";
+      let markAttrs: Record<string, unknown> = {};
+      editor.state.doc.nodesBetween(actualFrom, actualTo, (node) => {
+        if (!node.isText) return false;
+        for (const mark of node.marks) {
+          if (mark.type.name.startsWith("annotation")) {
+            markTypeName = mark.type.name;
+            markAttrs = { ...mark.attrs };
+            return false;
+          }
+        }
+        return false;
+      });
+
+      // Build the replacement text node with the preserved mark (data-approved: false)
+      const schema = editor.schema;
+      const markType = schema.marks[markTypeName];
+      const marksToApply = markType
+        ? [
+            markType.create({
+              ...markAttrs,
+              "data-approved": "false",
+            }),
+          ]
+        : [];
+      const textNode = schema.text(originalText, marksToApply);
+
+      // Replace range with the marked text node in a single transaction
+      const tr = editor.state.tr;
+      tr.replaceWith(actualFrom, actualTo, textNode);
+      editor.view.dispatch(tr);
+      editor.view.focus();
 
       // Update backend approval status and DOM attribute immediately
       if (id !== 0n) {

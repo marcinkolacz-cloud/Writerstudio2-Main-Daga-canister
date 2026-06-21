@@ -74843,7 +74843,32 @@ function RichTextEditor({
         actualFrom = match.from;
         actualTo = match.to;
       }
-      editor.chain().focus().deleteRange({ from: actualFrom, to: actualTo }).insertContent(proposal).run();
+      let markTypeName = "";
+      let markAttrs = {};
+      editor.state.doc.nodesBetween(actualFrom, actualTo, (node) => {
+        if (!node.isText) return false;
+        for (const mark of node.marks) {
+          if (mark.type.name.startsWith("annotation")) {
+            markTypeName = mark.type.name;
+            markAttrs = { ...mark.attrs };
+            return false;
+          }
+        }
+        return false;
+      });
+      const schema = editor.schema;
+      const markType = schema.marks[markTypeName];
+      const marksToApply = markType ? [
+        markType.create({
+          ...markAttrs,
+          "data-approved": "true"
+        })
+      ] : [];
+      const textNode = schema.text(proposal, marksToApply);
+      const tr2 = editor.state.tr;
+      tr2.replaceWith(actualFrom, actualTo, textNode);
+      editor.view.dispatch(tr2);
+      editor.view.focus();
       if (id !== 0n) {
         updateAnnotationApproved.mutate(
           { id, approved: true },
@@ -74879,7 +74904,32 @@ function RichTextEditor({
         actualFrom = match.from;
         actualTo = match.to;
       }
-      editor.chain().focus().deleteRange({ from: actualFrom, to: actualTo }).insertContent(originalText).run();
+      let markTypeName = "";
+      let markAttrs = {};
+      editor.state.doc.nodesBetween(actualFrom, actualTo, (node) => {
+        if (!node.isText) return false;
+        for (const mark of node.marks) {
+          if (mark.type.name.startsWith("annotation")) {
+            markTypeName = mark.type.name;
+            markAttrs = { ...mark.attrs };
+            return false;
+          }
+        }
+        return false;
+      });
+      const schema = editor.schema;
+      const markType = schema.marks[markTypeName];
+      const marksToApply = markType ? [
+        markType.create({
+          ...markAttrs,
+          "data-approved": "false"
+        })
+      ] : [];
+      const textNode = schema.text(originalText, marksToApply);
+      const tr2 = editor.state.tr;
+      tr2.replaceWith(actualFrom, actualTo, textNode);
+      editor.view.dispatch(tr2);
+      editor.view.focus();
       if (id !== 0n) {
         updateAnnotationApproved.mutate(
           { id, approved: false },
@@ -103816,7 +103866,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CIW11o9D.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BTXq8iTt.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -104912,6 +104962,7 @@ function applyAnnotationsToEditor(editor, annotations, options) {
     "annotationOrange",
     "annotationPurple"
   ];
+  const tr2 = editor.state.tr;
   if (options == null ? void 0 : options.clearRange) {
     const { from: clearFrom, to: clearTo } = options.clearRange;
     editor.state.doc.nodesBetween(clearFrom, clearTo, (node, pos) => {
@@ -104924,7 +104975,11 @@ function applyAnnotationsToEditor(editor, annotations, options) {
         for (const markName of annotationMarkNames) {
           const mark = node.marks.find((m2) => m2.type.name === markName);
           if (mark) {
-            editor.chain().focus().setTextSelection({ from: overlapStart, to: overlapEnd }).unsetMark(markName).run();
+            tr2.removeMark(
+              overlapStart,
+              overlapEnd,
+              editor.schema.marks[markName]
+            );
           }
         }
       }
@@ -104936,11 +104991,18 @@ function applyAnnotationsToEditor(editor, annotations, options) {
       for (const markName of annotationMarkNames) {
         const mark = node.marks.find((m2) => m2.type.name === markName);
         if (mark) {
-          editor.chain().focus().setTextSelection({ from: pos, to: pos + node.nodeSize }).unsetMark(markName).run();
+          tr2.removeMark(
+            pos,
+            pos + node.nodeSize,
+            editor.schema.marks[markName]
+          );
         }
       }
       return false;
     });
+  }
+  if (tr2.steps.length > 0) {
+    editor.view.dispatch(tr2);
   }
   const rangedAnnotations = annotations.map((ann) => {
     if ((options == null ? void 0 : options.skipApproved) && ann.approved) return null;
@@ -104965,18 +105027,25 @@ function applyAnnotationsToEditor(editor, annotations, options) {
     }
     accepted.push(item);
   }
+  const markTr = editor.state.tr;
   for (const { ann, start, end } of accepted) {
-    const from2 = editor.state.doc.resolve(start);
-    const to = editor.state.doc.resolve(end);
-    editor.chain().focus().setTextSelection({ from: from2.pos, to: to.pos }).setMark(
-      `annotation${ann.color.charAt(0).toUpperCase() + ann.color.slice(1)}`,
-      {
-        "data-explanation": ann.explanation,
-        "data-proposal": ann.proposal,
-        "data-annotation-id": String(ann.id),
-        "data-approved": String(ann.approved)
-      }
-    ).run();
+    const markName = `annotation${ann.color.charAt(0).toUpperCase() + ann.color.slice(1)}`;
+    const markType = editor.schema.marks[markName];
+    if (markType) {
+      markTr.addMark(
+        start,
+        end,
+        markType.create({
+          "data-explanation": ann.explanation,
+          "data-proposal": ann.proposal,
+          "data-annotation-id": String(ann.id),
+          "data-approved": String(ann.approved)
+        })
+      );
+    }
+  }
+  if (markTr.steps.length > 0) {
+    editor.view.dispatch(markTr);
   }
 }
 function ChapterEditorPage() {
@@ -105054,8 +105123,12 @@ function ChapterEditorPage() {
       lastSyncedChapterIdRef.current = chapterId;
     }
   }, [chapter, chapterId]);
+  const annotationsVisibleRef = reactExports.useRef(annotationsVisible);
   reactExports.useEffect(() => {
-    if (editorRef.current && persistedAnnotations && persistedAnnotations.length > 0) {
+    annotationsVisibleRef.current = annotationsVisible;
+  });
+  reactExports.useEffect(() => {
+    if (editorRef.current && persistedAnnotations && persistedAnnotations.length > 0 && annotationsVisibleRef.current) {
       const anns = persistedAnnotations.map((pa) => ({
         id: pa.id,
         text: pa.text,
