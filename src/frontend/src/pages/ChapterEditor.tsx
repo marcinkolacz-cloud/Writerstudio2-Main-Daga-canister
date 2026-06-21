@@ -109,6 +109,24 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
   );
 }
 
+function findFirstTextRangeInDoc(
+  editor: Editor,
+  searchText: string,
+): { from: number; to: number } | null {
+  let result: { from: number; to: number } | null = null;
+  editor.state.doc.descendants((node, pos) => {
+    if (result) return false;
+    if (!node.isText || !node.text) return true;
+    const idx = node.text.indexOf(searchText);
+    if (idx !== -1) {
+      result = { from: pos + idx, to: pos + idx + searchText.length };
+      return false;
+    }
+    return true;
+  });
+  return result;
+}
+
 function applyAnnotationsToEditor(
   editor: Editor,
   annotations: Annotation[],
@@ -117,8 +135,6 @@ function applyAnnotationsToEditor(
     clearRange?: { from: number; to: number };
   },
 ) {
-  const docText = editor.getText();
-
   // 1. Remove annotation marks — either in a specific range or entire document
   const annotationMarkNames = [
     "annotationYellow",
@@ -173,12 +189,12 @@ function applyAnnotationsToEditor(
   const rangedAnnotations = annotations
     .map((ann) => {
       if (options?.skipApproved && ann.approved) return null;
-      const idx = docText.indexOf(ann.text);
-      if (idx === -1) return null;
+      const range = findFirstTextRangeInDoc(editor, ann.text);
+      if (!range) return null;
       return {
         ann,
-        start: idx,
-        end: idx + ann.text.length,
+        start: range.from,
+        end: range.to,
       };
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);

@@ -103816,7 +103816,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CpmKbLf_.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CIW11o9D.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -104890,8 +104890,21 @@ function SaveIndicator({ status }) {
     }
   );
 }
+function findFirstTextRangeInDoc(editor, searchText) {
+  let result = null;
+  editor.state.doc.descendants((node, pos) => {
+    if (result) return false;
+    if (!node.isText || !node.text) return true;
+    const idx = node.text.indexOf(searchText);
+    if (idx !== -1) {
+      result = { from: pos + idx, to: pos + idx + searchText.length };
+      return false;
+    }
+    return true;
+  });
+  return result;
+}
 function applyAnnotationsToEditor(editor, annotations, options) {
-  const docText = editor.getText();
   const annotationMarkNames = [
     "annotationYellow",
     "annotationRed",
@@ -104931,12 +104944,12 @@ function applyAnnotationsToEditor(editor, annotations, options) {
   }
   const rangedAnnotations = annotations.map((ann) => {
     if ((options == null ? void 0 : options.skipApproved) && ann.approved) return null;
-    const idx = docText.indexOf(ann.text);
-    if (idx === -1) return null;
+    const range3 = findFirstTextRangeInDoc(editor, ann.text);
+    if (!range3) return null;
     return {
       ann,
-      start: idx,
-      end: idx + ann.text.length
+      start: range3.from,
+      end: range3.to
     };
   }).filter((item) => item !== null);
   rangedAnnotations.sort((a2, b2) => a2.start - b2.start);
