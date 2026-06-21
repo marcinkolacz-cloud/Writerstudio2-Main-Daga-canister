@@ -36187,12 +36187,17 @@ const TextAnnotation = Record({
 });
 const Book = Record({
   "id": Nat,
+  "writingStyle": Text$4,
   "title": Text$4,
   "ownerId": Principal2,
+  "authorSummary": Text$4,
   "createdAt": Int,
   "description": Text$4,
   "updatedAt": Int,
-  "category": Text$4
+  "themes": Text$4,
+  "keyContext": Text$4,
+  "category": Text$4,
+  "ageCategory": Text$4
 });
 const Chapter = Record({
   "id": Nat,
@@ -36404,6 +36409,11 @@ Service({
     [Bool],
     []
   ),
+  "updateBookMetadata": Func(
+    [Nat, Text$4, Text$4, Text$4, Text$4, Text$4],
+    [Bool],
+    []
+  ),
   "updateChapter": Func([Nat, Text$4, Text$4], [Bool], []),
   "updateChapterIndents": Func(
     [Nat, Nat, Nat, Nat],
@@ -36432,12 +36442,17 @@ const idlFactory = ({ IDL: IDL2 }) => {
   });
   const Book2 = IDL2.Record({
     "id": IDL2.Nat,
+    "writingStyle": IDL2.Text,
     "title": IDL2.Text,
     "ownerId": IDL2.Principal,
+    "authorSummary": IDL2.Text,
     "createdAt": IDL2.Int,
     "description": IDL2.Text,
     "updatedAt": IDL2.Int,
-    "category": IDL2.Text
+    "themes": IDL2.Text,
+    "keyContext": IDL2.Text,
+    "category": IDL2.Text,
+    "ageCategory": IDL2.Text
   });
   const Chapter2 = IDL2.Record({
     "id": IDL2.Nat,
@@ -36650,6 +36665,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "updateAnnotationApproved": IDL2.Func([IDL2.Nat, IDL2.Bool], [IDL2.Bool], []),
     "updateBook": IDL2.Func(
       [IDL2.Nat, IDL2.Text, IDL2.Text, IDL2.Text],
+      [IDL2.Bool],
+      []
+    ),
+    "updateBookMetadata": IDL2.Func(
+      [IDL2.Nat, IDL2.Text, IDL2.Text, IDL2.Text, IDL2.Text, IDL2.Text],
       [IDL2.Bool],
       []
     ),
@@ -37432,6 +37452,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.updateBook(arg0, arg1, arg2, arg3);
+      return result;
+    }
+  }
+  async updateBookMetadata(arg0, arg1, arg2, arg3, arg4, arg5) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.updateBookMetadata(arg0, arg1, arg2, arg3, arg4, arg5);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.updateBookMetadata(arg0, arg1, arg2, arg3, arg4, arg5);
       return result;
     }
   }
@@ -103260,7 +103294,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BY_vYdjf.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Bmph3UdW.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

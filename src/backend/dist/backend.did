@@ -67,13 +67,18 @@ type Chapter =
  };
 type Book = 
  record {
+   ageCategory: text;
+   authorSummary: text;
    category: text;
    createdAt: int;
    description: text;
    id: nat;
+   keyContext: text;
    ownerId: principal;
+   themes: text;
    title: text;
    updatedAt: int;
+   writingStyle: text;
  };
 type Analysis = 
  record {
@@ -203,6 +208,8 @@ service : {
   updateAnnotationApproved: (id: nat, approved: bool) -> (bool);
   updateBook: (id: nat, title: text, description: text, category: text) ->
    (bool);
+  updateBookMetadata: (id: nat, ageCategory: text, authorSummary: text,
+   keyContext: text, themes: text, writingStyle: text) -> (bool);
   updateChapter: (id: nat, title: text, content: text) -> (bool);
   updateChapterIndents: (id: nat, indentLeft: nat, indentRight: nat,
    indentFirstLine: nat) -> (bool);

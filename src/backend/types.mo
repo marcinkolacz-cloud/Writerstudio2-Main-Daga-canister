@@ -8,6 +8,11 @@ module {
     title : Text;
     description : Text;
     category : Text;
+    ageCategory : Text;
+    authorSummary : Text;
+    keyContext : Text;
+    themes : Text;
+    writingStyle : Text;
     createdAt : Int;
     updatedAt : Int;
   };

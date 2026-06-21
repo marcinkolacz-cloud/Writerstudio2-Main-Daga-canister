@@ -24,6 +24,11 @@ module {
       title;
       description;
       category;
+      ageCategory = "";
+      authorSummary = "";
+      keyContext = "";
+      themes = "";
+      writingStyle = "";
       createdAt = now;
       updatedAt = now;
     }

@@ -3,6 +3,7 @@ import List "mo:core/List";
 import Types "../types";
 import BooksLib "../lib/Books";
 import Principal "mo:core/Principal";
+import Time "mo:core/Time";
 
 mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>) {
 
@@ -41,6 +42,29 @@ mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>)
       case (?book) {
         if (BooksLib.isOwner(book, caller)) {
           let updated = BooksLib.updateBookRecord(book, title, description, category);
+          books.add(id, updated);
+          true
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
+  public shared ({ caller }) func updateBookMetadata(id : Nat, ageCategory : Text, authorSummary : Text, keyContext : Text, themes : Text, writingStyle : Text) : async Bool {
+    switch (books.get(id)) {
+      case (?book) {
+        if (BooksLib.isOwner(book, caller)) {
+          let updated = {
+            book with
+            ageCategory;
+            authorSummary;
+            keyContext;
+            themes;
+            writingStyle;
+            updatedAt = Time.now();
+          };
           books.add(id, updated);
           true
         } else {

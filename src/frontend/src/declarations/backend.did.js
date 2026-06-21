@@ -28,12 +28,17 @@ export const TextAnnotation = IDL.Record({
 });
 export const Book = IDL.Record({
   'id' : IDL.Nat,
+  'writingStyle' : IDL.Text,
   'title' : IDL.Text,
   'ownerId' : IDL.Principal,
+  'authorSummary' : IDL.Text,
   'createdAt' : IDL.Int,
   'description' : IDL.Text,
   'updatedAt' : IDL.Int,
+  'themes' : IDL.Text,
+  'keyContext' : IDL.Text,
   'category' : IDL.Text,
+  'ageCategory' : IDL.Text,
 });
 export const Chapter = IDL.Record({
   'id' : IDL.Nat,
@@ -246,6 +251,11 @@ export const idlService = IDL.Service({
       [IDL.Bool],
       [],
     ),
+  'updateBookMetadata' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
+      [IDL.Bool],
+      [],
+    ),
   'updateChapter' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Bool], []),
   'updateChapterIndents' : IDL.Func(
       [IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
@@ -277,12 +287,17 @@ export const idlFactory = ({ IDL }) => {
   });
   const Book = IDL.Record({
     'id' : IDL.Nat,
+    'writingStyle' : IDL.Text,
     'title' : IDL.Text,
     'ownerId' : IDL.Principal,
+    'authorSummary' : IDL.Text,
     'createdAt' : IDL.Int,
     'description' : IDL.Text,
     'updatedAt' : IDL.Int,
+    'themes' : IDL.Text,
+    'keyContext' : IDL.Text,
     'category' : IDL.Text,
+    'ageCategory' : IDL.Text,
   });
   const Chapter = IDL.Record({
     'id' : IDL.Nat,
@@ -496,6 +511,11 @@ export const idlFactory = ({ IDL }) => {
     'updateAnnotationApproved' : IDL.Func([IDL.Nat, IDL.Bool], [IDL.Bool], []),
     'updateBook' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
+        [IDL.Bool],
+        [],
+      ),
+    'updateBookMetadata' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
         [IDL.Bool],
         [],
       ),

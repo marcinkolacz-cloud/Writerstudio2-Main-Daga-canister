@@ -24,12 +24,17 @@ export interface Analysis {
 }
 export interface Book {
   'id' : bigint,
+  'writingStyle' : string,
   'title' : string,
   'ownerId' : Principal,
+  'authorSummary' : string,
   'createdAt' : bigint,
   'description' : string,
   'updatedAt' : bigint,
+  'themes' : string,
+  'keyContext' : string,
   'category' : string,
+  'ageCategory' : string,
 }
 export interface Chapter {
   'id' : bigint,
@@ -198,6 +203,10 @@ export interface _SERVICE {
   'sendMessage' : ActorMethod<[bigint, string, string, string], bigint>,
   'updateAnnotationApproved' : ActorMethod<[bigint, boolean], boolean>,
   'updateBook' : ActorMethod<[bigint, string, string, string], boolean>,
+  'updateBookMetadata' : ActorMethod<
+    [bigint, string, string, string, string, string],
+    boolean
+  >,
   'updateChapter' : ActorMethod<[bigint, string, string], boolean>,
   'updateChapterIndents' : ActorMethod<
     [bigint, bigint, bigint, bigint],
