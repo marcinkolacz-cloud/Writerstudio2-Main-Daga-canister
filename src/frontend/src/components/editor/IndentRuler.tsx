@@ -20,12 +20,13 @@ function setStoredIndent(key: string, value: number) {
 }
 
 interface IndentRulerProps {
+  editorElement: HTMLElement | null;
   onChange?: (left: number, right: number, firstLine: number) => void;
 }
 
 type DragTarget = "left" | "right" | "firstLine" | null;
 
-export function IndentRuler({ onChange }: IndentRulerProps) {
+export function IndentRuler({ editorElement, onChange }: IndentRulerProps) {
   const [left, setLeft] = useState(() => getStoredIndent(STORAGE_KEYS.left));
   const [right, setRight] = useState(() => getStoredIndent(STORAGE_KEYS.right));
   const [firstLine, setFirstLine] = useState(() =>
@@ -39,37 +40,30 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
   const dragTarget = useRef<DragTarget>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Measure the actual .ProseMirror text element directly
+  // Measure the actual editor DOM element passed as prop
   useEffect(() => {
     const updateMetrics = () => {
-      const proseMirror = document.querySelector(
-        ".ProseMirror",
-      ) as HTMLElement | null;
       const container = containerRef.current;
-      if (!proseMirror || !container) {
+      if (!editorElement || !container) {
         setTrackWidth(0);
         setLeftOffset(0);
         return;
       }
 
-      const proseRect = proseMirror.getBoundingClientRect();
+      const editorRect = editorElement.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
 
       // Width of the actual text area
-      setTrackWidth(Math.max(0, proseRect.width));
+      setTrackWidth(Math.max(0, editorRect.width));
       // Left offset of text area relative to our container
-      setLeftOffset(Math.max(0, proseRect.left - containerRect.left));
+      setLeftOffset(Math.max(0, editorRect.left - containerRect.left));
     };
 
     updateMetrics();
 
-    // Use ResizeObserver on the proseMirror element itself
-    const proseMirror = document.querySelector(
-      ".ProseMirror",
-    ) as HTMLElement | null;
     const ro = new ResizeObserver(updateMetrics);
-    if (proseMirror) {
-      ro.observe(proseMirror);
+    if (editorElement) {
+      ro.observe(editorElement);
     }
     // Also observe container for left-offset changes
     if (containerRef.current) {
@@ -82,7 +76,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
       ro.disconnect();
       window.removeEventListener("resize", updateMetrics);
     };
-  }, []);
+  }, [editorElement]);
 
   const saveToStorage = useCallback((l: number, r: number, f: number) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);

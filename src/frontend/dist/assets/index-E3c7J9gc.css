@@ -2291,6 +2291,10 @@ video {
 .border-current {
   border-color: currentColor;
 }
+.border-destructive {
+  --tw-border-opacity: 1;
+  border-color: oklch(var(--destructive) / var(--tw-border-opacity, 1));
+}
 .border-green-600 {
   --tw-border-opacity: 1;
   border-color: rgb(22 163 74 / var(--tw-border-opacity, 1));
@@ -2589,6 +2593,9 @@ video {
 }
 .pt-0 {
   padding-top: 0px;
+}
+.pt-10 {
+  padding-top: 2.5rem;
 }
 .pt-3 {
   padding-top: 0.75rem;

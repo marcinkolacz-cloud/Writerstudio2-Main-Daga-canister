@@ -17,6 +17,7 @@ import {
   LogOut,
   Moon,
   Sun,
+  WifiOff,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -49,6 +50,18 @@ export function Layout() {
     if (stored === "dark") return "dark";
     return "light";
   });
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -72,6 +85,18 @@ export function Layout() {
 
   return (
     <div className="flex h-screen w-full bg-background">
+      {/* Offline banner */}
+      {!isOnline && (
+        <div
+          className="fixed top-0 left-0 right-0 z-50 bg-destructive text-destructive-foreground px-4 py-2 text-sm font-medium flex items-center justify-center gap-2"
+          data-ocid="layout.offline_banner"
+        >
+          <WifiOff className="h-4 w-4" />
+          Brak połączenia z internetem — zmiany mogą się nie zapisywać. Sprawdź
+          swoje połączenie.
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className="w-[240px] flex-shrink-0 border-r border-border bg-sidebar flex flex-col">
         <div className="p-4 border-b border-sidebar-border">
@@ -187,7 +212,9 @@ export function Layout() {
       </aside>
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div
+        className={`flex-1 flex flex-col min-w-0 ${!isOnline ? "pt-10" : ""}`}
+      >
         {/* Top bar */}
         <header className="h-14 border-b border-border bg-card flex items-center px-6 flex-shrink-0 justify-between">
           <div className="flex items-center gap-2">

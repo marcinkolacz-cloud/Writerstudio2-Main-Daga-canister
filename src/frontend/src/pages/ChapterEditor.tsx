@@ -224,6 +224,7 @@ export function ChapterEditorPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
+  const [saveErrorBannerVisible, setSaveErrorBannerVisible] = useState(false);
 
   // AI analysis state
   const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle");
@@ -262,6 +263,7 @@ export function ChapterEditorPage() {
     return saved === "claude" ? "claude" : "openai";
   });
   const editorRef = useRef<Editor | null>(null);
+  const [editorDomEl, setEditorDomEl] = useState<HTMLElement | null>(null);
 
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -309,6 +311,7 @@ export function ChapterEditorPage() {
     (newTitle: string, newContent: string) => {
       if (!chapter) return;
       setSaveStatus("saving");
+      setSaveErrorBannerVisible(false);
       updateChapter.mutate(
         {
           id: chapter.id,
@@ -316,8 +319,14 @@ export function ChapterEditorPage() {
           content: newContent,
         },
         {
-          onSuccess: () => setSaveStatus("saved"),
-          onError: () => setSaveStatus("unsaved"),
+          onSuccess: () => {
+            setSaveStatus("saved");
+            setSaveErrorBannerVisible(false);
+          },
+          onError: () => {
+            setSaveStatus("unsaved");
+            setSaveErrorBannerVisible(true);
+          },
         },
       );
     },
@@ -415,6 +424,17 @@ export function ChapterEditorPage() {
           data-ocid="chapter.title_input"
         />
       </div>
+
+      {/* Save error banner */}
+      {saveErrorBannerVisible && (
+        <div
+          className="shrink-0 rounded-md border border-destructive bg-destructive/10 px-4 py-3 text-sm text-destructive font-medium"
+          data-ocid="chapter.save_error_banner"
+        >
+          Błąd zapisu! Twoje ostatnie zmiany NIE zostały zapisane. Sprawdź
+          połączenie z internetem — Twoja praca może zostać utracona.
+        </div>
+      )}
 
       {/* Analysis + Indent controls */}
       <div
@@ -1010,7 +1030,7 @@ export function ChapterEditorPage() {
           data-ocid="chapter.editor_wrapper"
         >
           {/* Indent ruler */}
-          <IndentRuler />
+          <IndentRuler editorElement={editorDomEl} />
 
           <RichTextEditor
             value={content}
@@ -1018,6 +1038,7 @@ export function ChapterEditorPage() {
             placeholder="Zacznij pisać..."
             onEditorReady={(editor) => {
               editorRef.current = editor;
+              setEditorDomEl(editor.view.dom as HTMLElement);
 
               // Listen for text selection to show floating button
               const view = editor.view;
