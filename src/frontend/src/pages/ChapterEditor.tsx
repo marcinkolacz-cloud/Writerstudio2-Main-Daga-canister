@@ -834,7 +834,8 @@ export function ChapterEditorPage() {
         )}
 
         {/* Approve changes button */}
-        {currentAnnotations.length > 0 && (
+        {(currentAnnotations.length > 0 ||
+          (persistedAnnotations && persistedAnnotations.length > 0)) && (
           <Button
             size="sm"
             variant="default"
@@ -849,10 +850,22 @@ export function ChapterEditorPage() {
                 "annotationPurple",
               ];
 
+              const annotationsToApprove: Annotation[] =
+                currentAnnotations.length > 0
+                  ? currentAnnotations
+                  : (persistedAnnotations ?? []).map((pa) => ({
+                      id: pa.id,
+                      text: pa.text,
+                      color: pa.color as Annotation["color"],
+                      explanation: pa.explanation,
+                      proposal: pa.proposal,
+                      approved: pa.approved,
+                    }));
+
               // Build a single atomic transaction to remove all annotation marks
               // by finding each annotation via its unique data-annotation-id
               const tr = editor.state.tr;
-              for (const ann of currentAnnotations) {
+              for (const ann of annotationsToApprove) {
                 let foundFrom: number | null = null;
                 let foundTo: number | null = null;
                 editor.state.doc.descendants((node, pos) => {

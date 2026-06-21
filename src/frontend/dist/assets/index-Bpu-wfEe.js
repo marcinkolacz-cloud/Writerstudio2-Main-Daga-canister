@@ -103869,7 +103869,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BnPR0QA4.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BVCDEFae.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -105558,7 +105558,7 @@ ${ch.content}`).join("\n\n---\n\n");
               ] })
             }
           ),
-          currentAnnotations.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          (currentAnnotations.length > 0 || persistedAnnotations && persistedAnnotations.length > 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
             Button,
             {
               size: "sm",
@@ -105573,8 +105573,16 @@ ${ch.content}`).join("\n\n---\n\n");
                   "annotationOrange",
                   "annotationPurple"
                 ];
+                const annotationsToApprove = currentAnnotations.length > 0 ? currentAnnotations : (persistedAnnotations ?? []).map((pa) => ({
+                  id: pa.id,
+                  text: pa.text,
+                  color: pa.color,
+                  explanation: pa.explanation,
+                  proposal: pa.proposal,
+                  approved: pa.approved
+                }));
                 const tr2 = editor.state.tr;
-                for (const ann of currentAnnotations) {
+                for (const ann of annotationsToApprove) {
                   let foundFrom = null;
                   let foundTo = null;
                   editor.state.doc.descendants((node, pos) => {

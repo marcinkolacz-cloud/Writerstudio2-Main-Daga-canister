@@ -1,4 +1,4 @@
-import { c as commonjsGlobal, _ as _typeof$1, g as getDefaultExportFromCjs } from "./index-Dmv0PwD3.js";
+import { c as commonjsGlobal, _ as _typeof$1, g as getDefaultExportFromCjs } from "./index-Bpu-wfEe.js";
 var check = function(it) {
   return it && it.Math === Math && it;
 };
