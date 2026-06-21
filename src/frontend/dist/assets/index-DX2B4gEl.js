@@ -66277,21 +66277,26 @@ function useAnnotationTooltip(editor, onApplyProposal, onRevertProposal) {
         hideTooltip();
         return;
       }
-      const view2 = editor.view;
-      const pos = view2.posAtDOM(annotationSpan, 0);
-      if (pos == null) {
+      let foundFrom = null;
+      let foundTo = null;
+      editor.state.doc.descendants((n2, p2) => {
+        if (!n2.isText) return true;
+        const mark = n2.marks.find(
+          (m2) => m2.type.name === color2 && m2.attrs["data-annotation-id"] === annotationIdAttr
+        );
+        if (mark) {
+          foundFrom = p2;
+          foundTo = p2 + n2.nodeSize;
+          return false;
+        }
+        return true;
+      });
+      if (foundFrom === null || foundTo === null) {
         hideTooltip();
         return;
       }
-      const resolvedPos = editor.state.doc.resolve(pos);
-      const node = resolvedPos.parent.child(resolvedPos.index());
-      if (!node || !node.isText) {
-        hideTooltip();
-        return;
-      }
-      const nodeStart = resolvedPos.start();
-      const from2 = nodeStart;
-      const to = nodeStart + node.nodeSize;
+      const from2 = foundFrom;
+      const to = foundTo;
       const rect = annotationSpan.getBoundingClientRect();
       showTooltip({
         id: annotationIdAttr ? BigInt(annotationIdAttr) : 0n,
@@ -103795,7 +103800,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Cww1uId8.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BiPlNKsP.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

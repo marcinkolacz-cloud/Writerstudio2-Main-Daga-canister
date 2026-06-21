@@ -96,25 +96,29 @@ export function useAnnotationTooltip(
         return;
       }
 
-      // Get ProseMirror position from DOM element
-      const view = editor.view;
-      const pos = view.posAtDOM(annotationSpan, 0);
-      if (pos == null) {
+      // Find the exact range of the annotation mark by searching the document
+      let foundFrom: number | null = null;
+      let foundTo: number | null = null;
+      editor.state.doc.descendants((n, p) => {
+        if (!n.isText) return true;
+        const mark = n.marks.find(
+          (m) =>
+            m.type.name === color &&
+            m.attrs["data-annotation-id"] === annotationIdAttr,
+        );
+        if (mark) {
+          foundFrom = p;
+          foundTo = p + n.nodeSize;
+          return false;
+        }
+        return true;
+      });
+      if (foundFrom === null || foundTo === null) {
         hideTooltip();
         return;
       }
-
-      // Find the full range of the annotation mark
-      const resolvedPos = editor.state.doc.resolve(pos);
-      const node = resolvedPos.parent.child(resolvedPos.index());
-      if (!node || !node.isText) {
-        hideTooltip();
-        return;
-      }
-
-      const nodeStart = resolvedPos.start();
-      const from = nodeStart;
-      const to = nodeStart + node.nodeSize;
+      const from = foundFrom;
+      const to = foundTo;
 
       const rect = annotationSpan.getBoundingClientRect();
       showTooltip({
