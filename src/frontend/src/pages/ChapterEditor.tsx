@@ -411,7 +411,7 @@ export function ChapterEditorPage() {
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
           placeholder="Tytuł rozdziału"
-          className="text-xl font-display font-semibold border-0 bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50"
+          className="text-xl font-display font-semibold border-0 bg-transparent px-0 focus-visible:border-b focus-visible:border-primary focus-visible:ring-0 focus-visible:ring-offset-0 hover:border-b hover:border-border transition-colors placeholder:text-muted-foreground/50"
           data-ocid="chapter.title_input"
         />
       </div>

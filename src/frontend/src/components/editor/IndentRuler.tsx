@@ -32,37 +32,55 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
     getStoredIndent(STORAGE_KEYS.firstLine),
   );
   const [trackWidth, setTrackWidth] = useState(0);
+  const [leftOffset, setLeftOffset] = useState(0);
 
   const trackRef = useRef<HTMLDivElement>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  // Fixed inset compensation for RichTextEditor:
-  // border 1px each side = 2px, prose content padding 16px each side = 32px
-  // Total per side = 34px, both sides = 68px
-  const INSET_TOTAL = 68;
-  const INSET_PER_SIDE = 34;
+  const containerRef = useRef<HTMLDivElement>(null);
   const dragTarget = useRef<DragTarget>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Measure actual width using ResizeObserver
+  // Measure the actual .ProseMirror text element directly
   useEffect(() => {
-    if (!wrapperRef.current) return;
-    const el = wrapperRef.current;
+    const updateMetrics = () => {
+      const proseMirror = document.querySelector(
+        ".ProseMirror",
+      ) as HTMLElement | null;
+      const container = containerRef.current;
+      if (!proseMirror || !container) {
+        setTrackWidth(0);
+        setLeftOffset(0);
+        return;
+      }
 
-    const updateWidth = () => {
-      const rect = el.getBoundingClientRect();
-      setTrackWidth(Math.max(0, rect.width - INSET_TOTAL));
+      const proseRect = proseMirror.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      // Width of the actual text area
+      setTrackWidth(Math.max(0, proseRect.width));
+      // Left offset of text area relative to our container
+      setLeftOffset(Math.max(0, proseRect.left - containerRect.left));
     };
 
-    updateWidth();
+    updateMetrics();
 
-    const ro = new ResizeObserver(updateWidth);
-    ro.observe(el);
-    window.addEventListener("resize", updateWidth);
+    // Use ResizeObserver on the proseMirror element itself
+    const proseMirror = document.querySelector(
+      ".ProseMirror",
+    ) as HTMLElement | null;
+    const ro = new ResizeObserver(updateMetrics);
+    if (proseMirror) {
+      ro.observe(proseMirror);
+    }
+    // Also observe container for left-offset changes
+    if (containerRef.current) {
+      ro.observe(containerRef.current);
+    }
+
+    window.addEventListener("resize", updateMetrics);
 
     return () => {
       ro.disconnect();
-      window.removeEventListener("resize", updateWidth);
+      window.removeEventListener("resize", updateMetrics);
     };
   }, []);
 
@@ -155,7 +173,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
 
   return (
     <div
-      ref={wrapperRef}
+      ref={containerRef}
       className="w-full select-none"
       data-ocid="editor.indent_ruler"
     >
@@ -164,7 +182,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         ref={trackRef}
         className="relative h-6 bg-muted/30 border border-border rounded-md cursor-default"
         style={{
-          marginLeft: `${INSET_PER_SIDE}px`,
+          marginLeft: `${leftOffset}px`,
           width: `${effectiveTrackWidth}px`,
         }}
       >
@@ -187,7 +205,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-primary cursor-ew-resize hover:scale-110 transition-transform"
           style={{
-            left: `${toVisualPos(left) - 6 + INSET_PER_SIDE}px`,
+            left: `${toVisualPos(left) - 6 + leftOffset}px`,
             top: "2px",
           }}
           onMouseDown={handleMouseDown("left")}
@@ -198,7 +216,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-3 w-px bg-primary/30 pointer-events-none"
           style={{
-            left: `${toVisualPos(left) + INSET_PER_SIDE}px`,
+            left: `${toVisualPos(left) + leftOffset}px`,
             height: "calc(100% - 12px)",
           }}
         />
@@ -207,7 +225,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-0 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[9px] border-t-accent cursor-ew-resize hover:scale-110 transition-transform"
           style={{
-            left: `${toVisualPos(firstLine) - 5 + INSET_PER_SIDE}px`,
+            left: `${toVisualPos(firstLine) - 5 + leftOffset}px`,
             top: "14px",
           }}
           onMouseDown={handleMouseDown("firstLine")}
@@ -218,7 +236,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-3 w-px bg-accent/30 pointer-events-none"
           style={{
-            left: `${toVisualPos(firstLine) + INSET_PER_SIDE}px`,
+            left: `${toVisualPos(firstLine) + leftOffset}px`,
             height: "calc(100% - 12px)",
           }}
         />
@@ -227,7 +245,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-secondary-foreground cursor-ew-resize hover:scale-110 transition-transform"
           style={{
-            left: `${toVisualPos(MAX_INDENT - right) - 6 + INSET_PER_SIDE}px`,
+            left: `${toVisualPos(MAX_INDENT - right) - 6 + leftOffset}px`,
             top: "2px",
           }}
           onMouseDown={handleMouseDown("right")}
@@ -238,7 +256,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-3 w-px bg-secondary-foreground/30 pointer-events-none"
           style={{
-            left: `${toVisualPos(MAX_INDENT - right) + INSET_PER_SIDE}px`,
+            left: `${toVisualPos(MAX_INDENT - right) + leftOffset}px`,
             height: "calc(100% - 12px)",
           }}
         />

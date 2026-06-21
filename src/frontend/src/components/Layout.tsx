@@ -12,14 +12,13 @@ import {
 import {
   BarChart3,
   BookOpen,
-  ChevronDown,
-  ChevronUp,
   FileText,
+  GripVertical,
   LogOut,
   Moon,
   Sun,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 function useActiveBookId(): string | null {
   const routerState = useRouterState();
@@ -44,6 +43,7 @@ export function Layout() {
   const activeChapterId = useActiveChapterId();
   const { data: chapters } = useChapters(activeBookId ?? "");
   const reorderChapters = useReorderChapters();
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     const stored = localStorage.getItem("writerstudio-theme");
     if (stored === "dark") return "dark";
@@ -87,13 +87,57 @@ export function Layout() {
                 return (
                   <div
                     key={String(chapter.id)}
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData("text/plain", String(chapter.id));
+                      e.dataTransfer.effectAllowed = "move";
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = "move";
+                      setDragOverIndex(index);
+                    }}
+                    onDragLeave={() => {
+                      setDragOverIndex(null);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const draggedId = e.dataTransfer.getData("text/plain");
+                      if (!draggedId || !chapters || !activeBookId) {
+                        setDragOverIndex(null);
+                        return;
+                      }
+                      const fromIndex = chapters.findIndex(
+                        (c) => String(c.id) === draggedId,
+                      );
+                      if (
+                        fromIndex === -1 ||
+                        fromIndex === index ||
+                        fromIndex === index - 1
+                      ) {
+                        setDragOverIndex(null);
+                        return;
+                      }
+                      const newOrder = chapters.map((c) => c.id);
+                      const [moved] = newOrder.splice(fromIndex, 1);
+                      const insertAt = fromIndex < index ? index - 1 : index;
+                      newOrder.splice(insertAt, 0, moved);
+                      reorderChapters.mutate({
+                        bookId: BigInt(activeBookId),
+                        orderedChapterIds: newOrder,
+                      });
+                      setDragOverIndex(null);
+                    }}
                     className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-sm transition-colors ${
                       isActive
                         ? "bg-sidebar-accent text-sidebar-foreground font-medium"
                         : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                    }`}
+                    } ${dragOverIndex === index ? "border-t-2 border-t-primary" : ""}`}
                     data-ocid={`nav.chapter_row.item.${Number(chapter.orderIndex) + 1}`}
                   >
+                    <div className="shrink-0 cursor-grab active:cursor-grabbing text-sidebar-foreground/40 hover:text-sidebar-foreground/70 transition-colors">
+                      <GripVertical className="h-4 w-4" />
+                    </div>
                     <button
                       type="button"
                       onClick={() =>
@@ -111,54 +155,6 @@ export function Layout() {
                       <FileText className="h-4 w-4 shrink-0" />
                       <span className="truncate">{chapter.title}</span>
                     </button>
-                    <div className="flex flex-col gap-0.5 shrink-0">
-                      <button
-                        type="button"
-                        disabled={index === 0}
-                        onClick={() => {
-                          if (!chapters || !activeBookId) return;
-                          const newOrder = chapters.map((c) => c.id);
-                          const currentIndex = index;
-                          const prevIndex = currentIndex - 1;
-                          [newOrder[currentIndex], newOrder[prevIndex]] = [
-                            newOrder[prevIndex],
-                            newOrder[currentIndex],
-                          ];
-                          reorderChapters.mutate({
-                            bookId: BigInt(activeBookId),
-                            orderedChapterIds: newOrder,
-                          });
-                        }}
-                        className="p-0.5 rounded hover:bg-sidebar-accent disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                        aria-label="Przesuń wyżej"
-                        data-ocid={`chapter.reorder_up.item.${Number(chapter.orderIndex) + 1}`}
-                      >
-                        <ChevronUp className="h-3 w-3" />
-                      </button>
-                      <button
-                        type="button"
-                        disabled={index === chapters.length - 1}
-                        onClick={() => {
-                          if (!chapters || !activeBookId) return;
-                          const newOrder = chapters.map((c) => c.id);
-                          const currentIndex = index;
-                          const nextIndex = currentIndex + 1;
-                          [newOrder[currentIndex], newOrder[nextIndex]] = [
-                            newOrder[nextIndex],
-                            newOrder[currentIndex],
-                          ];
-                          reorderChapters.mutate({
-                            bookId: BigInt(activeBookId),
-                            orderedChapterIds: newOrder,
-                          });
-                        }}
-                        className="p-0.5 rounded hover:bg-sidebar-accent disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                        aria-label="Przesuń niżej"
-                        data-ocid={`chapter.reorder_down.item.${Number(chapter.orderIndex) + 1}`}
-                      >
-                        <ChevronDown className="h-3 w-3" />
-                      </button>
-                    </div>
                   </div>
                 );
               })}

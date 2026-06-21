@@ -38363,12 +38363,23 @@ const createLucideIcon = (iconName, iconNode) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$F = [
+const __iconNode$G = [
   ["path", { d: "M15 12H3", key: "6jk70r" }],
   ["path", { d: "M17 18H3", key: "1amg6g" }],
   ["path", { d: "M21 6H3", key: "1jwq7v" }]
 ];
-const AlignLeft = createLucideIcon("align-left", __iconNode$F);
+const AlignLeft = createLucideIcon("align-left", __iconNode$G);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$F = [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+];
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$F);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38376,10 +38387,12 @@ const AlignLeft = createLucideIcon("align-left", __iconNode$F);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$E = [
-  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
-  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+  [
+    "path",
+    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
+  ]
 ];
-const ArrowLeft = createLucideIcon("arrow-left", __iconNode$E);
+const Bold$1 = createLucideIcon("bold", __iconNode$E);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38387,19 +38400,6 @@ const ArrowLeft = createLucideIcon("arrow-left", __iconNode$E);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$D = [
-  [
-    "path",
-    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
-  ]
-];
-const Bold$1 = createLucideIcon("bold", __iconNode$D);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$C = [
   ["path", { d: "M12 7v14", key: "1akyts" }],
   [
     "path",
@@ -38409,14 +38409,14 @@ const __iconNode$C = [
     }
   ]
 ];
-const BookOpen = createLucideIcon("book-open", __iconNode$C);
+const BookOpen = createLucideIcon("book-open", __iconNode$D);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$B = [
+const __iconNode$C = [
   [
     "path",
     {
@@ -38427,44 +38427,55 @@ const __iconNode$B = [
   ["path", { d: "M8 11h8", key: "vwpz6n" }],
   ["path", { d: "M8 7h6", key: "1f0q6e" }]
 ];
-const BookText = createLucideIcon("book-text", __iconNode$B);
+const BookText = createLucideIcon("book-text", __iconNode$C);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$A = [
+const __iconNode$B = [
   ["path", { d: "M3 3v16a2 2 0 0 0 2 2h16", key: "c24i48" }],
   ["path", { d: "M18 17V9", key: "2bz60n" }],
   ["path", { d: "M13 17V5", key: "1frdt8" }],
   ["path", { d: "M8 17v-3", key: "17ska0" }]
 ];
-const ChartColumn = createLucideIcon("chart-column", __iconNode$A);
+const ChartColumn = createLucideIcon("chart-column", __iconNode$B);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$z = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$z);
+const __iconNode$A = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$A);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$y = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$y);
+const __iconNode$z = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$z);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$x = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-const ChevronUp = createLucideIcon("chevron-up", __iconNode$x);
+const __iconNode$y = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+const ChevronUp = createLucideIcon("chevron-up", __iconNode$y);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$x = [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
+];
+const CircleCheck = createLucideIcon("circle-check", __iconNode$x);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38473,9 +38484,9 @@ const ChevronUp = createLucideIcon("chevron-up", __iconNode$x);
  */
 const __iconNode$w = [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
+  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
 ];
-const CircleCheck = createLucideIcon("circle-check", __iconNode$w);
+const Clock = createLucideIcon("clock", __iconNode$w);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38483,10 +38494,11 @@ const CircleCheck = createLucideIcon("circle-check", __iconNode$w);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$v = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
+  ["path", { d: "M12 15V3", key: "m9g1x1" }],
+  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
+  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
 ];
-const Clock = createLucideIcon("clock", __iconNode$v);
+const Download = createLucideIcon("download", __iconNode$v);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38494,11 +38506,13 @@ const Clock = createLucideIcon("clock", __iconNode$v);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$u = [
-  ["path", { d: "M12 15V3", key: "m9g1x1" }],
-  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
-  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
+  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
+  ["path", { d: "M10 9H8", key: "b1mrlr" }],
+  ["path", { d: "M16 13H8", key: "t4e002" }],
+  ["path", { d: "M16 17H8", key: "z1uh3a" }]
 ];
-const Download = createLucideIcon("download", __iconNode$u);
+const FileText = createLucideIcon("file-text", __iconNode$u);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38506,13 +38520,14 @@ const Download = createLucideIcon("download", __iconNode$u);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$t = [
-  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
-  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
-  ["path", { d: "M10 9H8", key: "b1mrlr" }],
-  ["path", { d: "M16 13H8", key: "t4e002" }],
-  ["path", { d: "M16 17H8", key: "z1uh3a" }]
+  ["circle", { cx: "9", cy: "12", r: "1", key: "1vctgf" }],
+  ["circle", { cx: "9", cy: "5", r: "1", key: "hp0tcf" }],
+  ["circle", { cx: "9", cy: "19", r: "1", key: "fkjjf6" }],
+  ["circle", { cx: "15", cy: "12", r: "1", key: "1tmaij" }],
+  ["circle", { cx: "15", cy: "5", r: "1", key: "19l28e" }],
+  ["circle", { cx: "15", cy: "19", r: "1", key: "f4zoj3" }]
 ];
-const FileText = createLucideIcon("file-text", __iconNode$t);
+const GripVertical = createLucideIcon("grip-vertical", __iconNode$t);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -39303,6 +39318,7 @@ function Layout() {
   const activeChapterId = useActiveChapterId();
   const { data: chapters } = useChapters(activeBookId ?? "");
   const reorderChapters = useReorderChapters();
+  const [dragOverIndex, setDragOverIndex] = reactExports.useState(null);
   const [theme, setTheme] = reactExports.useState(() => {
     const stored = localStorage.getItem("writerstudio-theme");
     if (stored === "dark") return "dark";
@@ -39334,9 +39350,47 @@ function Layout() {
           return /* @__PURE__ */ jsxRuntimeExports.jsxs(
             "div",
             {
-              className: `flex items-center gap-1 rounded-md px-2 py-1.5 text-sm transition-colors ${isActive2 ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"}`,
+              draggable: true,
+              onDragStart: (e3) => {
+                e3.dataTransfer.setData("text/plain", String(chapter.id));
+                e3.dataTransfer.effectAllowed = "move";
+              },
+              onDragOver: (e3) => {
+                e3.preventDefault();
+                e3.dataTransfer.dropEffect = "move";
+                setDragOverIndex(index2);
+              },
+              onDragLeave: () => {
+                setDragOverIndex(null);
+              },
+              onDrop: (e3) => {
+                e3.preventDefault();
+                const draggedId = e3.dataTransfer.getData("text/plain");
+                if (!draggedId || !chapters || !activeBookId) {
+                  setDragOverIndex(null);
+                  return;
+                }
+                const fromIndex = chapters.findIndex(
+                  (c2) => String(c2.id) === draggedId
+                );
+                if (fromIndex === -1 || fromIndex === index2 || fromIndex === index2 - 1) {
+                  setDragOverIndex(null);
+                  return;
+                }
+                const newOrder = chapters.map((c2) => c2.id);
+                const [moved] = newOrder.splice(fromIndex, 1);
+                const insertAt = fromIndex < index2 ? index2 - 1 : index2;
+                newOrder.splice(insertAt, 0, moved);
+                reorderChapters.mutate({
+                  bookId: BigInt(activeBookId),
+                  orderedChapterIds: newOrder
+                });
+                setDragOverIndex(null);
+              },
+              className: `flex items-center gap-1 rounded-md px-2 py-1.5 text-sm transition-colors ${isActive2 ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"} ${dragOverIndex === index2 ? "border-t-2 border-t-primary" : ""}`,
               "data-ocid": `nav.chapter_row.item.${Number(chapter.orderIndex) + 1}`,
               children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 cursor-grab active:cursor-grabbing text-sidebar-foreground/40 hover:text-sidebar-foreground/70 transition-colors", children: /* @__PURE__ */ jsxRuntimeExports.jsx(GripVertical, { className: "h-4 w-4" }) }),
                 /* @__PURE__ */ jsxRuntimeExports.jsxs(
                   "button",
                   {
@@ -39355,59 +39409,7 @@ function Layout() {
                       /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: chapter.title })
                     ]
                   }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col gap-0.5 shrink-0", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    "button",
-                    {
-                      type: "button",
-                      disabled: index2 === 0,
-                      onClick: () => {
-                        if (!chapters || !activeBookId) return;
-                        const newOrder = chapters.map((c2) => c2.id);
-                        const currentIndex = index2;
-                        const prevIndex = currentIndex - 1;
-                        [newOrder[currentIndex], newOrder[prevIndex]] = [
-                          newOrder[prevIndex],
-                          newOrder[currentIndex]
-                        ];
-                        reorderChapters.mutate({
-                          bookId: BigInt(activeBookId),
-                          orderedChapterIds: newOrder
-                        });
-                      },
-                      className: "p-0.5 rounded hover:bg-sidebar-accent disabled:opacity-30 disabled:hover:bg-transparent transition-colors",
-                      "aria-label": "Przesuń wyżej",
-                      "data-ocid": `chapter.reorder_up.item.${Number(chapter.orderIndex) + 1}`,
-                      children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronUp, { className: "h-3 w-3" })
-                    }
-                  ),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    "button",
-                    {
-                      type: "button",
-                      disabled: index2 === chapters.length - 1,
-                      onClick: () => {
-                        if (!chapters || !activeBookId) return;
-                        const newOrder = chapters.map((c2) => c2.id);
-                        const currentIndex = index2;
-                        const nextIndex = currentIndex + 1;
-                        [newOrder[currentIndex], newOrder[nextIndex]] = [
-                          newOrder[nextIndex],
-                          newOrder[currentIndex]
-                        ];
-                        reorderChapters.mutate({
-                          bookId: BigInt(activeBookId),
-                          orderedChapterIds: newOrder
-                        });
-                      },
-                      className: "p-0.5 rounded hover:bg-sidebar-accent disabled:opacity-30 disabled:hover:bg-transparent transition-colors",
-                      "aria-label": "Przesuń niżej",
-                      "data-ocid": `chapter.reorder_down.item.${Number(chapter.orderIndex) + 1}`,
-                      children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "h-3 w-3" })
-                    }
-                  )
-                ] })
+                )
               ]
             },
             String(chapter.id)
@@ -103572,7 +103574,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-MfMapwM5.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BBRZZS7z.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -104388,26 +104390,42 @@ function IndentRuler({ onChange }) {
     () => getStoredIndent(STORAGE_KEYS.firstLine)
   );
   const [trackWidth, setTrackWidth] = reactExports.useState(0);
+  const [leftOffset, setLeftOffset] = reactExports.useState(0);
   const trackRef = reactExports.useRef(null);
-  const wrapperRef = reactExports.useRef(null);
-  const INSET_TOTAL = 68;
-  const INSET_PER_SIDE = 34;
+  const containerRef = reactExports.useRef(null);
   const dragTarget = reactExports.useRef(null);
   const debounceRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (!wrapperRef.current) return;
-    const el = wrapperRef.current;
-    const updateWidth = () => {
-      const rect = el.getBoundingClientRect();
-      setTrackWidth(Math.max(0, rect.width - INSET_TOTAL));
+    const updateMetrics = () => {
+      const proseMirror2 = document.querySelector(
+        ".ProseMirror"
+      );
+      const container = containerRef.current;
+      if (!proseMirror2 || !container) {
+        setTrackWidth(0);
+        setLeftOffset(0);
+        return;
+      }
+      const proseRect = proseMirror2.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      setTrackWidth(Math.max(0, proseRect.width));
+      setLeftOffset(Math.max(0, proseRect.left - containerRect.left));
     };
-    updateWidth();
-    const ro = new ResizeObserver(updateWidth);
-    ro.observe(el);
-    window.addEventListener("resize", updateWidth);
+    updateMetrics();
+    const proseMirror = document.querySelector(
+      ".ProseMirror"
+    );
+    const ro = new ResizeObserver(updateMetrics);
+    if (proseMirror) {
+      ro.observe(proseMirror);
+    }
+    if (containerRef.current) {
+      ro.observe(containerRef.current);
+    }
+    window.addEventListener("resize", updateMetrics);
     return () => {
       ro.disconnect();
-      window.removeEventListener("resize", updateWidth);
+      window.removeEventListener("resize", updateMetrics);
     };
   }, []);
   const saveToStorage = reactExports.useCallback((l2, r2, f2) => {
@@ -104486,7 +104504,7 @@ function IndentRuler({ onChange }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
     {
-      ref: wrapperRef,
+      ref: containerRef,
       className: "w-full select-none",
       "data-ocid": "editor.indent_ruler",
       children: [
@@ -104496,7 +104514,7 @@ function IndentRuler({ onChange }) {
             ref: trackRef,
             className: "relative h-6 bg-muted/30 border border-border rounded-md cursor-default",
             style: {
-              marginLeft: `${INSET_PER_SIDE}px`,
+              marginLeft: `${leftOffset}px`,
               width: `${effectiveTrackWidth}px`
             },
             children: [
@@ -104518,7 +104536,7 @@ function IndentRuler({ onChange }) {
                 {
                   className: "absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-primary cursor-ew-resize hover:scale-110 transition-transform",
                   style: {
-                    left: `${toVisualPos(left) - 6 + INSET_PER_SIDE}px`,
+                    left: `${toVisualPos(left) - 6 + leftOffset}px`,
                     top: "2px"
                   },
                   onMouseDown: handleMouseDown("left"),
@@ -104531,7 +104549,7 @@ function IndentRuler({ onChange }) {
                 {
                   className: "absolute top-3 w-px bg-primary/30 pointer-events-none",
                   style: {
-                    left: `${toVisualPos(left) + INSET_PER_SIDE}px`,
+                    left: `${toVisualPos(left) + leftOffset}px`,
                     height: "calc(100% - 12px)"
                   }
                 }
@@ -104541,7 +104559,7 @@ function IndentRuler({ onChange }) {
                 {
                   className: "absolute top-0 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[9px] border-t-accent cursor-ew-resize hover:scale-110 transition-transform",
                   style: {
-                    left: `${toVisualPos(firstLine) - 5 + INSET_PER_SIDE}px`,
+                    left: `${toVisualPos(firstLine) - 5 + leftOffset}px`,
                     top: "14px"
                   },
                   onMouseDown: handleMouseDown("firstLine"),
@@ -104554,7 +104572,7 @@ function IndentRuler({ onChange }) {
                 {
                   className: "absolute top-3 w-px bg-accent/30 pointer-events-none",
                   style: {
-                    left: `${toVisualPos(firstLine) + INSET_PER_SIDE}px`,
+                    left: `${toVisualPos(firstLine) + leftOffset}px`,
                     height: "calc(100% - 12px)"
                   }
                 }
@@ -104564,7 +104582,7 @@ function IndentRuler({ onChange }) {
                 {
                   className: "absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-secondary-foreground cursor-ew-resize hover:scale-110 transition-transform",
                   style: {
-                    left: `${toVisualPos(MAX_INDENT - right) - 6 + INSET_PER_SIDE}px`,
+                    left: `${toVisualPos(MAX_INDENT - right) - 6 + leftOffset}px`,
                     top: "2px"
                   },
                   onMouseDown: handleMouseDown("right"),
@@ -104577,7 +104595,7 @@ function IndentRuler({ onChange }) {
                 {
                   className: "absolute top-3 w-px bg-secondary-foreground/30 pointer-events-none",
                   style: {
-                    left: `${toVisualPos(MAX_INDENT - right) + INSET_PER_SIDE}px`,
+                    left: `${toVisualPos(MAX_INDENT - right) + leftOffset}px`,
                     height: "calc(100% - 12px)"
                   }
                 }
@@ -104867,7 +104885,7 @@ function ChapterEditorPage() {
         value: title,
         onChange: (e3) => handleTitleChange(e3.target.value),
         placeholder: "Tytuł rozdziału",
-        className: "text-xl font-display font-semibold border-0 bg-transparent px-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50",
+        className: "text-xl font-display font-semibold border-0 bg-transparent px-0 focus-visible:border-b focus-visible:border-primary focus-visible:ring-0 focus-visible:ring-offset-0 hover:border-b hover:border-border transition-colors placeholder:text-muted-foreground/50",
         "data-ocid": "chapter.title_input"
       }
     ) }),
