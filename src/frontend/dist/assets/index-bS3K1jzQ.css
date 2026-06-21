@@ -1392,6 +1392,9 @@ video {
 .row-start-1 {
   grid-row-start: 1;
 }
+.m-0 {
+  margin: 0px;
+}
 .-mx-1 {
   margin-left: -0.25rem;
   margin-right: -0.25rem;
@@ -1403,6 +1406,10 @@ video {
 .mx-3\.5 {
   margin-left: 0.875rem;
   margin-right: 0.875rem;
+}
+.mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 .mx-auto {
   margin-left: auto;
@@ -1424,6 +1431,9 @@ video {
 }
 .-mt-4 {
   margin-top: -1rem;
+}
+.mb-0 {
+  margin-bottom: 0px;
 }
 .mb-1 {
   margin-bottom: 0.25rem;
@@ -2628,6 +2638,9 @@ video {
 }
 .text-muted-foreground\/60 {
   color: oklch(var(--muted-foreground) / 0.6);
+}
+.text-muted-foreground\/70 {
+  color: oklch(var(--muted-foreground) / 0.7);
 }
 .text-popover-foreground {
   color: oklch(var(--popover-foreground));

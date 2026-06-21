@@ -1,3 +1,4 @@
+import { AnalysisHistoryPanel } from "@/components/editor/AnalysisHistoryPanel";
 import { CommentDialog } from "@/components/editor/CommentDialog";
 import { CommentsPanel } from "@/components/editor/CommentsPanel";
 import { LektorPanel } from "@/components/editor/LektorPanel";
@@ -63,6 +64,7 @@ import {
   Download,
   FileText,
   Headphones,
+  History,
   MessageCircle,
   MessageSquare,
   Save,
@@ -214,6 +216,7 @@ export function ChapterEditorPage() {
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [lektorPanelOpen, setLektorPanelOpen] = useState(false);
   const [recordingsPanelOpen, setRecordingsPanelOpen] = useState(false);
+  const [historyPanelOpen, setHistoryPanelOpen] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedText, setSelectedText] = useState("");
   const [floatingButtonPos, setFloatingButtonPos] = useState<{
@@ -681,6 +684,19 @@ export function ChapterEditorPage() {
 
         <div className="w-px h-6 bg-border hidden sm:block" />
 
+        {/* History toggle */}
+        <Button
+          size="sm"
+          variant={historyPanelOpen ? "default" : "outline"}
+          onClick={() => setHistoryPanelOpen((v) => !v)}
+          data-ocid="chapter.history_toggle_button"
+        >
+          <History className="h-3.5 w-3.5 mr-1.5" />
+          Historia
+        </Button>
+
+        <div className="w-px h-6 bg-border hidden sm:block" />
+
         {/* Recordings toggle */}
         <Button
           size="sm"
@@ -816,6 +832,26 @@ export function ChapterEditorPage() {
               bookId={book.id}
             />
           )}
+        </div>
+      )}
+
+      {/* History panel */}
+      {historyPanelOpen && (
+        <div data-ocid="chapter.history_panel_container">
+          <AnalysisHistoryPanel
+            bookId={book.id}
+            chapterId={chapter.id}
+            onLoadAnalysis={(annotations) => {
+              if (editorRef.current) {
+                applyAnnotationsToEditor(editorRef.current, annotations, {
+                  skipApproved: true,
+                });
+              }
+            }}
+            onOpenSummary={(content) => {
+              setSummaryResult(content);
+            }}
+          />
         </div>
       )}
 

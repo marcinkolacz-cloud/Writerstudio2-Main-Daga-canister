@@ -529,6 +529,21 @@ export async function getAnnotation(
   return actor.getAnnotation(id);
 }
 
+export function useDeleteAnalysis() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id }: { id: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteAnalysis(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["analyses"] });
+    },
+  });
+}
+
 export function useClearChat() {
   const { actor } = useActor(createActor);
   const queryClient = useQueryClient();
