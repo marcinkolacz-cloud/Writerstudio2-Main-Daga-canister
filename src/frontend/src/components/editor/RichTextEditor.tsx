@@ -195,19 +195,10 @@ export function RichTextEditor({
     }) => {
       if (!editor) return;
 
-      let actualFrom = from;
-      let actualTo = to;
+      const actualFrom = from;
+      const actualTo = to;
 
-      // Verify the exact range still contains the expected text
-      const currentText = editor.state.doc.textBetween(from, to, " ");
-      if (currentText !== originalText) {
-        const match = findTextRangeInDoc(editor, originalText, from);
-        if (!match) return; // avoid accidental damage to random location
-        actualFrom = match.from;
-        actualTo = match.to;
-      }
-
-      // Read the existing mark and its attributes before deleting
+      // Read the existing mark and its attributes at the given position
       let markTypeName = "";
       let markAttrs: Record<string, unknown> = {};
       editor.state.doc.nodesBetween(actualFrom, actualTo, (node) => {
@@ -258,7 +249,7 @@ export function RichTextEditor({
         );
       }
     },
-    [editor, updateAnnotationApproved, findTextRangeInDoc],
+    [editor, updateAnnotationApproved],
   );
 
   const { tooltip, tooltipRef, handleApply, handleRevert, clearHideTimeout } =

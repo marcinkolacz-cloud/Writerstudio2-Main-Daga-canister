@@ -74905,15 +74905,8 @@ function RichTextEditor({
       originalText
     }) => {
       if (!editor) return;
-      let actualFrom = from2;
-      let actualTo = to;
-      const currentText = editor.state.doc.textBetween(from2, to, " ");
-      if (currentText !== originalText) {
-        const match = findTextRangeInDoc(editor, originalText, from2);
-        if (!match) return;
-        actualFrom = match.from;
-        actualTo = match.to;
-      }
+      const actualFrom = from2;
+      const actualTo = to;
       let markTypeName = "";
       let markAttrs = {};
       editor.state.doc.nodesBetween(actualFrom, actualTo, (node) => {
@@ -74956,7 +74949,7 @@ function RichTextEditor({
         );
       }
     },
-    [editor, updateAnnotationApproved, findTextRangeInDoc]
+    [editor, updateAnnotationApproved]
   );
   const { tooltip, tooltipRef, handleApply, handleRevert, clearHideTimeout } = useAnnotationTooltip(editor, handleApplyProposal, handleRevertProposal);
   reactExports.useEffect(() => {
@@ -103876,7 +103869,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-D92YVIX4.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BnPR0QA4.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -105582,12 +105575,26 @@ ${ch.content}`).join("\n\n---\n\n");
                 ];
                 const tr2 = editor.state.tr;
                 for (const ann of currentAnnotations) {
-                  const range3 = findFirstTextRangeInDoc(editor, ann.text);
-                  if (range3) {
+                  let foundFrom = null;
+                  let foundTo = null;
+                  editor.state.doc.descendants((node, pos) => {
+                    if (foundFrom !== null) return false;
+                    if (!node.isText) return true;
+                    const mark = node.marks.find(
+                      (m2) => annotationMarkNames.includes(m2.type.name) && m2.attrs["data-annotation-id"] === String(ann.id)
+                    );
+                    if (mark) {
+                      foundFrom = pos;
+                      foundTo = pos + node.nodeSize;
+                      return false;
+                    }
+                    return true;
+                  });
+                  if (foundFrom !== null && foundTo !== null) {
                     for (const markName of annotationMarkNames) {
                       const markType = editor.schema.marks[markName];
                       if (markType) {
-                        tr2.removeMark(range3.from, range3.to, markType);
+                        tr2.removeMark(foundFrom, foundTo, markType);
                       }
                     }
                   }

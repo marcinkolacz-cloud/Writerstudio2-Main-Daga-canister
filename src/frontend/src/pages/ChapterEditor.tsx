@@ -850,15 +850,31 @@ export function ChapterEditorPage() {
               ];
 
               // Build a single atomic transaction to remove all annotation marks
-              // for the text fragments corresponding to currentAnnotations
+              // by finding each annotation via its unique data-annotation-id
               const tr = editor.state.tr;
               for (const ann of currentAnnotations) {
-                const range = findFirstTextRangeInDoc(editor, ann.text);
-                if (range) {
+                let foundFrom: number | null = null;
+                let foundTo: number | null = null;
+                editor.state.doc.descendants((node, pos) => {
+                  if (foundFrom !== null) return false;
+                  if (!node.isText) return true;
+                  const mark = node.marks.find(
+                    (m) =>
+                      annotationMarkNames.includes(m.type.name) &&
+                      m.attrs["data-annotation-id"] === String(ann.id),
+                  );
+                  if (mark) {
+                    foundFrom = pos;
+                    foundTo = pos + node.nodeSize;
+                    return false;
+                  }
+                  return true;
+                });
+                if (foundFrom !== null && foundTo !== null) {
                   for (const markName of annotationMarkNames) {
                     const markType = editor.schema.marks[markName];
                     if (markType) {
-                      tr.removeMark(range.from, range.to, markType);
+                      tr.removeMark(foundFrom, foundTo, markType);
                     }
                   }
                 }
