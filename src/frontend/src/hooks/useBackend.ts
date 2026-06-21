@@ -175,7 +175,7 @@ export function useSaveAnalysis() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["analyses", variables.bookId],
+        queryKey: ["analyses", "book", variables.bookId],
       });
       if (variables.chapterId) {
         queryClient.invalidateQueries({
