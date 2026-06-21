@@ -71,6 +71,7 @@ function BookStatsRow({
           <>
             <Skeleton className="h-5 w-16" />
             <Skeleton className="h-5 w-16" />
+            <Skeleton className="h-5 w-16" />
             <Skeleton className="h-5 w-20" />
           </>
         ) : (
@@ -81,6 +82,13 @@ function BookStatsRow({
                 {Number(stats?.totalWords ?? 0).toLocaleString()}
               </span>{" "}
               słów
+            </span>
+            <span className="flex items-center gap-1.5">
+              <FileText className="h-4 w-4 text-chart-4" />
+              <span className="font-medium text-foreground">
+                {Number(stats?.totalChars ?? 0).toLocaleString()}
+              </span>{" "}
+              znaków
             </span>
             <span className="flex items-center gap-1.5">
               <Layers className="h-4 w-4 text-chart-2" />

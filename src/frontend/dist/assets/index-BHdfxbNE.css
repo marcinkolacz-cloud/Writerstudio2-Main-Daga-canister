@@ -2707,6 +2707,9 @@ video {
 .text-chart-3 {
   color: oklch(var(--chart-3));
 }
+.text-chart-4 {
+  color: oklch(var(--chart-4));
+}
 .text-current {
   color: currentColor;
 }

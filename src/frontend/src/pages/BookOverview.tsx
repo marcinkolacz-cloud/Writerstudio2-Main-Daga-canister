@@ -2,7 +2,12 @@ import { BookSettingsTab } from "@/components/book/BookSettingsTab";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useBook, useChapters, useCreateChapter } from "@/hooks/useBackend";
+import {
+  useBook,
+  useBookStats,
+  useChapters,
+  useCreateChapter,
+} from "@/hooks/useBackend";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, BookOpen, FileText, Plus, Settings } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +21,7 @@ function ChapterListItem({
     id: bigint;
     title: string;
     wordCount: bigint;
+    charCount: bigint;
   };
   bookId: string;
   index: number;
@@ -42,7 +48,7 @@ function ChapterListItem({
           {chapter.title}
         </h3>
         <p className="text-sm text-muted-foreground">
-          {Number(chapter.wordCount)} słów
+          {Number(chapter.wordCount)} słów · {Number(chapter.charCount)} znaków
         </p>
       </div>
       <ArrowLeft className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity -rotate-180" />
@@ -60,6 +66,7 @@ export function BookOverviewPage() {
     isError: bookError,
   } = useBook(bookId);
   const { data: chapters, isLoading: chaptersLoading } = useChapters(bookId);
+  const { data: bookStats } = useBookStats(bookId);
   const createChapter = useCreateChapter();
 
   const handleAddChapter = () => {
@@ -147,7 +154,23 @@ export function BookOverviewPage() {
               {book.description}
             </p>
           )}
-          <div className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+              {book.category}
+            </div>
+            {bookStats && (
+              <div className="inline-flex items-center gap-3 rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                <span>
+                  {Number(bookStats.totalWords).toLocaleString()} słów
+                </span>
+                <span>·</span>
+                <span>
+                  {Number(bookStats.totalChars).toLocaleString()} znaków
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground hidden">
             {book.category}
           </div>
         </div>

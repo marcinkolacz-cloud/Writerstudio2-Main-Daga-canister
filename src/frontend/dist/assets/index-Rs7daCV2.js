@@ -45463,7 +45463,9 @@ function ChapterListItem({
           /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "font-medium text-foreground truncate", children: chapter.title }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-muted-foreground", children: [
             Number(chapter.wordCount),
-            " słów"
+            " słów · ",
+            Number(chapter.charCount),
+            " znaków"
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity -rotate-180" })
@@ -45480,6 +45482,7 @@ function BookOverviewPage() {
     isError: bookError
   } = useBook(bookId);
   const { data: chapters, isLoading: chaptersLoading } = useChapters(bookId);
+  const { data: bookStats } = useBookStats(bookId);
   const createChapter = useCreateChapter();
   const handleAddChapter = () => {
     createChapter.mutate(
@@ -45551,7 +45554,21 @@ function BookOverviewPage() {
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-2xl font-display font-semibold text-foreground", children: book.title }),
         book.description && /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-muted-foreground max-w-xl", children: book.description }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground", children: book.category })
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground", children: book.category }),
+          bookStats && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "inline-flex items-center gap-3 rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              Number(bookStats.totalWords).toLocaleString(),
+              " słów"
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "·" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              Number(bookStats.totalChars).toLocaleString(),
+              " znaków"
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground hidden", children: book.category })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs(
         Button,
@@ -103618,7 +103635,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CxfaM6pX.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-W4I4bEtw.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -126529,6 +126546,7 @@ function BookStatsRow({
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center gap-6 text-sm text-muted-foreground", children: isLoading ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(Skeleton, { className: "h-5 w-16" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(Skeleton, { className: "h-5 w-16" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Skeleton, { className: "h-5 w-16" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(Skeleton, { className: "h-5 w-20" })
         ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-1.5", children: [
@@ -126536,6 +126554,12 @@ function BookStatsRow({
             /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium text-foreground", children: Number((stats == null ? void 0 : stats.totalWords) ?? 0).toLocaleString() }),
             " ",
             "słów"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-1.5", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 text-chart-4" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-medium text-foreground", children: Number((stats == null ? void 0 : stats.totalChars) ?? 0).toLocaleString() }),
+            " ",
+            "znaków"
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-1.5", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(Layers, { className: "h-4 w-4 text-chart-2" }),
