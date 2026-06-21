@@ -87,6 +87,7 @@ export interface Recording {
 }
 export interface TextAnnotation {
   'id' : bigint,
+  'alternativeProposal' : [] | [string],
   'explanation' : string,
   'color' : string,
   'text' : string,
@@ -190,6 +191,7 @@ export interface _SERVICE {
       bigint,
       Array<
         {
+          'alternativeProposal' : [] | [string],
           'explanation' : string,
           'color' : string,
           'text' : string,

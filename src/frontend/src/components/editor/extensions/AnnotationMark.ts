@@ -32,6 +32,18 @@ function createAnnotationMark(name: string, options: AnnotationMarkOptions) {
             return { "data-proposal": attributes["data-proposal"] };
           },
         },
+        "data-alternative-proposal": {
+          default: null,
+          parseHTML: (element) =>
+            element.getAttribute("data-alternative-proposal"),
+          renderHTML: (attributes) => {
+            if (!attributes["data-alternative-proposal"]) return {};
+            return {
+              "data-alternative-proposal":
+                attributes["data-alternative-proposal"],
+            };
+          },
+        },
       };
     },
 

@@ -88,20 +88,30 @@ export function RichTextEditor({
       let actualTo = to;
 
       if (currentText !== text) {
-        // Try to re-locate the fragment near the original position
+        // Find ALL occurrences and pick the nearest to original 'from'
         const docText = editor.getText();
-        const searchStart = Math.max(0, from - 100);
-        const idx = docText.indexOf(text, searchStart);
-        if (idx !== -1) {
-          actualFrom = idx;
-          actualTo = idx + text.length;
-        } else {
-          // Fallback: try from the beginning
-          const idx2 = docText.indexOf(text);
-          if (idx2 !== -1) {
-            actualFrom = idx2;
-            actualTo = idx2 + text.length;
+        const positions: number[] = [];
+        let searchPos = 0;
+        while (true) {
+          const idx = docText.indexOf(text, searchPos);
+          if (idx === -1) break;
+          positions.push(idx);
+          searchPos = idx + 1;
+        }
+
+        if (positions.length > 0) {
+          // Pick the occurrence with smallest absolute distance from original 'from'
+          let bestPos = positions[0];
+          let bestDist = Math.abs(positions[0] - from);
+          for (let i = 1; i < positions.length; i++) {
+            const dist = Math.abs(positions[i] - from);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestPos = positions[i];
+            }
           }
+          actualFrom = bestPos;
+          actualTo = bestPos + text.length;
         }
       }
 
@@ -112,9 +122,22 @@ export function RichTextEditor({
         .insertContent(proposal)
         .run();
 
-      // Update backend approval status
+      // Update backend approval status and DOM attribute immediately
       if (id !== 0n) {
-        updateAnnotationApproved.mutate({ id, approved: true });
+        updateAnnotationApproved.mutate(
+          { id, approved: true },
+          {
+            onSuccess: () => {
+              // Immediately update the DOM attribute so tooltip re-renders correctly
+              const span = editor.view.dom.querySelector(
+                `[data-annotation-id="${id}"]`,
+              ) as HTMLElement | null;
+              if (span) {
+                span.setAttribute("data-approved", "true");
+              }
+            },
+          },
+        );
       }
     },
     [editor, updateAnnotationApproved],
@@ -139,20 +162,30 @@ export function RichTextEditor({
       let actualFrom = from;
       let actualTo = to;
 
-      // If the exact range doesn't match, try to locate the proposal text
+      // If the exact range doesn't match, find nearest occurrence
       if (currentText !== originalText) {
         const docText = editor.getText();
-        const searchStart = Math.max(0, from - 100);
-        const idx = docText.indexOf(originalText, searchStart);
-        if (idx !== -1) {
-          actualFrom = idx;
-          actualTo = idx + originalText.length;
-        } else {
-          const idx2 = docText.indexOf(originalText);
-          if (idx2 !== -1) {
-            actualFrom = idx2;
-            actualTo = idx2 + originalText.length;
+        const positions: number[] = [];
+        let searchPos = 0;
+        while (true) {
+          const idx = docText.indexOf(originalText, searchPos);
+          if (idx === -1) break;
+          positions.push(idx);
+          searchPos = idx + 1;
+        }
+
+        if (positions.length > 0) {
+          let bestPos = positions[0];
+          let bestDist = Math.abs(positions[0] - from);
+          for (let i = 1; i < positions.length; i++) {
+            const dist = Math.abs(positions[i] - from);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestPos = positions[i];
+            }
           }
+          actualFrom = bestPos;
+          actualTo = bestPos + originalText.length;
         }
       }
 
@@ -163,9 +196,21 @@ export function RichTextEditor({
         .insertContent(originalText)
         .run();
 
-      // Update backend approval status
+      // Update backend approval status and DOM attribute immediately
       if (id !== 0n) {
-        updateAnnotationApproved.mutate({ id, approved: false });
+        updateAnnotationApproved.mutate(
+          { id, approved: false },
+          {
+            onSuccess: () => {
+              const span = editor.view.dom.querySelector(
+                `[data-annotation-id="${id}"]`,
+              ) as HTMLElement | null;
+              if (span) {
+                span.setAttribute("data-approved", "false");
+              }
+            },
+          },
+        );
       }
     },
     [editor, updateAnnotationApproved],
@@ -277,14 +322,51 @@ export function RichTextEditor({
               </div>
             )}
             <div className="flex items-center gap-2 mt-2">
-              <button
-                type="button"
-                onClick={handleApply}
-                className="flex-1 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                data-ocid="editor.apply_proposal_button"
-              >
-                Wstaw propozycję
-              </button>
+              {tooltip.alternativeProposal ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleApplyProposal({
+                        id: tooltip.id,
+                        from: tooltip.from,
+                        to: tooltip.to,
+                        proposal: tooltip.proposal,
+                        text: tooltip.text,
+                      })
+                    }
+                    className="flex-1 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                    data-ocid="editor.apply_proposal_button.option1"
+                  >
+                    Opcja 1: {tooltip.proposal}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleApplyProposal({
+                        id: tooltip.id,
+                        from: tooltip.from,
+                        to: tooltip.to,
+                        proposal: tooltip.alternativeProposal ?? "",
+                        text: tooltip.text,
+                      })
+                    }
+                    className="flex-1 px-3 py-1.5 text-xs font-medium rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors"
+                    data-ocid="editor.apply_proposal_button.option2"
+                  >
+                    Opcja 2: {tooltip.alternativeProposal}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleApply}
+                  className="flex-1 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  data-ocid="editor.apply_proposal_button"
+                >
+                  Wstaw propozycję
+                </button>
+              )}
               {tooltip.approved && (
                 <button
                   type="button"

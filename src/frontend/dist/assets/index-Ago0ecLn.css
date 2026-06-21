@@ -3317,6 +3317,10 @@ video {
   background-color: oklch(var(--secondary) / 0.8);
 }
 
+.hover\:bg-secondary\/90:hover {
+  background-color: oklch(var(--secondary) / 0.9);
+}
+
 .hover\:bg-sidebar-accent:hover {
   background-color: oklch(var(--sidebar-accent));
 }

@@ -5,11 +5,12 @@ export interface Annotation {
   color: "yellow" | "red" | "blue" | "orange" | "purple";
   explanation: string;
   proposal: string;
+  alternativeProposal?: string;
   approved: boolean;
 }
 
 function buildGrammarPrompt(text: string): string {
-  return `Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+  return `Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
@@ -100,6 +101,8 @@ function validateAnnotations(data: unknown): Annotation[] {
     const color = (item as Record<string, unknown>).color;
     const explanation = (item as Record<string, unknown>).explanation;
     const proposal = (item as Record<string, unknown>).proposal;
+    const alternativeProposal = (item as Record<string, unknown>)
+      .alternativeProposal;
     if (
       typeof text !== "string" ||
       typeof explanation !== "string" ||
@@ -117,6 +120,10 @@ function validateAnnotations(data: unknown): Annotation[] {
       color: colorStr as Annotation["color"],
       explanation,
       proposal,
+      alternativeProposal:
+        typeof alternativeProposal === "string"
+          ? alternativeProposal
+          : undefined,
       approved: false,
     };
   });

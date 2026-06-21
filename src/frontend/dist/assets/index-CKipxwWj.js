@@ -36178,6 +36178,7 @@ const Analysis = Record({
 });
 const TextAnnotation = Record({
   "id": Nat,
+  "alternativeProposal": Opt(Text$4),
   "explanation": Text$4,
   "color": Text$4,
   "text": Text$4,
@@ -36383,6 +36384,7 @@ Service({
       Nat,
       Vec(
         Record({
+          "alternativeProposal": Opt(Text$4),
           "explanation": Text$4,
           "color": Text$4,
           "text": Text$4,
@@ -36433,6 +36435,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
   });
   const TextAnnotation2 = IDL2.Record({
     "id": IDL2.Nat,
+    "alternativeProposal": IDL2.Opt(IDL2.Text),
     "explanation": IDL2.Text,
     "color": IDL2.Text,
     "text": IDL2.Text,
@@ -36642,6 +36645,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
         IDL2.Nat,
         IDL2.Vec(
           IDL2.Record({
+            "alternativeProposal": IDL2.Opt(IDL2.Text),
             "explanation": IDL2.Text,
             "color": IDL2.Text,
             "text": IDL2.Text,
@@ -36717,14 +36721,14 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.__annotations(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-        return result;
+        return from_candid_vec_n7(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.__annotations(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-      return result;
+      return from_candid_vec_n7(this._uploadFile, this._downloadFile, result);
     }
   }
   async __books(arg0, arg1) {
@@ -36786,15 +36790,15 @@ class Backend {
   async __inviteCodes(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.__inviteCodes(to_candid_opt_n7(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-        return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
+        const result = await this.actor.__inviteCodes(to_candid_opt_n12(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return from_candid_vec_n13(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__inviteCodes(to_candid_opt_n7(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-      return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
+      const result = await this.actor.__inviteCodes(to_candid_opt_n12(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return from_candid_vec_n13(this._uploadFile, this._downloadFile, result);
     }
   }
   async __nextAnalysisId() {
@@ -36927,14 +36931,14 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.checkAccess();
-        return from_candid_AccessCheckResult_n15(this._uploadFile, this._downloadFile, result);
+        return from_candid_AccessCheckResult_n20(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.checkAccess();
-      return from_candid_AccessCheckResult_n15(this._uploadFile, this._downloadFile, result);
+      return from_candid_AccessCheckResult_n20(this._uploadFile, this._downloadFile, result);
     }
   }
   async claimInviteCode(arg0) {
@@ -37094,14 +37098,14 @@ class Backend {
   async generateInviteCode(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.generateInviteCode(arg0, to_candid_opt_n17(this._uploadFile, this._downloadFile, arg1));
+        const result = await this.actor.generateInviteCode(arg0, to_candid_opt_n22(this._uploadFile, this._downloadFile, arg1));
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.generateInviteCode(arg0, to_candid_opt_n17(this._uploadFile, this._downloadFile, arg1));
+      const result = await this.actor.generateInviteCode(arg0, to_candid_opt_n22(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
@@ -37109,56 +37113,56 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.getAnalysis(arg0);
-        return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n23(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getAnalysis(arg0);
-      return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n23(this._uploadFile, this._downloadFile, result);
     }
   }
   async getAnnotation(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.getAnnotation(arg0);
-        return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n24(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getAnnotation(arg0);
-      return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n24(this._uploadFile, this._downloadFile, result);
     }
   }
   async getAnnotations(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.getAnnotations(arg0);
-        return result;
+        return from_candid_vec_n25(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getAnnotations(arg0);
-      return result;
+      return from_candid_vec_n25(this._uploadFile, this._downloadFile, result);
     }
   }
   async getBook(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.getBook(arg0);
-        return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n26(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getBook(arg0);
-      return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n26(this._uploadFile, this._downloadFile, result);
     }
   }
   async getBookStats(arg0) {
@@ -37179,14 +37183,14 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.getChapter(arg0);
-        return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n27(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getChapter(arg0);
-      return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n27(this._uploadFile, this._downloadFile, result);
     }
   }
   async getOverallStats() {
@@ -37207,56 +37211,56 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.getRecordingAudio(arg0);
-        return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n28(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getRecordingAudio(arg0);
-      return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n28(this._uploadFile, this._downloadFile, result);
     }
   }
   async listAnalysesByBook(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.listAnalysesByBook(arg0);
-        return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
+        return from_candid_vec_n29(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listAnalysesByBook(arg0);
-      return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
+      return from_candid_vec_n29(this._uploadFile, this._downloadFile, result);
     }
   }
   async listAnalysesByChapter(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.listAnalysesByChapter(arg0);
-        return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
+        return from_candid_vec_n29(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listAnalysesByChapter(arg0);
-      return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
+      return from_candid_vec_n29(this._uploadFile, this._downloadFile, result);
     }
   }
   async listAnnotationsByAnalysis(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.listAnnotationsByAnalysis(arg0);
-        return result;
+        return from_candid_vec_n25(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listAnnotationsByAnalysis(arg0);
-      return result;
+      return from_candid_vec_n25(this._uploadFile, this._downloadFile, result);
     }
   }
   async listBooksByOwner() {
@@ -37305,14 +37309,14 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.listInviteCodes();
-        return from_candid_vec_n24(this._uploadFile, this._downloadFile, result);
+        return from_candid_vec_n30(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listInviteCodes();
-      return from_candid_vec_n24(this._uploadFile, this._downloadFile, result);
+      return from_candid_vec_n30(this._uploadFile, this._downloadFile, result);
     }
   }
   async listMessagesByBook(arg0) {
@@ -37388,14 +37392,14 @@ class Backend {
   async saveAnnotations(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.saveAnnotations(arg0, arg1);
+        const result = await this.actor.saveAnnotations(arg0, to_candid_vec_n31(this._uploadFile, this._downloadFile, arg1));
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.saveAnnotations(arg0, arg1);
+      const result = await this.actor.saveAnnotations(arg0, to_candid_vec_n31(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
@@ -37498,43 +37502,61 @@ class Backend {
     }
   }
 }
-function from_candid_AccessCheckResult_n15(_uploadFile, _downloadFile, value) {
-  return from_candid_variant_n16(_uploadFile, _downloadFile, value);
+function from_candid_AccessCheckResult_n20(_uploadFile, _downloadFile, value) {
+  return from_candid_variant_n21(_uploadFile, _downloadFile, value);
 }
 function from_candid_Analysis_n4(_uploadFile, _downloadFile, value) {
   return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
-function from_candid_InviteCodeStatus_n12(_uploadFile, _downloadFile, value) {
-  return from_candid_variant_n13(_uploadFile, _downloadFile, value);
+function from_candid_InviteCodeStatus_n17(_uploadFile, _downloadFile, value) {
+  return from_candid_variant_n18(_uploadFile, _downloadFile, value);
 }
-function from_candid_InviteCode_n10(_uploadFile, _downloadFile, value) {
-  return from_candid_record_n11(_uploadFile, _downloadFile, value);
+function from_candid_InviteCode_n15(_uploadFile, _downloadFile, value) {
+  return from_candid_record_n16(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n14(_uploadFile, _downloadFile, value) {
+function from_candid_TextAnnotation_n9(_uploadFile, _downloadFile, value) {
+  return from_candid_record_n10(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n11(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
-}
-function from_candid_opt_n18(_uploadFile, _downloadFile, value) {
-  return value.length === 0 ? null : from_candid_Analysis_n4(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_opt_n19(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n20(_uploadFile, _downloadFile, value) {
+function from_candid_opt_n23(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : from_candid_Analysis_n4(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n24(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : from_candid_TextAnnotation_n9(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n26(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n21(_uploadFile, _downloadFile, value) {
+function from_candid_opt_n27(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n22(_uploadFile, _downloadFile, value) {
+function from_candid_opt_n28(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n6(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
-function from_candid_record_n11(_uploadFile, _downloadFile, value) {
+function from_candid_record_n10(_uploadFile, _downloadFile, value) {
   return {
-    status: from_candid_InviteCodeStatus_n12(_uploadFile, _downloadFile, value.status),
-    expiresAt: record_opt_to_undefined(from_candid_opt_n14(_uploadFile, _downloadFile, value.expiresAt)),
+    id: value.id,
+    alternativeProposal: record_opt_to_undefined(from_candid_opt_n11(_uploadFile, _downloadFile, value.alternativeProposal)),
+    explanation: value.explanation,
+    color: value.color,
+    text: value.text,
+    approved: value.approved,
+    analysisId: value.analysisId,
+    proposal: value.proposal
+  };
+}
+function from_candid_record_n16(_uploadFile, _downloadFile, value) {
+  return {
+    status: from_candid_InviteCodeStatus_n17(_uploadFile, _downloadFile, value.status),
+    expiresAt: record_opt_to_undefined(from_candid_opt_n19(_uploadFile, _downloadFile, value.expiresAt)),
     code: value.code,
     createdAt: value.createdAt,
     usedCount: value.usedCount,
@@ -37553,44 +37575,68 @@ function from_candid_record_n5(_uploadFile, _downloadFile, value) {
     resultContent: value.resultContent
   };
 }
+function from_candid_tuple_n14(_uploadFile, _downloadFile, value) {
+  return [
+    value[0],
+    from_candid_InviteCode_n15(_uploadFile, _downloadFile, value[1])
+  ];
+}
 function from_candid_tuple_n3(_uploadFile, _downloadFile, value) {
   return [
     value[0],
     from_candid_Analysis_n4(_uploadFile, _downloadFile, value[1])
   ];
 }
-function from_candid_tuple_n9(_uploadFile, _downloadFile, value) {
+function from_candid_tuple_n8(_uploadFile, _downloadFile, value) {
   return [
     value[0],
-    from_candid_InviteCode_n10(_uploadFile, _downloadFile, value[1])
+    from_candid_TextAnnotation_n9(_uploadFile, _downloadFile, value[1])
   ];
 }
-function from_candid_variant_n13(_uploadFile, _downloadFile, value) {
+function from_candid_variant_n18(_uploadFile, _downloadFile, value) {
   return "active" in value ? "active" : "revoked" in value ? "revoked" : "exhausted" in value ? "exhausted" : value;
 }
-function from_candid_variant_n16(_uploadFile, _downloadFile, value) {
+function from_candid_variant_n21(_uploadFile, _downloadFile, value) {
   return "ExistingUser" in value ? "ExistingUser" : "Admin" in value ? "Admin" : "NewUserNeedsCode" in value ? "NewUserNeedsCode" : value;
+}
+function from_candid_vec_n13(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_tuple_n14(_uploadFile, _downloadFile, x3));
 }
 function from_candid_vec_n2(_uploadFile, _downloadFile, value) {
   return value.map((x3) => from_candid_tuple_n3(_uploadFile, _downloadFile, x3));
 }
-function from_candid_vec_n23(_uploadFile, _downloadFile, value) {
+function from_candid_vec_n25(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_TextAnnotation_n9(_uploadFile, _downloadFile, x3));
+}
+function from_candid_vec_n29(_uploadFile, _downloadFile, value) {
   return value.map((x3) => from_candid_Analysis_n4(_uploadFile, _downloadFile, x3));
 }
-function from_candid_vec_n24(_uploadFile, _downloadFile, value) {
-  return value.map((x3) => from_candid_InviteCode_n10(_uploadFile, _downloadFile, x3));
+function from_candid_vec_n30(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_InviteCode_n15(_uploadFile, _downloadFile, x3));
 }
-function from_candid_vec_n8(_uploadFile, _downloadFile, value) {
-  return value.map((x3) => from_candid_tuple_n9(_uploadFile, _downloadFile, x3));
+function from_candid_vec_n7(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_tuple_n8(_uploadFile, _downloadFile, x3));
 }
 function to_candid_opt_n1(_uploadFile, _downloadFile, value) {
   return value === null ? candid_none() : candid_some(value);
 }
-function to_candid_opt_n17(_uploadFile, _downloadFile, value) {
+function to_candid_opt_n12(_uploadFile, _downloadFile, value) {
   return value === null ? candid_none() : candid_some(value);
 }
-function to_candid_opt_n7(_uploadFile, _downloadFile, value) {
+function to_candid_opt_n22(_uploadFile, _downloadFile, value) {
   return value === null ? candid_none() : candid_some(value);
+}
+function to_candid_record_n32(_uploadFile, _downloadFile, value) {
+  return {
+    alternativeProposal: value.alternativeProposal ? candid_some(value.alternativeProposal) : candid_none(),
+    explanation: value.explanation,
+    color: value.color,
+    text: value.text,
+    proposal: value.proposal
+  };
+}
+function to_candid_vec_n31(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => to_candid_record_n32(_uploadFile, _downloadFile, x3));
 }
 function createActor(canisterId, _uploadFile, _downloadFile, options = {}) {
   const agent2 = options.agent || HttpAgent.createSync({
@@ -38043,7 +38089,7 @@ function useClearChat() {
   });
 }
 function buildGrammarPrompt(text) {
-  return `Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+  return `Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
@@ -38118,6 +38164,7 @@ function validateAnnotations(data) {
     const color2 = item.color;
     const explanation = item.explanation;
     const proposal = item.proposal;
+    const alternativeProposal = item.alternativeProposal;
     if (typeof text !== "string" || typeof explanation !== "string" || typeof proposal !== "string") {
       throw new Error(`Element ${idx} ma nieprawidłowy typ pól`);
     }
@@ -38131,6 +38178,7 @@ function validateAnnotations(data) {
       color: colorStr,
       explanation,
       proposal,
+      alternativeProposal: typeof alternativeProposal === "string" ? alternativeProposal : void 0,
       approved: false
     };
   });
@@ -66080,6 +66128,16 @@ function createAnnotationMark(name, options) {
             if (!attributes["data-proposal"]) return {};
             return { "data-proposal": attributes["data-proposal"] };
           }
+        },
+        "data-alternative-proposal": {
+          default: null,
+          parseHTML: (element) => element.getAttribute("data-alternative-proposal"),
+          renderHTML: (attributes) => {
+            if (!attributes["data-alternative-proposal"]) return {};
+            return {
+              "data-alternative-proposal": attributes["data-alternative-proposal"]
+            };
+          }
         }
       };
     },
@@ -66211,6 +66269,7 @@ function useAnnotationTooltip(editor, onApplyProposal, onRevertProposal) {
       }
       const explanation = annotationSpan.getAttribute("data-explanation") ?? "";
       const proposal = annotationSpan.getAttribute("data-proposal") ?? "";
+      const alternativeProposal = annotationSpan.getAttribute("data-alternative-proposal") ?? void 0;
       const color2 = annotationSpan.getAttribute("data-annotation") ?? "";
       const annotationIdAttr = annotationSpan.getAttribute("data-annotation-id");
       const approvedAttr = annotationSpan.getAttribute("data-approved");
@@ -66239,6 +66298,7 @@ function useAnnotationTooltip(editor, onApplyProposal, onRevertProposal) {
         text: annotationSpan.textContent ?? "",
         explanation,
         proposal,
+        alternativeProposal: alternativeProposal || void 0,
         color: color2,
         from: from2,
         to,
@@ -74732,22 +74792,43 @@ function RichTextEditor({
       let actualTo = to;
       if (currentText !== text) {
         const docText = editor.getText();
-        const searchStart = Math.max(0, from2 - 100);
-        const idx = docText.indexOf(text, searchStart);
-        if (idx !== -1) {
-          actualFrom = idx;
-          actualTo = idx + text.length;
-        } else {
-          const idx2 = docText.indexOf(text);
-          if (idx2 !== -1) {
-            actualFrom = idx2;
-            actualTo = idx2 + text.length;
+        const positions = [];
+        let searchPos = 0;
+        while (true) {
+          const idx = docText.indexOf(text, searchPos);
+          if (idx === -1) break;
+          positions.push(idx);
+          searchPos = idx + 1;
+        }
+        if (positions.length > 0) {
+          let bestPos = positions[0];
+          let bestDist = Math.abs(positions[0] - from2);
+          for (let i2 = 1; i2 < positions.length; i2++) {
+            const dist = Math.abs(positions[i2] - from2);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestPos = positions[i2];
+            }
           }
+          actualFrom = bestPos;
+          actualTo = bestPos + text.length;
         }
       }
       editor.chain().focus().deleteRange({ from: actualFrom, to: actualTo }).insertContent(proposal).run();
       if (id !== 0n) {
-        updateAnnotationApproved.mutate({ id, approved: true });
+        updateAnnotationApproved.mutate(
+          { id, approved: true },
+          {
+            onSuccess: () => {
+              const span = editor.view.dom.querySelector(
+                `[data-annotation-id="${id}"]`
+              );
+              if (span) {
+                span.setAttribute("data-approved", "true");
+              }
+            }
+          }
+        );
       }
     },
     [editor, updateAnnotationApproved]
@@ -74765,22 +74846,43 @@ function RichTextEditor({
       let actualTo = to;
       if (currentText !== originalText) {
         const docText = editor.getText();
-        const searchStart = Math.max(0, from2 - 100);
-        const idx = docText.indexOf(originalText, searchStart);
-        if (idx !== -1) {
-          actualFrom = idx;
-          actualTo = idx + originalText.length;
-        } else {
-          const idx2 = docText.indexOf(originalText);
-          if (idx2 !== -1) {
-            actualFrom = idx2;
-            actualTo = idx2 + originalText.length;
+        const positions = [];
+        let searchPos = 0;
+        while (true) {
+          const idx = docText.indexOf(originalText, searchPos);
+          if (idx === -1) break;
+          positions.push(idx);
+          searchPos = idx + 1;
+        }
+        if (positions.length > 0) {
+          let bestPos = positions[0];
+          let bestDist = Math.abs(positions[0] - from2);
+          for (let i2 = 1; i2 < positions.length; i2++) {
+            const dist = Math.abs(positions[i2] - from2);
+            if (dist < bestDist) {
+              bestDist = dist;
+              bestPos = positions[i2];
+            }
           }
+          actualFrom = bestPos;
+          actualTo = bestPos + originalText.length;
         }
       }
       editor.chain().focus().deleteRange({ from: actualFrom, to: actualTo }).insertContent(originalText).run();
       if (id !== 0n) {
-        updateAnnotationApproved.mutate({ id, approved: false });
+        updateAnnotationApproved.mutate(
+          { id, approved: false },
+          {
+            onSuccess: () => {
+              const span = editor.view.dom.querySelector(
+                `[data-annotation-id="${id}"]`
+              );
+              if (span) {
+                span.setAttribute("data-approved", "false");
+              }
+            }
+          }
+        );
       }
     },
     [editor, updateAnnotationApproved]
@@ -74871,7 +74973,46 @@ function RichTextEditor({
               /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-medium text-primary", children: tooltip.proposal })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 mt-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
+              tooltip.alternativeProposal ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => handleApplyProposal({
+                      id: tooltip.id,
+                      from: tooltip.from,
+                      to: tooltip.to,
+                      proposal: tooltip.proposal,
+                      text: tooltip.text
+                    }),
+                    className: "flex-1 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors",
+                    "data-ocid": "editor.apply_proposal_button.option1",
+                    children: [
+                      "Opcja 1: ",
+                      tooltip.proposal
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => handleApplyProposal({
+                      id: tooltip.id,
+                      from: tooltip.from,
+                      to: tooltip.to,
+                      proposal: tooltip.alternativeProposal ?? "",
+                      text: tooltip.text
+                    }),
+                    className: "flex-1 px-3 py-1.5 text-xs font-medium rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors",
+                    "data-ocid": "editor.apply_proposal_button.option2",
+                    children: [
+                      "Opcja 2: ",
+                      tooltip.alternativeProposal
+                    ]
+                  }
+                )
+              ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
                 "button",
                 {
                   type: "button",
@@ -103664,7 +103805,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-ENHMr2MK.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BPES565N.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

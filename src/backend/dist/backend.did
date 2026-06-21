@@ -1,5 +1,6 @@
 type TextAnnotation = 
  record {
+   alternativeProposal: opt text;
    analysisId: nat;
    approved: bool;
    color: text;
@@ -195,12 +196,14 @@ service : {
   saveAnalysis: (bookId: nat, chapterId: opt nat, analysisType: text,
    provider: text, resultContent: text) -> (nat);
   saveAnnotations: (analysisId: nat, annotationData:
-   vec record {
-         color: text;
-         explanation: text;
-         proposal: text;
-         "text": text;
-       }) -> (vec nat);
+   vec
+    record {
+      alternativeProposal: opt text;
+      color: text;
+      explanation: text;
+      proposal: text;
+      "text": text;
+    }) -> (vec nat);
   saveRecording: (chapterId: nat, bookId: nat, voice: text, audioData:
    blob) -> (nat);
   sendMessage: (bookId: nat, role: text, content: text, provider: text) ->

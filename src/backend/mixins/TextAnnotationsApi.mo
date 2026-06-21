@@ -38,7 +38,7 @@ mixin (
 
   public shared ({ caller }) func saveAnnotations(
     analysisId : Nat,
-    annotationData : [{ text : Text; color : Text; explanation : Text; proposal : Text }],
+    annotationData : [{ text : Text; color : Text; explanation : Text; proposal : Text; alternativeProposal : ?Text }],
   ) : async [Nat] {
     switch (annotationsGetAnalysisBookId(analysisId)) {
       case (?bookId) {
@@ -72,6 +72,7 @@ mixin (
                   data.color,
                   data.explanation,
                   data.proposal,
+                  data.alternativeProposal,
                 );
                 annotations.add(newId, annotation);
                 newIds.add(newId);
@@ -124,6 +125,7 @@ mixin (
       case (?annotation) {
         if (isAnnotationOwner(annotation, caller)) {
           let updated = { annotation with approved = approved };
+          annotations.add(id, updated);
           annotations.add(id, updated);
           true
         } else {

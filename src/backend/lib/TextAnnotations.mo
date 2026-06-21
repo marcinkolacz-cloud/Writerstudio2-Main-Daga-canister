@@ -18,6 +18,7 @@ module {
     color : Text,
     explanation : Text,
     proposal : Text,
+    alternativeProposal : ?Text,
   ) : Types.TextAnnotation {
     {
       id;
@@ -26,6 +27,7 @@ module {
       color;
       explanation;
       proposal;
+      alternativeProposal;
       approved = false;
     }
   };

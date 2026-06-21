@@ -39,6 +39,7 @@ export interface Book {
 }
 export interface TextAnnotation {
     id: bigint;
+    alternativeProposal?: string;
     explanation: string;
     color: string;
     text: string;
@@ -143,6 +144,7 @@ export interface backendInterface {
     revokeInviteCode(code: string): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
     saveAnnotations(analysisId: bigint, annotationData: Array<{
+        alternativeProposal?: string;
         explanation: string;
         color: string;
         text: string;

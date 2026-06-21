@@ -19,6 +19,7 @@ export const Analysis = IDL.Record({
 });
 export const TextAnnotation = IDL.Record({
   'id' : IDL.Nat,
+  'alternativeProposal' : IDL.Opt(IDL.Text),
   'explanation' : IDL.Text,
   'color' : IDL.Text,
   'text' : IDL.Text,
@@ -225,6 +226,7 @@ export const idlService = IDL.Service({
         IDL.Nat,
         IDL.Vec(
           IDL.Record({
+            'alternativeProposal' : IDL.Opt(IDL.Text),
             'explanation' : IDL.Text,
             'color' : IDL.Text,
             'text' : IDL.Text,
@@ -278,6 +280,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const TextAnnotation = IDL.Record({
     'id' : IDL.Nat,
+    'alternativeProposal' : IDL.Opt(IDL.Text),
     'explanation' : IDL.Text,
     'color' : IDL.Text,
     'text' : IDL.Text,
@@ -488,6 +491,7 @@ export const idlFactory = ({ IDL }) => {
           IDL.Nat,
           IDL.Vec(
             IDL.Record({
+              'alternativeProposal' : IDL.Opt(IDL.Text),
               'explanation' : IDL.Text,
               'color' : IDL.Text,
               'text' : IDL.Text,

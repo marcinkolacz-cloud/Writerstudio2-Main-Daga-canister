@@ -49,6 +49,7 @@ module {
     color : Text;
     explanation : Text;
     proposal : Text;
+    alternativeProposal : ?Text;
     approved : Bool;
   };
 

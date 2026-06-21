@@ -7,6 +7,7 @@ interface TooltipData {
   text: string;
   explanation: string;
   proposal: string;
+  alternativeProposal?: string;
   color: string;
   rect: DOMRect;
   from: number;
@@ -83,6 +84,8 @@ export function useAnnotationTooltip(
 
       const explanation = annotationSpan.getAttribute("data-explanation") ?? "";
       const proposal = annotationSpan.getAttribute("data-proposal") ?? "";
+      const alternativeProposal =
+        annotationSpan.getAttribute("data-alternative-proposal") ?? undefined;
       const color = annotationSpan.getAttribute("data-annotation") ?? "";
       const annotationIdAttr =
         annotationSpan.getAttribute("data-annotation-id");
@@ -119,6 +122,7 @@ export function useAnnotationTooltip(
         text: annotationSpan.textContent ?? "",
         explanation,
         proposal,
+        alternativeProposal: alternativeProposal || undefined,
         color,
         from,
         to,
