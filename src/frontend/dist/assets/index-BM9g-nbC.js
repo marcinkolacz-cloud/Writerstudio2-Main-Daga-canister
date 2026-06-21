@@ -36222,6 +36222,14 @@ const Comment$1 = Record({
   "chapterId": Nat,
   "anchorText": Text$4
 });
+const Recording = Record({
+  "id": Nat,
+  "voice": Text$4,
+  "createdAt": Int,
+  "audioData": Vec(Nat8),
+  "bookId": Nat,
+  "chapterId": Nat
+});
 Service({
   "__analyses": Func(
     [Opt(Nat), Opt(Nat)],
@@ -36259,6 +36267,12 @@ Service({
   "__nextChapterId": Func([], [Nat], ["query"]),
   "__nextChatMessageId": Func([], [Nat], ["query"]),
   "__nextCommentId": Func([], [Nat], ["query"]),
+  "__nextRecordingId": Func([], [Nat], ["query"]),
+  "__recordings": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, Recording))],
+    ["query"]
+  ),
   "clearChat": Func([Nat], [Bool], []),
   "createBook": Func([Text$4, Text$4, Text$4], [Nat], []),
   "createChapter": Func([Nat, Text$4], [Nat], []),
@@ -36268,6 +36282,7 @@ Service({
   "deleteChapter": Func([Nat], [Bool], []),
   "deleteComment": Func([Nat], [Bool], []),
   "deleteMessage": Func([Nat], [Bool], []),
+  "deleteRecording": Func([Nat], [Bool], []),
   "getAnalysis": Func([Nat], [Opt(Analysis)], []),
   "getAnnotations": Func([Nat], [Vec(TextAnnotation)], []),
   "getBook": Func([Nat], [Opt(Book)], []),
@@ -36295,12 +36310,26 @@ Service({
     ],
     []
   ),
+  "getRecordingAudio": Func([Nat], [Opt(Vec(Nat8))], []),
   "listAnalysesByBook": Func([Nat], [Vec(Analysis)], []),
   "listAnalysesByChapter": Func([Nat], [Vec(Analysis)], []),
   "listBooksByOwner": Func([], [Vec(Book)], []),
   "listChaptersByBook": Func([Nat], [Vec(Chapter)], []),
   "listCommentsByChapter": Func([Nat], [Vec(Comment$1)], []),
   "listMessagesByBook": Func([Nat], [Vec(ChatMessage)], []),
+  "listRecordingsByChapter": Func(
+    [Nat],
+    [
+      Vec(
+        Record({
+          "id": Nat,
+          "voice": Text$4,
+          "createdAt": Int
+        })
+      )
+    ],
+    []
+  ),
   "reorderChapters": Func([Nat, Vec(Nat)], [Bool], []),
   "saveAnalysis": Func(
     [Nat, Opt(Nat), Text$4, Text$4, Text$4],
@@ -36320,6 +36349,11 @@ Service({
       )
     ],
     [Bool],
+    []
+  ),
+  "saveRecording": Func(
+    [Nat, Nat, Text$4, Vec(Nat8)],
+    [Nat],
     []
   ),
   "sendMessage": Func(
@@ -36395,6 +36429,14 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "chapterId": IDL2.Nat,
     "anchorText": IDL2.Text
   });
+  const Recording2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "voice": IDL2.Text,
+    "createdAt": IDL2.Int,
+    "audioData": IDL2.Vec(IDL2.Nat8),
+    "bookId": IDL2.Nat,
+    "chapterId": IDL2.Nat
+  });
   return IDL2.Service({
     "__analyses": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
@@ -36432,6 +36474,12 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "__nextChapterId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChatMessageId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextCommentId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__nextRecordingId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__recordings": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Recording2))],
+      ["query"]
+    ),
     "clearChat": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "createBook": IDL2.Func([IDL2.Text, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "createChapter": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
@@ -36441,6 +36489,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "deleteChapter": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteComment": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteMessage": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "deleteRecording": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "getAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Opt(Analysis2)], []),
     "getAnnotations": IDL2.Func([IDL2.Nat], [IDL2.Vec(TextAnnotation2)], []),
     "getBook": IDL2.Func([IDL2.Nat], [IDL2.Opt(Book2)], []),
@@ -36468,12 +36517,26 @@ const idlFactory = ({ IDL: IDL2 }) => {
       ],
       []
     ),
+    "getRecordingAudio": IDL2.Func([IDL2.Nat], [IDL2.Opt(IDL2.Vec(IDL2.Nat8))], []),
     "listAnalysesByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Analysis2)], []),
     "listAnalysesByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Analysis2)], []),
     "listBooksByOwner": IDL2.Func([], [IDL2.Vec(Book2)], []),
     "listChaptersByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Chapter2)], []),
     "listCommentsByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Comment2)], []),
     "listMessagesByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(ChatMessage2)], []),
+    "listRecordingsByChapter": IDL2.Func(
+      [IDL2.Nat],
+      [
+        IDL2.Vec(
+          IDL2.Record({
+            "id": IDL2.Nat,
+            "voice": IDL2.Text,
+            "createdAt": IDL2.Int
+          })
+        )
+      ],
+      []
+    ),
     "reorderChapters": IDL2.Func([IDL2.Nat, IDL2.Vec(IDL2.Nat)], [IDL2.Bool], []),
     "saveAnalysis": IDL2.Func(
       [IDL2.Nat, IDL2.Opt(IDL2.Nat), IDL2.Text, IDL2.Text, IDL2.Text],
@@ -36493,6 +36556,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
         )
       ],
       [IDL2.Bool],
+      []
+    ),
+    "saveRecording": IDL2.Func(
+      [IDL2.Nat, IDL2.Nat, IDL2.Text, IDL2.Vec(IDL2.Nat8)],
+      [IDL2.Nat],
       []
     ),
     "sendMessage": IDL2.Func(
@@ -36699,6 +36767,34 @@ class Backend {
       return result;
     }
   }
+  async __nextRecordingId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextRecordingId();
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextRecordingId();
+      return result;
+    }
+  }
+  async __recordings(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__recordings(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__recordings(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
   async clearChat(arg0) {
     if (this.processError) {
       try {
@@ -36825,6 +36921,20 @@ class Backend {
       return result;
     }
   }
+  async deleteRecording(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.deleteRecording(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.deleteRecording(arg0);
+      return result;
+    }
+  }
   async getAnalysis(arg0) {
     if (this.processError) {
       try {
@@ -36909,32 +37019,46 @@ class Backend {
       return result;
     }
   }
+  async getRecordingAudio(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getRecordingAudio(arg0);
+        return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getRecordingAudio(arg0);
+      return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+    }
+  }
   async listAnalysesByBook(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.listAnalysesByBook(arg0);
-        return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+        return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listAnalysesByBook(arg0);
-      return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+      return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
     }
   }
   async listAnalysesByChapter(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.listAnalysesByChapter(arg0);
-        return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+        return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listAnalysesByChapter(arg0);
-      return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+      return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
     }
   }
   async listBooksByOwner() {
@@ -36993,6 +37117,20 @@ class Backend {
       return result;
     }
   }
+  async listRecordingsByChapter(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.listRecordingsByChapter(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.listRecordingsByChapter(arg0);
+      return result;
+    }
+  }
   async reorderChapters(arg0, arg1) {
     if (this.processError) {
       try {
@@ -37032,6 +37170,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.saveAnnotations(arg0, arg1);
+      return result;
+    }
+  }
+  async saveRecording(arg0, arg1, arg2, arg3) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.saveRecording(arg0, arg1, arg2, arg3);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.saveRecording(arg0, arg1, arg2, arg3);
       return result;
     }
   }
@@ -37095,6 +37247,9 @@ class Backend {
 function from_candid_Analysis_n4(_uploadFile, _downloadFile, value) {
   return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
+function from_candid_opt_n10(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : value[0];
+}
 function from_candid_opt_n6(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
@@ -37124,7 +37279,7 @@ function from_candid_tuple_n3(_uploadFile, _downloadFile, value) {
     from_candid_Analysis_n4(_uploadFile, _downloadFile, value[1])
   ];
 }
-function from_candid_vec_n10(_uploadFile, _downloadFile, value) {
+function from_candid_vec_n11(_uploadFile, _downloadFile, value) {
   return value.map((x3) => from_candid_Analysis_n4(_uploadFile, _downloadFile, x3));
 }
 function from_candid_vec_n2(_uploadFile, _downloadFile, value) {
@@ -37458,6 +37613,55 @@ function useBookStats(bookId) {
     },
     enabled: !!actor && !!bookId
   });
+}
+function useRecordings(chapterId) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(chapterId);
+  return useQuery({
+    queryKey: ["recordings", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listRecordingsByChapter(id);
+    },
+    enabled: !!actor && !!chapterId
+  });
+}
+function useSaveRecording() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      chapterId,
+      bookId,
+      voice,
+      audioData
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.saveRecording(chapterId, bookId, voice, audioData);
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["recordings", variables.chapterId]
+      });
+    }
+  });
+}
+function useDeleteRecording() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteRecording(id);
+    },
+    onSuccess: () => {
+      queryClient2.invalidateQueries({ queryKey: ["recordings"] });
+    }
+  });
+}
+async function fetchRecordingAudio(actor, id) {
+  if (!actor) return null;
+  return actor.getRecordingAudio(id);
 }
 function useClearChat() {
   const { actor } = useActor(createActor);
@@ -37793,12 +37997,36 @@ const createLucideIcon = (iconName, iconNode) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$x = [
+const __iconNode$z = [
   ["path", { d: "M15 12H3", key: "6jk70r" }],
   ["path", { d: "M17 18H3", key: "1amg6g" }],
   ["path", { d: "M21 6H3", key: "1jwq7v" }]
 ];
-const AlignLeft = createLucideIcon("align-left", __iconNode$x);
+const AlignLeft = createLucideIcon("align-left", __iconNode$z);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$y = [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+];
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$y);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$x = [
+  [
+    "path",
+    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
+  ]
+];
+const Bold$1 = createLucideIcon("bold", __iconNode$x);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -37806,30 +38034,6 @@ const AlignLeft = createLucideIcon("align-left", __iconNode$x);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$w = [
-  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
-  ["path", { d: "M19 12H5", key: "x3x0zl" }]
-];
-const ArrowLeft = createLucideIcon("arrow-left", __iconNode$w);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$v = [
-  [
-    "path",
-    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
-  ]
-];
-const Bold$1 = createLucideIcon("bold", __iconNode$v);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$u = [
   ["path", { d: "M12 7v14", key: "1akyts" }],
   [
     "path",
@@ -37839,14 +38043,14 @@ const __iconNode$u = [
     }
   ]
 ];
-const BookOpen = createLucideIcon("book-open", __iconNode$u);
+const BookOpen = createLucideIcon("book-open", __iconNode$w);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$t = [
+const __iconNode$v = [
   [
     "path",
     {
@@ -37857,44 +38061,70 @@ const __iconNode$t = [
   ["path", { d: "M8 11h8", key: "vwpz6n" }],
   ["path", { d: "M8 7h6", key: "1f0q6e" }]
 ];
-const BookText = createLucideIcon("book-text", __iconNode$t);
+const BookText = createLucideIcon("book-text", __iconNode$v);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$s = [
+const __iconNode$u = [
   ["path", { d: "M3 3v16a2 2 0 0 0 2 2h16", key: "c24i48" }],
   ["path", { d: "M18 17V9", key: "2bz60n" }],
   ["path", { d: "M13 17V5", key: "1frdt8" }],
   ["path", { d: "M8 17v-3", key: "17ska0" }]
 ];
-const ChartColumn = createLucideIcon("chart-column", __iconNode$s);
+const ChartColumn = createLucideIcon("chart-column", __iconNode$u);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$r = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$r);
+const __iconNode$t = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$t);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$q = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$q);
+const __iconNode$s = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$s);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$p = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-const ChevronUp = createLucideIcon("chevron-up", __iconNode$p);
+const __iconNode$r = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+const ChevronUp = createLucideIcon("chevron-up", __iconNode$r);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$q = [
+  ["path", { d: "M12 15V3", key: "m9g1x1" }],
+  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
+  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
+];
+const Download = createLucideIcon("download", __iconNode$q);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$p = [
+  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
+  ["path", { d: "M10 9H8", key: "b1mrlr" }],
+  ["path", { d: "M16 13H8", key: "t4e002" }],
+  ["path", { d: "M16 17H8", key: "z1uh3a" }]
+];
+const FileText = createLucideIcon("file-text", __iconNode$p);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -37902,11 +38132,15 @@ const ChevronUp = createLucideIcon("chevron-up", __iconNode$p);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$o = [
-  ["path", { d: "M12 15V3", key: "m9g1x1" }],
-  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
-  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
+  [
+    "path",
+    {
+      d: "M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3",
+      key: "1xhozi"
+    }
+  ]
 ];
-const Download = createLucideIcon("download", __iconNode$o);
+const Headphones = createLucideIcon("headphones", __iconNode$o);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -37914,13 +38148,11 @@ const Download = createLucideIcon("download", __iconNode$o);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$n = [
-  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
-  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
-  ["path", { d: "M10 9H8", key: "b1mrlr" }],
-  ["path", { d: "M16 13H8", key: "t4e002" }],
-  ["path", { d: "M16 17H8", key: "z1uh3a" }]
+  ["line", { x1: "19", x2: "10", y1: "4", y2: "4", key: "15jd3p" }],
+  ["line", { x1: "14", x2: "5", y1: "20", y2: "20", key: "bu0au3" }],
+  ["line", { x1: "15", x2: "9", y1: "4", y2: "20", key: "uljnxc" }]
 ];
-const FileText = createLucideIcon("file-text", __iconNode$n);
+const Italic$1 = createLucideIcon("italic", __iconNode$n);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -37928,18 +38160,6 @@ const FileText = createLucideIcon("file-text", __iconNode$n);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$m = [
-  ["line", { x1: "19", x2: "10", y1: "4", y2: "4", key: "15jd3p" }],
-  ["line", { x1: "14", x2: "5", y1: "20", y2: "20", key: "bu0au3" }],
-  ["line", { x1: "15", x2: "9", y1: "4", y2: "20", key: "uljnxc" }]
-];
-const Italic$1 = createLucideIcon("italic", __iconNode$m);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$l = [
   [
     "path",
     {
@@ -37962,15 +38182,27 @@ const __iconNode$l = [
     }
   ]
 ];
-const Layers = createLucideIcon("layers", __iconNode$l);
+const Layers = createLucideIcon("layers", __iconNode$m);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$k = [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]];
-const LoaderCircle = createLucideIcon("loader-circle", __iconNode$k);
+const __iconNode$l = [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]];
+const LoaderCircle = createLucideIcon("loader-circle", __iconNode$l);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$k = [
+  ["path", { d: "m10 17 5-5-5-5", key: "1bsop3" }],
+  ["path", { d: "M15 12H3", key: "6jk70r" }],
+  ["path", { d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4", key: "u53s6r" }]
+];
+const LogIn = createLucideIcon("log-in", __iconNode$k);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -37978,11 +38210,11 @@ const LoaderCircle = createLucideIcon("loader-circle", __iconNode$k);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$j = [
-  ["path", { d: "m10 17 5-5-5-5", key: "1bsop3" }],
-  ["path", { d: "M15 12H3", key: "6jk70r" }],
-  ["path", { d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4", key: "u53s6r" }]
+  ["path", { d: "m16 17 5-5-5-5", key: "1bji2h" }],
+  ["path", { d: "M21 12H9", key: "dn1m92" }],
+  ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
 ];
-const LogIn = createLucideIcon("log-in", __iconNode$j);
+const LogOut = createLucideIcon("log-out", __iconNode$j);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -37990,11 +38222,9 @@ const LogIn = createLucideIcon("log-in", __iconNode$j);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$i = [
-  ["path", { d: "m16 17 5-5-5-5", key: "1bji2h" }],
-  ["path", { d: "M21 12H9", key: "dn1m92" }],
-  ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
+  ["path", { d: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z", key: "vv11sd" }]
 ];
-const LogOut = createLucideIcon("log-out", __iconNode$i);
+const MessageCircle = createLucideIcon("message-circle", __iconNode$i);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38002,9 +38232,9 @@ const LogOut = createLucideIcon("log-out", __iconNode$i);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$h = [
-  ["path", { d: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z", key: "vv11sd" }]
+  ["path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", key: "1lielz" }]
 ];
-const MessageCircle = createLucideIcon("message-circle", __iconNode$h);
+const MessageSquare = createLucideIcon("message-square", __iconNode$h);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38012,9 +38242,11 @@ const MessageCircle = createLucideIcon("message-circle", __iconNode$h);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$g = [
-  ["path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", key: "1lielz" }]
+  ["path", { d: "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z", key: "131961" }],
+  ["path", { d: "M19 10v2a7 7 0 0 1-14 0v-2", key: "1vc78b" }],
+  ["line", { x1: "12", x2: "12", y1: "19", y2: "22", key: "x3vr5v" }]
 ];
-const MessageSquare = createLucideIcon("message-square", __iconNode$g);
+const Mic = createLucideIcon("mic", __iconNode$g);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -46233,15 +46465,23 @@ const VOICES = [
   { value: "nova", label: "Nova" },
   { value: "shimmer", label: "Shimmer" }
 ];
-function LektorPanel({ editor, apiKey }) {
+function LektorPanel({
+  editor,
+  apiKey,
+  chapterId,
+  bookId
+}) {
   const [voice, setVoice] = reactExports.useState("alloy");
   const [speed, setSpeed] = reactExports.useState([1]);
   const [playbackState, setPlaybackState] = reactExports.useState("idle");
   const [progress, setProgress] = reactExports.useState(0);
   const [duration, setDuration] = reactExports.useState(0);
   const [error, setError] = reactExports.useState(null);
+  const [generatedBlob, setGeneratedBlob] = reactExports.useState(null);
+  const [saving, setSaving] = reactExports.useState(false);
   const audioRef = reactExports.useRef(null);
   const objectUrlRef = reactExports.useRef(null);
+  const saveRecording = useSaveRecording();
   const cleanupAudio = reactExports.useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -46256,6 +46496,27 @@ function LektorPanel({ editor, apiKey }) {
     setProgress(0);
     setDuration(0);
   }, []);
+  const handleSaveRecording = reactExports.useCallback(async () => {
+    if (!generatedBlob) return;
+    setSaving(true);
+    try {
+      const arrayBuffer = await generatedBlob.arrayBuffer();
+      const audioData = new Uint8Array(arrayBuffer);
+      await saveRecording.mutateAsync({
+        chapterId,
+        bookId,
+        voice,
+        audioData
+      });
+      setGeneratedBlob(null);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Błąd zapisywania nagrania"
+      );
+    } finally {
+      setSaving(false);
+    }
+  }, [generatedBlob, chapterId, bookId, voice, saveRecording]);
   reactExports.useEffect(() => {
     return () => cleanupAudio();
   }, [cleanupAudio]);
@@ -46270,6 +46531,7 @@ function LektorPanel({ editor, apiKey }) {
     setPlaybackState("loading");
     try {
       const blob = await generateSpeech(text, apiKey.trim(), voice, speed[0]);
+      setGeneratedBlob(blob);
       cleanupAudio();
       const url = URL.createObjectURL(blob);
       objectUrlRef.current = url;
@@ -46386,6 +46648,20 @@ function LektorPanel({ editor, apiKey }) {
                 "Stop"
               ]
             }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              size: "sm",
+              variant: "secondary",
+              disabled: !generatedBlob || saving,
+              onClick: handleSaveRecording,
+              "data-ocid": "lektor.save_recording_button",
+              children: [
+                saving ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-3.5 w-3.5 mr-1.5 animate-spin rounded-full border-2 border-current border-t-transparent" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Save, { className: "h-3.5 w-3.5 mr-1.5" }),
+                saving ? "Zapisywanie..." : "Zapisz nagranie"
+              ]
+            }
           )
         ] }),
         (playbackState === "playing" || playbackState === "paused") && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 min-w-[160px]", children: [
@@ -46406,6 +46682,161 @@ function LektorPanel({ editor, apiKey }) {
       ]
     }
   );
+}
+function RecordingsPanel({ chapterId }) {
+  const { actor } = useActor(createActor);
+  const { data: recordings, isLoading } = useRecordings(Number(chapterId));
+  const deleteRecording = useDeleteRecording();
+  const [playingId, setPlayingId] = reactExports.useState(null);
+  const [loadingId, setLoadingId] = reactExports.useState(null);
+  const audioRef = reactExports.useRef(null);
+  const objectUrlRef = reactExports.useRef(null);
+  const cleanupAudio = reactExports.useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+    setPlayingId(null);
+  }, []);
+  const handlePlay = reactExports.useCallback(
+    async (id) => {
+      if (playingId === id) {
+        cleanupAudio();
+        return;
+      }
+      cleanupAudio();
+      setLoadingId(id);
+      try {
+        if (!actor) {
+          setLoadingId(null);
+          return;
+        }
+        const audioData = await fetchRecordingAudio(actor, id);
+        if (!audioData || audioData.length === 0) {
+          setLoadingId(null);
+          return;
+        }
+        const blob = new Blob([audioData.buffer], {
+          type: "audio/mpeg"
+        });
+        const url = URL.createObjectURL(blob);
+        objectUrlRef.current = url;
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.addEventListener("ended", () => {
+          setPlayingId(null);
+        });
+        audio.addEventListener("error", () => {
+          setPlayingId(null);
+        });
+        await audio.play();
+        setPlayingId(id);
+      } catch {
+      } finally {
+        setLoadingId(null);
+      }
+    },
+    [playingId, cleanupAudio, actor]
+  );
+  const handleDelete2 = reactExports.useCallback(
+    (id) => {
+      if (playingId === id) {
+        cleanupAudio();
+      }
+      deleteRecording.mutate({ id });
+    },
+    [playingId, cleanupAudio, deleteRecording]
+  );
+  const formatDate = (timestamp) => {
+    return new Date(Number(timestamp) / 1e6).toLocaleDateString("pl-PL", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
+  const voiceLabels = {
+    alloy: "Alloy",
+    echo: "Echo",
+    fable: "Fable",
+    onyx: "Onyx",
+    nova: "Nova",
+    shimmer: "Shimmer"
+  };
+  if (isLoading) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "p-3 text-xs text-muted-foreground",
+        "data-ocid": "recordings.loading_state",
+        children: "Ładowanie nagrań..."
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-72 border-l border-border bg-card flex flex-col h-full shrink-0", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center justify-between px-4 py-3 border-b border-border", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Mic, { className: "h-4 w-4 text-muted-foreground" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold", children: "Nagrania" })
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollArea, { className: "flex-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-3 space-y-2", children: !recordings || recordings.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        className: "text-center py-8 text-sm text-muted-foreground",
+        "data-ocid": "recordings.empty_state",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Headphones, { className: "h-8 w-8 mx-auto mb-2 text-muted-foreground/40" }),
+          "Brak zapisanych nagrań"
+        ]
+      }
+    ) : recordings.map((recording, index2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        className: "group rounded-md border border-border bg-background p-3 hover:border-primary/40 transition-colors",
+        "data-ocid": `recordings.item.${index2 + 1}`,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Mic, { className: "h-3 w-3 text-muted-foreground" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: voiceLabels[recording.voice] ?? recording.voice })
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "icon",
+                  className: "h-7 w-7",
+                  disabled: loadingId === recording.id,
+                  onClick: () => handlePlay(recording.id),
+                  "data-ocid": `recordings.play_button.${index2 + 1}`,
+                  children: loadingId === recording.id ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" }) : playingId === recording.id ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-3 w-3 rounded-full bg-primary" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Play, { className: "h-3 w-3" })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "icon",
+                  className: "h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity",
+                  onClick: () => handleDelete2(recording.id),
+                  "data-ocid": `recordings.delete_button.${index2 + 1}`,
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3 w-3" })
+                }
+              )
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] text-muted-foreground/60", children: formatDate(recording.createdAt) })
+        ]
+      },
+      String(recording.id)
+    )) }) })
+  ] });
 }
 function OrderedMap(content) {
   this.content = content;
@@ -101899,7 +102330,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-UW-J5le6.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-h_Xu4ewE.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -102784,6 +103215,7 @@ function ChapterEditorPage() {
   const [summaryResult, setSummaryResult] = reactExports.useState(null);
   const [commentsPanelOpen, setCommentsPanelOpen] = reactExports.useState(false);
   const [lektorPanelOpen, setLektorPanelOpen] = reactExports.useState(false);
+  const [recordingsPanelOpen, setRecordingsPanelOpen] = reactExports.useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = reactExports.useState(false);
   const [selectedText, setSelectedText] = reactExports.useState("");
   const [floatingButtonPos, setFloatingButtonPos] = reactExports.useState(null);
@@ -103182,6 +103614,20 @@ ${ch.content}`).join("\n\n---\n\n");
             Button,
             {
               size: "sm",
+              variant: recordingsPanelOpen ? "default" : "outline",
+              onClick: () => setRecordingsPanelOpen((v2) => !v2),
+              "data-ocid": "chapter.recordings_toggle_button",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Headphones, { className: "h-3.5 w-3.5 mr-1.5" }),
+                "Nagrania"
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              size: "sm",
               variant: commentsPanelOpen ? "default" : "outline",
               onClick: () => setCommentsPanelOpen((v2) => !v2),
               "data-ocid": "chapter.comments_toggle_button",
@@ -103297,7 +103743,16 @@ ${ch.content}`).join("\n\n---\n\n");
         ]
       }
     ),
-    lektorPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { "data-ocid": "chapter.lektor_panel_container", children: provider === "claude" ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border", children: "Lektor wymaga klucza API OpenAI. Przełącz provider na OpenAI lub wprowadź klucz OpenAI." }) : /* @__PURE__ */ jsxRuntimeExports.jsx(LektorPanel, { editor: editorRef.current, apiKey }) }),
+    lektorPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { "data-ocid": "chapter.lektor_panel_container", children: provider === "claude" ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border", children: "Lektor wymaga klucza API OpenAI. Przełącz provider na OpenAI lub wprowadź klucz OpenAI." }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+      LektorPanel,
+      {
+        editor: editorRef.current,
+        apiKey,
+        chapterId: chapter.id,
+        bookId: book.id
+      }
+    ) }),
+    recordingsPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { "data-ocid": "chapter.recordings_panel_container", children: /* @__PURE__ */ jsxRuntimeExports.jsx(RecordingsPanel, { chapterId: chapter.id }) }),
     analysisStatus === "error" && analysisError && /* @__PURE__ */ jsxRuntimeExports.jsx(
       "div",
       {

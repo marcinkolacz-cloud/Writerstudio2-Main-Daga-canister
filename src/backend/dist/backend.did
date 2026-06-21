@@ -7,6 +7,15 @@ type TextAnnotation =
    proposal: text;
    "text": text;
  };
+type Recording = 
+ record {
+   audioData: blob;
+   bookId: nat;
+   chapterId: nat;
+   createdAt: int;
+   id: nat;
+   voice: text;
+ };
 type Comment = 
  record {
    anchorText: text;
@@ -95,6 +104,12 @@ service : {
   __nextChapterId: () -> (nat) query;
   __nextChatMessageId: () -> (nat) query;
   __nextCommentId: () -> (nat) query;
+  __nextRecordingId: () -> (nat) query;
+  __recordings: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          Recording;
+        }) query;
   clearChat: (bookId: nat) -> (bool);
   createBook: (title: text, description: text, category: text) -> (nat);
   createChapter: (bookId: nat, title: text) -> (nat);
@@ -104,6 +119,7 @@ service : {
   deleteChapter: (id: nat) -> (bool);
   deleteComment: (id: nat) -> (bool);
   deleteMessage: (id: nat) -> (bool);
+  deleteRecording: (id: nat) -> (bool);
   getAnalysis: (id: nat) -> (opt Analysis);
   getAnnotations: (analysisId: nat) -> (vec TextAnnotation);
   getBook: (id: nat) -> (opt Book);
@@ -121,12 +137,19 @@ service : {
       totalChapters: nat;
       totalWords: nat;
     });
+  getRecordingAudio: (id: nat) -> (opt blob);
   listAnalysesByBook: (bookId: nat) -> (vec Analysis);
   listAnalysesByChapter: (chapterId: nat) -> (vec Analysis);
   listBooksByOwner: () -> (vec Book);
   listChaptersByBook: (bookId: nat) -> (vec Chapter);
   listCommentsByChapter: (chapterId: nat) -> (vec Comment);
   listMessagesByBook: (bookId: nat) -> (vec ChatMessage);
+  listRecordingsByChapter: (chapterId: nat) ->
+   (vec record {
+          createdAt: int;
+          id: nat;
+          voice: text;
+        });
   reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);
   saveAnalysis: (bookId: nat, chapterId: opt nat, analysisType: text,
    provider: text, resultContent: text) -> (nat);
@@ -137,6 +160,8 @@ service : {
          proposal: text;
          "text": text;
        }) -> (bool);
+  saveRecording: (chapterId: nat, bookId: nat, voice: text, audioData:
+   blob) -> (nat);
   sendMessage: (bookId: nat, role: text, content: text, provider: text) ->
    (nat);
   updateBook: (id: nat, title: text, description: text, category: text) ->

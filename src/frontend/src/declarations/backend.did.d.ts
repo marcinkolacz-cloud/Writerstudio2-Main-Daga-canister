@@ -57,6 +57,14 @@ export interface Comment {
   'chapterId' : bigint,
   'anchorText' : string,
 }
+export interface Recording {
+  'id' : bigint,
+  'voice' : string,
+  'createdAt' : bigint,
+  'audioData' : Uint8Array,
+  'bookId' : bigint,
+  'chapterId' : bigint,
+}
 export interface TextAnnotation {
   'id' : bigint,
   'explanation' : string,
@@ -96,6 +104,11 @@ export interface _SERVICE {
   '__nextChapterId' : ActorMethod<[], bigint>,
   '__nextChatMessageId' : ActorMethod<[], bigint>,
   '__nextCommentId' : ActorMethod<[], bigint>,
+  '__nextRecordingId' : ActorMethod<[], bigint>,
+  '__recordings' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, Recording]>
+  >,
   'clearChat' : ActorMethod<[bigint], boolean>,
   'createBook' : ActorMethod<[string, string, string], bigint>,
   'createChapter' : ActorMethod<[bigint, string], bigint>,
@@ -105,6 +118,7 @@ export interface _SERVICE {
   'deleteChapter' : ActorMethod<[bigint], boolean>,
   'deleteComment' : ActorMethod<[bigint], boolean>,
   'deleteMessage' : ActorMethod<[bigint], boolean>,
+  'deleteRecording' : ActorMethod<[bigint], boolean>,
   'getAnalysis' : ActorMethod<[bigint], [] | [Analysis]>,
   'getAnnotations' : ActorMethod<[bigint], Array<TextAnnotation>>,
   'getBook' : ActorMethod<[bigint], [] | [Book]>,
@@ -122,12 +136,17 @@ export interface _SERVICE {
     [],
     { 'totalBooks' : bigint, 'totalChapters' : bigint, 'totalWords' : bigint }
   >,
+  'getRecordingAudio' : ActorMethod<[bigint], [] | [Uint8Array]>,
   'listAnalysesByBook' : ActorMethod<[bigint], Array<Analysis>>,
   'listAnalysesByChapter' : ActorMethod<[bigint], Array<Analysis>>,
   'listBooksByOwner' : ActorMethod<[], Array<Book>>,
   'listChaptersByBook' : ActorMethod<[bigint], Array<Chapter>>,
   'listCommentsByChapter' : ActorMethod<[bigint], Array<Comment>>,
   'listMessagesByBook' : ActorMethod<[bigint], Array<ChatMessage>>,
+  'listRecordingsByChapter' : ActorMethod<
+    [bigint],
+    Array<{ 'id' : bigint, 'voice' : string, 'createdAt' : bigint }>
+  >,
   'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
   'saveAnalysis' : ActorMethod<
     [bigint, [] | [bigint], string, string, string],
@@ -147,6 +166,7 @@ export interface _SERVICE {
     ],
     boolean
   >,
+  'saveRecording' : ActorMethod<[bigint, bigint, string, Uint8Array], bigint>,
   'sendMessage' : ActorMethod<[bigint, string, string, string], bigint>,
   'updateBook' : ActorMethod<[bigint, string, string, string], boolean>,
   'updateChapter' : ActorMethod<[bigint, string, string], boolean>,

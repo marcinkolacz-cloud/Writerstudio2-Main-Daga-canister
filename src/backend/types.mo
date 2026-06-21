@@ -54,6 +54,15 @@ module {
     createdAt : Int;
   };
 
+  public type Recording = {
+    id : Nat;
+    chapterId : Nat;
+    bookId : Nat;
+    voice : Text;
+    audioData : Blob;
+    createdAt : Int;
+  };
+
   public type ChatMessage = {
     id : Nat;
     bookId : Nat;

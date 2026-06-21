@@ -1,6 +1,7 @@
 import { CommentDialog } from "@/components/editor/CommentDialog";
 import { CommentsPanel } from "@/components/editor/CommentsPanel";
 import { LektorPanel } from "@/components/editor/LektorPanel";
+import { RecordingsPanel } from "@/components/editor/RecordingsPanel";
 import { RichTextEditor } from "@/components/editor/RichTextEditor";
 import { SynonymPopup } from "@/components/editor/SynonymPopup";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ import {
   useComments,
   useCreateComment,
   useDeleteComment,
+  useRecordings,
   useSaveAnalysis,
   useSaveAnnotations,
   useUpdateChapter,
@@ -58,6 +60,7 @@ import {
   Check,
   Download,
   FileText,
+  Headphones,
   MessageCircle,
   MessageSquare,
   Save,
@@ -189,6 +192,7 @@ export function ChapterEditorPage() {
   // Comments state
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [lektorPanelOpen, setLektorPanelOpen] = useState(false);
+  const [recordingsPanelOpen, setRecordingsPanelOpen] = useState(false);
   const [commentDialogOpen, setCommentDialogOpen] = useState(false);
   const [selectedText, setSelectedText] = useState("");
   const [floatingButtonPos, setFloatingButtonPos] = useState<{
@@ -625,6 +629,19 @@ export function ChapterEditorPage() {
 
         <div className="w-px h-6 bg-border hidden sm:block" />
 
+        {/* Recordings toggle */}
+        <Button
+          size="sm"
+          variant={recordingsPanelOpen ? "default" : "outline"}
+          onClick={() => setRecordingsPanelOpen((v) => !v)}
+          data-ocid="chapter.recordings_toggle_button"
+        >
+          <Headphones className="h-3.5 w-3.5 mr-1.5" />
+          Nagrania
+        </Button>
+
+        <div className="w-px h-6 bg-border hidden sm:block" />
+
         {/* Comments toggle */}
         <Button
           size="sm"
@@ -740,8 +757,20 @@ export function ChapterEditorPage() {
               wprowadź klucz OpenAI.
             </div>
           ) : (
-            <LektorPanel editor={editorRef.current} apiKey={apiKey} />
+            <LektorPanel
+              editor={editorRef.current}
+              apiKey={apiKey}
+              chapterId={chapter.id}
+              bookId={book.id}
+            />
           )}
+        </div>
+      )}
+
+      {/* Recordings panel */}
+      {recordingsPanelOpen && (
+        <div data-ocid="chapter.recordings_panel_container">
+          <RecordingsPanel chapterId={chapter.id} />
         </div>
       )}
 

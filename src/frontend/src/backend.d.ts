@@ -7,6 +7,22 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface Comment {
+    id: bigint;
+    content: string;
+    createdAt: bigint;
+    chapterId: bigint;
+    anchorText: string;
+}
+export interface Analysis {
+    id: bigint;
+    provider: string;
+    analysisType: string;
+    createdAt: bigint;
+    bookId: bigint;
+    chapterId?: bigint;
+    resultContent: string;
+}
 export interface Book {
     id: bigint;
     title: string;
@@ -32,22 +48,6 @@ export interface ChatMessage {
     role: string;
     bookId: bigint;
 }
-export interface Comment {
-    id: bigint;
-    content: string;
-    createdAt: bigint;
-    chapterId: bigint;
-    anchorText: string;
-}
-export interface Analysis {
-    id: bigint;
-    provider: string;
-    analysisType: string;
-    createdAt: bigint;
-    bookId: bigint;
-    chapterId?: bigint;
-    resultContent: string;
-}
 export interface Chapter {
     id: bigint;
     charCount: bigint;
@@ -62,6 +62,14 @@ export interface Chapter {
     updatedAt: bigint;
     orderIndex: bigint;
 }
+export interface Recording {
+    id: bigint;
+    voice: string;
+    createdAt: bigint;
+    audioData: Uint8Array;
+    bookId: bigint;
+    chapterId: bigint;
+}
 export interface backendInterface {
     clearChat(bookId: bigint): Promise<boolean>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
@@ -72,6 +80,7 @@ export interface backendInterface {
     deleteChapter(id: bigint): Promise<boolean>;
     deleteComment(id: bigint): Promise<boolean>;
     deleteMessage(id: bigint): Promise<boolean>;
+    deleteRecording(id: bigint): Promise<boolean>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
     getBook(id: bigint): Promise<Book | null>;
@@ -87,12 +96,18 @@ export interface backendInterface {
         totalChapters: bigint;
         totalWords: bigint;
     }>;
+    getRecordingAudio(id: bigint): Promise<Uint8Array | null>;
     listAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listBooksByOwner(): Promise<Array<Book>>;
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
     listCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
     listMessagesByBook(bookId: bigint): Promise<Array<ChatMessage>>;
+    listRecordingsByChapter(chapterId: bigint): Promise<Array<{
+        id: bigint;
+        voice: string;
+        createdAt: bigint;
+    }>>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
     saveAnnotations(analysisId: bigint, annotationData: Array<{
@@ -101,6 +116,7 @@ export interface backendInterface {
         text: string;
         proposal: string;
     }>): Promise<boolean>;
+    saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
     sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;

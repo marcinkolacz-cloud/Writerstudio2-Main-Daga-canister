@@ -1,4 +1,4 @@
-import { createActor } from "@/backend";
+import { Recording, createActor } from "@/backend";
 import type {
   Analysis,
   Book,
@@ -415,6 +415,75 @@ export function useBookStats(bookId: string | number) {
     },
     enabled: !!actor && !!bookId,
   });
+}
+
+export function useRecordings(chapterId: string | number) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(chapterId);
+  return useQuery<
+    Array<{
+      id: bigint;
+      voice: string;
+      createdAt: bigint;
+    }>
+  >({
+    queryKey: ["recordings", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listRecordingsByChapter(id);
+    },
+    enabled: !!actor && !!chapterId,
+  });
+}
+
+export function useSaveRecording() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      chapterId,
+      bookId,
+      voice,
+      audioData,
+    }: {
+      chapterId: bigint;
+      bookId: bigint;
+      voice: string;
+      audioData: Uint8Array;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.saveRecording(chapterId, bookId, voice, audioData);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["recordings", variables.chapterId],
+      });
+    },
+  });
+}
+
+export function useDeleteRecording() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id }: { id: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteRecording(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recordings"] });
+    },
+  });
+}
+
+export async function fetchRecordingAudio(
+  actor: ReturnType<typeof createActor>,
+  id: bigint,
+): Promise<Uint8Array | null> {
+  if (!actor) return null;
+  return actor.getRecordingAudio(id);
 }
 
 export function useClearChat() {

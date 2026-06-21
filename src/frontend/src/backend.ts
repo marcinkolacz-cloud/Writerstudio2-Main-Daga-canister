@@ -89,6 +89,22 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface Comment {
+    id: bigint;
+    content: string;
+    createdAt: bigint;
+    chapterId: bigint;
+    anchorText: string;
+}
+export interface Analysis {
+    id: bigint;
+    provider: string;
+    analysisType: string;
+    createdAt: bigint;
+    bookId: bigint;
+    chapterId?: bigint;
+    resultContent: string;
+}
 export interface Book {
     id: bigint;
     title: string;
@@ -114,22 +130,6 @@ export interface ChatMessage {
     role: string;
     bookId: bigint;
 }
-export interface Comment {
-    id: bigint;
-    content: string;
-    createdAt: bigint;
-    chapterId: bigint;
-    anchorText: string;
-}
-export interface Analysis {
-    id: bigint;
-    provider: string;
-    analysisType: string;
-    createdAt: bigint;
-    bookId: bigint;
-    chapterId?: bigint;
-    resultContent: string;
-}
 export interface Chapter {
     id: bigint;
     charCount: bigint;
@@ -144,6 +144,14 @@ export interface Chapter {
     updatedAt: bigint;
     orderIndex: bigint;
 }
+export interface Recording {
+    id: bigint;
+    voice: string;
+    createdAt: bigint;
+    audioData: Uint8Array;
+    bookId: bigint;
+    chapterId: bigint;
+}
 export interface backendInterface {
     __analyses(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Analysis]>>;
     __annotations(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, TextAnnotation]>>;
@@ -157,6 +165,8 @@ export interface backendInterface {
     __nextChapterId(): Promise<bigint>;
     __nextChatMessageId(): Promise<bigint>;
     __nextCommentId(): Promise<bigint>;
+    __nextRecordingId(): Promise<bigint>;
+    __recordings(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Recording]>>;
     clearChat(bookId: bigint): Promise<boolean>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
@@ -166,6 +176,7 @@ export interface backendInterface {
     deleteChapter(id: bigint): Promise<boolean>;
     deleteComment(id: bigint): Promise<boolean>;
     deleteMessage(id: bigint): Promise<boolean>;
+    deleteRecording(id: bigint): Promise<boolean>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
     getBook(id: bigint): Promise<Book | null>;
@@ -181,12 +192,18 @@ export interface backendInterface {
         totalChapters: bigint;
         totalWords: bigint;
     }>;
+    getRecordingAudio(id: bigint): Promise<Uint8Array | null>;
     listAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listBooksByOwner(): Promise<Array<Book>>;
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
     listCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
     listMessagesByBook(bookId: bigint): Promise<Array<ChatMessage>>;
+    listRecordingsByChapter(chapterId: bigint): Promise<Array<{
+        id: bigint;
+        voice: string;
+        createdAt: bigint;
+    }>>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
     saveAnnotations(analysisId: bigint, annotationData: Array<{
@@ -195,6 +212,7 @@ export interface backendInterface {
         text: string;
         proposal: string;
     }>): Promise<boolean>;
+    saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
     sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
@@ -371,6 +389,34 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async __nextRecordingId(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__nextRecordingId();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__nextRecordingId();
+            return result;
+        }
+    }
+    async __recordings(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, Recording]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__recordings(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__recordings(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
     async clearChat(arg0: bigint): Promise<boolean> {
         if (this.processError) {
             try {
@@ -497,6 +543,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async deleteRecording(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteRecording(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteRecording(arg0);
+            return result;
+        }
+    }
     async getAnalysis(arg0: bigint): Promise<Analysis | null> {
         if (this.processError) {
             try {
@@ -590,32 +650,46 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getRecordingAudio(arg0: bigint): Promise<Uint8Array | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getRecordingAudio(arg0);
+                return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getRecordingAudio(arg0);
+            return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async listAnalysesByBook(arg0: bigint): Promise<Array<Analysis>> {
         if (this.processError) {
             try {
                 const result = await this.actor.listAnalysesByBook(arg0);
-                return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.listAnalysesByBook(arg0);
-            return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
         }
     }
     async listAnalysesByChapter(arg0: bigint): Promise<Array<Analysis>> {
         if (this.processError) {
             try {
                 const result = await this.actor.listAnalysesByChapter(arg0);
-                return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.listAnalysesByChapter(arg0);
-            return from_candid_vec_n10(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n11(this._uploadFile, this._downloadFile, result);
         }
     }
     async listBooksByOwner(): Promise<Array<Book>> {
@@ -674,6 +748,24 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async listRecordingsByChapter(arg0: bigint): Promise<Array<{
+        id: bigint;
+        voice: string;
+        createdAt: bigint;
+    }>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listRecordingsByChapter(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listRecordingsByChapter(arg0);
+            return result;
+        }
+    }
     async reorderChapters(arg0: bigint, arg1: Array<bigint>): Promise<boolean> {
         if (this.processError) {
             try {
@@ -718,6 +810,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.saveAnnotations(arg0, arg1);
+            return result;
+        }
+    }
+    async saveRecording(arg0: bigint, arg1: bigint, arg2: string, arg3: Uint8Array): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.saveRecording(arg0, arg1, arg2, arg3);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.saveRecording(arg0, arg1, arg2, arg3);
             return result;
         }
     }
@@ -781,6 +887,9 @@ export class Backend implements backendInterface {
 function from_candid_Analysis_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Analysis): Analysis {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
+function from_candid_opt_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [Uint8Array]): Uint8Array | null {
+    return value.length === 0 ? null : value[0];
+}
 function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
     return value.length === 0 ? null : value[0];
 }
@@ -826,7 +935,7 @@ function from_candid_tuple_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         from_candid_Analysis_n4(_uploadFile, _downloadFile, value[1])
     ];
 }
-function from_candid_vec_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Analysis>): Array<Analysis> {
+function from_candid_vec_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Analysis>): Array<Analysis> {
     return value.map((x)=>from_candid_Analysis_n4(_uploadFile, _downloadFile, x));
 }
 function from_candid_vec_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[bigint, _Analysis]>): Array<[bigint, Analysis]> {

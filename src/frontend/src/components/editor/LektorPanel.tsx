@@ -8,9 +8,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { useSaveRecording } from "@/hooks/useBackend";
 import { generateSpeech } from "@/lib/tts";
 import type { Editor } from "@tiptap/core";
-import { Pause, Play, Square, Volume2 } from "lucide-react";
+import { Pause, Play, Save, Square, Volume2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const VOICES = [
@@ -25,20 +26,31 @@ const VOICES = [
 interface LektorPanelProps {
   editor: Editor | null;
   apiKey: string;
+  chapterId: bigint;
+  bookId: bigint;
 }
 
 type PlaybackState = "idle" | "loading" | "playing" | "paused";
 
-export function LektorPanel({ editor, apiKey }: LektorPanelProps) {
+export function LektorPanel({
+  editor,
+  apiKey,
+  chapterId,
+  bookId,
+}: LektorPanelProps) {
   const [voice, setVoice] = useState("alloy");
   const [speed, setSpeed] = useState([1.0]);
   const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
+
+  const saveRecording = useSaveRecording();
 
   const cleanupAudio = useCallback(() => {
     if (audioRef.current) {
@@ -54,6 +66,28 @@ export function LektorPanel({ editor, apiKey }: LektorPanelProps) {
     setProgress(0);
     setDuration(0);
   }, []);
+
+  const handleSaveRecording = useCallback(async () => {
+    if (!generatedBlob) return;
+    setSaving(true);
+    try {
+      const arrayBuffer = await generatedBlob.arrayBuffer();
+      const audioData = new Uint8Array(arrayBuffer);
+      await saveRecording.mutateAsync({
+        chapterId,
+        bookId,
+        voice,
+        audioData,
+      });
+      setGeneratedBlob(null);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Błąd zapisywania nagrania",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }, [generatedBlob, chapterId, bookId, voice, saveRecording]);
 
   useEffect(() => {
     return () => cleanupAudio();
@@ -72,6 +106,7 @@ export function LektorPanel({ editor, apiKey }: LektorPanelProps) {
 
     try {
       const blob = await generateSpeech(text, apiKey.trim(), voice, speed[0]);
+      setGeneratedBlob(blob);
 
       // Clean up previous audio if any
       cleanupAudio();
@@ -216,6 +251,21 @@ export function LektorPanel({ editor, apiKey }: LektorPanelProps) {
         >
           <Square className="h-3.5 w-3.5 mr-1.5" />
           Stop
+        </Button>
+
+        <Button
+          size="sm"
+          variant="secondary"
+          disabled={!generatedBlob || saving}
+          onClick={handleSaveRecording}
+          data-ocid="lektor.save_recording_button"
+        >
+          {saving ? (
+            <span className="h-3.5 w-3.5 mr-1.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          ) : (
+            <Save className="h-3.5 w-3.5 mr-1.5" />
+          )}
+          {saving ? "Zapisywanie..." : "Zapisz nagranie"}
         </Button>
       </div>
 
