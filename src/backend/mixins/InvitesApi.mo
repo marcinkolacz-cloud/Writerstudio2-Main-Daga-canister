@@ -34,6 +34,17 @@ mixin (
     false
   };
 
+  func hasClaimedAnyCode(caller : Principal) : Bool {
+    for ((_, inviteCode) in inviteCodes.entries()) {
+      for (p in inviteCode.claimedBy.vals()) {
+        if (Principal.equal(p, caller)) {
+          return true;
+        };
+      };
+    };
+    false
+  };
+
   func generateRandomCode() : Text {
     let charArray = [
       'A','B','C','D','E','F','G','H','I','J','K','L','M',
@@ -58,7 +69,7 @@ mixin (
   public shared ({ caller }) func checkAccess() : async Types.AccessCheckResult {
     if (isAdmin(caller)) {
       #Admin
-    } else if (hasAnyBook(caller)) {
+    } else if (hasAnyBook(caller) or hasClaimedAnyCode(caller)) {
       #ExistingUser
     } else {
       #NewUserNeedsCode
