@@ -1,6 +1,6 @@
 import { ChatBotPanel } from "@/components/chat/ChatBotPanel";
 import { Button } from "@/components/ui/button";
-import { useChapters } from "@/hooks/useBackend";
+import { useChapters, useReorderChapters } from "@/hooks/useBackend";
 import { useAppStore } from "@/store/useAppStore";
 import { useInternetIdentity } from "@caffeineai/core-infrastructure";
 import {
@@ -9,7 +9,16 @@ import {
   useParams,
   useRouterState,
 } from "@tanstack/react-router";
-import { BarChart3, BookOpen, FileText, LogOut, Moon, Sun } from "lucide-react";
+import {
+  BarChart3,
+  BookOpen,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  LogOut,
+  Moon,
+  Sun,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 function useActiveBookId(): string | null {
@@ -34,6 +43,7 @@ export function Layout() {
   const activeBookId = useActiveBookId();
   const activeChapterId = useActiveChapterId();
   const { data: chapters } = useChapters(activeBookId ?? "");
+  const reorderChapters = useReorderChapters();
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     const stored = localStorage.getItem("writerstudio-theme");
     if (stored === "dark") return "dark";
@@ -72,31 +82,84 @@ export function Layout() {
         <div className="flex-1 p-4 space-y-2 overflow-y-auto">
           {activeBookId && chapters && chapters.length > 0 && (
             <div className="space-y-1">
-              {chapters.map((chapter) => {
+              {chapters.map((chapter, index) => {
                 const isActive = activeChapterId === String(chapter.id);
                 return (
-                  <button
+                  <div
                     key={String(chapter.id)}
-                    type="button"
-                    onClick={() =>
-                      navigate({
-                        to: "/books/$bookId/chapters/$chapterId",
-                        params: {
-                          bookId: activeBookId,
-                          chapterId: String(chapter.id),
-                        },
-                      })
-                    }
-                    className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors ${
+                    className={`flex items-center gap-1 rounded-md px-2 py-1.5 text-sm transition-colors ${
                       isActive
                         ? "bg-sidebar-accent text-sidebar-foreground font-medium"
                         : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                     }`}
-                    data-ocid={`nav.chapter_link.item.${Number(chapter.orderIndex) + 1}`}
+                    data-ocid={`nav.chapter_row.item.${Number(chapter.orderIndex) + 1}`}
                   >
-                    <FileText className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{chapter.title}</span>
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate({
+                          to: "/books/$bookId/chapters/$chapterId",
+                          params: {
+                            bookId: activeBookId,
+                            chapterId: String(chapter.id),
+                          },
+                        })
+                      }
+                      className="flex flex-1 items-center gap-2 min-w-0"
+                      data-ocid={`nav.chapter_link.item.${Number(chapter.orderIndex) + 1}`}
+                    >
+                      <FileText className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{chapter.title}</span>
+                    </button>
+                    <div className="flex flex-col gap-0.5 shrink-0">
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={() => {
+                          if (!chapters || !activeBookId) return;
+                          const newOrder = chapters.map((c) => c.id);
+                          const currentIndex = index;
+                          const prevIndex = currentIndex - 1;
+                          [newOrder[currentIndex], newOrder[prevIndex]] = [
+                            newOrder[prevIndex],
+                            newOrder[currentIndex],
+                          ];
+                          reorderChapters.mutate({
+                            bookId: BigInt(activeBookId),
+                            orderedChapterIds: newOrder,
+                          });
+                        }}
+                        className="p-0.5 rounded hover:bg-sidebar-accent disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                        aria-label="Przesuń wyżej"
+                        data-ocid={`chapter.reorder_up.item.${Number(chapter.orderIndex) + 1}`}
+                      >
+                        <ChevronUp className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === chapters.length - 1}
+                        onClick={() => {
+                          if (!chapters || !activeBookId) return;
+                          const newOrder = chapters.map((c) => c.id);
+                          const currentIndex = index;
+                          const nextIndex = currentIndex + 1;
+                          [newOrder[currentIndex], newOrder[nextIndex]] = [
+                            newOrder[nextIndex],
+                            newOrder[currentIndex],
+                          ];
+                          reorderChapters.mutate({
+                            bookId: BigInt(activeBookId),
+                            orderedChapterIds: newOrder,
+                          });
+                        }}
+                        className="p-0.5 rounded hover:bg-sidebar-accent disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                        aria-label="Przesuń niżej"
+                        data-ocid={`chapter.reorder_down.item.${Number(chapter.orderIndex) + 1}`}
+                      >
+                        <ChevronDown className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>

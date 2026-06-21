@@ -582,6 +582,29 @@ export function useUpdateBookMetadata() {
   });
 }
 
+export function useReorderChapters() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      bookId,
+      orderedChapterIds,
+    }: {
+      bookId: bigint;
+      orderedChapterIds: bigint[];
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.reorderChapters(bookId, orderedChapterIds);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chapters", variables.bookId],
+      });
+    },
+  });
+}
+
 export function useClearChat() {
   const { actor } = useActor(createActor);
   const queryClient = useQueryClient();

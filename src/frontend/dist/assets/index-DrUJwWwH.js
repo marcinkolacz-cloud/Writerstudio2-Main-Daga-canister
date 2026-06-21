@@ -38009,6 +38009,24 @@ function useUpdateBookMetadata() {
     }
   });
 }
+function useReorderChapters() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      bookId,
+      orderedChapterIds
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.reorderChapters(bookId, orderedChapterIds);
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["chapters", variables.bookId]
+      });
+    }
+  });
+}
 function useClearChat() {
   const { actor } = useActor(createActor);
   const queryClient2 = useQueryClient();
@@ -39284,6 +39302,7 @@ function Layout() {
   const activeBookId = useActiveBookId();
   const activeChapterId = useActiveChapterId();
   const { data: chapters } = useChapters(activeBookId ?? "");
+  const reorderChapters = useReorderChapters();
   const [theme, setTheme] = reactExports.useState(() => {
     const stored = localStorage.getItem("writerstudio-theme");
     if (stored === "dark") return "dark";
@@ -39310,24 +39329,85 @@ function Layout() {
     /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { className: "w-[240px] flex-shrink-0 border-r border-border bg-sidebar flex flex-col", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b border-sidebar-border", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-sm font-semibold text-sidebar-foreground uppercase tracking-wider", children: "Lista rozdziałów" }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 p-4 space-y-2 overflow-y-auto", children: [
-        activeBookId && chapters && chapters.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-1", children: chapters.map((chapter) => {
+        activeBookId && chapters && chapters.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-1", children: chapters.map((chapter, index2) => {
           const isActive2 = activeChapterId === String(chapter.id);
           return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
+            "div",
             {
-              type: "button",
-              onClick: () => navigate({
-                to: "/books/$bookId/chapters/$chapterId",
-                params: {
-                  bookId: activeBookId,
-                  chapterId: String(chapter.id)
-                }
-              }),
-              className: `flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors ${isActive2 ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"}`,
-              "data-ocid": `nav.chapter_link.item.${Number(chapter.orderIndex) + 1}`,
+              className: `flex items-center gap-1 rounded-md px-2 py-1.5 text-sm transition-colors ${isActive2 ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"}`,
+              "data-ocid": `nav.chapter_row.item.${Number(chapter.orderIndex) + 1}`,
               children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 shrink-0" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: chapter.title })
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => navigate({
+                      to: "/books/$bookId/chapters/$chapterId",
+                      params: {
+                        bookId: activeBookId,
+                        chapterId: String(chapter.id)
+                      }
+                    }),
+                    className: "flex flex-1 items-center gap-2 min-w-0",
+                    "data-ocid": `nav.chapter_link.item.${Number(chapter.orderIndex) + 1}`,
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 shrink-0" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: chapter.title })
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col gap-0.5 shrink-0", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      type: "button",
+                      disabled: index2 === 0,
+                      onClick: () => {
+                        if (!chapters || !activeBookId) return;
+                        const newOrder = chapters.map((c2) => c2.id);
+                        const currentIndex = index2;
+                        const prevIndex = currentIndex - 1;
+                        [newOrder[currentIndex], newOrder[prevIndex]] = [
+                          newOrder[prevIndex],
+                          newOrder[currentIndex]
+                        ];
+                        reorderChapters.mutate({
+                          bookId: BigInt(activeBookId),
+                          orderedChapterIds: newOrder
+                        });
+                      },
+                      className: "p-0.5 rounded hover:bg-sidebar-accent disabled:opacity-30 disabled:hover:bg-transparent transition-colors",
+                      "aria-label": "Przesuń wyżej",
+                      "data-ocid": `chapter.reorder_up.item.${Number(chapter.orderIndex) + 1}`,
+                      children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronUp, { className: "h-3 w-3" })
+                    }
+                  ),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "button",
+                    {
+                      type: "button",
+                      disabled: index2 === chapters.length - 1,
+                      onClick: () => {
+                        if (!chapters || !activeBookId) return;
+                        const newOrder = chapters.map((c2) => c2.id);
+                        const currentIndex = index2;
+                        const nextIndex = currentIndex + 1;
+                        [newOrder[currentIndex], newOrder[nextIndex]] = [
+                          newOrder[nextIndex],
+                          newOrder[currentIndex]
+                        ];
+                        reorderChapters.mutate({
+                          bookId: BigInt(activeBookId),
+                          orderedChapterIds: newOrder
+                        });
+                      },
+                      className: "p-0.5 rounded hover:bg-sidebar-accent disabled:opacity-30 disabled:hover:bg-transparent transition-colors",
+                      "aria-label": "Przesuń niżej",
+                      "data-ocid": `chapter.reorder_down.item.${Number(chapter.orderIndex) + 1}`,
+                      children: /* @__PURE__ */ jsxRuntimeExports.jsx(ChevronDown, { className: "h-3 w-3" })
+                    }
+                  )
+                ] })
               ]
             },
             String(chapter.id)
@@ -103492,7 +103572,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BKZEa5WZ.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-MfMapwM5.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -104672,13 +104752,15 @@ function ChapterEditorPage() {
   reactExports.useEffect(() => {
     localStorage.setItem("ws_api_provider", provider);
   }, [provider]);
+  const lastSyncedChapterIdRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (chapter) {
+    if (chapter && lastSyncedChapterIdRef.current !== chapterId) {
       setTitle(chapter.title);
       setContent2(chapter.content);
       setSaveStatus("saved");
+      lastSyncedChapterIdRef.current = chapterId;
     }
-  }, [chapter]);
+  }, [chapter, chapterId]);
   reactExports.useEffect(() => {
     if (editorRef.current && persistedAnnotations && persistedAnnotations.length > 0) {
       const anns = persistedAnnotations.map((pa) => ({

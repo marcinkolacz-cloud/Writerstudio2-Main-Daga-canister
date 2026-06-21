@@ -275,15 +275,16 @@ export function ChapterEditorPage() {
     localStorage.setItem("ws_api_provider", provider);
   }, [provider]);
 
-  // Sync from query data
+  // Sync from query data — only when chapterId changes, not on every background refetch
+  const lastSyncedChapterIdRef = useRef<string | null>(null);
   useEffect(() => {
-    if (chapter) {
+    if (chapter && lastSyncedChapterIdRef.current !== chapterId) {
       setTitle(chapter.title);
       setContent(chapter.content);
-
       setSaveStatus("saved");
+      lastSyncedChapterIdRef.current = chapterId;
     }
-  }, [chapter]);
+  }, [chapter, chapterId]);
 
   // Apply persisted annotations (only non-approved ones) when editor is ready
   useEffect(() => {

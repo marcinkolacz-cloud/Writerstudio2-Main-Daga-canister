@@ -6,6 +6,7 @@ import ChaptersLib "../lib/Chapters";
 import Principal "mo:core/Principal";
 import Time "mo:core/Time";
 import Order "mo:core/Order";
+import Set "mo:core/Set";
 
 mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>) {
 
@@ -138,6 +139,27 @@ mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>)
     switch (getBookOwner(bookId)) {
       case (?ownerId) {
         if (Principal.equal(ownerId, caller)) {
+          // Collect existing chapter IDs for this book
+          var existingIds = List.empty<Nat>();
+          for ((_, chapter) in chapters.entries()) {
+            if (chapter.bookId == bookId) {
+              existingIds.add(chapter.id);
+            };
+          };
+          let existingArr = existingIds.toArray();
+
+          // Validate: same count
+          if (existingArr.size() != orderedIds.size()) {
+            return false;
+          };
+
+          // Validate: same set of IDs
+          let existingSet = Set.fromArray<Nat>(existingArr);
+          let orderedSet = Set.fromArray<Nat>(orderedIds);
+          if (not existingSet.equal<Nat>(orderedSet)) {
+            return false;
+          };
+
           var index = 0;
           for (chapterId in orderedIds.vals()) {
             switch (chapters.get(chapterId)) {
