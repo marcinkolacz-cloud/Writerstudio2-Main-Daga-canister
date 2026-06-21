@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface TooltipData {
   id: bigint;
   text: string;
+  originalText: string;
   explanation: string;
   proposal: string;
   alternativeProposal?: string;
@@ -90,6 +91,10 @@ export function useAnnotationTooltip(
       const annotationIdAttr =
         annotationSpan.getAttribute("data-annotation-id");
       const approvedAttr = annotationSpan.getAttribute("data-approved");
+      const originalTextAttr =
+        annotationSpan.getAttribute("data-original-text") ??
+        annotationSpan.textContent ??
+        "";
 
       if (!explanation && !proposal) {
         hideTooltip();
@@ -124,6 +129,7 @@ export function useAnnotationTooltip(
       showTooltip({
         id: annotationIdAttr ? BigInt(annotationIdAttr) : 0n,
         text: annotationSpan.textContent ?? "",
+        originalText: originalTextAttr,
         explanation,
         proposal,
         alternativeProposal: alternativeProposal || undefined,
@@ -175,7 +181,7 @@ export function useAnnotationTooltip(
       id: tooltip.id,
       from: tooltip.from,
       to: tooltip.to,
-      originalText: tooltip.text,
+      originalText: tooltip.originalText,
     });
     setTooltip(null);
   }, [tooltip, editor, onRevertProposal]);

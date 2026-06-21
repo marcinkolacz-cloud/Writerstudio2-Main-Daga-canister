@@ -238,6 +238,7 @@ function applyAnnotationsToEditor(
           "data-proposal": ann.proposal,
           "data-annotation-id": String(ann.id),
           "data-approved": String(ann.approved),
+          "data-original-text": ann.text,
         }),
       );
     }
@@ -829,6 +830,51 @@ export function ChapterEditorPage() {
                 Pokaż kolorowanie
               </>
             )}
+          </Button>
+        )}
+
+        {/* Approve changes button */}
+        {currentAnnotations.length > 0 && (
+          <Button
+            size="sm"
+            variant="default"
+            onClick={() => {
+              if (!editorRef.current) return;
+              const editor = editorRef.current;
+              const annotationMarkNames = [
+                "annotationYellow",
+                "annotationRed",
+                "annotationBlue",
+                "annotationOrange",
+                "annotationPurple",
+              ];
+
+              // Build a single atomic transaction to remove all annotation marks
+              // for the text fragments corresponding to currentAnnotations
+              const tr = editor.state.tr;
+              for (const ann of currentAnnotations) {
+                const range = findFirstTextRangeInDoc(editor, ann.text);
+                if (range) {
+                  for (const markName of annotationMarkNames) {
+                    const markType = editor.schema.marks[markName];
+                    if (markType) {
+                      tr.removeMark(range.from, range.to, markType);
+                    }
+                  }
+                }
+              }
+              if (tr.steps.length > 0) {
+                editor.view.dispatch(tr);
+              }
+
+              // Clear current annotations state
+              setCurrentAnnotations([]);
+              setAnnotationsVisible(true);
+            }}
+            data-ocid="chapter.approve_changes_button"
+          >
+            <Check className="h-3.5 w-3.5 mr-1.5" />
+            Zatwierdź zmiany
           </Button>
         )}
 

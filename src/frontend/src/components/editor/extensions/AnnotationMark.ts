@@ -60,6 +60,14 @@ function createAnnotationMark(name: string, options: AnnotationMarkOptions) {
             return { "data-approved": attributes["data-approved"] };
           },
         },
+        "data-original-text": {
+          default: null,
+          parseHTML: (element) => element.getAttribute("data-original-text"),
+          renderHTML: (attributes) => {
+            if (!attributes["data-original-text"]) return {};
+            return { "data-original-text": attributes["data-original-text"] };
+          },
+        },
       };
     },
 

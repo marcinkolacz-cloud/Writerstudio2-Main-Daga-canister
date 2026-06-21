@@ -66154,6 +66154,14 @@ function createAnnotationMark(name, options) {
             if (!attributes["data-approved"]) return {};
             return { "data-approved": attributes["data-approved"] };
           }
+        },
+        "data-original-text": {
+          default: null,
+          parseHTML: (element) => element.getAttribute("data-original-text"),
+          renderHTML: (attributes) => {
+            if (!attributes["data-original-text"]) return {};
+            return { "data-original-text": attributes["data-original-text"] };
+          }
         }
       };
     },
@@ -66289,6 +66297,7 @@ function useAnnotationTooltip(editor, onApplyProposal, onRevertProposal) {
       const color2 = annotationSpan.getAttribute("data-annotation") ?? "";
       const annotationIdAttr = annotationSpan.getAttribute("data-annotation-id");
       const approvedAttr = annotationSpan.getAttribute("data-approved");
+      const originalTextAttr = annotationSpan.getAttribute("data-original-text") ?? annotationSpan.textContent ?? "";
       if (!explanation && !proposal) {
         hideTooltip();
         return;
@@ -66317,6 +66326,7 @@ function useAnnotationTooltip(editor, onApplyProposal, onRevertProposal) {
       showTooltip({
         id: annotationIdAttr ? BigInt(annotationIdAttr) : 0n,
         text: annotationSpan.textContent ?? "",
+        originalText: originalTextAttr,
         explanation,
         proposal,
         alternativeProposal: alternativeProposal || void 0,
@@ -66359,7 +66369,7 @@ function useAnnotationTooltip(editor, onApplyProposal, onRevertProposal) {
       id: tooltip.id,
       from: tooltip.from,
       to: tooltip.to,
-      originalText: tooltip.text
+      originalText: tooltip.originalText
     });
     setTooltip(null);
   }, [tooltip, editor, onRevertProposal]);
@@ -103866,7 +103876,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Dk40TlDi.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-D92YVIX4.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -105039,7 +105049,8 @@ function applyAnnotationsToEditor(editor, annotations, options) {
           "data-explanation": ann.explanation,
           "data-proposal": ann.proposal,
           "data-annotation-id": String(ann.id),
-          "data-approved": String(ann.approved)
+          "data-approved": String(ann.approved),
+          "data-original-text": ann.text
         })
       );
     }
@@ -105552,6 +105563,46 @@ ${ch.content}`).join("\n\n---\n\n");
                 /* @__PURE__ */ jsxRuntimeExports.jsx(Eye, { className: "h-3.5 w-3.5 mr-1.5" }),
                 "Pokaż kolorowanie"
               ] })
+            }
+          ),
+          currentAnnotations.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              size: "sm",
+              variant: "default",
+              onClick: () => {
+                if (!editorRef.current) return;
+                const editor = editorRef.current;
+                const annotationMarkNames = [
+                  "annotationYellow",
+                  "annotationRed",
+                  "annotationBlue",
+                  "annotationOrange",
+                  "annotationPurple"
+                ];
+                const tr2 = editor.state.tr;
+                for (const ann of currentAnnotations) {
+                  const range3 = findFirstTextRangeInDoc(editor, ann.text);
+                  if (range3) {
+                    for (const markName of annotationMarkNames) {
+                      const markType = editor.schema.marks[markName];
+                      if (markType) {
+                        tr2.removeMark(range3.from, range3.to, markType);
+                      }
+                    }
+                  }
+                }
+                if (tr2.steps.length > 0) {
+                  editor.view.dispatch(tr2);
+                }
+                setCurrentAnnotations([]);
+                setAnnotationsVisible(true);
+              },
+              "data-ocid": "chapter.approve_changes_button",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-3.5 w-3.5 mr-1.5" }),
+                "Zatwierdź zmiany"
+              ]
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
