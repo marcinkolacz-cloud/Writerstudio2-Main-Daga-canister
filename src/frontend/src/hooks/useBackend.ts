@@ -486,6 +486,48 @@ export async function fetchRecordingAudio(
   return actor.getRecordingAudio(id);
 }
 
+export function useAnnotationsByAnalysis(analysisId: string | number) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(analysisId);
+  return useQuery<TextAnnotation[]>({
+    queryKey: ["annotations", "analysis", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listAnnotationsByAnalysis(id);
+    },
+    enabled: !!actor && !!analysisId,
+  });
+}
+
+export function useUpdateAnnotationApproved() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      approved,
+    }: {
+      id: bigint;
+      approved: boolean;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.updateAnnotationApproved(id, approved);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["annotations"] });
+    },
+  });
+}
+
+export async function getAnnotation(
+  actor: ReturnType<typeof createActor>,
+  id: bigint,
+): Promise<TextAnnotation | null> {
+  if (!actor) return null;
+  return actor.getAnnotation(id);
+}
+
 export function useClearChat() {
   const { actor } = useActor(createActor);
   const queryClient = useQueryClient();

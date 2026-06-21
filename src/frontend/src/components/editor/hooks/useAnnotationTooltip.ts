@@ -1,7 +1,9 @@
 import type { Editor } from "@tiptap/core";
+import { Check, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface TooltipData {
+  id: bigint;
   text: string;
   explanation: string;
   proposal: string;
@@ -9,14 +11,23 @@ interface TooltipData {
   rect: DOMRect;
   from: number;
   to: number;
+  approved: boolean;
 }
 
 export function useAnnotationTooltip(
   editor: Editor | null,
   onApplyProposal: (params: {
+    id: bigint;
     from: number;
     to: number;
     proposal: string;
+    text: string;
+  }) => void,
+  onRevertProposal: (params: {
+    id: bigint;
+    from: number;
+    to: number;
+    originalText: string;
   }) => void,
 ) {
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
@@ -73,6 +84,9 @@ export function useAnnotationTooltip(
       const explanation = annotationSpan.getAttribute("data-explanation") ?? "";
       const proposal = annotationSpan.getAttribute("data-proposal") ?? "";
       const color = annotationSpan.getAttribute("data-annotation") ?? "";
+      const annotationIdAttr =
+        annotationSpan.getAttribute("data-annotation-id");
+      const approvedAttr = annotationSpan.getAttribute("data-approved");
 
       if (!explanation && !proposal) {
         hideTooltip();
@@ -101,6 +115,7 @@ export function useAnnotationTooltip(
 
       const rect = annotationSpan.getBoundingClientRect();
       showTooltip({
+        id: annotationIdAttr ? BigInt(annotationIdAttr) : 0n,
         text: annotationSpan.textContent ?? "",
         explanation,
         proposal,
@@ -108,6 +123,7 @@ export function useAnnotationTooltip(
         from,
         to,
         rect,
+        approved: approvedAttr === "true",
       });
     };
 
@@ -136,17 +152,31 @@ export function useAnnotationTooltip(
   const handleApply = useCallback(() => {
     if (!tooltip || !editor) return;
     onApplyProposal({
+      id: tooltip.id,
       from: tooltip.from,
       to: tooltip.to,
       proposal: tooltip.proposal,
+      text: tooltip.text,
     });
     setTooltip(null);
   }, [tooltip, editor, onApplyProposal]);
+
+  const handleRevert = useCallback(() => {
+    if (!tooltip || !editor) return;
+    onRevertProposal({
+      id: tooltip.id,
+      from: tooltip.from,
+      to: tooltip.to,
+      originalText: tooltip.text,
+    });
+    setTooltip(null);
+  }, [tooltip, editor, onRevertProposal]);
 
   return {
     tooltip,
     tooltipRef,
     handleApply,
+    handleRevert,
     hideTooltip,
     clearHideTimeout,
   };

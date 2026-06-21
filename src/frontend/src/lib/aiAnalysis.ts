@@ -1,9 +1,11 @@
 import { useRef } from "react";
 export interface Annotation {
+  id: bigint;
   text: string;
   color: "yellow" | "red" | "blue" | "orange" | "purple";
   explanation: string;
   proposal: string;
+  approved: boolean;
 }
 
 function buildGrammarPrompt(text: string): string {
@@ -110,10 +112,12 @@ function validateAnnotations(data: unknown): Annotation[] {
       throw new Error(`Element ${idx} ma nieprawidłowy kolor: ${colorStr}`);
     }
     return {
+      id: 0n,
       text,
       color: colorStr as Annotation["color"],
       explanation,
       proposal,
+      approved: false,
     };
   });
 }

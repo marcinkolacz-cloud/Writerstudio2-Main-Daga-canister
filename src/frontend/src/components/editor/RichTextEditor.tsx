@@ -1,5 +1,4 @@
 import {
-  annotationApplied,
   annotationBlue,
   annotationOrange,
   annotationPurple,
@@ -8,14 +7,17 @@ import {
 } from "@/components/editor/extensions/AnnotationMark";
 import { commentMark } from "@/components/editor/extensions/CommentMark";
 import { useAnnotationTooltip } from "@/components/editor/hooks/useAnnotationTooltip";
+import { useUpdateAnnotationApproved } from "@/hooks/useBackend";
 import { cn } from "@/lib/utils";
 import Underline from "@tiptap/extension-underline";
 import { type Editor, EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {
   Bold,
+  Check,
   Italic,
   Redo,
+  RotateCcw,
   Underline as UnderlineIcon,
   Undo,
 } from "lucide-react";
@@ -45,7 +47,6 @@ export function RichTextEditor({
       annotationBlue,
       annotationOrange,
       annotationPurple,
-      annotationApplied,
       commentMark,
     ],
     content: value,
@@ -64,26 +65,115 @@ export function RichTextEditor({
     },
   });
 
+  const updateAnnotationApproved = useUpdateAnnotationApproved();
+
   const handleApplyProposal = useCallback(
     ({
+      id,
       from,
       to,
       proposal,
-    }: { from: number; to: number; proposal: string }) => {
+      text,
+    }: {
+      id: bigint;
+      from: number;
+      to: number;
+      proposal: string;
+      text: string;
+    }) => {
       if (!editor) return;
+
+      // Verify the text at from/to matches the expected annotation text
+      const currentText = editor.state.doc.textBetween(from, to, " ");
+      let actualFrom = from;
+      let actualTo = to;
+
+      if (currentText !== text) {
+        // Try to re-locate the fragment near the original position
+        const docText = editor.getText();
+        const searchStart = Math.max(0, from - 100);
+        const idx = docText.indexOf(text, searchStart);
+        if (idx !== -1) {
+          actualFrom = idx;
+          actualTo = idx + text.length;
+        } else {
+          // Fallback: try from the beginning
+          const idx2 = docText.indexOf(text);
+          if (idx2 !== -1) {
+            actualFrom = idx2;
+            actualTo = idx2 + text.length;
+          }
+        }
+      }
+
       editor
         .chain()
         .focus()
-        .deleteRange({ from, to })
+        .deleteRange({ from: actualFrom, to: actualTo })
         .insertContent(proposal)
-        .setMark("annotationApplied", {})
         .run();
+
+      // Update backend approval status
+      if (id !== 0n) {
+        updateAnnotationApproved.mutate({ id, approved: true });
+      }
     },
-    [editor],
+    [editor, updateAnnotationApproved],
   );
 
-  const { tooltip, tooltipRef, handleApply, clearHideTimeout } =
-    useAnnotationTooltip(editor, handleApplyProposal);
+  const handleRevertProposal = useCallback(
+    ({
+      id,
+      from,
+      to,
+      originalText,
+    }: {
+      id: bigint;
+      from: number;
+      to: number;
+      originalText: string;
+    }) => {
+      if (!editor) return;
+
+      // Verify the text at from/to matches the proposal (current text after apply)
+      const currentText = editor.state.doc.textBetween(from, to, " ");
+      let actualFrom = from;
+      let actualTo = to;
+
+      // If the exact range doesn't match, try to locate the proposal text
+      if (currentText !== originalText) {
+        const docText = editor.getText();
+        const searchStart = Math.max(0, from - 100);
+        const idx = docText.indexOf(originalText, searchStart);
+        if (idx !== -1) {
+          actualFrom = idx;
+          actualTo = idx + originalText.length;
+        } else {
+          const idx2 = docText.indexOf(originalText);
+          if (idx2 !== -1) {
+            actualFrom = idx2;
+            actualTo = idx2 + originalText.length;
+          }
+        }
+      }
+
+      editor
+        .chain()
+        .focus()
+        .deleteRange({ from: actualFrom, to: actualTo })
+        .insertContent(originalText)
+        .run();
+
+      // Update backend approval status
+      if (id !== 0n) {
+        updateAnnotationApproved.mutate({ id, approved: false });
+      }
+    },
+    [editor, updateAnnotationApproved],
+  );
+
+  const { tooltip, tooltipRef, handleApply, handleRevert, clearHideTimeout } =
+    useAnnotationTooltip(editor, handleApplyProposal, handleRevertProposal);
 
   useEffect(() => {
     if (editor && value !== lastEmittedValue.current) {
@@ -187,14 +277,35 @@ export function RichTextEditor({
                 </p>
               </div>
             )}
-            <button
-              type="button"
-              onClick={handleApply}
-              className="w-full mt-2 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              data-ocid="editor.apply_proposal_button"
-            >
-              Wstaw propozycję
-            </button>
+            <div className="flex items-center gap-2 mt-2">
+              <button
+                type="button"
+                onClick={handleApply}
+                className="flex-1 px-3 py-1.5 text-xs font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                data-ocid="editor.apply_proposal_button"
+              >
+                Wstaw propozycję
+              </button>
+              {tooltip.approved && (
+                <button
+                  type="button"
+                  onClick={handleRevert}
+                  className="flex-1 px-3 py-1.5 text-xs font-medium rounded-md bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
+                  data-ocid="editor.revert_proposal_button"
+                >
+                  <RotateCcw className="h-3 w-3 inline mr-1" />
+                  Cofnij zmianę
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
+              <Check
+                className={`h-3.5 w-3.5 ${tooltip.approved ? "text-success" : "text-muted-foreground/40"}`}
+              />
+              <span>
+                {tooltip.approved ? "Zatwierdzone" : "Niezatwierdzone"}
+              </span>
+            </div>
           </div>
           {/* Arrow */}
           <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 bg-popover border-l border-t border-border" />

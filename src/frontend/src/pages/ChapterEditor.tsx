@@ -29,6 +29,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useAnalysesByBook,
+  useAnnotationsByAnalysis,
   useBook,
   useChapter,
   useChapters,
@@ -38,6 +39,7 @@ import {
   useRecordings,
   useSaveAnalysis,
   useSaveAnnotations,
+  useUpdateAnnotationApproved,
   useUpdateChapter,
   useUpdateChapterIndents,
 } from "@/hooks/useBackend";
@@ -130,10 +132,17 @@ function IndentControl({
   );
 }
 
-function applyAnnotationsToEditor(editor: Editor, annotations: Annotation[]) {
+function applyAnnotationsToEditor(
+  editor: Editor,
+  annotations: Annotation[],
+  options?: { skipApproved?: boolean },
+) {
   const docText = editor.getText();
 
   for (const ann of annotations) {
+    // Skip approved annotations (they are already part of normal text)
+    if (options?.skipApproved && ann.approved) continue;
+
     const idx = docText.indexOf(ann.text);
     if (idx === -1) continue;
 
@@ -149,6 +158,8 @@ function applyAnnotationsToEditor(editor: Editor, annotations: Annotation[]) {
         {
           "data-explanation": ann.explanation,
           "data-proposal": ann.proposal,
+          "data-annotation-id": String(ann.id),
+          "data-approved": String(ann.approved),
         },
       )
       .run();
@@ -168,6 +179,16 @@ export function ChapterEditorPage() {
   const { data: comments } = useComments(chapterId);
   const createComment = useCreateComment();
   const deleteComment = useDeleteComment();
+
+  // Load persisted annotations for the latest analysis of this chapter
+  const latestAnalysisId =
+    bookAnalyses
+      ?.filter((a) => a.chapterId === BigInt(chapterId))
+      .sort((a, b) => Number(b.createdAt - a.createdAt))[0]?.id ?? null;
+
+  const { data: persistedAnnotations } = useAnnotationsByAnalysis(
+    latestAnalysisId ? String(latestAnalysisId) : "",
+  );
 
   const updateChapter = useUpdateChapter();
   const saveAnalysis = useSaveAnalysis();
@@ -245,6 +266,25 @@ export function ChapterEditorPage() {
       setSaveStatus("saved");
     }
   }, [chapter]);
+
+  // Apply persisted annotations (only non-approved ones) when editor is ready
+  useEffect(() => {
+    if (
+      editorRef.current &&
+      persistedAnnotations &&
+      persistedAnnotations.length > 0
+    ) {
+      const anns: Annotation[] = persistedAnnotations.map((pa) => ({
+        id: pa.id,
+        text: pa.text,
+        color: pa.color as Annotation["color"],
+        explanation: pa.explanation,
+        proposal: pa.proposal,
+        approved: pa.approved,
+      }));
+      applyAnnotationsToEditor(editorRef.current, anns, { skipApproved: true });
+    }
+  }, [persistedAnnotations]);
 
   const doSave = useCallback(
     (newTitle: string, newContent: string) => {
