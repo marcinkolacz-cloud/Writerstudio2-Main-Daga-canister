@@ -74856,6 +74856,16 @@ function RichTextEditor({
         }
         return false;
       });
+      console.log(
+        "[DEBUG] actualFrom:",
+        actualFrom,
+        "actualTo:",
+        actualTo,
+        "markTypeName:",
+        markTypeName,
+        "markAttrs:",
+        markAttrs
+      );
       const schema = editor.schema;
       const markType = schema.marks[markTypeName];
       const marksToApply = markType ? [
@@ -74864,6 +74874,12 @@ function RichTextEditor({
           "data-approved": "true"
         })
       ] : [];
+      console.log(
+        "[DEBUG] markType found:",
+        !!markType,
+        "marksToApply length:",
+        marksToApply.length
+      );
       const textNode = schema.text(proposal, marksToApply);
       const tr2 = editor.state.tr;
       tr2.replaceWith(actualFrom, actualTo, textNode);
@@ -103866,7 +103882,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BTXq8iTt.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BC0TjvHI.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

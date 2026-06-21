@@ -139,6 +139,16 @@ export function RichTextEditor({
         }
         return false;
       });
+      console.log(
+        "[DEBUG] actualFrom:",
+        actualFrom,
+        "actualTo:",
+        actualTo,
+        "markTypeName:",
+        markTypeName,
+        "markAttrs:",
+        markAttrs,
+      );
 
       // Build the replacement text node with the preserved mark (updated data-approved)
       const schema = editor.schema;
@@ -151,6 +161,12 @@ export function RichTextEditor({
             }),
           ]
         : [];
+      console.log(
+        "[DEBUG] markType found:",
+        !!markType,
+        "marksToApply length:",
+        marksToApply.length,
+      );
       const textNode = schema.text(proposal, marksToApply);
 
       // Replace range with the marked text node in a single transaction
