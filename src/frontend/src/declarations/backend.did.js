@@ -64,6 +64,20 @@ export const Comment = IDL.Record({
   'chapterId' : IDL.Nat,
   'anchorText' : IDL.Text,
 });
+export const InviteCodeStatus = IDL.Variant({
+  'active' : IDL.Null,
+  'revoked' : IDL.Null,
+  'exhausted' : IDL.Null,
+});
+export const InviteCode = IDL.Record({
+  'status' : InviteCodeStatus,
+  'expiresAt' : IDL.Opt(IDL.Int),
+  'code' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'usedCount' : IDL.Nat,
+  'claimedBy' : IDL.Vec(IDL.Principal),
+  'maxUses' : IDL.Nat,
+});
 export const Recording = IDL.Record({
   'id' : IDL.Nat,
   'voice' : IDL.Text,
@@ -71,6 +85,11 @@ export const Recording = IDL.Record({
   'audioData' : IDL.Vec(IDL.Nat8),
   'bookId' : IDL.Nat,
   'chapterId' : IDL.Nat,
+});
+export const AccessCheckResult = IDL.Variant({
+  'ExistingUser' : IDL.Null,
+  'Admin' : IDL.Null,
+  'NewUserNeedsCode' : IDL.Null,
 });
 
 export const idlService = IDL.Service({
@@ -104,18 +123,26 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Tuple(IDL.Nat, Comment))],
       ['query'],
     ),
+  '__inviteCodes' : IDL.Func(
+      [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Text, InviteCode))],
+      ['query'],
+    ),
   '__nextAnalysisId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextAnnotationId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextBookId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextChapterId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextChatMessageId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextCommentId' : IDL.Func([], [IDL.Nat], ['query']),
+  '__nextInviteCodeId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextRecordingId' : IDL.Func([], [IDL.Nat], ['query']),
   '__recordings' : IDL.Func(
       [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
       [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
       ['query'],
     ),
+  'checkAccess' : IDL.Func([], [AccessCheckResult], []),
+  'claimInviteCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'clearChat' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
   'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
@@ -126,6 +153,7 @@ export const idlService = IDL.Service({
   'deleteComment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'generateInviteCode' : IDL.Func([IDL.Nat, IDL.Opt(IDL.Int)], [IDL.Text], []),
   'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
   'getAnnotation' : IDL.Func([IDL.Nat], [IDL.Opt(TextAnnotation)], []),
   'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
@@ -165,6 +193,7 @@ export const idlService = IDL.Service({
   'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
   'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
   'listCommentsByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Comment)], []),
+  'listInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], []),
   'listMessagesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(ChatMessage)], []),
   'listRecordingsByChapter' : IDL.Func(
       [IDL.Nat],
@@ -180,6 +209,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
+  'revokeInviteCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'saveAnalysis' : IDL.Func(
       [IDL.Nat, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text],
       [IDL.Nat],
@@ -283,6 +313,20 @@ export const idlFactory = ({ IDL }) => {
     'chapterId' : IDL.Nat,
     'anchorText' : IDL.Text,
   });
+  const InviteCodeStatus = IDL.Variant({
+    'active' : IDL.Null,
+    'revoked' : IDL.Null,
+    'exhausted' : IDL.Null,
+  });
+  const InviteCode = IDL.Record({
+    'status' : InviteCodeStatus,
+    'expiresAt' : IDL.Opt(IDL.Int),
+    'code' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'usedCount' : IDL.Nat,
+    'claimedBy' : IDL.Vec(IDL.Principal),
+    'maxUses' : IDL.Nat,
+  });
   const Recording = IDL.Record({
     'id' : IDL.Nat,
     'voice' : IDL.Text,
@@ -290,6 +334,11 @@ export const idlFactory = ({ IDL }) => {
     'audioData' : IDL.Vec(IDL.Nat8),
     'bookId' : IDL.Nat,
     'chapterId' : IDL.Nat,
+  });
+  const AccessCheckResult = IDL.Variant({
+    'ExistingUser' : IDL.Null,
+    'Admin' : IDL.Null,
+    'NewUserNeedsCode' : IDL.Null,
   });
   
   return IDL.Service({
@@ -323,18 +372,26 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, Comment))],
         ['query'],
       ),
+    '__inviteCodes' : IDL.Func(
+        [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Text, InviteCode))],
+        ['query'],
+      ),
     '__nextAnalysisId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextAnnotationId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextBookId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextChapterId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextChatMessageId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextCommentId' : IDL.Func([], [IDL.Nat], ['query']),
+    '__nextInviteCodeId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextRecordingId' : IDL.Func([], [IDL.Nat], ['query']),
     '__recordings' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
         ['query'],
       ),
+    'checkAccess' : IDL.Func([], [AccessCheckResult], []),
+    'claimInviteCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'clearChat' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
     'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
@@ -345,6 +402,11 @@ export const idlFactory = ({ IDL }) => {
     'deleteComment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'generateInviteCode' : IDL.Func(
+        [IDL.Nat, IDL.Opt(IDL.Int)],
+        [IDL.Text],
+        [],
+      ),
     'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
     'getAnnotation' : IDL.Func([IDL.Nat], [IDL.Opt(TextAnnotation)], []),
     'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
@@ -384,6 +446,7 @@ export const idlFactory = ({ IDL }) => {
     'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
     'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
     'listCommentsByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Comment)], []),
+    'listInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], []),
     'listMessagesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(ChatMessage)], []),
     'listRecordingsByChapter' : IDL.Func(
         [IDL.Nat],
@@ -399,6 +462,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
+    'revokeInviteCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'saveAnalysis' : IDL.Func(
         [IDL.Nat, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text],
         [IDL.Nat],

@@ -36223,6 +36223,20 @@ const Comment$1 = Record({
   "chapterId": Nat,
   "anchorText": Text$4
 });
+const InviteCodeStatus = Variant({
+  "active": Null,
+  "revoked": Null,
+  "exhausted": Null
+});
+const InviteCode = Record({
+  "status": InviteCodeStatus,
+  "expiresAt": Opt(Int),
+  "code": Text$4,
+  "createdAt": Int,
+  "usedCount": Nat,
+  "claimedBy": Vec(Principal2),
+  "maxUses": Nat
+});
 const Recording = Record({
   "id": Nat,
   "voice": Text$4,
@@ -36230,6 +36244,11 @@ const Recording = Record({
   "audioData": Vec(Nat8),
   "bookId": Nat,
   "chapterId": Nat
+});
+const AccessCheckResult = Variant({
+  "ExistingUser": Null,
+  "Admin": Null,
+  "NewUserNeedsCode": Null
 });
 Service({
   "__analyses": Func(
@@ -36262,18 +36281,26 @@ Service({
     [Vec(Tuple(Nat, Comment$1))],
     ["query"]
   ),
+  "__inviteCodes": Func(
+    [Opt(Text$4), Opt(Nat)],
+    [Vec(Tuple(Text$4, InviteCode))],
+    ["query"]
+  ),
   "__nextAnalysisId": Func([], [Nat], ["query"]),
   "__nextAnnotationId": Func([], [Nat], ["query"]),
   "__nextBookId": Func([], [Nat], ["query"]),
   "__nextChapterId": Func([], [Nat], ["query"]),
   "__nextChatMessageId": Func([], [Nat], ["query"]),
   "__nextCommentId": Func([], [Nat], ["query"]),
+  "__nextInviteCodeId": Func([], [Nat], ["query"]),
   "__nextRecordingId": Func([], [Nat], ["query"]),
   "__recordings": Func(
     [Opt(Nat), Opt(Nat)],
     [Vec(Tuple(Nat, Recording))],
     ["query"]
   ),
+  "checkAccess": Func([], [AccessCheckResult], []),
+  "claimInviteCode": Func([Text$4], [Bool], []),
   "clearChat": Func([Nat], [Bool], []),
   "createBook": Func([Text$4, Text$4, Text$4], [Nat], []),
   "createChapter": Func([Nat, Text$4], [Nat], []),
@@ -36284,6 +36311,7 @@ Service({
   "deleteComment": Func([Nat], [Bool], []),
   "deleteMessage": Func([Nat], [Bool], []),
   "deleteRecording": Func([Nat], [Bool], []),
+  "generateInviteCode": Func([Nat, Opt(Int)], [Text$4], []),
   "getAnalysis": Func([Nat], [Opt(Analysis)], []),
   "getAnnotation": Func([Nat], [Opt(TextAnnotation)], []),
   "getAnnotations": Func([Nat], [Vec(TextAnnotation)], []),
@@ -36323,6 +36351,7 @@ Service({
   "listBooksByOwner": Func([], [Vec(Book)], []),
   "listChaptersByBook": Func([Nat], [Vec(Chapter)], []),
   "listCommentsByChapter": Func([Nat], [Vec(Comment$1)], []),
+  "listInviteCodes": Func([], [Vec(InviteCode)], []),
   "listMessagesByBook": Func([Nat], [Vec(ChatMessage)], []),
   "listRecordingsByChapter": Func(
     [Nat],
@@ -36338,6 +36367,7 @@ Service({
     []
   ),
   "reorderChapters": Func([Nat, Vec(Nat)], [Bool], []),
+  "revokeInviteCode": Func([Text$4], [Bool], []),
   "saveAnalysis": Func(
     [Nat, Opt(Nat), Text$4, Text$4, Text$4],
     [Nat],
@@ -36438,6 +36468,20 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "chapterId": IDL2.Nat,
     "anchorText": IDL2.Text
   });
+  const InviteCodeStatus2 = IDL2.Variant({
+    "active": IDL2.Null,
+    "revoked": IDL2.Null,
+    "exhausted": IDL2.Null
+  });
+  const InviteCode2 = IDL2.Record({
+    "status": InviteCodeStatus2,
+    "expiresAt": IDL2.Opt(IDL2.Int),
+    "code": IDL2.Text,
+    "createdAt": IDL2.Int,
+    "usedCount": IDL2.Nat,
+    "claimedBy": IDL2.Vec(IDL2.Principal),
+    "maxUses": IDL2.Nat
+  });
   const Recording2 = IDL2.Record({
     "id": IDL2.Nat,
     "voice": IDL2.Text,
@@ -36445,6 +36489,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "audioData": IDL2.Vec(IDL2.Nat8),
     "bookId": IDL2.Nat,
     "chapterId": IDL2.Nat
+  });
+  const AccessCheckResult2 = IDL2.Variant({
+    "ExistingUser": IDL2.Null,
+    "Admin": IDL2.Null,
+    "NewUserNeedsCode": IDL2.Null
   });
   return IDL2.Service({
     "__analyses": IDL2.Func(
@@ -36477,18 +36526,26 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Comment2))],
       ["query"]
     ),
+    "__inviteCodes": IDL2.Func(
+      [IDL2.Opt(IDL2.Text), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Text, InviteCode2))],
+      ["query"]
+    ),
     "__nextAnalysisId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextAnnotationId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextBookId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChapterId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChatMessageId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextCommentId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__nextInviteCodeId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextRecordingId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__recordings": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Recording2))],
       ["query"]
     ),
+    "checkAccess": IDL2.Func([], [AccessCheckResult2], []),
+    "claimInviteCode": IDL2.Func([IDL2.Text], [IDL2.Bool], []),
     "clearChat": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "createBook": IDL2.Func([IDL2.Text, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "createChapter": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
@@ -36499,6 +36556,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "deleteComment": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteMessage": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteRecording": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "generateInviteCode": IDL2.Func(
+      [IDL2.Nat, IDL2.Opt(IDL2.Int)],
+      [IDL2.Text],
+      []
+    ),
     "getAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Opt(Analysis2)], []),
     "getAnnotation": IDL2.Func([IDL2.Nat], [IDL2.Opt(TextAnnotation2)], []),
     "getAnnotations": IDL2.Func([IDL2.Nat], [IDL2.Vec(TextAnnotation2)], []),
@@ -36538,6 +36600,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "listBooksByOwner": IDL2.Func([], [IDL2.Vec(Book2)], []),
     "listChaptersByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Chapter2)], []),
     "listCommentsByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Comment2)], []),
+    "listInviteCodes": IDL2.Func([], [IDL2.Vec(InviteCode2)], []),
     "listMessagesByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(ChatMessage2)], []),
     "listRecordingsByChapter": IDL2.Func(
       [IDL2.Nat],
@@ -36553,6 +36616,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
       []
     ),
     "reorderChapters": IDL2.Func([IDL2.Nat, IDL2.Vec(IDL2.Nat)], [IDL2.Bool], []),
+    "revokeInviteCode": IDL2.Func([IDL2.Text], [IDL2.Bool], []),
     "saveAnalysis": IDL2.Func(
       [IDL2.Nat, IDL2.Opt(IDL2.Nat), IDL2.Text, IDL2.Text, IDL2.Text],
       [IDL2.Nat],
@@ -36699,6 +36763,20 @@ class Backend {
       return result;
     }
   }
+  async __inviteCodes(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__inviteCodes(to_candid_opt_n7(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__inviteCodes(to_candid_opt_n7(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
+    }
+  }
   async __nextAnalysisId() {
     if (this.processError) {
       try {
@@ -36783,6 +36861,20 @@ class Backend {
       return result;
     }
   }
+  async __nextInviteCodeId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextInviteCodeId();
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextInviteCodeId();
+      return result;
+    }
+  }
   async __nextRecordingId() {
     if (this.processError) {
       try {
@@ -36808,6 +36900,34 @@ class Backend {
       }
     } else {
       const result = await this.actor.__recordings(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
+  async checkAccess() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.checkAccess();
+        return from_candid_AccessCheckResult_n15(this._uploadFile, this._downloadFile, result);
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.checkAccess();
+      return from_candid_AccessCheckResult_n15(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async claimInviteCode(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.claimInviteCode(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.claimInviteCode(arg0);
       return result;
     }
   }
@@ -36951,32 +37071,46 @@ class Backend {
       return result;
     }
   }
+  async generateInviteCode(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.generateInviteCode(arg0, to_candid_opt_n17(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.generateInviteCode(arg0, to_candid_opt_n17(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
   async getAnalysis(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.getAnalysis(arg0);
-        return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getAnalysis(arg0);
-      return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
     }
   }
   async getAnnotation(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.getAnnotation(arg0);
-        return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getAnnotation(arg0);
-      return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
     }
   }
   async getAnnotations(arg0) {
@@ -36997,14 +37131,14 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.getBook(arg0);
-        return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getBook(arg0);
-      return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
     }
   }
   async getBookStats(arg0) {
@@ -37025,14 +37159,14 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.getChapter(arg0);
-        return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getChapter(arg0);
-      return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
     }
   }
   async getOverallStats() {
@@ -37053,42 +37187,42 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.getRecordingAudio(arg0);
-        return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+        return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.getRecordingAudio(arg0);
-      return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+      return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
     }
   }
   async listAnalysesByBook(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.listAnalysesByBook(arg0);
-        return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+        return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listAnalysesByBook(arg0);
-      return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+      return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
     }
   }
   async listAnalysesByChapter(arg0) {
     if (this.processError) {
       try {
         const result = await this.actor.listAnalysesByChapter(arg0);
-        return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+        return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listAnalysesByChapter(arg0);
-      return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+      return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
     }
   }
   async listAnnotationsByAnalysis(arg0) {
@@ -37147,6 +37281,20 @@ class Backend {
       return result;
     }
   }
+  async listInviteCodes() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.listInviteCodes();
+        return from_candid_vec_n24(this._uploadFile, this._downloadFile, result);
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.listInviteCodes();
+      return from_candid_vec_n24(this._uploadFile, this._downloadFile, result);
+    }
+  }
   async listMessagesByBook(arg0) {
     if (this.processError) {
       try {
@@ -37186,6 +37334,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.reorderChapters(arg0, arg1);
+      return result;
+    }
+  }
+  async revokeInviteCode(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.revokeInviteCode(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.revokeInviteCode(arg0);
       return result;
     }
   }
@@ -37302,26 +37464,49 @@ class Backend {
     }
   }
 }
+function from_candid_AccessCheckResult_n15(_uploadFile, _downloadFile, value) {
+  return from_candid_variant_n16(_uploadFile, _downloadFile, value);
+}
 function from_candid_Analysis_n4(_uploadFile, _downloadFile, value) {
   return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n10(_uploadFile, _downloadFile, value) {
+function from_candid_InviteCodeStatus_n12(_uploadFile, _downloadFile, value) {
+  return from_candid_variant_n13(_uploadFile, _downloadFile, value);
+}
+function from_candid_InviteCode_n10(_uploadFile, _downloadFile, value) {
+  return from_candid_record_n11(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n14(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n11(_uploadFile, _downloadFile, value) {
+function from_candid_opt_n18(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : from_candid_Analysis_n4(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n19(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n20(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n21(_uploadFile, _downloadFile, value) {
+  return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n22(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n6(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n7(_uploadFile, _downloadFile, value) {
-  return value.length === 0 ? null : from_candid_Analysis_n4(_uploadFile, _downloadFile, value[0]);
-}
-function from_candid_opt_n8(_uploadFile, _downloadFile, value) {
-  return value.length === 0 ? null : value[0];
-}
-function from_candid_opt_n9(_uploadFile, _downloadFile, value) {
-  return value.length === 0 ? null : value[0];
+function from_candid_record_n11(_uploadFile, _downloadFile, value) {
+  return {
+    status: from_candid_InviteCodeStatus_n12(_uploadFile, _downloadFile, value.status),
+    expiresAt: record_opt_to_undefined(from_candid_opt_n14(_uploadFile, _downloadFile, value.expiresAt)),
+    code: value.code,
+    createdAt: value.createdAt,
+    usedCount: value.usedCount,
+    claimedBy: value.claimedBy,
+    maxUses: value.maxUses
+  };
 }
 function from_candid_record_n5(_uploadFile, _downloadFile, value) {
   return {
@@ -37340,13 +37525,37 @@ function from_candid_tuple_n3(_uploadFile, _downloadFile, value) {
     from_candid_Analysis_n4(_uploadFile, _downloadFile, value[1])
   ];
 }
-function from_candid_vec_n12(_uploadFile, _downloadFile, value) {
-  return value.map((x3) => from_candid_Analysis_n4(_uploadFile, _downloadFile, x3));
+function from_candid_tuple_n9(_uploadFile, _downloadFile, value) {
+  return [
+    value[0],
+    from_candid_InviteCode_n10(_uploadFile, _downloadFile, value[1])
+  ];
+}
+function from_candid_variant_n13(_uploadFile, _downloadFile, value) {
+  return "active" in value ? "active" : "revoked" in value ? "revoked" : "exhausted" in value ? "exhausted" : value;
+}
+function from_candid_variant_n16(_uploadFile, _downloadFile, value) {
+  return "ExistingUser" in value ? "ExistingUser" : "Admin" in value ? "Admin" : "NewUserNeedsCode" in value ? "NewUserNeedsCode" : value;
 }
 function from_candid_vec_n2(_uploadFile, _downloadFile, value) {
   return value.map((x3) => from_candid_tuple_n3(_uploadFile, _downloadFile, x3));
 }
+function from_candid_vec_n23(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_Analysis_n4(_uploadFile, _downloadFile, x3));
+}
+function from_candid_vec_n24(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_InviteCode_n10(_uploadFile, _downloadFile, x3));
+}
+function from_candid_vec_n8(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_tuple_n9(_uploadFile, _downloadFile, x3));
+}
 function to_candid_opt_n1(_uploadFile, _downloadFile, value) {
+  return value === null ? candid_none() : candid_some(value);
+}
+function to_candid_opt_n17(_uploadFile, _downloadFile, value) {
+  return value === null ? candid_none() : candid_some(value);
+}
+function to_candid_opt_n7(_uploadFile, _downloadFile, value) {
   return value === null ? candid_none() : candid_some(value);
 }
 function createActor(canisterId, _uploadFile, _downloadFile, options = {}) {
@@ -103051,7 +103260,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-B7fpiRbs.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BY_vYdjf.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

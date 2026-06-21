@@ -72,4 +72,22 @@ module {
     provider : Text;
     createdAt : Int;
   };
+
+  public type InviteCodeStatus = { #active; #exhausted; #revoked };
+
+  public type InviteCode = {
+    code : Text;
+    status : InviteCodeStatus;
+    createdAt : Int;
+    expiresAt : ?Int;
+    maxUses : Nat;
+    usedCount : Nat;
+    claimedBy : [Principal];
+  };
+
+  public type AccessCheckResult = {
+    #Admin;
+    #ExistingUser;
+    #NewUserNeedsCode;
+  };
 };

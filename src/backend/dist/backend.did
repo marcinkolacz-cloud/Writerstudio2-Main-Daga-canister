@@ -17,6 +17,22 @@ type Recording =
    id: nat;
    voice: text;
  };
+type InviteCodeStatus = 
+ variant {
+   active;
+   exhausted;
+   revoked;
+ };
+type InviteCode = 
+ record {
+   claimedBy: vec principal;
+   code: text;
+   createdAt: int;
+   expiresAt: opt int;
+   maxUses: nat;
+   status: InviteCodeStatus;
+   usedCount: nat;
+ };
 type Comment = 
  record {
    anchorText: text;
@@ -69,6 +85,12 @@ type Analysis =
    provider: text;
    resultContent: text;
  };
+type AccessCheckResult = 
+ variant {
+   Admin;
+   ExistingUser;
+   NewUserNeedsCode;
+ };
 service : {
   __analyses: (ko: opt nat, count: opt nat) ->
    (vec record {
@@ -99,18 +121,26 @@ service : {
           nat;
           Comment;
         }) query;
+  __inviteCodes: (ko: opt text, count: opt nat) ->
+   (vec record {
+          text;
+          InviteCode;
+        }) query;
   __nextAnalysisId: () -> (nat) query;
   __nextAnnotationId: () -> (nat) query;
   __nextBookId: () -> (nat) query;
   __nextChapterId: () -> (nat) query;
   __nextChatMessageId: () -> (nat) query;
   __nextCommentId: () -> (nat) query;
+  __nextInviteCodeId: () -> (nat) query;
   __nextRecordingId: () -> (nat) query;
   __recordings: (ko: opt nat, count: opt nat) ->
    (vec record {
           nat;
           Recording;
         }) query;
+  checkAccess: () -> (AccessCheckResult);
+  claimInviteCode: (code: text) -> (bool);
   clearChat: (bookId: nat) -> (bool);
   createBook: (title: text, description: text, category: text) -> (nat);
   createChapter: (bookId: nat, title: text) -> (nat);
@@ -121,6 +151,7 @@ service : {
   deleteComment: (id: nat) -> (bool);
   deleteMessage: (id: nat) -> (bool);
   deleteRecording: (id: nat) -> (bool);
+  generateInviteCode: (maxUses: nat, expiresAt: opt int) -> (text);
   getAnalysis: (id: nat) -> (opt Analysis);
   getAnnotation: (id: nat) -> (opt TextAnnotation);
   getAnnotations: (analysisId: nat) -> (vec TextAnnotation);
@@ -146,6 +177,7 @@ service : {
   listBooksByOwner: () -> (vec Book);
   listChaptersByBook: (bookId: nat) -> (vec Chapter);
   listCommentsByChapter: (chapterId: nat) -> (vec Comment);
+  listInviteCodes: () -> (vec InviteCode);
   listMessagesByBook: (bookId: nat) -> (vec ChatMessage);
   listRecordingsByChapter: (chapterId: nat) ->
    (vec record {
@@ -154,6 +186,7 @@ service : {
           voice: text;
         });
   reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);
+  revokeInviteCode: (code: text) -> (bool);
   saveAnalysis: (bookId: nat, chapterId: opt nat, analysisType: text,
    provider: text, resultContent: text) -> (nat);
   saveAnnotations: (analysisId: nat, annotationData:

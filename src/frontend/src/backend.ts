@@ -145,6 +145,15 @@ export interface Chapter {
     updatedAt: bigint;
     orderIndex: bigint;
 }
+export interface InviteCode {
+    status: InviteCodeStatus;
+    expiresAt?: bigint;
+    code: string;
+    createdAt: bigint;
+    usedCount: bigint;
+    claimedBy: Array<Principal>;
+    maxUses: bigint;
+}
 export interface Recording {
     id: bigint;
     voice: string;
@@ -153,6 +162,16 @@ export interface Recording {
     bookId: bigint;
     chapterId: bigint;
 }
+export enum AccessCheckResult {
+    ExistingUser = "ExistingUser",
+    Admin = "Admin",
+    NewUserNeedsCode = "NewUserNeedsCode"
+}
+export enum InviteCodeStatus {
+    active = "active",
+    revoked = "revoked",
+    exhausted = "exhausted"
+}
 export interface backendInterface {
     __analyses(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Analysis]>>;
     __annotations(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, TextAnnotation]>>;
@@ -160,14 +179,18 @@ export interface backendInterface {
     __chapters(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Chapter]>>;
     __chatMessages(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, ChatMessage]>>;
     __comments(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Comment]>>;
+    __inviteCodes(ko: string | null, count: bigint | null): Promise<Array<[string, InviteCode]>>;
     __nextAnalysisId(): Promise<bigint>;
     __nextAnnotationId(): Promise<bigint>;
     __nextBookId(): Promise<bigint>;
     __nextChapterId(): Promise<bigint>;
     __nextChatMessageId(): Promise<bigint>;
     __nextCommentId(): Promise<bigint>;
+    __nextInviteCodeId(): Promise<bigint>;
     __nextRecordingId(): Promise<bigint>;
     __recordings(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Recording]>>;
+    checkAccess(): Promise<AccessCheckResult>;
+    claimInviteCode(code: string): Promise<boolean>;
     clearChat(bookId: bigint): Promise<boolean>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
@@ -178,6 +201,7 @@ export interface backendInterface {
     deleteComment(id: bigint): Promise<boolean>;
     deleteMessage(id: bigint): Promise<boolean>;
     deleteRecording(id: bigint): Promise<boolean>;
+    generateInviteCode(maxUses: bigint, expiresAt: bigint | null): Promise<string>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotation(id: bigint): Promise<TextAnnotation | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
@@ -201,6 +225,7 @@ export interface backendInterface {
     listBooksByOwner(): Promise<Array<Book>>;
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
     listCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
+    listInviteCodes(): Promise<Array<InviteCode>>;
     listMessagesByBook(bookId: bigint): Promise<Array<ChatMessage>>;
     listRecordingsByChapter(chapterId: bigint): Promise<Array<{
         id: bigint;
@@ -208,6 +233,7 @@ export interface backendInterface {
         createdAt: bigint;
     }>>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
+    revokeInviteCode(code: string): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
     saveAnnotations(analysisId: bigint, annotationData: Array<{
         explanation: string;
@@ -222,7 +248,7 @@ export interface backendInterface {
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
     updateChapterIndents(id: bigint, indentLeft: bigint, indentRight: bigint, indentFirstLine: bigint): Promise<boolean>;
 }
-import type { Analysis as _Analysis, Book as _Book, Chapter as _Chapter, TextAnnotation as _TextAnnotation } from "./declarations/backend.did.d.ts";
+import type { AccessCheckResult as _AccessCheckResult, Analysis as _Analysis, Book as _Book, Chapter as _Chapter, InviteCode as _InviteCode, InviteCodeStatus as _InviteCodeStatus, TextAnnotation as _TextAnnotation } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async __analyses(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, Analysis]>> {
@@ -309,6 +335,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async __inviteCodes(arg0: string | null, arg1: bigint | null): Promise<Array<[string, InviteCode]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__inviteCodes(to_candid_opt_n7(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+                return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__inviteCodes(to_candid_opt_n7(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+            return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async __nextAnalysisId(): Promise<bigint> {
         if (this.processError) {
             try {
@@ -393,6 +433,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async __nextInviteCodeId(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__nextInviteCodeId();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__nextInviteCodeId();
+            return result;
+        }
+    }
     async __nextRecordingId(): Promise<bigint> {
         if (this.processError) {
             try {
@@ -418,6 +472,34 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.__recordings(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async checkAccess(): Promise<AccessCheckResult> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.checkAccess();
+                return from_candid_AccessCheckResult_n15(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.checkAccess();
+            return from_candid_AccessCheckResult_n15(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async claimInviteCode(arg0: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.claimInviteCode(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.claimInviteCode(arg0);
             return result;
         }
     }
@@ -561,32 +643,46 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async generateInviteCode(arg0: bigint, arg1: bigint | null): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.generateInviteCode(arg0, to_candid_opt_n17(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.generateInviteCode(arg0, to_candid_opt_n17(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
     async getAnalysis(arg0: bigint): Promise<Analysis | null> {
         if (this.processError) {
             try {
                 const result = await this.actor.getAnalysis(arg0);
-                return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getAnalysis(arg0);
-            return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n18(this._uploadFile, this._downloadFile, result);
         }
     }
     async getAnnotation(arg0: bigint): Promise<TextAnnotation | null> {
         if (this.processError) {
             try {
                 const result = await this.actor.getAnnotation(arg0);
-                return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getAnnotation(arg0);
-            return from_candid_opt_n8(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
         }
     }
     async getAnnotations(arg0: bigint): Promise<Array<TextAnnotation>> {
@@ -607,14 +703,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getBook(arg0);
-                return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getBook(arg0);
-            return from_candid_opt_n9(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n20(this._uploadFile, this._downloadFile, result);
         }
     }
     async getBookStats(arg0: bigint): Promise<{
@@ -640,14 +736,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getChapter(arg0);
-                return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getChapter(arg0);
-            return from_candid_opt_n10(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n21(this._uploadFile, this._downloadFile, result);
         }
     }
     async getOverallStats(): Promise<{
@@ -672,42 +768,42 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getRecordingAudio(arg0);
-                return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getRecordingAudio(arg0);
-            return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+            return from_candid_opt_n22(this._uploadFile, this._downloadFile, result);
         }
     }
     async listAnalysesByBook(arg0: bigint): Promise<Array<Analysis>> {
         if (this.processError) {
             try {
                 const result = await this.actor.listAnalysesByBook(arg0);
-                return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.listAnalysesByBook(arg0);
-            return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
         }
     }
     async listAnalysesByChapter(arg0: bigint): Promise<Array<Analysis>> {
         if (this.processError) {
             try {
                 const result = await this.actor.listAnalysesByChapter(arg0);
-                return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+                return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.listAnalysesByChapter(arg0);
-            return from_candid_vec_n12(this._uploadFile, this._downloadFile, result);
+            return from_candid_vec_n23(this._uploadFile, this._downloadFile, result);
         }
     }
     async listAnnotationsByAnalysis(arg0: bigint): Promise<Array<TextAnnotation>> {
@@ -766,6 +862,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async listInviteCodes(): Promise<Array<InviteCode>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listInviteCodes();
+                return from_candid_vec_n24(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listInviteCodes();
+            return from_candid_vec_n24(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async listMessagesByBook(arg0: bigint): Promise<Array<ChatMessage>> {
         if (this.processError) {
             try {
@@ -809,6 +919,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.reorderChapters(arg0, arg1);
+            return result;
+        }
+    }
+    async revokeInviteCode(arg0: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.revokeInviteCode(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.revokeInviteCode(arg0);
             return result;
         }
     }
@@ -930,26 +1054,65 @@ export class Backend implements backendInterface {
         }
     }
 }
+function from_candid_AccessCheckResult_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _AccessCheckResult): AccessCheckResult {
+    return from_candid_variant_n16(_uploadFile, _downloadFile, value);
+}
 function from_candid_Analysis_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _Analysis): Analysis {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Chapter]): Chapter | null {
+function from_candid_InviteCodeStatus_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _InviteCodeStatus): InviteCodeStatus {
+    return from_candid_variant_n13(_uploadFile, _downloadFile, value);
+}
+function from_candid_InviteCode_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _InviteCode): InviteCode {
+    return from_candid_record_n11(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [Uint8Array]): Uint8Array | null {
+function from_candid_opt_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Analysis]): Analysis | null {
+    return value.length === 0 ? null : from_candid_Analysis_n4(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_TextAnnotation]): TextAnnotation | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Book]): Book | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n21(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Chapter]): Chapter | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [Uint8Array]): Uint8Array | null {
     return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Analysis]): Analysis | null {
-    return value.length === 0 ? null : from_candid_Analysis_n4(_uploadFile, _downloadFile, value[0]);
-}
-function from_candid_opt_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_TextAnnotation]): TextAnnotation | null {
-    return value.length === 0 ? null : value[0];
-}
-function from_candid_opt_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_Book]): Book | null {
-    return value.length === 0 ? null : value[0];
+function from_candid_record_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    status: _InviteCodeStatus;
+    expiresAt: [] | [bigint];
+    code: string;
+    createdAt: bigint;
+    usedCount: bigint;
+    claimedBy: Array<Principal>;
+    maxUses: bigint;
+}): {
+    status: InviteCodeStatus;
+    expiresAt?: bigint;
+    code: string;
+    createdAt: bigint;
+    usedCount: bigint;
+    claimedBy: Array<Principal>;
+    maxUses: bigint;
+} {
+    return {
+        status: from_candid_InviteCodeStatus_n12(_uploadFile, _downloadFile, value.status),
+        expiresAt: record_opt_to_undefined(from_candid_opt_n14(_uploadFile, _downloadFile, value.expiresAt)),
+        code: value.code,
+        createdAt: value.createdAt,
+        usedCount: value.usedCount,
+        claimedBy: value.claimedBy,
+        maxUses: value.maxUses
+    };
 }
 function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: bigint;
@@ -984,13 +1147,49 @@ function from_candid_tuple_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         from_candid_Analysis_n4(_uploadFile, _downloadFile, value[1])
     ];
 }
-function from_candid_vec_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Analysis>): Array<Analysis> {
-    return value.map((x)=>from_candid_Analysis_n4(_uploadFile, _downloadFile, x));
+function from_candid_tuple_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [string, _InviteCode]): [string, InviteCode] {
+    return [
+        value[0],
+        from_candid_InviteCode_n10(_uploadFile, _downloadFile, value[1])
+    ];
+}
+function from_candid_variant_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    active: null;
+} | {
+    revoked: null;
+} | {
+    exhausted: null;
+}): InviteCodeStatus {
+    return "active" in value ? InviteCodeStatus.active : "revoked" in value ? InviteCodeStatus.revoked : "exhausted" in value ? InviteCodeStatus.exhausted : value;
+}
+function from_candid_variant_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    ExistingUser: null;
+} | {
+    Admin: null;
+} | {
+    NewUserNeedsCode: null;
+}): AccessCheckResult {
+    return "ExistingUser" in value ? AccessCheckResult.ExistingUser : "Admin" in value ? AccessCheckResult.Admin : "NewUserNeedsCode" in value ? AccessCheckResult.NewUserNeedsCode : value;
 }
 function from_candid_vec_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[bigint, _Analysis]>): Array<[bigint, Analysis]> {
     return value.map((x)=>from_candid_tuple_n3(_uploadFile, _downloadFile, x));
 }
+function from_candid_vec_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_Analysis>): Array<Analysis> {
+    return value.map((x)=>from_candid_Analysis_n4(_uploadFile, _downloadFile, x));
+}
+function from_candid_vec_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_InviteCode>): Array<InviteCode> {
+    return value.map((x)=>from_candid_InviteCode_n10(_uploadFile, _downloadFile, x));
+}
+function from_candid_vec_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[string, _InviteCode]>): Array<[string, InviteCode]> {
+    return value.map((x)=>from_candid_tuple_n9(_uploadFile, _downloadFile, x));
+}
 function to_candid_opt_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: bigint | null): [] | [bigint] {
+    return value === null ? candid_none() : candid_some(value);
+}
+function to_candid_opt_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: bigint | null): [] | [bigint] {
+    return value === null ? candid_none() : candid_some(value);
+}
+function to_candid_opt_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: string | null): [] | [string] {
     return value === null ? candid_none() : candid_some(value);
 }
 export interface CreateActorOptions {
