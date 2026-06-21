@@ -44,8 +44,11 @@ import {
   useUpdateChapter,
 } from "@/hooks/useBackend";
 import {
+  analyzeConsistency,
   analyzeDialogue,
+  analyzeEmotion,
   analyzeGrammarStyle,
+  analyzeSceneExpansion,
   analyzeWithContext,
   generateSummary,
   getSynonyms,
@@ -65,6 +68,7 @@ import {
   EyeOff,
   FileText,
   Headphones,
+  Heart,
   History,
   MessageCircle,
   MessageSquare,
@@ -82,7 +86,14 @@ import {
 
 type SaveStatus = "saved" | "saving" | "unsaved";
 type AnalysisStatus = "idle" | "loading" | "success" | "error";
-type AnalysisMode = "grammar" | "context" | "dialogue" | "summary";
+type AnalysisMode =
+  | "grammar"
+  | "context"
+  | "dialogue"
+  | "summary"
+  | "scene"
+  | "emotion"
+  | "consistency";
 type SummaryType = "short" | "long" | "hooks";
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
@@ -583,6 +594,24 @@ export function ChapterEditorPage() {
                     Dialogi
                   </div>
                 </SelectItem>
+                <SelectItem value="scene">
+                  <div className="flex items-center gap-2">
+                    <Wand2 className="h-3.5 w-3.5" />
+                    Rozszerzenie sceny
+                  </div>
+                </SelectItem>
+                <SelectItem value="emotion">
+                  <div className="flex items-center gap-2">
+                    <Heart className="h-3.5 w-3.5" />
+                    Emocja
+                  </div>
+                </SelectItem>
+                <SelectItem value="consistency">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    Analiza spójności książki
+                  </div>
+                </SelectItem>
                 <SelectItem value="summary">
                   <div className="flex items-center gap-2">
                     <AlignLeft className="h-3.5 w-3.5" />
@@ -624,7 +653,10 @@ export function ChapterEditorPage() {
                 const editor = editorRef.current;
                 const { from: selFrom, to: selTo } = editor.state.selection;
 
-                if (analysisMode === "summary") {
+                if (
+                  analysisMode === "summary" ||
+                  analysisMode === "consistency"
+                ) {
                   text = editor.getText();
                 } else if (selFrom !== selTo) {
                   text = editor.state.doc.textBetween(selFrom, selTo, " ");
@@ -642,27 +674,47 @@ export function ChapterEditorPage() {
                 setAnalysisError(null);
                 setSummaryResult(null);
                 try {
-                  if (analysisMode === "summary") {
+                  if (
+                    analysisMode === "summary" ||
+                    analysisMode === "consistency"
+                  ) {
                     // Build all chapters text
                     const allChaptersText = (chapters ?? [])
                       .sort((a, b) => Number(a.orderIndex - b.orderIndex))
                       .map((ch) => `## ${ch.title}\n\n${ch.content}`)
                       .join("\n\n---\n\n");
-                    const summary = await generateSummary(
-                      allChaptersText,
-                      summaryType,
-                      apiKey.trim(),
-                      provider,
-                    );
-                    setSummaryResult(summary);
-                    // Save as book-level analysis
-                    await saveAnalysis.mutateAsync({
-                      bookId: book.id,
-                      chapterId: null,
-                      analysisType: "summary",
-                      provider,
-                      resultContent: summary,
-                    });
+                    if (analysisMode === "summary") {
+                      const summary = await generateSummary(
+                        allChaptersText,
+                        summaryType,
+                        apiKey.trim(),
+                        provider,
+                      );
+                      setSummaryResult(summary);
+                      // Save as book-level analysis
+                      await saveAnalysis.mutateAsync({
+                        bookId: book.id,
+                        chapterId: null,
+                        analysisType: "summary",
+                        provider,
+                        resultContent: summary,
+                      });
+                    } else {
+                      const consistencyReport = await analyzeConsistency(
+                        allChaptersText,
+                        apiKey.trim(),
+                        provider,
+                      );
+                      setSummaryResult(consistencyReport);
+                      // Save as book-level analysis
+                      await saveAnalysis.mutateAsync({
+                        bookId: book.id,
+                        chapterId: null,
+                        analysisType: "consistency",
+                        provider,
+                        resultContent: consistencyReport,
+                      });
+                    }
                     setAnalysisStatus("success");
                     setTimeout(() => setAnalysisStatus("idle"), 3000);
                     return;
@@ -706,6 +758,18 @@ export function ChapterEditorPage() {
                     );
                   } else if (analysisMode === "dialogue") {
                     annotations = await analyzeDialogue(
+                      text,
+                      apiKey.trim(),
+                      provider,
+                    );
+                  } else if (analysisMode === "scene") {
+                    annotations = await analyzeSceneExpansion(
+                      text,
+                      apiKey.trim(),
+                      provider,
+                    );
+                  } else if (analysisMode === "emotion") {
+                    annotations = await analyzeEmotion(
                       text,
                       apiKey.trim(),
                       provider,
@@ -1131,7 +1195,9 @@ export function ChapterEditorPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlignLeft className="h-4 w-4" />
-              Streszczenie książki
+              {analysisMode === "consistency"
+                ? "Analiza spójności"
+                : "Streszczenie książki"}
               <span className="text-xs font-normal text-muted-foreground ml-2">
                 {summaryType === "short" && "Krótkie"}
                 {summaryType === "long" && "Długie"}

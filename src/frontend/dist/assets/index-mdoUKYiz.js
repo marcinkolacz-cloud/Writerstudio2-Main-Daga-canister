@@ -38117,6 +38117,30 @@ Tekst do analizy:
 ${text}
 """`;
 }
+function buildSceneExpansionPrompt(text) {
+  return `Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+function buildEmotionPrompt(text) {
+  return `Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+function buildConsistencyPrompt(allChaptersText) {
+  return `Przeanalizuj poniższy tekst całej książki (wszystkie rozdziały) pod kątem niespójności między rozdziałami. Szukaj: sprzecznych faktów (np. postać ma inny kolor oczu w różnych rozdziałach), nielogicznych skoków czasowych, zapomnianych wątków, niespójnych cech postaci, zmiennych nazw miejsc lub postaci, błędów chronologicznych. Zwróć czytelny tekstowy raport listujący znalezione problemy z odniesieniem do konkretnych rozdziałów. Format: każdy problem w osobnym akapicie, zacznij od numeru rozdziału lub "Ogólne" jeśli dotyczy całości. Nie używaj JSON — zwróć zwykły tekst.
+
+Tekst do analizy:
+"""
+${allChaptersText}
+"""`;
+}
 function buildSummaryPrompt(allChaptersText, summaryType) {
   const typeInstructions = {
     short: "Napisz KRÓTKIE streszczenie książki w 3-5 zdaniach, zachowując główne wątki i konflikt.",
@@ -38261,6 +38285,32 @@ async function analyzeDialogue(text, apiKey, provider) {
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   return validateAnnotations(parsed);
+}
+async function analyzeSceneExpansion(text, apiKey, provider) {
+  if (text.length > 8e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildSceneExpansionPrompt(text);
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  return validateAnnotations(parsed);
+}
+async function analyzeEmotion(text, apiKey, provider) {
+  if (text.length > 8e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildEmotionPrompt(text);
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  const annotations = validateAnnotations(parsed);
+  return annotations.map((a2) => ({ ...a2, color: "purple" }));
+}
+async function analyzeConsistency(allChaptersText, apiKey, provider) {
+  if (allChaptersText.length > 12e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildConsistencyPrompt(allChaptersText);
+  return await callAi(prompt, apiKey, provider, false);
 }
 async function generateSummary(allChaptersText, summaryType, apiKey, provider) {
   if (allChaptersText.length > 12e3) {
@@ -38411,12 +38461,23 @@ const createLucideIcon = (iconName, iconNode) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$J = [
+const __iconNode$K = [
   ["path", { d: "M15 12H3", key: "6jk70r" }],
   ["path", { d: "M17 18H3", key: "1amg6g" }],
   ["path", { d: "M21 6H3", key: "1jwq7v" }]
 ];
-const AlignLeft = createLucideIcon("align-left", __iconNode$J);
+const AlignLeft = createLucideIcon("align-left", __iconNode$K);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$J = [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+];
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$J);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38424,10 +38485,12 @@ const AlignLeft = createLucideIcon("align-left", __iconNode$J);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$I = [
-  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
-  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+  [
+    "path",
+    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
+  ]
 ];
-const ArrowLeft = createLucideIcon("arrow-left", __iconNode$I);
+const Bold$1 = createLucideIcon("bold", __iconNode$I);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38435,19 +38498,6 @@ const ArrowLeft = createLucideIcon("arrow-left", __iconNode$I);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$H = [
-  [
-    "path",
-    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
-  ]
-];
-const Bold$1 = createLucideIcon("bold", __iconNode$H);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$G = [
   ["path", { d: "M12 7v14", key: "1akyts" }],
   [
     "path",
@@ -38457,14 +38507,14 @@ const __iconNode$G = [
     }
   ]
 ];
-const BookOpen = createLucideIcon("book-open", __iconNode$G);
+const BookOpen = createLucideIcon("book-open", __iconNode$H);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$F = [
+const __iconNode$G = [
   [
     "path",
     {
@@ -38475,44 +38525,55 @@ const __iconNode$F = [
   ["path", { d: "M8 11h8", key: "vwpz6n" }],
   ["path", { d: "M8 7h6", key: "1f0q6e" }]
 ];
-const BookText = createLucideIcon("book-text", __iconNode$F);
+const BookText = createLucideIcon("book-text", __iconNode$G);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$E = [
+const __iconNode$F = [
   ["path", { d: "M3 3v16a2 2 0 0 0 2 2h16", key: "c24i48" }],
   ["path", { d: "M18 17V9", key: "2bz60n" }],
   ["path", { d: "M13 17V5", key: "1frdt8" }],
   ["path", { d: "M8 17v-3", key: "17ska0" }]
 ];
-const ChartColumn = createLucideIcon("chart-column", __iconNode$E);
+const ChartColumn = createLucideIcon("chart-column", __iconNode$F);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$D = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$D);
+const __iconNode$E = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$E);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$C = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$C);
+const __iconNode$D = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$D);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$B = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-const ChevronUp = createLucideIcon("chevron-up", __iconNode$B);
+const __iconNode$C = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+const ChevronUp = createLucideIcon("chevron-up", __iconNode$C);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$B = [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
+];
+const CircleCheck = createLucideIcon("circle-check", __iconNode$B);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38521,9 +38582,9 @@ const ChevronUp = createLucideIcon("chevron-up", __iconNode$B);
  */
 const __iconNode$A = [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
+  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
 ];
-const CircleCheck = createLucideIcon("circle-check", __iconNode$A);
+const Clock = createLucideIcon("clock", __iconNode$A);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38531,10 +38592,11 @@ const CircleCheck = createLucideIcon("circle-check", __iconNode$A);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$z = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
+  ["path", { d: "M12 15V3", key: "m9g1x1" }],
+  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
+  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
 ];
-const Clock = createLucideIcon("clock", __iconNode$z);
+const Download = createLucideIcon("download", __iconNode$z);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38542,18 +38604,6 @@ const Clock = createLucideIcon("clock", __iconNode$z);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$y = [
-  ["path", { d: "M12 15V3", key: "m9g1x1" }],
-  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
-  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
-];
-const Download = createLucideIcon("download", __iconNode$y);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$x = [
   [
     "path",
     {
@@ -38571,14 +38621,14 @@ const __iconNode$x = [
   ],
   ["path", { d: "m2 2 20 20", key: "1ooewy" }]
 ];
-const EyeOff = createLucideIcon("eye-off", __iconNode$x);
+const EyeOff = createLucideIcon("eye-off", __iconNode$y);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$w = [
+const __iconNode$x = [
   [
     "path",
     {
@@ -38588,7 +38638,21 @@ const __iconNode$w = [
   ],
   ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
 ];
-const Eye = createLucideIcon("eye", __iconNode$w);
+const Eye = createLucideIcon("eye", __iconNode$x);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$w = [
+  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
+  ["path", { d: "M10 9H8", key: "b1mrlr" }],
+  ["path", { d: "M16 13H8", key: "t4e002" }],
+  ["path", { d: "M16 17H8", key: "z1uh3a" }]
+];
+const FileText = createLucideIcon("file-text", __iconNode$w);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38596,20 +38660,6 @@ const Eye = createLucideIcon("eye", __iconNode$w);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$v = [
-  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
-  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
-  ["path", { d: "M10 9H8", key: "b1mrlr" }],
-  ["path", { d: "M16 13H8", key: "t4e002" }],
-  ["path", { d: "M16 17H8", key: "z1uh3a" }]
-];
-const FileText = createLucideIcon("file-text", __iconNode$v);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$u = [
   ["circle", { cx: "9", cy: "12", r: "1", key: "1vctgf" }],
   ["circle", { cx: "9", cy: "5", r: "1", key: "hp0tcf" }],
   ["circle", { cx: "9", cy: "19", r: "1", key: "fkjjf6" }],
@@ -38617,7 +38667,23 @@ const __iconNode$u = [
   ["circle", { cx: "15", cy: "5", r: "1", key: "19l28e" }],
   ["circle", { cx: "15", cy: "19", r: "1", key: "f4zoj3" }]
 ];
-const GripVertical = createLucideIcon("grip-vertical", __iconNode$u);
+const GripVertical = createLucideIcon("grip-vertical", __iconNode$v);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$u = [
+  [
+    "path",
+    {
+      d: "M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3",
+      key: "1xhozi"
+    }
+  ]
+];
+const Headphones = createLucideIcon("headphones", __iconNode$u);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38628,12 +38694,12 @@ const __iconNode$t = [
   [
     "path",
     {
-      d: "M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3",
-      key: "1xhozi"
+      d: "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z",
+      key: "c3ymky"
     }
   ]
 ];
-const Headphones = createLucideIcon("headphones", __iconNode$t);
+const Heart = createLucideIcon("heart", __iconNode$t);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -45746,13 +45812,19 @@ const analysisTypeLabels = {
   grammar: "Gramatyka i styl",
   context: "Analizuj z kontekstem",
   dialogue: "Dialogi",
-  summary: "Streszczenie"
+  summary: "Streszczenie",
+  scene: "Rozszerzenie sceny",
+  emotion: "Emocja",
+  consistency: "Analiza spójności"
 };
 const analysisTypeIcons = {
   grammar: /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "h-3.5 w-3.5" }),
   context: /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-3.5 w-3.5" }),
   dialogue: /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-3.5 w-3.5" }),
-  summary: /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-3.5 w-3.5" })
+  summary: /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-3.5 w-3.5" }),
+  scene: /* @__PURE__ */ jsxRuntimeExports.jsx(WandSparkles, { className: "h-3.5 w-3.5" }),
+  emotion: /* @__PURE__ */ jsxRuntimeExports.jsx(Heart, { className: "h-3.5 w-3.5" }),
+  consistency: /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-3.5 w-3.5" })
 };
 function formatDate(timestamp) {
   return new Date(Number(timestamp) / 1e6).toLocaleDateString("pl-PL", {
@@ -103869,7 +103941,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BVCDEFae.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CHOYn_9D.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -105339,6 +105411,18 @@ function ChapterEditorPage() {
                       /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-3.5 w-3.5" }),
                       "Dialogi"
                     ] }) }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "scene", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(WandSparkles, { className: "h-3.5 w-3.5" }),
+                      "Rozszerzenie sceny"
+                    ] }) }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "emotion", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(Heart, { className: "h-3.5 w-3.5" }),
+                      "Emocja"
+                    ] }) }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "consistency", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-3.5 w-3.5" }),
+                      "Analiza spójności książki"
+                    ] }) }),
                     /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "summary", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
                       /* @__PURE__ */ jsxRuntimeExports.jsx(AlignLeft, { className: "h-3.5 w-3.5" }),
                       "Streszczenie książki"
@@ -105381,7 +105465,7 @@ function ChapterEditorPage() {
                   let selectionRange;
                   const editor = editorRef.current;
                   const { from: selFrom, to: selTo } = editor.state.selection;
-                  if (analysisMode === "summary") {
+                  if (analysisMode === "summary" || analysisMode === "consistency") {
                     text = editor.getText();
                   } else if (selFrom !== selTo) {
                     text = editor.state.doc.textBetween(selFrom, selTo, " ");
@@ -105398,24 +105482,40 @@ function ChapterEditorPage() {
                   setAnalysisError(null);
                   setSummaryResult(null);
                   try {
-                    if (analysisMode === "summary") {
+                    if (analysisMode === "summary" || analysisMode === "consistency") {
                       const allChaptersText = (chapters ?? []).sort((a2, b2) => Number(a2.orderIndex - b2.orderIndex)).map((ch) => `## ${ch.title}
 
 ${ch.content}`).join("\n\n---\n\n");
-                      const summary = await generateSummary(
-                        allChaptersText,
-                        summaryType,
-                        apiKey.trim(),
-                        provider
-                      );
-                      setSummaryResult(summary);
-                      await saveAnalysis.mutateAsync({
-                        bookId: book.id,
-                        chapterId: null,
-                        analysisType: "summary",
-                        provider,
-                        resultContent: summary
-                      });
+                      if (analysisMode === "summary") {
+                        const summary = await generateSummary(
+                          allChaptersText,
+                          summaryType,
+                          apiKey.trim(),
+                          provider
+                        );
+                        setSummaryResult(summary);
+                        await saveAnalysis.mutateAsync({
+                          bookId: book.id,
+                          chapterId: null,
+                          analysisType: "summary",
+                          provider,
+                          resultContent: summary
+                        });
+                      } else {
+                        const consistencyReport = await analyzeConsistency(
+                          allChaptersText,
+                          apiKey.trim(),
+                          provider
+                        );
+                        setSummaryResult(consistencyReport);
+                        await saveAnalysis.mutateAsync({
+                          bookId: book.id,
+                          chapterId: null,
+                          analysisType: "consistency",
+                          provider,
+                          resultContent: consistencyReport
+                        });
+                      }
                       setAnalysisStatus("success");
                       setTimeout(() => setAnalysisStatus("idle"), 3e3);
                       return;
@@ -105454,6 +105554,18 @@ ${ch.content}`).join("\n\n---\n\n");
                       );
                     } else if (analysisMode === "dialogue") {
                       annotations = await analyzeDialogue(
+                        text,
+                        apiKey.trim(),
+                        provider
+                      );
+                    } else if (analysisMode === "scene") {
+                      annotations = await analyzeSceneExpansion(
+                        text,
+                        apiKey.trim(),
+                        provider
+                      );
+                    } else if (analysisMode === "emotion") {
+                      annotations = await analyzeEmotion(
                         text,
                         apiKey.trim(),
                         provider
@@ -105834,7 +105946,7 @@ ${ch.content}`).join("\n\n---\n\n");
         children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "max-w-2xl max-h-[80vh] overflow-y-auto", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogTitle, { className: "flex items-center gap-2", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(AlignLeft, { className: "h-4 w-4" }),
-            "Streszczenie książki",
+            analysisMode === "consistency" ? "Analiza spójności" : "Streszczenie książki",
             /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs font-normal text-muted-foreground ml-2", children: [
               summaryType === "short" && "Krótkie",
               summaryType === "long" && "Długie",

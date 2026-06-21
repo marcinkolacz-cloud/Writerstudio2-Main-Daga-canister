@@ -13,9 +13,11 @@ import {
   BookOpen,
   CheckCircle2,
   Clock,
+  Heart,
   MessageCircle,
   Sparkles,
   Trash2,
+  Wand2,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
@@ -31,6 +33,9 @@ const analysisTypeLabels: Record<string, string> = {
   context: "Analizuj z kontekstem",
   dialogue: "Dialogi",
   summary: "Streszczenie",
+  scene: "Rozszerzenie sceny",
+  emotion: "Emocja",
+  consistency: "Analiza spójności",
 };
 
 const analysisTypeIcons: Record<string, React.ReactNode> = {
@@ -38,6 +43,9 @@ const analysisTypeIcons: Record<string, React.ReactNode> = {
   context: <BookOpen className="h-3.5 w-3.5" />,
   dialogue: <MessageCircle className="h-3.5 w-3.5" />,
   summary: <Clock className="h-3.5 w-3.5" />,
+  scene: <Wand2 className="h-3.5 w-3.5" />,
+  emotion: <Heart className="h-3.5 w-3.5" />,
+  consistency: <BookOpen className="h-3.5 w-3.5" />,
 };
 
 function formatDate(timestamp: bigint) {

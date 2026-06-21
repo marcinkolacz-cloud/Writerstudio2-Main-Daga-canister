@@ -46,6 +46,33 @@ ${text}
 """`;
 }
 
+function buildSceneExpansionPrompt(text: string): string {
+  return `Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+
+function buildEmotionPrompt(text: string): string {
+  return `Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+
+function buildConsistencyPrompt(allChaptersText: string): string {
+  return `Przeanalizuj poniższy tekst całej książki (wszystkie rozdziały) pod kątem niespójności między rozdziałami. Szukaj: sprzecznych faktów (np. postać ma inny kolor oczu w różnych rozdziałach), nielogicznych skoków czasowych, zapomnianych wątków, niespójnych cech postaci, zmiennych nazw miejsc lub postaci, błędów chronologicznych. Zwróć czytelny tekstowy raport listujący znalezione problemy z odniesieniem do konkretnych rozdziałów. Format: każdy problem w osobnym akapicie, zacznij od numeru rozdziału lub "Ogólne" jeśli dotyczy całości. Nie używaj JSON — zwróć zwykły tekst.
+
+Tekst do analizy:
+"""
+${allChaptersText}
+"""`;
+}
+
 function buildSummaryPrompt(
   allChaptersText: string,
   summaryType: "short" | "long" | "hooks",
@@ -231,6 +258,48 @@ export async function analyzeDialogue(
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   return validateAnnotations(parsed);
+}
+
+export async function analyzeSceneExpansion(
+  text: string,
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<Annotation[]> {
+  if (text.length > 8000) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildSceneExpansionPrompt(text);
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  return validateAnnotations(parsed);
+}
+
+export async function analyzeEmotion(
+  text: string,
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<Annotation[]> {
+  if (text.length > 8000) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildEmotionPrompt(text);
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  const parsed = extractJsonArray(responseText);
+  const annotations = validateAnnotations(parsed);
+  // Force purple color for all emotion annotations
+  return annotations.map((a) => ({ ...a, color: "purple" as const }));
+}
+
+export async function analyzeConsistency(
+  allChaptersText: string,
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<string> {
+  if (allChaptersText.length > 12000) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildConsistencyPrompt(allChaptersText);
+  return await callAi(prompt, apiKey, provider, false);
 }
 
 export async function generateSummary(
