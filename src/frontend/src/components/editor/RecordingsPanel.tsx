@@ -128,7 +128,7 @@ export function RecordingsPanel({ chapterId }: RecordingsPanelProps) {
   }
 
   return (
-    <div className="w-72 border-l border-border bg-card flex flex-col h-full shrink-0">
+    <div className="w-full border border-border rounded-lg bg-card flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
@@ -138,7 +138,7 @@ export function RecordingsPanel({ chapterId }: RecordingsPanelProps) {
       </div>
 
       {/* List */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="max-h-64 overflow-y-auto">
         <div className="p-3 space-y-2">
           {!recordings || recordings.length === 0 ? (
             <div

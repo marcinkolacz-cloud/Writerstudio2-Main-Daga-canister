@@ -214,7 +214,7 @@ export function ChapterEditorPage() {
   const [apiKey, setApiKey] = useState(
     () => localStorage.getItem("ws_api_key") ?? "",
   );
-  const [_apiKeyFocused, setApiKeyFocused] = useState(false);
+  const [apiKeyFocused, setApiKeyFocused] = useState(false);
   const [provider, setProvider] = useState<"openai" | "claude">(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
@@ -408,6 +408,11 @@ export function ChapterEditorPage() {
             className="h-8 text-sm flex-1 min-w-[120px]"
             data-ocid="chapter.api_key_input"
           />
+          {!apiKeyFocused && apiKey.trim().length > 0 && (
+            <span className="text-[10px] text-muted-foreground/60 mt-0.5 ml-0.5">
+              {apiKey.slice(0, 8)}...
+            </span>
+          )}
           <Select
             value={provider}
             onValueChange={(v) => setProvider(v as "openai" | "claude")}

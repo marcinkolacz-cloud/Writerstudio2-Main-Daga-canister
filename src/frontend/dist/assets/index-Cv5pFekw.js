@@ -46779,12 +46779,12 @@ function RecordingsPanel({ chapterId }) {
       }
     );
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-72 border-l border-border bg-card flex flex-col h-full shrink-0", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full border border-border rounded-lg bg-card flex flex-col", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center justify-between px-4 py-3 border-b border-border", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(Mic, { className: "h-4 w-4 text-muted-foreground" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold", children: "Nagrania" })
     ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollArea, { className: "flex-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-3 space-y-2", children: !recordings || recordings.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollArea, { className: "max-h-64 overflow-y-auto", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-3 space-y-2", children: !recordings || recordings.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs(
       "div",
       {
         className: "text-center py-8 text-sm text-muted-foreground",
@@ -102330,7 +102330,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-h_Xu4ewE.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BDlFGa93.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -103229,7 +103229,7 @@ function ChapterEditorPage() {
   const [apiKey, setApiKey] = reactExports.useState(
     () => localStorage.getItem("ws_api_key") ?? ""
   );
-  const [_apiKeyFocused, setApiKeyFocused] = reactExports.useState(false);
+  const [apiKeyFocused, setApiKeyFocused] = reactExports.useState(false);
   const [provider, setProvider] = reactExports.useState(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
@@ -103397,6 +103397,10 @@ function ChapterEditorPage() {
                 "data-ocid": "chapter.api_key_input"
               }
             ),
+            !apiKeyFocused && apiKey.trim().length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-[10px] text-muted-foreground/60 mt-0.5 ml-0.5", children: [
+              apiKey.slice(0, 8),
+              "..."
+            ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs(
               Select,
               {

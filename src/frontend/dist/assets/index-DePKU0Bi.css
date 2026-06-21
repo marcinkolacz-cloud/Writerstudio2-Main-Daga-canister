@@ -1443,6 +1443,9 @@ video {
 .mb-6 {
   margin-bottom: 1.5rem;
 }
+.ml-0\.5 {
+  margin-left: 0.125rem;
+}
 .ml-1 {
   margin-left: 0.25rem;
 }
@@ -1653,6 +1656,9 @@ video {
 }
 .h-svh {
   height: 100svh;
+}
+.max-h-64 {
+  max-height: 16rem;
 }
 .max-h-\[120px\] {
   max-height: 120px;
