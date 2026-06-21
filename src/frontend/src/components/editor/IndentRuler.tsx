@@ -31,10 +31,34 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
   const [firstLine, setFirstLine] = useState(() =>
     getStoredIndent(STORAGE_KEYS.firstLine),
   );
+  const [trackWidth, setTrackWidth] = useState(0);
 
   const trackRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const dragTarget = useRef<DragTarget>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Measure actual width using ResizeObserver
+  useEffect(() => {
+    if (!wrapperRef.current) return;
+    const el = wrapperRef.current;
+
+    const updateWidth = () => {
+      const rect = el.getBoundingClientRect();
+      setTrackWidth(Math.max(0, rect.width));
+    };
+
+    updateWidth();
+
+    const ro = new ResizeObserver(updateWidth);
+    ro.observe(el);
+    window.addEventListener("resize", updateWidth);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateWidth);
+    };
+  }, []);
 
   const saveToStorage = useCallback((l: number, r: number, f: number) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -69,7 +93,9 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
       if (!dragTarget.current || !trackRef.current) return;
       const rect = trackRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
-      const px = Math.max(0, Math.min(MAX_INDENT, Math.round(x)));
+      // Scale pixel position to MAX_INDENT range based on actual track width
+      const scale = trackWidth > 0 ? MAX_INDENT / trackWidth : 1;
+      const px = Math.max(0, Math.min(MAX_INDENT, Math.round(x * scale)));
 
       switch (dragTarget.current) {
         case "left":
@@ -94,7 +120,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [left, right, firstLine, updateValues]);
+  }, [left, right, firstLine, updateValues, trackWidth]);
 
   // Listen for storage changes from other tabs
   useEffect(() => {
@@ -111,29 +137,43 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
-  const trackWidth = MAX_INDENT + 40; // extra padding
+  // Convert indent value (0-MAX_INDENT) to visual position within track
+  const toVisualPos = (val: number) => {
+    if (trackWidth <= 0) return val;
+    return (val / MAX_INDENT) * trackWidth;
+  };
+
+  const tickCount = trackWidth > 0 ? Math.floor(trackWidth / 20) : 16;
 
   return (
-    <div className="w-full select-none" data-ocid="editor.indent_ruler">
+    <div
+      ref={wrapperRef}
+      className="w-full select-none"
+      data-ocid="editor.indent_ruler"
+    >
       {/* Ruler track */}
       <div
         ref={trackRef}
-        className="relative h-6 bg-muted/30 border border-border rounded-md cursor-default"
-        style={{ width: `${trackWidth}px`, maxWidth: "100%" }}
+        className="relative h-6 bg-muted/30 border border-border rounded-md cursor-default w-full"
       >
         {/* Tick marks */}
-        {Array.from({ length: 16 }, (_, i) => i * 10).map((tick) => (
-          <div
-            key={tick}
-            className="absolute top-0 h-2 border-l border-border/60"
-            style={{ left: `${tick}px` }}
-          />
-        ))}
+        {Array.from({ length: Math.max(0, tickCount) }, (_, i) => i).map(
+          (i) => {
+            const leftPos = (i / Math.max(1, tickCount - 1)) * trackWidth;
+            return (
+              <div
+                key={i}
+                className="absolute top-0 h-2 border-l border-border/60"
+                style={{ left: `${leftPos}px` }}
+              />
+            );
+          },
+        )}
 
         {/* Left indent handle */}
         <div
           className="absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-primary cursor-ew-resize hover:scale-110 transition-transform"
-          style={{ left: `${left - 6}px`, top: "2px" }}
+          style={{ left: `${toVisualPos(left) - 6}px`, top: "2px" }}
           onMouseDown={handleMouseDown("left")}
           title={`Lewe wcięcie: ${left}px`}
           data-ocid="editor.indent_left_handle"
@@ -141,13 +181,16 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         {/* Left indent guide line */}
         <div
           className="absolute top-3 w-px bg-primary/30 pointer-events-none"
-          style={{ left: `${left}px`, height: "calc(100% - 12px)" }}
+          style={{
+            left: `${toVisualPos(left)}px`,
+            height: "calc(100% - 12px)",
+          }}
         />
 
         {/* First line indent handle */}
         <div
           className="absolute top-0 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[9px] border-t-accent cursor-ew-resize hover:scale-110 transition-transform"
-          style={{ left: `${firstLine - 5}px`, top: "14px" }}
+          style={{ left: `${toVisualPos(firstLine) - 5}px`, top: "14px" }}
           onMouseDown={handleMouseDown("firstLine")}
           title={`Wcięcie pierwszej linii: ${firstLine}px`}
           data-ocid="editor.indent_first_line_handle"
@@ -155,13 +198,19 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         {/* First line indent guide line */}
         <div
           className="absolute top-3 w-px bg-accent/30 pointer-events-none"
-          style={{ left: `${firstLine}px`, height: "calc(100% - 12px)" }}
+          style={{
+            left: `${toVisualPos(firstLine)}px`,
+            height: "calc(100% - 12px)",
+          }}
         />
 
         {/* Right indent handle */}
         <div
           className="absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-secondary-foreground cursor-ew-resize hover:scale-110 transition-transform"
-          style={{ left: `${trackWidth - 40 - right - 6}px`, top: "2px" }}
+          style={{
+            left: `${toVisualPos(MAX_INDENT - right) - 6}px`,
+            top: "2px",
+          }}
           onMouseDown={handleMouseDown("right")}
           title={`Prawe wcięcie: ${right}px`}
           data-ocid="editor.indent_right_handle"
@@ -170,7 +219,7 @@ export function IndentRuler({ onChange }: IndentRulerProps) {
         <div
           className="absolute top-3 w-px bg-secondary-foreground/30 pointer-events-none"
           style={{
-            left: `${trackWidth - 40 - right}px`,
+            left: `${toVisualPos(MAX_INDENT - right)}px`,
             height: "calc(100% - 12px)",
           }}
         />

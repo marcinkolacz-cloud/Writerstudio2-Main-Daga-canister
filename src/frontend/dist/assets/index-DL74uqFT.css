@@ -3225,10 +3225,6 @@ video {
   background-color: oklch(var(--accent) / var(--tw-bg-opacity, 1));
 }
 
-.hover\:bg-accent\/90:hover {
-  background-color: oklch(var(--accent) / 0.9);
-}
-
 .hover\:bg-destructive\/10:hover {
   background-color: oklch(var(--destructive) / 0.1);
 }

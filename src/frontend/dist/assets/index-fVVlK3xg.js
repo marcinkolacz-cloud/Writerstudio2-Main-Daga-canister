@@ -74756,9 +74756,17 @@ function SynonymPopup({
   error,
   onSelect,
   onClose,
-  position
+  anchorElement
 }) {
   const popupRef = reactExports.useRef(null);
+  const [popupPos, setPopupPos] = reactExports.useState({ top: 0, left: 0 });
+  reactExports.useEffect(() => {
+    const rect = anchorElement.getBoundingClientRect();
+    setPopupPos({
+      top: rect.bottom + 8,
+      left: rect.left + rect.width / 2
+    });
+  }, [anchorElement]);
   reactExports.useEffect(() => {
     const handleClickOutside = (e3) => {
       if (popupRef.current && !popupRef.current.contains(e3.target)) {
@@ -74781,8 +74789,8 @@ function SynonymPopup({
       ref: popupRef,
       className: "fixed z-50 min-w-[180px] max-w-[280px] rounded-lg border border-border bg-popover shadow-elevated text-popover-foreground",
       style: {
-        top: position.top,
-        left: position.left,
+        top: popupPos.top,
+        left: popupPos.left,
         transform: "translateX(-50%)"
       },
       "data-ocid": "editor.synonym_popup",
@@ -103484,7 +103492,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CHiup8RZ.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DpptQ7Lh.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -104299,9 +104307,27 @@ function IndentRuler({ onChange }) {
   const [firstLine, setFirstLine] = reactExports.useState(
     () => getStoredIndent(STORAGE_KEYS.firstLine)
   );
+  const [trackWidth, setTrackWidth] = reactExports.useState(0);
   const trackRef = reactExports.useRef(null);
+  const wrapperRef = reactExports.useRef(null);
   const dragTarget = reactExports.useRef(null);
   const debounceRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    if (!wrapperRef.current) return;
+    const el = wrapperRef.current;
+    const updateWidth = () => {
+      const rect = el.getBoundingClientRect();
+      setTrackWidth(Math.max(0, rect.width));
+    };
+    updateWidth();
+    const ro = new ResizeObserver(updateWidth);
+    ro.observe(el);
+    window.addEventListener("resize", updateWidth);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateWidth);
+    };
+  }, []);
   const saveToStorage = reactExports.useCallback((l2, r2, f2) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
@@ -104332,7 +104358,8 @@ function IndentRuler({ onChange }) {
       if (!dragTarget.current || !trackRef.current) return;
       const rect = trackRef.current.getBoundingClientRect();
       const x3 = e3.clientX - rect.left;
-      const px = Math.max(0, Math.min(MAX_INDENT, Math.round(x3)));
+      const scale = trackWidth > 0 ? MAX_INDENT / trackWidth : 1;
+      const px = Math.max(0, Math.min(MAX_INDENT, Math.round(x3 * scale)));
       switch (dragTarget.current) {
         case "left":
           updateValues(px, right, firstLine);
@@ -104354,7 +104381,7 @@ function IndentRuler({ onChange }) {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [left, right, firstLine, updateValues]);
+  }, [left, right, firstLine, updateValues, trackWidth]);
   reactExports.useEffect(() => {
     const handleStorage = (e3) => {
       if (e3.key === STORAGE_KEYS.left) {
@@ -104368,98 +104395,123 @@ function IndentRuler({ onChange }) {
     window.addEventListener("storage", handleStorage);
     return () => window.removeEventListener("storage", handleStorage);
   }, []);
-  const trackWidth = MAX_INDENT + 40;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full select-none", "data-ocid": "editor.indent_ruler", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "div",
-      {
-        ref: trackRef,
-        className: "relative h-6 bg-muted/30 border border-border rounded-md cursor-default",
-        style: { width: `${trackWidth}px`, maxWidth: "100%" },
-        children: [
-          Array.from({ length: 16 }, (_2, i2) => i2 * 10).map((tick) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "absolute top-0 h-2 border-l border-border/60",
-              style: { left: `${tick}px` }
-            },
-            tick
-          )),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-primary cursor-ew-resize hover:scale-110 transition-transform",
-              style: { left: `${left - 6}px`, top: "2px" },
-              onMouseDown: handleMouseDown("left"),
-              title: `Lewe wcięcie: ${left}px`,
-              "data-ocid": "editor.indent_left_handle"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "absolute top-3 w-px bg-primary/30 pointer-events-none",
-              style: { left: `${left}px`, height: "calc(100% - 12px)" }
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "absolute top-0 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[9px] border-t-accent cursor-ew-resize hover:scale-110 transition-transform",
-              style: { left: `${firstLine - 5}px`, top: "14px" },
-              onMouseDown: handleMouseDown("firstLine"),
-              title: `Wcięcie pierwszej linii: ${firstLine}px`,
-              "data-ocid": "editor.indent_first_line_handle"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "absolute top-3 w-px bg-accent/30 pointer-events-none",
-              style: { left: `${firstLine}px`, height: "calc(100% - 12px)" }
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-secondary-foreground cursor-ew-resize hover:scale-110 transition-transform",
-              style: { left: `${trackWidth - 40 - right - 6}px`, top: "2px" },
-              onMouseDown: handleMouseDown("right"),
-              title: `Prawe wcięcie: ${right}px`,
-              "data-ocid": "editor.indent_right_handle"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "absolute top-3 w-px bg-secondary-foreground/30 pointer-events-none",
-              style: {
-                left: `${trackWidth - 40 - right}px`,
-                height: "calc(100% - 12px)"
-              }
-            }
-          )
-        ]
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4 mt-1 text-[10px] text-muted-foreground/60", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-        "L: ",
-        left,
-        "px"
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-        "P: ",
-        right,
-        "px"
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-        "1L: ",
-        firstLine,
-        "px"
-      ] })
-    ] })
-  ] });
+  const toVisualPos = (val) => {
+    if (trackWidth <= 0) return val;
+    return val / MAX_INDENT * trackWidth;
+  };
+  const tickCount = trackWidth > 0 ? Math.floor(trackWidth / 20) : 16;
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      ref: wrapperRef,
+      className: "w-full select-none",
+      "data-ocid": "editor.indent_ruler",
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
+          {
+            ref: trackRef,
+            className: "relative h-6 bg-muted/30 border border-border rounded-md cursor-default w-full",
+            children: [
+              Array.from({ length: Math.max(0, tickCount) }, (_2, i2) => i2).map(
+                (i2) => {
+                  const leftPos = i2 / Math.max(1, tickCount - 1) * trackWidth;
+                  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "div",
+                    {
+                      className: "absolute top-0 h-2 border-l border-border/60",
+                      style: { left: `${leftPos}px` }
+                    },
+                    i2
+                  );
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  className: "absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-primary cursor-ew-resize hover:scale-110 transition-transform",
+                  style: { left: `${toVisualPos(left) - 6}px`, top: "2px" },
+                  onMouseDown: handleMouseDown("left"),
+                  title: `Lewe wcięcie: ${left}px`,
+                  "data-ocid": "editor.indent_left_handle"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  className: "absolute top-3 w-px bg-primary/30 pointer-events-none",
+                  style: {
+                    left: `${toVisualPos(left)}px`,
+                    height: "calc(100% - 12px)"
+                  }
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  className: "absolute top-0 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[9px] border-t-accent cursor-ew-resize hover:scale-110 transition-transform",
+                  style: { left: `${toVisualPos(firstLine) - 5}px`, top: "14px" },
+                  onMouseDown: handleMouseDown("firstLine"),
+                  title: `Wcięcie pierwszej linii: ${firstLine}px`,
+                  "data-ocid": "editor.indent_first_line_handle"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  className: "absolute top-3 w-px bg-accent/30 pointer-events-none",
+                  style: {
+                    left: `${toVisualPos(firstLine)}px`,
+                    height: "calc(100% - 12px)"
+                  }
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  className: "absolute top-0 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-secondary-foreground cursor-ew-resize hover:scale-110 transition-transform",
+                  style: {
+                    left: `${toVisualPos(MAX_INDENT - right) - 6}px`,
+                    top: "2px"
+                  },
+                  onMouseDown: handleMouseDown("right"),
+                  title: `Prawe wcięcie: ${right}px`,
+                  "data-ocid": "editor.indent_right_handle"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  className: "absolute top-3 w-px bg-secondary-foreground/30 pointer-events-none",
+                  style: {
+                    left: `${toVisualPos(MAX_INDENT - right)}px`,
+                    height: "calc(100% - 12px)"
+                  }
+                }
+              )
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4 mt-1 text-[10px] text-muted-foreground/60", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "L: ",
+            left,
+            "px"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "P: ",
+            right,
+            "px"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+            "1L: ",
+            firstLine,
+            "px"
+          ] })
+        ] })
+      ]
+    }
+  );
 }
 function getGlobalIndents() {
   return {
@@ -104583,12 +104635,13 @@ function ChapterEditorPage() {
   const [selectedText, setSelectedText] = reactExports.useState("");
   const [floatingButtonPos, setFloatingButtonPos] = reactExports.useState(null);
   const [synonymPopupOpen, setSynonymPopupOpen] = reactExports.useState(false);
-  const [synonymPopupPos, setSynonymPopupPos] = reactExports.useState(null);
   const [synonyms, setSynonyms] = reactExports.useState([]);
   const [synonymLoading, setSynonymLoading] = reactExports.useState(false);
   const [synonymError, setSynonymError] = reactExports.useState(null);
   const [selectedWord, setSelectedWord] = reactExports.useState("");
+  const [synonymMessage, setSynonymMessage] = reactExports.useState(null);
   const synonymSelectionRef = reactExports.useRef(null);
+  const synonymButtonRef = reactExports.useRef(null);
   const [apiKey, setApiKey] = reactExports.useState(
     () => localStorage.getItem("ws_api_key") ?? ""
   );
@@ -105014,6 +105067,67 @@ ${ch.content}`).join("\n\n---\n\n");
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              ref: synonymButtonRef,
+              size: "sm",
+              variant: synonymPopupOpen ? "default" : "outline",
+              onClick: async () => {
+                if (synonymPopupOpen) {
+                  setSynonymPopupOpen(false);
+                  setSynonyms([]);
+                  setSelectedWord("");
+                  setSynonymMessage(null);
+                  synonymSelectionRef.current = null;
+                  return;
+                }
+                if (!editorRef.current) return;
+                const { from: from2, to } = editorRef.current.state.selection;
+                if (from2 === to) {
+                  setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
+                  setTimeout(() => setSynonymMessage(null), 3e3);
+                  return;
+                }
+                const text = editorRef.current.state.doc.textBetween(from2, to, " ");
+                const trimmed = text.replace(
+                  /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,
+                  ""
+                );
+                if (!trimmed.trim()) {
+                  setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
+                  setTimeout(() => setSynonymMessage(null), 3e3);
+                  return;
+                }
+                setSelectedWord(trimmed);
+                synonymSelectionRef.current = { from: from2, to };
+                setSynonymPopupOpen(true);
+                setSynonymLoading(true);
+                setSynonymError(null);
+                setSynonymMessage(null);
+                try {
+                  const results = await getSynonyms(
+                    trimmed,
+                    apiKey.trim(),
+                    provider
+                  );
+                  setSynonyms(results);
+                } catch (err) {
+                  setSynonymError(
+                    err instanceof Error ? err.message : "Błąd wyszukiwania synonimów"
+                  );
+                } finally {
+                  setSynonymLoading(false);
+                }
+              },
+              "data-ocid": "chapter.synonyms_toggle_button",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(BookText, { className: "h-3.5 w-3.5 mr-1.5" }),
+                "Synonimy"
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs(DropdownMenu, { children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
               Button,
@@ -105142,43 +105256,15 @@ ${ch.content}`).join("\n\n---\n\n");
         children: "Dodaj komentarz"
       }
     ),
-    synonymPopupPos && !synonymPopupOpen && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "button",
+    synonymMessage && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
       {
-        type: "button",
-        className: "fixed z-40 px-3 py-1.5 text-xs font-medium rounded-md bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 transition-colors",
-        style: {
-          left: synonymPopupPos.x,
-          top: synonymPopupPos.y - 36
-        },
-        onClick: async () => {
-          if (!editorRef.current || !selectedWord) return;
-          setSynonymPopupOpen(true);
-          setSynonymLoading(true);
-          setSynonymError(null);
-          try {
-            const results = await getSynonyms(
-              selectedWord,
-              apiKey.trim(),
-              provider
-            );
-            setSynonyms(results);
-          } catch (err) {
-            setSynonymError(
-              err instanceof Error ? err.message : "Błąd wyszukiwania synonimów"
-            );
-          } finally {
-            setSynonymLoading(false);
-          }
-        },
-        "data-ocid": "chapter.synonym_floating_button",
-        children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(BookText, { className: "h-3 w-3 mr-1 inline" }),
-          "Synonimy"
-        ]
+        className: "shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border",
+        "data-ocid": "chapter.synonym_message",
+        children: synonymMessage
       }
     ),
-    synonymPopupOpen && synonymPopupPos && editorRef.current && /* @__PURE__ */ jsxRuntimeExports.jsx(
+    synonymPopupOpen && editorRef.current && synonymButtonRef.current && /* @__PURE__ */ jsxRuntimeExports.jsx(
       SynonymPopup,
       {
         editor: editorRef.current,
@@ -105191,22 +105277,17 @@ ${ch.content}`).join("\n\n---\n\n");
           const { from: from2, to } = synonymSelectionRef.current;
           editorRef.current.chain().focus().setTextSelection({ from: from2, to }).insertContent(synonym).run();
           setSynonymPopupOpen(false);
-          setSynonymPopupPos(null);
           setSynonyms([]);
           setSelectedWord("");
           synonymSelectionRef.current = null;
         },
         onClose: () => {
           setSynonymPopupOpen(false);
-          setSynonymPopupPos(null);
           setSynonyms([]);
           setSelectedWord("");
           synonymSelectionRef.current = null;
         },
-        position: {
-          top: (synonymPopupPos.y ?? 0) - 40,
-          left: synonymPopupPos.x ?? 0
-        }
+        anchorElement: synonymButtonRef.current
       }
     ),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -105274,35 +105355,7 @@ ${ch.content}`).join("\n\n---\n\n");
                     });
                   }
                 };
-                const handleDoubleClick2 = () => {
-                  const { from: from2, to } = editor.state.selection;
-                  if (from2 === to) {
-                    setSynonymPopupPos(null);
-                    return;
-                  }
-                  const text = editor.state.doc.textBetween(from2, to, " ");
-                  const trimmed = text.replace(
-                    /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,
-                    ""
-                  );
-                  if (!trimmed.trim()) {
-                    setSynonymPopupPos(null);
-                    return;
-                  }
-                  setSelectedWord(trimmed);
-                  synonymSelectionRef.current = { from: from2, to };
-                  const selection = window.getSelection();
-                  if (selection && selection.rangeCount > 0) {
-                    const range3 = selection.getRangeAt(0);
-                    const rect = range3.getBoundingClientRect();
-                    setSynonymPopupPos({
-                      x: rect.left + rect.width / 2,
-                      y: rect.top
-                    });
-                  }
-                };
                 dom.addEventListener("mouseup", handleMouseUp);
-                dom.addEventListener("dblclick", handleDoubleClick2);
               }
             }
           )

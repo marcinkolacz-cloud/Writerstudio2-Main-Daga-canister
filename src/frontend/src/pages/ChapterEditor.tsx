@@ -246,15 +246,13 @@ export function ChapterEditorPage() {
 
   // Synonym state
   const [synonymPopupOpen, setSynonymPopupOpen] = useState(false);
-  const [synonymPopupPos, setSynonymPopupPos] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
   const [synonyms, setSynonyms] = useState<string[]>([]);
   const [synonymLoading, setSynonymLoading] = useState(false);
   const [synonymError, setSynonymError] = useState<string | null>(null);
   const [selectedWord, setSelectedWord] = useState("");
+  const [synonymMessage, setSynonymMessage] = useState<string | null>(null);
   const synonymSelectionRef = useRef<{ from: number; to: number } | null>(null);
+  const synonymButtonRef = useRef<HTMLButtonElement>(null);
   const [apiKey, setApiKey] = useState(
     () => localStorage.getItem("ws_api_key") ?? "",
   );
@@ -712,6 +710,69 @@ export function ChapterEditorPage() {
           <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
           Komentarze
         </Button>
+
+        <div className="w-px h-6 bg-border hidden sm:block" />
+
+        {/* Synonyms toggle */}
+        <Button
+          ref={synonymButtonRef}
+          size="sm"
+          variant={synonymPopupOpen ? "default" : "outline"}
+          onClick={async () => {
+            if (synonymPopupOpen) {
+              setSynonymPopupOpen(false);
+              setSynonyms([]);
+              setSelectedWord("");
+              setSynonymMessage(null);
+              synonymSelectionRef.current = null;
+              return;
+            }
+            if (!editorRef.current) return;
+            const { from, to } = editorRef.current.state.selection;
+            if (from === to) {
+              setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
+              setTimeout(() => setSynonymMessage(null), 3000);
+              return;
+            }
+            const text = editorRef.current.state.doc.textBetween(from, to, " ");
+            const trimmed = text.replace(
+              /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,
+              "",
+            );
+            if (!trimmed.trim()) {
+              setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
+              setTimeout(() => setSynonymMessage(null), 3000);
+              return;
+            }
+            setSelectedWord(trimmed);
+            synonymSelectionRef.current = { from, to };
+            setSynonymPopupOpen(true);
+            setSynonymLoading(true);
+            setSynonymError(null);
+            setSynonymMessage(null);
+            try {
+              const results = await getSynonyms(
+                trimmed,
+                apiKey.trim(),
+                provider,
+              );
+              setSynonyms(results);
+            } catch (err) {
+              setSynonymError(
+                err instanceof Error
+                  ? err.message
+                  : "Błąd wyszukiwania synonimów",
+              );
+            } finally {
+              setSynonymLoading(false);
+            }
+          }}
+          data-ocid="chapter.synonyms_toggle_button"
+        >
+          <BookText className="h-3.5 w-3.5 mr-1.5" />
+          Synonimy
+        </Button>
+
         <div className="w-px h-6 bg-border hidden sm:block" />
         {/* Export dropdown */}
         <DropdownMenu>
@@ -858,46 +919,18 @@ export function ChapterEditorPage() {
         </button>
       )}
 
-      {/* Floating "Synonimy" button on double-click word selection */}
-      {synonymPopupPos && !synonymPopupOpen && (
-        <button
-          type="button"
-          className="fixed z-40 px-3 py-1.5 text-xs font-medium rounded-md bg-accent text-accent-foreground shadow-lg hover:bg-accent/90 transition-colors"
-          style={{
-            left: synonymPopupPos.x,
-            top: synonymPopupPos.y - 36,
-          }}
-          onClick={async () => {
-            if (!editorRef.current || !selectedWord) return;
-            setSynonymPopupOpen(true);
-            setSynonymLoading(true);
-            setSynonymError(null);
-            try {
-              const results = await getSynonyms(
-                selectedWord,
-                apiKey.trim(),
-                provider,
-              );
-              setSynonyms(results);
-            } catch (err) {
-              setSynonymError(
-                err instanceof Error
-                  ? err.message
-                  : "Błąd wyszukiwania synonimów",
-              );
-            } finally {
-              setSynonymLoading(false);
-            }
-          }}
-          data-ocid="chapter.synonym_floating_button"
+      {/* Synonym message */}
+      {synonymMessage && (
+        <div
+          className="shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border"
+          data-ocid="chapter.synonym_message"
         >
-          <BookText className="h-3 w-3 mr-1 inline" />
-          Synonimy
-        </button>
+          {synonymMessage}
+        </div>
       )}
 
       {/* Synonym popup */}
-      {synonymPopupOpen && synonymPopupPos && editorRef.current && (
+      {synonymPopupOpen && editorRef.current && synonymButtonRef.current && (
         <SynonymPopup
           editor={editorRef.current}
           word={selectedWord}
@@ -914,22 +947,17 @@ export function ChapterEditorPage() {
               .insertContent(synonym)
               .run();
             setSynonymPopupOpen(false);
-            setSynonymPopupPos(null);
             setSynonyms([]);
             setSelectedWord("");
             synonymSelectionRef.current = null;
           }}
           onClose={() => {
             setSynonymPopupOpen(false);
-            setSynonymPopupPos(null);
             setSynonyms([]);
             setSelectedWord("");
             synonymSelectionRef.current = null;
           }}
-          position={{
-            top: (synonymPopupPos.y ?? 0) - 40,
-            left: synonymPopupPos.x ?? 0,
-          }}
+          anchorElement={synonymButtonRef.current}
         />
       )}
 
@@ -1019,38 +1047,7 @@ export function ChapterEditorPage() {
                 }
               };
 
-              const handleDoubleClick = () => {
-                const { from, to } = editor.state.selection;
-                if (from === to) {
-                  setSynonymPopupPos(null);
-                  return;
-                }
-                const text = editor.state.doc.textBetween(from, to, " ");
-                // Trim punctuation from word boundaries
-                const trimmed = text.replace(
-                  /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,
-                  "",
-                );
-                if (!trimmed.trim()) {
-                  setSynonymPopupPos(null);
-                  return;
-                }
-                setSelectedWord(trimmed);
-                synonymSelectionRef.current = { from, to };
-
-                const selection = window.getSelection();
-                if (selection && selection.rangeCount > 0) {
-                  const range = selection.getRangeAt(0);
-                  const rect = range.getBoundingClientRect();
-                  setSynonymPopupPos({
-                    x: rect.left + rect.width / 2,
-                    y: rect.top,
-                  });
-                }
-              };
-
               dom.addEventListener("mouseup", handleMouseUp);
-              dom.addEventListener("dblclick", handleDoubleClick);
             }}
           />
         </div>

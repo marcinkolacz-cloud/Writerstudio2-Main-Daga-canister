@@ -1,6 +1,6 @@
 import type { Editor } from "@tiptap/core";
 import { Loader2, X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface SynonymPopupProps {
   editor: Editor;
@@ -10,7 +10,7 @@ interface SynonymPopupProps {
   error: string | null;
   onSelect: (synonym: string) => void;
   onClose: () => void;
-  position: { top: number; left: number };
+  anchorElement: HTMLElement;
 }
 
 export function SynonymPopup({
@@ -19,9 +19,20 @@ export function SynonymPopup({
   error,
   onSelect,
   onClose,
-  position,
+  anchorElement,
 }: SynonymPopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
+
+  // Compute position relative to anchor element
+  const [popupPos, setPopupPos] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    const rect = anchorElement.getBoundingClientRect();
+    setPopupPos({
+      top: rect.bottom + 8,
+      left: rect.left + rect.width / 2,
+    });
+  }, [anchorElement]);
 
   // Close on click outside
   useEffect(() => {
@@ -48,8 +59,8 @@ export function SynonymPopup({
       ref={popupRef}
       className="fixed z-50 min-w-[180px] max-w-[280px] rounded-lg border border-border bg-popover shadow-elevated text-popover-foreground"
       style={{
-        top: position.top,
-        left: position.left,
+        top: popupPos.top,
+        left: popupPos.left,
         transform: "translateX(-50%)",
       }}
       data-ocid="editor.synonym_popup"
