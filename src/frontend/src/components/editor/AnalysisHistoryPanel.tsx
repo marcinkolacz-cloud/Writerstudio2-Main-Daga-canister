@@ -1,6 +1,5 @@
 import type { Analysis, Chapter } from "@/backend";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useAnalysesByBook,
@@ -17,7 +16,6 @@ import {
   MessageCircle,
   Sparkles,
   Trash2,
-  X,
 } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
@@ -206,32 +204,19 @@ export function AnalysisHistoryPanel({
 
   if (isLoading) {
     return (
-      <div className="w-full border border-border rounded-lg bg-card">
-        <div
-          className="p-3 text-xs text-muted-foreground"
-          data-ocid="history.loading_state"
-        >
-          Ładowanie historii...
-        </div>
+      <div
+        className="py-8 text-center text-xs text-muted-foreground"
+        data-ocid="history.loading_state"
+      >
+        Ładowanie historii...
       </div>
     );
   }
 
   return (
-    <div
-      className="w-full border border-border rounded-lg bg-card flex flex-col"
-      data-ocid="history.panel"
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold">Historia analiz</h3>
-        </div>
-      </div>
-
+    <div className="flex flex-col" data-ocid="history.panel">
       <Tabs defaultValue="chapter" className="flex flex-col flex-1 min-h-0">
-        <TabsList className="mx-4 mt-3 mb-0 h-8 bg-muted/50">
+        <TabsList className="h-8 bg-muted/50 mb-3">
           <TabsTrigger
             value="chapter"
             className="text-xs px-3 py-1"
@@ -249,57 +234,53 @@ export function AnalysisHistoryPanel({
         </TabsList>
 
         <TabsContent value="chapter" className="flex-1 min-h-0 m-0">
-          <ScrollArea className="max-h-64 overflow-y-auto">
-            <div className="p-3 space-y-2">
-              {chapterAnalyses.length === 0 ? (
-                <div
-                  className="text-center py-8 text-sm text-muted-foreground"
-                  data-ocid="history.empty_state.chapter"
-                >
-                  <Clock className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
-                  Brak analiz dla tego rozdziału
-                </div>
-              ) : (
-                chapterAnalyses.map((analysis) => (
-                  <AnalysisRow
-                    key={String(analysis.id)}
-                    analysis={analysis}
-                    chapterMap={chapterMap}
-                    onLoad={handleLoad}
-                    onOpenSummary={onOpenSummary}
-                    onDelete={handleDelete}
-                  />
-                ))
-              )}
-            </div>
-          </ScrollArea>
+          <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+            {chapterAnalyses.length === 0 ? (
+              <div
+                className="text-center py-8 text-sm text-muted-foreground"
+                data-ocid="history.empty_state.chapter"
+              >
+                <Clock className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+                Brak analiz dla tego rozdziału
+              </div>
+            ) : (
+              chapterAnalyses.map((analysis) => (
+                <AnalysisRow
+                  key={String(analysis.id)}
+                  analysis={analysis}
+                  chapterMap={chapterMap}
+                  onLoad={handleLoad}
+                  onOpenSummary={onOpenSummary}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
+          </div>
         </TabsContent>
 
         <TabsContent value="book" className="flex-1 min-h-0 m-0">
-          <ScrollArea className="max-h-64 overflow-y-auto">
-            <div className="p-3 space-y-2">
-              {allBookAnalyses.length === 0 ? (
-                <div
-                  className="text-center py-8 text-sm text-muted-foreground"
-                  data-ocid="history.empty_state.book"
-                >
-                  <Clock className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
-                  Brak analiz dla tej książki
-                </div>
-              ) : (
-                allBookAnalyses.map((analysis) => (
-                  <AnalysisRow
-                    key={String(analysis.id)}
-                    analysis={analysis}
-                    chapterMap={chapterMap}
-                    onLoad={handleLoad}
-                    onOpenSummary={onOpenSummary}
-                    onDelete={handleDelete}
-                  />
-                ))
-              )}
-            </div>
-          </ScrollArea>
+          <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+            {allBookAnalyses.length === 0 ? (
+              <div
+                className="text-center py-8 text-sm text-muted-foreground"
+                data-ocid="history.empty_state.book"
+              >
+                <Clock className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+                Brak analiz dla tej książki
+              </div>
+            ) : (
+              allBookAnalyses.map((analysis) => (
+                <AnalysisRow
+                  key={String(analysis.id)}
+                  analysis={analysis}
+                  chapterMap={chapterMap}
+                  onLoad={handleLoad}
+                  onOpenSummary={onOpenSummary}
+                  onDelete={handleDelete}
+                />
+              ))
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

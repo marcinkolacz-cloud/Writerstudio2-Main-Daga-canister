@@ -61,6 +61,8 @@ import {
   BookText,
   Check,
   Download,
+  Eye,
+  EyeOff,
   FileText,
   Headphones,
   History,
@@ -110,11 +112,14 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
 function applyAnnotationsToEditor(
   editor: Editor,
   annotations: Annotation[],
-  options?: { skipApproved?: boolean },
+  options?: {
+    skipApproved?: boolean;
+    clearRange?: { from: number; to: number };
+  },
 ) {
   const docText = editor.getText();
 
-  // 1. Remove ALL existing annotation marks from the entire document
+  // 1. Remove annotation marks — either in a specific range or entire document
   const annotationMarkNames = [
     "annotationYellow",
     "annotationRed",
@@ -123,21 +128,46 @@ function applyAnnotationsToEditor(
     "annotationPurple",
   ];
 
-  editor.state.doc.descendants((node, pos) => {
-    if (!node.isText) return false;
-    for (const markName of annotationMarkNames) {
-      const mark = node.marks.find((m) => m.type.name === markName);
-      if (mark) {
-        editor
-          .chain()
-          .focus()
-          .setTextSelection({ from: pos, to: pos + node.nodeSize })
-          .unsetMark(markName)
-          .run();
+  if (options?.clearRange) {
+    const { from: clearFrom, to: clearTo } = options.clearRange;
+    editor.state.doc.nodesBetween(clearFrom, clearTo, (node, pos) => {
+      if (!node.isText) return false;
+      const nodeStart = pos;
+      const nodeEnd = pos + node.nodeSize;
+      const overlapStart = Math.max(nodeStart, clearFrom);
+      const overlapEnd = Math.min(nodeEnd, clearTo);
+      if (overlapStart < overlapEnd) {
+        for (const markName of annotationMarkNames) {
+          const mark = node.marks.find((m) => m.type.name === markName);
+          if (mark) {
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from: overlapStart, to: overlapEnd })
+              .unsetMark(markName)
+              .run();
+          }
+        }
       }
-    }
-    return false;
-  });
+      return false;
+    });
+  } else {
+    editor.state.doc.descendants((node, pos) => {
+      if (!node.isText) return false;
+      for (const markName of annotationMarkNames) {
+        const mark = node.marks.find((m) => m.type.name === markName);
+        if (mark) {
+          editor
+            .chain()
+            .focus()
+            .setTextSelection({ from: pos, to: pos + node.nodeSize })
+            .unsetMark(markName)
+            .run();
+        }
+      }
+      return false;
+    });
+  }
 
   // 2. Compute ranges and resolve overlaps within this batch
   const rangedAnnotations = annotations
@@ -254,6 +284,13 @@ export function ChapterEditorPage() {
   const [synonymMessage, setSynonymMessage] = useState<string | null>(null);
   const synonymSelectionRef = useRef<{ from: number; to: number } | null>(null);
   const synonymButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Annotation visibility toggle state
+  const [annotationsVisible, setAnnotationsVisible] = useState(true);
+  const [currentAnnotations, setCurrentAnnotations] = useState<Annotation[]>(
+    [],
+  );
+
   const [apiKey, setApiKey] = useState(
     () => localStorage.getItem("ws_api_key") ?? "",
   );
@@ -548,7 +585,22 @@ export function ChapterEditorPage() {
               disabled={analysisStatus === "loading" || !apiKey.trim()}
               onClick={async () => {
                 if (!editorRef.current || !chapter || !book) return;
-                const text = editorRef.current.getText();
+
+                // Determine text to analyze: selection for grammar/context/dialogue, full text for summary
+                let text: string;
+                let selectionRange: { from: number; to: number } | undefined;
+                const editor = editorRef.current;
+                const { from: selFrom, to: selTo } = editor.state.selection;
+
+                if (analysisMode === "summary") {
+                  text = editor.getText();
+                } else if (selFrom !== selTo) {
+                  text = editor.state.doc.textBetween(selFrom, selTo, " ");
+                  selectionRange = { from: selFrom, to: selTo };
+                } else {
+                  text = editor.getText();
+                }
+
                 if (!text.trim()) {
                   setAnalysisError("Brak tekstu do analizy");
                   setAnalysisStatus("error");
@@ -628,7 +680,11 @@ export function ChapterEditorPage() {
                     );
                   }
 
-                  applyAnnotationsToEditor(editorRef.current, annotations);
+                  setCurrentAnnotations(annotations);
+                  setAnnotationsVisible(true);
+                  applyAnnotationsToEditor(editorRef.current, annotations, {
+                    clearRange: selectionRange,
+                  });
                   // Save analysis + annotations to backend
                   const analysisId = await saveAnalysis.mutateAsync({
                     bookId: book.id,
@@ -647,7 +703,10 @@ export function ChapterEditorPage() {
                       annotations[i].id = newIds[i];
                     }
                   }
-                  applyAnnotationsToEditor(editorRef.current, annotations);
+                  setCurrentAnnotations(annotations);
+                  applyAnnotationsToEditor(editorRef.current, annotations, {
+                    clearRange: selectionRange,
+                  });
                   setAnalysisStatus("success");
                   setTimeout(() => setAnalysisStatus("idle"), 3000);
                 } catch (err) {
@@ -692,6 +751,55 @@ export function ChapterEditorPage() {
           <Volume2 className="h-3.5 w-3.5 mr-1.5" />
           Lektor
         </Button>
+
+        <div className="w-px h-6 bg-border hidden sm:block" />
+
+        {/* Annotation visibility toggle */}
+        {(currentAnnotations.length > 0 ||
+          (persistedAnnotations && persistedAnnotations.length > 0)) && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              if (!editorRef.current) return;
+              if (annotationsVisible) {
+                // Hide: remove all annotation marks from editor
+                applyAnnotationsToEditor(editorRef.current, []);
+                setAnnotationsVisible(false);
+              } else {
+                // Show: re-apply known annotations
+                const anns: Annotation[] =
+                  currentAnnotations.length > 0
+                    ? currentAnnotations
+                    : (persistedAnnotations ?? []).map((pa) => ({
+                        id: pa.id,
+                        text: pa.text,
+                        color: pa.color as Annotation["color"],
+                        explanation: pa.explanation,
+                        proposal: pa.proposal,
+                        approved: pa.approved,
+                      }));
+                applyAnnotationsToEditor(editorRef.current, anns, {
+                  skipApproved: true,
+                });
+                setAnnotationsVisible(true);
+              }
+            }}
+            data-ocid="chapter.annotation_visibility_toggle"
+          >
+            {annotationsVisible ? (
+              <>
+                <EyeOff className="h-3.5 w-3.5 mr-1.5" />
+                Ukryj kolorowanie
+              </>
+            ) : (
+              <>
+                <Eye className="h-3.5 w-3.5 mr-1.5" />
+                Pokaż kolorowanie
+              </>
+            )}
+          </Button>
+        )}
 
         <div className="w-px h-6 bg-border hidden sm:block" />
 
@@ -862,25 +970,35 @@ export function ChapterEditorPage() {
         </div>
       )}
 
-      {/* History panel */}
-      {historyPanelOpen && (
-        <div data-ocid="chapter.history_panel_container">
+      {/* History modal */}
+      <Dialog open={historyPanelOpen} onOpenChange={setHistoryPanelOpen}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              Historia analiz
+            </DialogTitle>
+          </DialogHeader>
           <AnalysisHistoryPanel
             bookId={book.id}
             chapterId={chapter.id}
             onLoadAnalysis={(annotations) => {
+              setHistoryPanelOpen(false);
               if (editorRef.current) {
+                setCurrentAnnotations(annotations);
+                setAnnotationsVisible(true);
                 applyAnnotationsToEditor(editorRef.current, annotations, {
                   skipApproved: true,
                 });
               }
             }}
             onOpenSummary={(content) => {
+              setHistoryPanelOpen(false);
               setSummaryResult(content);
             }}
           />
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Recordings panel */}
       {recordingsPanelOpen && (
