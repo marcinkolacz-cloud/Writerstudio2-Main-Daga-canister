@@ -129,7 +129,7 @@ export function RichTextEditor({
       let markTypeName = "";
       let markAttrs: Record<string, unknown> = {};
       editor.state.doc.nodesBetween(actualFrom, actualTo, (node) => {
-        if (!node.isText) return false;
+        if (!node.isText) return true;
         for (const mark of node.marks) {
           if (mark.type.name.startsWith("annotation")) {
             markTypeName = mark.type.name;
@@ -137,18 +137,8 @@ export function RichTextEditor({
             return false;
           }
         }
-        return false;
+        return true;
       });
-      console.log(
-        "[DEBUG] actualFrom:",
-        actualFrom,
-        "actualTo:",
-        actualTo,
-        "markTypeName:",
-        markTypeName,
-        "markAttrs:",
-        markAttrs,
-      );
 
       // Build the replacement text node with the preserved mark (updated data-approved)
       const schema = editor.schema;
@@ -161,12 +151,7 @@ export function RichTextEditor({
             }),
           ]
         : [];
-      console.log(
-        "[DEBUG] markType found:",
-        !!markType,
-        "marksToApply length:",
-        marksToApply.length,
-      );
+
       const textNode = schema.text(proposal, marksToApply);
 
       // Replace range with the marked text node in a single transaction
@@ -226,7 +211,7 @@ export function RichTextEditor({
       let markTypeName = "";
       let markAttrs: Record<string, unknown> = {};
       editor.state.doc.nodesBetween(actualFrom, actualTo, (node) => {
-        if (!node.isText) return false;
+        if (!node.isText) return true;
         for (const mark of node.marks) {
           if (mark.type.name.startsWith("annotation")) {
             markTypeName = mark.type.name;
@@ -234,7 +219,7 @@ export function RichTextEditor({
             return false;
           }
         }
-        return false;
+        return true;
       });
 
       // Build the replacement text node with the preserved mark (data-approved: false)
