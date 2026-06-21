@@ -103484,7 +103484,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Cfy9U6Ac.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CHiup8RZ.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -104510,12 +104510,32 @@ function applyAnnotationsToEditor(editor, annotations, options) {
     }
     return false;
   });
-  for (const ann of annotations) {
-    if ((options == null ? void 0 : options.skipApproved) && ann.approved) continue;
+  const rangedAnnotations = annotations.map((ann) => {
+    if ((options == null ? void 0 : options.skipApproved) && ann.approved) return null;
     const idx = docText.indexOf(ann.text);
-    if (idx === -1) continue;
-    const from2 = editor.state.doc.resolve(idx);
-    const to = editor.state.doc.resolve(idx + ann.text.length);
+    if (idx === -1) return null;
+    return {
+      ann,
+      start: idx,
+      end: idx + ann.text.length
+    };
+  }).filter((item) => item !== null);
+  rangedAnnotations.sort((a2, b2) => a2.start - b2.start);
+  const accepted = [];
+  for (const item of rangedAnnotations) {
+    if (accepted.length === 0) {
+      accepted.push(item);
+      continue;
+    }
+    const last2 = accepted[accepted.length - 1];
+    if (item.start < last2.end) {
+      continue;
+    }
+    accepted.push(item);
+  }
+  for (const { ann, start, end } of accepted) {
+    const from2 = editor.state.doc.resolve(start);
+    const to = editor.state.doc.resolve(end);
     editor.chain().focus().setTextSelection({ from: from2.pos, to: to.pos }).setMark(
       `annotation${ann.color.charAt(0).toUpperCase() + ann.color.slice(1)}`,
       {

@@ -139,16 +139,42 @@ function applyAnnotationsToEditor(
     return false;
   });
 
-  // 2. Apply new annotation marks
-  for (const ann of annotations) {
-    // Skip approved annotations (they are already part of normal text)
-    if (options?.skipApproved && ann.approved) continue;
+  // 2. Compute ranges and resolve overlaps within this batch
+  const rangedAnnotations = annotations
+    .map((ann) => {
+      if (options?.skipApproved && ann.approved) return null;
+      const idx = docText.indexOf(ann.text);
+      if (idx === -1) return null;
+      return {
+        ann,
+        start: idx,
+        end: idx + ann.text.length,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 
-    const idx = docText.indexOf(ann.text);
-    if (idx === -1) continue;
+  // Sort by start ascending
+  rangedAnnotations.sort((a, b) => a.start - b.start);
 
-    const from = editor.state.doc.resolve(idx);
-    const to = editor.state.doc.resolve(idx + ann.text.length);
+  // Build accepted list: skip any annotation that overlaps with the last accepted one
+  const accepted: typeof rangedAnnotations = [];
+  for (const item of rangedAnnotations) {
+    if (accepted.length === 0) {
+      accepted.push(item);
+      continue;
+    }
+    const last = accepted[accepted.length - 1];
+    if (item.start < last.end) {
+      // Overlaps with last accepted range — skip this annotation entirely
+      continue;
+    }
+    accepted.push(item);
+  }
+
+  // 3. Apply marks only for accepted (non-overlapping) annotations
+  for (const { ann, start, end } of accepted) {
+    const from = editor.state.doc.resolve(start);
+    const to = editor.state.doc.resolve(end);
 
     editor
       .chain()
