@@ -66,6 +66,37 @@ export function RichTextEditor({
 
   const updateAnnotationApproved = useUpdateAnnotationApproved();
 
+  const findTextRangeInDoc = useCallback(
+    (
+      editorInstance: Editor,
+      searchText: string,
+      nearPos: number,
+    ): { from: number; to: number } | null => {
+      let bestMatch: { from: number; to: number } | null = null;
+      let bestDist = Number.POSITIVE_INFINITY;
+      editorInstance.state.doc.descendants((node, pos) => {
+        if (!node.isText || !node.text) return true;
+        const nodeText = node.text;
+        let searchIdx = 0;
+        while (true) {
+          const idx = nodeText.indexOf(searchText, searchIdx);
+          if (idx === -1) break;
+          const from = pos + idx;
+          const to = from + searchText.length;
+          const dist = Math.abs(from - nearPos);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestMatch = { from, to };
+          }
+          searchIdx = idx + 1;
+        }
+        return true;
+      });
+      return bestMatch;
+    },
+    [],
+  );
+
   const handleApplyProposal = useCallback(
     ({
       id,
@@ -82,37 +113,16 @@ export function RichTextEditor({
     }) => {
       if (!editor) return;
 
-      // Verify the text at from/to matches the expected annotation text
-      const currentText = editor.state.doc.textBetween(from, to, " ");
       let actualFrom = from;
       let actualTo = to;
 
+      // Verify the exact range still contains the expected text
+      const currentText = editor.state.doc.textBetween(from, to, " ");
       if (currentText !== text) {
-        // Find ALL occurrences and pick the nearest to original 'from'
-        const docText = editor.getText();
-        const positions: number[] = [];
-        let searchPos = 0;
-        while (true) {
-          const idx = docText.indexOf(text, searchPos);
-          if (idx === -1) break;
-          positions.push(idx);
-          searchPos = idx + 1;
-        }
-
-        if (positions.length > 0) {
-          // Pick the occurrence with smallest absolute distance from original 'from'
-          let bestPos = positions[0];
-          let bestDist = Math.abs(positions[0] - from);
-          for (let i = 1; i < positions.length; i++) {
-            const dist = Math.abs(positions[i] - from);
-            if (dist < bestDist) {
-              bestDist = dist;
-              bestPos = positions[i];
-            }
-          }
-          actualFrom = bestPos;
-          actualTo = bestPos + text.length;
-        }
+        const match = findTextRangeInDoc(editor, text, from);
+        if (!match) return; // avoid accidental damage to random location
+        actualFrom = match.from;
+        actualTo = match.to;
       }
 
       editor
@@ -140,7 +150,7 @@ export function RichTextEditor({
         );
       }
     },
-    [editor, updateAnnotationApproved],
+    [editor, updateAnnotationApproved, findTextRangeInDoc],
   );
 
   const handleRevertProposal = useCallback(
@@ -157,36 +167,16 @@ export function RichTextEditor({
     }) => {
       if (!editor) return;
 
-      // Verify the text at from/to matches the proposal (current text after apply)
-      const currentText = editor.state.doc.textBetween(from, to, " ");
       let actualFrom = from;
       let actualTo = to;
 
-      // If the exact range doesn't match, find nearest occurrence
+      // Verify the exact range still contains the expected text
+      const currentText = editor.state.doc.textBetween(from, to, " ");
       if (currentText !== originalText) {
-        const docText = editor.getText();
-        const positions: number[] = [];
-        let searchPos = 0;
-        while (true) {
-          const idx = docText.indexOf(originalText, searchPos);
-          if (idx === -1) break;
-          positions.push(idx);
-          searchPos = idx + 1;
-        }
-
-        if (positions.length > 0) {
-          let bestPos = positions[0];
-          let bestDist = Math.abs(positions[0] - from);
-          for (let i = 1; i < positions.length; i++) {
-            const dist = Math.abs(positions[i] - from);
-            if (dist < bestDist) {
-              bestDist = dist;
-              bestPos = positions[i];
-            }
-          }
-          actualFrom = bestPos;
-          actualTo = bestPos + originalText.length;
-        }
+        const match = findTextRangeInDoc(editor, originalText, from);
+        if (!match) return; // avoid accidental damage to random location
+        actualFrom = match.from;
+        actualTo = match.to;
       }
 
       editor
@@ -213,7 +203,7 @@ export function RichTextEditor({
         );
       }
     },
-    [editor, updateAnnotationApproved],
+    [editor, updateAnnotationApproved, findTextRangeInDoc],
   );
 
   const { tooltip, tooltipRef, handleApply, handleRevert, clearHideTimeout } =

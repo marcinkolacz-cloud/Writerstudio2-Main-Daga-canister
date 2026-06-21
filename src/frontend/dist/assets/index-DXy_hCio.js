@@ -74778,6 +74778,32 @@ function RichTextEditor({
     }
   });
   const updateAnnotationApproved = useUpdateAnnotationApproved();
+  const findTextRangeInDoc = reactExports.useCallback(
+    (editorInstance, searchText, nearPos) => {
+      let bestMatch = null;
+      let bestDist = Number.POSITIVE_INFINITY;
+      editorInstance.state.doc.descendants((node, pos) => {
+        if (!node.isText || !node.text) return true;
+        const nodeText = node.text;
+        let searchIdx = 0;
+        while (true) {
+          const idx = nodeText.indexOf(searchText, searchIdx);
+          if (idx === -1) break;
+          const from2 = pos + idx;
+          const to = from2 + searchText.length;
+          const dist = Math.abs(from2 - nearPos);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestMatch = { from: from2, to };
+          }
+          searchIdx = idx + 1;
+        }
+        return true;
+      });
+      return bestMatch;
+    },
+    []
+  );
   const handleApplyProposal = reactExports.useCallback(
     ({
       id,
@@ -74787,32 +74813,14 @@ function RichTextEditor({
       text
     }) => {
       if (!editor) return;
-      const currentText = editor.state.doc.textBetween(from2, to, " ");
       let actualFrom = from2;
       let actualTo = to;
+      const currentText = editor.state.doc.textBetween(from2, to, " ");
       if (currentText !== text) {
-        const docText = editor.getText();
-        const positions = [];
-        let searchPos = 0;
-        while (true) {
-          const idx = docText.indexOf(text, searchPos);
-          if (idx === -1) break;
-          positions.push(idx);
-          searchPos = idx + 1;
-        }
-        if (positions.length > 0) {
-          let bestPos = positions[0];
-          let bestDist = Math.abs(positions[0] - from2);
-          for (let i2 = 1; i2 < positions.length; i2++) {
-            const dist = Math.abs(positions[i2] - from2);
-            if (dist < bestDist) {
-              bestDist = dist;
-              bestPos = positions[i2];
-            }
-          }
-          actualFrom = bestPos;
-          actualTo = bestPos + text.length;
-        }
+        const match = findTextRangeInDoc(editor, text, from2);
+        if (!match) return;
+        actualFrom = match.from;
+        actualTo = match.to;
       }
       editor.chain().focus().deleteRange({ from: actualFrom, to: actualTo }).insertContent(proposal).run();
       if (id !== 0n) {
@@ -74831,7 +74839,7 @@ function RichTextEditor({
         );
       }
     },
-    [editor, updateAnnotationApproved]
+    [editor, updateAnnotationApproved, findTextRangeInDoc]
   );
   const handleRevertProposal = reactExports.useCallback(
     ({
@@ -74841,32 +74849,14 @@ function RichTextEditor({
       originalText
     }) => {
       if (!editor) return;
-      const currentText = editor.state.doc.textBetween(from2, to, " ");
       let actualFrom = from2;
       let actualTo = to;
+      const currentText = editor.state.doc.textBetween(from2, to, " ");
       if (currentText !== originalText) {
-        const docText = editor.getText();
-        const positions = [];
-        let searchPos = 0;
-        while (true) {
-          const idx = docText.indexOf(originalText, searchPos);
-          if (idx === -1) break;
-          positions.push(idx);
-          searchPos = idx + 1;
-        }
-        if (positions.length > 0) {
-          let bestPos = positions[0];
-          let bestDist = Math.abs(positions[0] - from2);
-          for (let i2 = 1; i2 < positions.length; i2++) {
-            const dist = Math.abs(positions[i2] - from2);
-            if (dist < bestDist) {
-              bestDist = dist;
-              bestPos = positions[i2];
-            }
-          }
-          actualFrom = bestPos;
-          actualTo = bestPos + originalText.length;
-        }
+        const match = findTextRangeInDoc(editor, originalText, from2);
+        if (!match) return;
+        actualFrom = match.from;
+        actualTo = match.to;
       }
       editor.chain().focus().deleteRange({ from: actualFrom, to: actualTo }).insertContent(originalText).run();
       if (id !== 0n) {
@@ -74885,7 +74875,7 @@ function RichTextEditor({
         );
       }
     },
-    [editor, updateAnnotationApproved]
+    [editor, updateAnnotationApproved, findTextRangeInDoc]
   );
   const { tooltip, tooltipRef, handleApply, handleRevert, clearHideTimeout } = useAnnotationTooltip(editor, handleApplyProposal, handleRevertProposal);
   reactExports.useEffect(() => {
@@ -103805,7 +103795,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BPES565N.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Cww1uId8.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
