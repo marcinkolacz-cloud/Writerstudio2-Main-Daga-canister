@@ -154,16 +154,42 @@ ${allChaptersText}
 }
 
 function parsePipeAnnotations(responseText: string): Annotation[] {
-  const lines = responseText.split("\n").filter((line) => line.includes("|||"));
+  const validColors = new Set<string>([
+    "red",
+    "yellow",
+    "blue",
+    "orange",
+    "purple",
+  ]);
+  const lines = responseText
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.includes("|||"));
+
   const annotations = lines
     .map((line) => {
-      const parts = line.split("|||");
+      // Remove everything before the first recognized color
+      let workingLine = line;
+      const colorMatch = workingLine.match(
+        /(red|yellow|blue|orange|purple)\|\|\|/i,
+      );
+      if (
+        colorMatch &&
+        colorMatch.index !== undefined &&
+        colorMatch.index > 0
+      ) {
+        workingLine = workingLine.slice(colorMatch.index);
+      }
+
+      const parts = workingLine.split("|||");
       if (parts.length < 3) return null;
       const [color, text, explanation, proposal] = parts;
       if (!color?.trim() || !text?.trim() || !explanation?.trim()) return null;
+      const colorLower = color.trim().toLowerCase();
+      if (!validColors.has(colorLower)) return null;
       return {
         id: 0n,
-        color: color.trim().toLowerCase() as Annotation["color"],
+        color: colorLower as Annotation["color"],
         text: text.trim(),
         explanation: explanation.trim(),
         proposal: (proposal || "").trim(),
@@ -182,34 +208,41 @@ function validateAnnotations(annotations: Annotation[]): Annotation[] {
     "orange",
     "purple",
   ]);
-  return annotations.map((item, idx) => {
-    if (!item || typeof item !== "object") {
-      throw new Error(`Element ${idx} nie jest obiektem`);
-    }
-    const text = item.text;
-    const color = item.color;
-    const explanation = item.explanation;
-    const proposal = item.proposal;
-    if (
-      typeof text !== "string" ||
-      typeof explanation !== "string" ||
-      typeof proposal !== "string"
-    ) {
-      throw new Error(`Element ${idx} ma nieprawidłowy typ pól`);
-    }
-    const colorStr = String(color);
-    if (!validColors.has(colorStr)) {
-      throw new Error(`Element ${idx} ma nieprawidłowy kolor: ${colorStr}`);
-    }
-    return {
-      id: 0n,
-      text,
-      color: colorStr as Annotation["color"],
-      explanation,
-      proposal,
-      approved: false,
-    };
-  });
+  return annotations
+    .map((item, idx) => {
+      if (!item || typeof item !== "object") {
+        console.warn(`Element ${idx} nie jest obiektem — pominięto`);
+        return null;
+      }
+      const text = item.text;
+      const color = item.color;
+      const explanation = item.explanation;
+      const proposal = item.proposal;
+      if (
+        typeof text !== "string" ||
+        typeof explanation !== "string" ||
+        typeof proposal !== "string"
+      ) {
+        console.warn(`Element ${idx} ma nieprawidłowy typ pól — pominięto`);
+        return null;
+      }
+      const colorStr = String(color).toLowerCase();
+      if (!validColors.has(colorStr)) {
+        console.warn(
+          `Element ${idx} ma nieprawidłowy kolor: ${colorStr} — pominięto`,
+        );
+        return null;
+      }
+      return {
+        id: 0n,
+        text,
+        color: colorStr as Annotation["color"],
+        explanation,
+        proposal,
+        approved: false,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 }
 
 async function callAi(

@@ -45618,15 +45618,31 @@ ${allChaptersText}
 """`;
 }
 function parsePipeAnnotations(responseText) {
-  const lines = responseText.split("\n").filter((line) => line.includes("|||"));
+  const validColors = /* @__PURE__ */ new Set([
+    "red",
+    "yellow",
+    "blue",
+    "orange",
+    "purple"
+  ]);
+  const lines = responseText.split("\n").map((line) => line.trim()).filter((line) => line.includes("|||"));
   const annotations = lines.map((line) => {
-    const parts = line.split("|||");
+    let workingLine = line;
+    const colorMatch = workingLine.match(
+      /(red|yellow|blue|orange|purple)\|\|\|/i
+    );
+    if (colorMatch && colorMatch.index !== void 0 && colorMatch.index > 0) {
+      workingLine = workingLine.slice(colorMatch.index);
+    }
+    const parts = workingLine.split("|||");
     if (parts.length < 3) return null;
     const [color2, text, explanation, proposal] = parts;
     if (!(color2 == null ? void 0 : color2.trim()) || !(text == null ? void 0 : text.trim()) || !(explanation == null ? void 0 : explanation.trim())) return null;
+    const colorLower = color2.trim().toLowerCase();
+    if (!validColors.has(colorLower)) return null;
     return {
       id: 0n,
-      color: color2.trim().toLowerCase(),
+      color: colorLower,
       text: text.trim(),
       explanation: explanation.trim(),
       proposal: (proposal || "").trim(),
@@ -45645,18 +45661,23 @@ function validateAnnotations(annotations) {
   ]);
   return annotations.map((item, idx) => {
     if (!item || typeof item !== "object") {
-      throw new Error(`Element ${idx} nie jest obiektem`);
+      console.warn(`Element ${idx} nie jest obiektem — pominięto`);
+      return null;
     }
     const text = item.text;
     const color2 = item.color;
     const explanation = item.explanation;
     const proposal = item.proposal;
     if (typeof text !== "string" || typeof explanation !== "string" || typeof proposal !== "string") {
-      throw new Error(`Element ${idx} ma nieprawidłowy typ pól`);
+      console.warn(`Element ${idx} ma nieprawidłowy typ pól — pominięto`);
+      return null;
     }
-    const colorStr = String(color2);
+    const colorStr = String(color2).toLowerCase();
     if (!validColors.has(colorStr)) {
-      throw new Error(`Element ${idx} ma nieprawidłowy kolor: ${colorStr}`);
+      console.warn(
+        `Element ${idx} ma nieprawidłowy kolor: ${colorStr} — pominięto`
+      );
+      return null;
     }
     return {
       id: 0n,
@@ -45666,7 +45687,7 @@ function validateAnnotations(annotations) {
       proposal,
       approved: false
     };
-  });
+  }).filter((item) => item !== null);
 }
 async function callAi(prompt, apiKey, provider, expectJson) {
   var _a3, _b3, _c2, _d2, _e3;
@@ -105480,7 +105501,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DKrIMXZ2.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BfHVM1ke.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -106739,8 +106760,9 @@ function ChapterEditorPage() {
       lastSyncedChapterIdRef.current = chapterId;
     }
   }, [chapter, chapterId]);
+  const lastAppliedAnalysisIdRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    if (editorRef.current && persistedAnnotations && persistedAnnotations.length > 0) {
+    if (editorRef.current && persistedAnnotations && persistedAnnotations.length > 0 && latestAnalysisId !== null && latestAnalysisId !== lastAppliedAnalysisIdRef.current) {
       const anns = persistedAnnotations.map((pa) => ({
         id: pa.id,
         text: pa.text,
@@ -106750,8 +106772,9 @@ function ChapterEditorPage() {
         approved: pa.approved
       }));
       applyAnnotationsToEditor(editorRef.current, anns, { skipApproved: true });
+      lastAppliedAnalysisIdRef.current = latestAnalysisId;
     }
-  }, [persistedAnnotations]);
+  }, [persistedAnnotations, latestAnalysisId]);
   const doSave = reactExports.useCallback(
     (newTitle, newContent) => {
       if (!chapter) return;

@@ -377,11 +377,14 @@ export function ChapterEditorPage() {
   }, [chapter, chapterId]);
 
   // Apply persisted annotations (only non-approved ones) when editor is ready
+  const lastAppliedAnalysisIdRef = useRef<bigint | null>(null);
   useEffect(() => {
     if (
       editorRef.current &&
       persistedAnnotations &&
-      persistedAnnotations.length > 0
+      persistedAnnotations.length > 0 &&
+      latestAnalysisId !== null &&
+      latestAnalysisId !== lastAppliedAnalysisIdRef.current
     ) {
       const anns: Annotation[] = persistedAnnotations.map((pa) => ({
         id: pa.id,
@@ -392,8 +395,9 @@ export function ChapterEditorPage() {
         approved: pa.approved,
       }));
       applyAnnotationsToEditor(editorRef.current, anns, { skipApproved: true });
+      lastAppliedAnalysisIdRef.current = latestAnalysisId;
     }
-  }, [persistedAnnotations]);
+  }, [persistedAnnotations, latestAnalysisId]);
 
   const doSave = useCallback(
     (newTitle: string, newContent: string) => {
