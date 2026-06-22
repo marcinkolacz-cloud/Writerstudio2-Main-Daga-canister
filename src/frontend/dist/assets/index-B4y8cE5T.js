@@ -45652,6 +45652,7 @@ function parsePipeAnnotations(responseText) {
   return annotations;
 }
 function validateAnnotations(annotations) {
+  console.log("[VALIDATE]", annotations);
   const validColors = /* @__PURE__ */ new Set([
     "yellow",
     "red",
@@ -45737,7 +45738,9 @@ async function callAi(prompt, apiKey, provider, expectJson) {
     throw new Error(`Claude error ${res.status}: ${err}`);
   }
   const data = await res.json();
-  return ((_e3 = (_d2 = data.content) == null ? void 0 : _d2.find((c2) => c2.type === "text")) == null ? void 0 : _e3.text) ?? "";
+  const responseText = ((_e3 = (_d2 = data.content) == null ? void 0 : _d2.find((c2) => c2.type === "text")) == null ? void 0 : _e3.text) ?? "";
+  console.log("[AI RESPONSE]", responseText.substring(0, 500));
+  return responseText;
 }
 async function analyzeGrammarStyle(text, apiKey, provider, bookContext) {
   if (text.length > 8e3) {
@@ -45746,6 +45749,7 @@ async function analyzeGrammarStyle(text, apiKey, provider, bookContext) {
   const prompt = buildGrammarPrompt(text, bookContext);
   const responseText = await callAi(prompt, apiKey, provider, false);
   const annotations = parsePipeAnnotations(responseText);
+  console.log("[PARSED]", annotations.length, annotations);
   return validateAnnotations(annotations);
 }
 async function analyzeWithContext(currentChapterText, previousChaptersSummaries, apiKey, provider, bookContext) {
@@ -105501,7 +105505,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BfHVM1ke.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Bs9bS0Al.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

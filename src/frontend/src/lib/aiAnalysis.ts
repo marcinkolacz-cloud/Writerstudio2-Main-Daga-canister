@@ -201,6 +201,7 @@ function parsePipeAnnotations(responseText: string): Annotation[] {
 }
 
 function validateAnnotations(annotations: Annotation[]): Annotation[] {
+  console.log("[VALIDATE]", annotations);
   const validColors = new Set<string>([
     "yellow",
     "red",
@@ -302,7 +303,9 @@ async function callAi(
   const data = (await res.json()) as {
     content?: Array<{ type?: string; text?: string }>;
   };
-  return data.content?.find((c) => c.type === "text")?.text ?? "";
+  const responseText = data.content?.find((c) => c.type === "text")?.text ?? "";
+  console.log("[AI RESPONSE]", responseText.substring(0, 500));
+  return responseText;
 }
 
 export async function analyzeGrammarStyle(
@@ -317,6 +320,7 @@ export async function analyzeGrammarStyle(
   const prompt = buildGrammarPrompt(text, bookContext);
   const responseText = await callAi(prompt, apiKey, provider, false);
   const annotations = parsePipeAnnotations(responseText);
+  console.log("[PARSED]", annotations.length, annotations);
   return validateAnnotations(annotations);
 }
 
