@@ -45567,19 +45567,24 @@ ${allChaptersText}
 """`;
 }
 function extractJsonArray(text) {
-  const match = text.match(/\[[\s\S]*\]/);
-  if (match) {
-    return JSON.parse(match[0]);
+  const jsonMatch = text.match(/\[[\s\S]*\]/) || text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    return [];
   }
-  const objMatch = text.match(/\{[\s\S]*\}/);
-  if (objMatch) {
-    const parsed = JSON.parse(objMatch[0]);
-    if (Array.isArray(parsed)) return parsed;
-    if (parsed && typeof parsed === "object" && "annotations" in parsed) {
-      return parsed.annotations;
+  const jsonText = jsonMatch[0];
+  try {
+    return JSON.parse(jsonText);
+  } catch {
+    let fixed = jsonText;
+    fixed = fixed.replace(new RegExp('(?<=")([^"\\\\]*)(?=")', "g"), (match) => {
+      return match.replace(/"/g, '\\"');
+    });
+    try {
+      return JSON.parse(fixed);
+    } catch {
+      return [];
     }
   }
-  throw new Error("Nie udało się wyciągnąć JSON z odpowiedzi AI");
 }
 function validateAnnotations(data) {
   if (!Array.isArray(data)) {
@@ -45621,6 +45626,7 @@ function validateAnnotations(data) {
 }
 async function callAi(prompt, apiKey, provider, expectJson) {
   var _a3, _b3, _c2, _d2, _e3;
+  const safeApiKey = apiKey.replace(/[^\x00-\xFF]/g, "").trim();
   if (provider === "openai") {
     const body = {
       model: "gpt-4o-mini",
@@ -45635,7 +45641,7 @@ async function callAi(prompt, apiKey, provider, expectJson) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
+        Authorization: `Bearer ${safeApiKey}`
       },
       body: JSON.stringify(body)
     });
@@ -45650,7 +45656,7 @@ async function callAi(prompt, apiKey, provider, expectJson) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": apiKey,
+      "x-api-key": safeApiKey,
       "anthropic-version": "2023-06-01",
       "anthropic-dangerous-direct-browser-access": "true"
     },
@@ -49470,6 +49476,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
   const handleSaveRecording = reactExports.useCallback(async () => {
     if (!generatedBlob) return;
     setSaving(true);
+    setError(null);
     try {
       const arrayBuffer = await generatedBlob.arrayBuffer();
       const audioData = new Uint8Array(arrayBuffer);
@@ -49481,9 +49488,9 @@ function LektorPanel({ editor, chapterId, bookId }) {
       });
       setGeneratedBlob(null);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Błąd zapisywania nagrania"
-      );
+      const errorMessage = err instanceof Error ? err.message : "Błąd zapisywania nagrania";
+      console.error("[LektorPanel] Błąd zapisu nagrania:", err);
+      setError(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -105424,7 +105431,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-AgB0yYGC.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BVe3gh7L.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

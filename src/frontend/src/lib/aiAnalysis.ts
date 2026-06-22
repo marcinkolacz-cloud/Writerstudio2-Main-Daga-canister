@@ -125,19 +125,26 @@ ${allChaptersText}
 }
 
 function extractJsonArray(text: string): unknown {
-  const match = text.match(/\[[\s\S]*\]/);
-  if (match) {
-    return JSON.parse(match[0]);
+  const jsonMatch = text.match(/\[[\s\S]*\]/) || text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    return [];
   }
-  const objMatch = text.match(/\{[\s\S]*\}/);
-  if (objMatch) {
-    const parsed = JSON.parse(objMatch[0]);
-    if (Array.isArray(parsed)) return parsed;
-    if (parsed && typeof parsed === "object" && "annotations" in parsed) {
-      return (parsed as { annotations: unknown }).annotations;
+  const jsonText = jsonMatch[0];
+  try {
+    return JSON.parse(jsonText);
+  } catch {
+    // Try to fix unescaped quotes inside values
+    let fixed = jsonText;
+    // Replace unescaped quotes inside string values (heuristic)
+    fixed = fixed.replace(/(?<=")([^"\\]*)(?=")/g, (match) => {
+      return match.replace(/"/g, '\\"');
+    });
+    try {
+      return JSON.parse(fixed);
+    } catch {
+      return [];
     }
   }
-  throw new Error("Nie udało się wyciągnąć JSON z odpowiedzi AI");
 }
 
 function validateAnnotations(data: unknown): Annotation[] {
@@ -193,6 +200,8 @@ async function callAi(
   provider: "openai" | "claude",
   expectJson: boolean,
 ): Promise<string> {
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional ISO-8859-1 range filter
+  const safeApiKey = apiKey.replace(/[^\x00-\xFF]/g, "").trim();
   if (provider === "openai") {
     const body: Record<string, unknown> = {
       model: "gpt-4o-mini",
@@ -207,7 +216,7 @@ async function callAi(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${safeApiKey}`,
       },
       body: JSON.stringify(body),
     });
@@ -224,7 +233,7 @@ async function callAi(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": apiKey,
+      "x-api-key": safeApiKey,
       "anthropic-version": "2023-06-01",
       "anthropic-dangerous-direct-browser-access": "true",
     },

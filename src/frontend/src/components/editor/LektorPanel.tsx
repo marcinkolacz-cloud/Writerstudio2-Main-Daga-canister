@@ -72,6 +72,7 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
   const handleSaveRecording = useCallback(async () => {
     if (!generatedBlob) return;
     setSaving(true);
+    setError(null);
     try {
       const arrayBuffer = await generatedBlob.arrayBuffer();
       const audioData = new Uint8Array(arrayBuffer);
@@ -83,9 +84,10 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
       });
       setGeneratedBlob(null);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Błąd zapisywania nagrania",
-      );
+      const errorMessage =
+        err instanceof Error ? err.message : "Błąd zapisywania nagrania";
+      console.error("[LektorPanel] Błąd zapisu nagrania:", err);
+      setError(errorMessage);
     } finally {
       setSaving(false);
     }
