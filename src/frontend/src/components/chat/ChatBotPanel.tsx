@@ -150,7 +150,10 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
     const trimmed = input.trim();
     if (!trimmed || isSending || !book) return;
 
-    const apiKey = localStorage.getItem("ws_api_key") ?? "";
+    const apiKey =
+      (localStorage.getItem("ws_api_provider") === "claude"
+        ? localStorage.getItem("ws_api_key_claude")
+        : localStorage.getItem("ws_api_key_openai")) ?? "";
     const provider =
       (localStorage.getItem("ws_api_provider") as "openai" | "claude") ||
       "openai";

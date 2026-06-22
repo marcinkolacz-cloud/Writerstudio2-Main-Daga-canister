@@ -334,9 +334,14 @@ export function ChapterEditorPage() {
     [],
   );
 
-  const [apiKey, _setApiKey] = useState(
-    () => localStorage.getItem("ws_api_key") ?? "",
-  );
+  const [apiKey, _setApiKey] = useState(() => {
+    const provider =
+      (localStorage.getItem("ws_api_provider") as "openai" | "claude") ||
+      "openai";
+    return provider === "claude"
+      ? (localStorage.getItem("ws_api_key_claude") ?? "")
+      : (localStorage.getItem("ws_api_key_openai") ?? "");
+  });
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [provider, _setProvider] = useState<"openai" | "claude">(() => {
     const saved = localStorage.getItem("ws_api_provider");
@@ -350,12 +355,15 @@ export function ChapterEditorPage() {
 
   // Persist API key / provider to localStorage
   useEffect(() => {
-    localStorage.setItem("ws_api_key", apiKey);
-  }, [apiKey]);
-
-  useEffect(() => {
-    localStorage.setItem("ws_api_provider", provider);
-  }, [provider]);
+    const provider =
+      (localStorage.getItem("ws_api_provider") as "openai" | "claude") ||
+      "openai";
+    const key =
+      provider === "claude"
+        ? (localStorage.getItem("ws_api_key_claude") ?? "")
+        : (localStorage.getItem("ws_api_key_openai") ?? "");
+    _setApiKey(key);
+  }, []);
 
   // Sync from query data — only when chapterId changes, not on every background refetch
   const lastSyncedChapterIdRef = useRef<string | null>(null);

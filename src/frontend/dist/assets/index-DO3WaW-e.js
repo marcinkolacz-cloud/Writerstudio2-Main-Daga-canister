@@ -45300,19 +45300,27 @@ function Textarea({ className, ...props }) {
   );
 }
 function SettingsModal({ open: open2, onOpenChange }) {
-  const [apiKey, setApiKey] = reactExports.useState("");
+  const [apiKeyOpenAI, setApiKeyOpenAI] = reactExports.useState("");
+  const [apiKeyClaude, setApiKeyClaude] = reactExports.useState("");
   const [provider, setProvider] = reactExports.useState("openai");
   const [systemPrompt, setSystemPrompt] = reactExports.useState("");
   reactExports.useEffect(() => {
     if (open2) {
-      setApiKey(localStorage.getItem("ws_api_key") ?? "");
+      const oldKey = localStorage.getItem("ws_api_key");
+      if (oldKey && !localStorage.getItem("ws_api_key_openai")) {
+        localStorage.setItem("ws_api_key_openai", oldKey);
+        localStorage.removeItem("ws_api_key");
+      }
+      setApiKeyOpenAI(localStorage.getItem("ws_api_key_openai") ?? "");
+      setApiKeyClaude(localStorage.getItem("ws_api_key_claude") ?? "");
       const savedProvider = localStorage.getItem("ws_api_provider");
       setProvider(savedProvider === "claude" ? "claude" : "openai");
       setSystemPrompt(localStorage.getItem("ws_system_prompt") ?? "");
     }
   }, [open2]);
   const handleSave = () => {
-    localStorage.setItem("ws_api_key", apiKey);
+    localStorage.setItem("ws_api_key_openai", apiKeyOpenAI);
+    localStorage.setItem("ws_api_key_claude", apiKeyClaude);
     localStorage.setItem("ws_api_provider", provider);
     localStorage.setItem("ws_system_prompt", systemPrompt);
     onOpenChange(false);
@@ -45333,16 +45341,30 @@ function SettingsModal({ open: open2, onOpenChange }) {
           "Klucz API i provider"
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "settings-api-key", children: "Klucz API" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "settings-api-key-openai", children: "Klucz API OpenAI" }),
           /* @__PURE__ */ jsxRuntimeExports.jsx(
             Input,
             {
-              id: "settings-api-key",
+              id: "settings-api-key-openai",
               type: "password",
-              placeholder: "Wprowadź klucz API (OpenAI lub Claude)",
-              value: apiKey,
-              onChange: (e3) => setApiKey(e3.target.value),
-              "data-ocid": "settings.api_key_input"
+              placeholder: "Wprowadź klucz API OpenAI",
+              value: apiKeyOpenAI,
+              onChange: (e3) => setApiKeyOpenAI(e3.target.value),
+              "data-ocid": "settings.api_key_openai_input"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "settings-api-key-claude", children: "Klucz API Claude" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Input,
+            {
+              id: "settings-api-key-claude",
+              type: "password",
+              placeholder: "Wprowadź klucz API Claude",
+              value: apiKeyClaude,
+              onChange: (e3) => setApiKeyClaude(e3.target.value),
+              "data-ocid": "settings.api_key_claude_input"
             }
           )
         ] }),
@@ -45454,7 +45476,7 @@ ${parts.join("\n")}
 }
 function buildGrammarPrompt(text, bookContext) {
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON. WAŻNE: W polach JSON (text, explanation, proposal) NIE używaj cudzysłowów podwójnych wewnątrz tekstu. Zamiast cudzysłowów użyj guillemets «» lub pauz —. Każdy string JSON musi być poprawnie escapowany. Zwróć TYLKO poprawny JSON bez żadnego dodatkowego tekstu przed ani po.`;
   if (customPrompt) {
     system += `
 
@@ -45491,7 +45513,7 @@ ${text}
 }
 function buildDialoguePrompt(text, bookContext) {
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON. WAŻNE: W polach JSON (text, explanation, proposal) NIE używaj cudzysłowów podwójnych wewnątrz tekstu. Zamiast cudzysłowów użyj guillemets «» lub pauz —. Każdy string JSON musi być poprawnie escapowany. Zwróć TYLKO poprawny JSON bez żadnego dodatkowego tekstu przed ani po.`;
   if (customPrompt) {
     system += `
 
@@ -45507,7 +45529,7 @@ ${text}
 }
 function buildSceneExpansionPrompt(text, bookContext) {
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON. WAŻNE: W polach JSON (text, explanation, proposal) NIE używaj cudzysłowów podwójnych wewnątrz tekstu. Zamiast cudzysłowów użyj guillemets «» lub pauz —. Każdy string JSON musi być poprawnie escapowany. Zwróć TYLKO poprawny JSON bez żadnego dodatkowego tekstu przed ani po.`;
   if (customPrompt) {
     system += `
 
@@ -45523,7 +45545,7 @@ ${text}
 }
 function buildEmotionPrompt(text, bookContext) {
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON. WAŻNE: W polach JSON (text, explanation, proposal) NIE używaj cudzysłowów podwójnych wewnątrz tekstu. Zamiast cudzysłowów użyj guillemets «» lub pauz —. Każdy string JSON musi być poprawnie escapowany. Zwróć TYLKO poprawny JSON bez żadnego dodatkowego tekstu przed ani po.`;
   if (customPrompt) {
     system += `
 
@@ -45568,23 +45590,39 @@ ${allChaptersText}
 }
 function extractJsonArray(text) {
   const jsonMatch = text.match(/\[[\s\S]*\]/) || text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    return [];
-  }
-  const jsonText = jsonMatch[0];
-  try {
-    return JSON.parse(jsonText);
-  } catch {
-    let fixed = jsonText;
-    fixed = fixed.replace(new RegExp('(?<=")([^"\\\\]*)(?=")', "g"), (match) => {
-      return match.replace(/"/g, '\\"');
-    });
+  if (jsonMatch) {
+    const jsonText = jsonMatch[0];
     try {
-      return JSON.parse(fixed);
+      return JSON.parse(jsonText);
     } catch {
-      return [];
+      let fixed = jsonText;
+      fixed = fixed.replace(new RegExp('(?<=")([^"\\\\]*)(?=")', "g"), (match2) => {
+        return match2.replace(/"/g, '\\"');
+      });
+      try {
+        return JSON.parse(fixed);
+      } catch {
+      }
     }
   }
+  const objectRegex = /\{[\s\S]*?\}/g;
+  const objects = [];
+  let match = objectRegex.exec(text);
+  while (match !== null) {
+    const objText = match[0];
+    try {
+      const parsed = JSON.parse(objText);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        objects.push(parsed);
+      }
+    } catch {
+    }
+  }
+  if (objects.length > 0) {
+    return objects;
+  }
+  console.error("Nie udało się sparsować odpowiedzi AI jako JSON:", text);
+  return [];
 }
 function validateAnnotations(data) {
   if (!Array.isArray(data)) {
@@ -45883,7 +45921,7 @@ function ChatBotPanel({ bookId }) {
   const handleSend = reactExports.useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || isSending || !book) return;
-    const apiKey = localStorage.getItem("ws_api_key") ?? "";
+    const apiKey = (localStorage.getItem("ws_api_provider") === "claude" ? localStorage.getItem("ws_api_key_claude") : localStorage.getItem("ws_api_key_openai")) ?? "";
     const provider = localStorage.getItem("ws_api_provider") || "openai";
     if (!apiKey.trim()) {
       setInput("");
@@ -49447,7 +49485,7 @@ const VOICES = [
   { value: "shimmer", label: "Shimmer" }
 ];
 function LektorPanel({ editor, chapterId, bookId }) {
-  const apiKey = localStorage.getItem("ws_api_key") ?? "";
+  const apiKey = localStorage.getItem("ws_api_key_openai") ?? "";
   const [voice, setVoice] = reactExports.useState("alloy");
   const [speed, setSpeed] = reactExports.useState([1]);
   const [playbackState, setPlaybackState] = reactExports.useState("idle");
@@ -105431,7 +105469,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BVe3gh7L.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Dz8LVzZm.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -106663,9 +106701,10 @@ function ChapterEditorPage() {
   const [currentAnnotations, setCurrentAnnotations] = reactExports.useState(
     []
   );
-  const [apiKey, _setApiKey] = reactExports.useState(
-    () => localStorage.getItem("ws_api_key") ?? ""
-  );
+  const [apiKey, _setApiKey] = reactExports.useState(() => {
+    const provider2 = localStorage.getItem("ws_api_provider") || "openai";
+    return provider2 === "claude" ? localStorage.getItem("ws_api_key_claude") ?? "" : localStorage.getItem("ws_api_key_openai") ?? "";
+  });
   const [settingsModalOpen, setSettingsModalOpen] = reactExports.useState(false);
   const [provider, _setProvider] = reactExports.useState(() => {
     const saved = localStorage.getItem("ws_api_provider");
@@ -106676,11 +106715,10 @@ function ChapterEditorPage() {
   const titleDebounceRef = reactExports.useRef(null);
   const contentDebounceRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    localStorage.setItem("ws_api_key", apiKey);
-  }, [apiKey]);
-  reactExports.useEffect(() => {
-    localStorage.setItem("ws_api_provider", provider);
-  }, [provider]);
+    const provider2 = localStorage.getItem("ws_api_provider") || "openai";
+    const key = provider2 === "claude" ? localStorage.getItem("ws_api_key_claude") ?? "" : localStorage.getItem("ws_api_key_openai") ?? "";
+    _setApiKey(key);
+  }, []);
   const lastSyncedChapterIdRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
     if (chapter && lastSyncedChapterIdRef.current !== chapterId) {

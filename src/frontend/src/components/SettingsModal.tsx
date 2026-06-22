@@ -24,14 +24,23 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
-  const [apiKey, setApiKey] = useState("");
+  const [apiKeyOpenAI, setApiKeyOpenAI] = useState("");
+  const [apiKeyClaude, setApiKeyClaude] = useState("");
   const [provider, setProvider] = useState<"openai" | "claude">("openai");
   const [systemPrompt, setSystemPrompt] = useState("");
 
   // Load values from localStorage when modal opens
   useEffect(() => {
     if (open) {
-      setApiKey(localStorage.getItem("ws_api_key") ?? "");
+      // Backward compatibility: migrate old single key to OpenAI key
+      const oldKey = localStorage.getItem("ws_api_key");
+      if (oldKey && !localStorage.getItem("ws_api_key_openai")) {
+        localStorage.setItem("ws_api_key_openai", oldKey);
+        localStorage.removeItem("ws_api_key");
+      }
+
+      setApiKeyOpenAI(localStorage.getItem("ws_api_key_openai") ?? "");
+      setApiKeyClaude(localStorage.getItem("ws_api_key_claude") ?? "");
       const savedProvider = localStorage.getItem("ws_api_provider");
       setProvider(savedProvider === "claude" ? "claude" : "openai");
       setSystemPrompt(localStorage.getItem("ws_system_prompt") ?? "");
@@ -39,7 +48,8 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   }, [open]);
 
   const handleSave = () => {
-    localStorage.setItem("ws_api_key", apiKey);
+    localStorage.setItem("ws_api_key_openai", apiKeyOpenAI);
+    localStorage.setItem("ws_api_key_claude", apiKeyClaude);
     localStorage.setItem("ws_api_provider", provider);
     localStorage.setItem("ws_system_prompt", systemPrompt);
     onOpenChange(false);
@@ -68,14 +78,25 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
               Klucz API i provider
             </h3>
             <div className="space-y-2">
-              <Label htmlFor="settings-api-key">Klucz API</Label>
+              <Label htmlFor="settings-api-key-openai">Klucz API OpenAI</Label>
               <Input
-                id="settings-api-key"
+                id="settings-api-key-openai"
                 type="password"
-                placeholder="Wprowadź klucz API (OpenAI lub Claude)"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                data-ocid="settings.api_key_input"
+                placeholder="Wprowadź klucz API OpenAI"
+                value={apiKeyOpenAI}
+                onChange={(e) => setApiKeyOpenAI(e.target.value)}
+                data-ocid="settings.api_key_openai_input"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="settings-api-key-claude">Klucz API Claude</Label>
+              <Input
+                id="settings-api-key-claude"
+                type="password"
+                placeholder="Wprowadź klucz API Claude"
+                value={apiKeyClaude}
+                onChange={(e) => setApiKeyClaude(e.target.value)}
+                data-ocid="settings.api_key_claude_input"
               />
             </div>
             <div className="space-y-2">

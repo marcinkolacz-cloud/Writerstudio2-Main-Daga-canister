@@ -39,7 +39,7 @@ interface LektorPanelProps {
 type PlaybackState = "idle" | "loading" | "playing" | "paused";
 
 export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
-  const apiKey = localStorage.getItem("ws_api_key") ?? "";
+  const apiKey = localStorage.getItem("ws_api_key_openai") ?? "";
   const [voice, setVoice] = useState("alloy");
   const [speed, setSpeed] = useState([1.0]);
   const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");
