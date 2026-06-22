@@ -45476,7 +45476,13 @@ ${parts.join("\n")}
 }
 function buildGrammarPrompt(text, bookContext) {
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON. WAŻNE: W polach JSON (text, explanation, proposal) NIE używaj cudzysłowów podwójnych wewnątrz tekstu. Zamiast cudzysłowów użyj guillemets «» lub pauz —. Każdy string JSON musi być poprawnie escapowany. Zwróć TYLKO poprawny JSON bez żadnego dodatkowego tekstu przed ani po.`;
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
+Możliwe wartości COLOR: red, yellow, blue, orange, purple
+Przykład:
+red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
+yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
   if (customPrompt) {
     system += `
 
@@ -45494,7 +45500,13 @@ function buildContextPrompt(text, previousSummaries, bookContext) {
   const summariesBlock = previousSummaries.length > 0 ? previousSummaries.map((s2, i2) => `Streszczenie rozdziału ${i2 + 1}:
 ${s2}`).join("\n\n") : "Brak wcześniejszych rozdziałów.";
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  let system = `${buildBookContextPrompt(bookContext)}Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
+Możliwe wartości COLOR: red, yellow, blue, orange, purple
+Przykład:
+red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
+yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
   if (customPrompt) {
     system += `
 
@@ -45513,7 +45525,13 @@ ${text}
 }
 function buildDialoguePrompt(text, bookContext) {
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON. WAŻNE: W polach JSON (text, explanation, proposal) NIE używaj cudzysłowów podwójnych wewnątrz tekstu. Zamiast cudzysłowów użyj guillemets «» lub pauz —. Każdy string JSON musi być poprawnie escapowany. Zwróć TYLKO poprawny JSON bez żadnego dodatkowego tekstu przed ani po.`;
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
+Możliwe wartości COLOR: red, yellow, blue, orange, purple
+Przykład:
+red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
+yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
   if (customPrompt) {
     system += `
 
@@ -45529,7 +45547,13 @@ ${text}
 }
 function buildSceneExpansionPrompt(text, bookContext) {
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON. WAŻNE: W polach JSON (text, explanation, proposal) NIE używaj cudzysłowów podwójnych wewnątrz tekstu. Zamiast cudzysłowów użyj guillemets «» lub pauz —. Każdy string JSON musi być poprawnie escapowany. Zwróć TYLKO poprawny JSON bez żadnego dodatkowego tekstu przed ani po.`;
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
+Możliwe wartości COLOR: red, yellow, blue, orange, purple
+Przykład:
+red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
+yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
   if (customPrompt) {
     system += `
 
@@ -45545,7 +45569,12 @@ ${text}
 }
 function buildEmotionPrompt(text, bookContext) {
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON. WAŻNE: W polach JSON (text, explanation, proposal) NIE używaj cudzysłowów podwójnych wewnątrz tekstu. Zamiast cudzysłowów użyj guillemets «» lub pauz —. Każdy string JSON musi być poprawnie escapowany. Zwróć TYLKO poprawny JSON bez żadnego dodatkowego tekstu przed ani po.`;
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
+Możliwe wartości COLOR: red, yellow, blue, orange, purple
+Przykład:
+purple|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
   if (customPrompt) {
     system += `
 
@@ -45588,46 +45617,25 @@ Oto pełny tekst wszystkich rozdziałów książki:
 ${allChaptersText}
 """`;
 }
-function extractJsonArray(text) {
-  const jsonMatch = text.match(/\[[\s\S]*\]/) || text.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    const jsonText = jsonMatch[0];
-    try {
-      return JSON.parse(jsonText);
-    } catch {
-      let fixed = jsonText;
-      fixed = fixed.replace(new RegExp('(?<=")([^"\\\\]*)(?=")', "g"), (match2) => {
-        return match2.replace(/"/g, '\\"');
-      });
-      try {
-        return JSON.parse(fixed);
-      } catch {
-      }
-    }
-  }
-  const objectRegex = /\{[\s\S]*?\}/g;
-  const objects = [];
-  let match = objectRegex.exec(text);
-  while (match !== null) {
-    const objText = match[0];
-    try {
-      const parsed = JSON.parse(objText);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        objects.push(parsed);
-      }
-    } catch {
-    }
-  }
-  if (objects.length > 0) {
-    return objects;
-  }
-  console.error("Nie udało się sparsować odpowiedzi AI jako JSON:", text);
-  return [];
+function parsePipeAnnotations(responseText) {
+  const lines = responseText.split("\n").filter((line) => line.includes("|||"));
+  const annotations = lines.map((line) => {
+    const parts = line.split("|||");
+    if (parts.length < 3) return null;
+    const [color2, text, explanation, proposal] = parts;
+    if (!(color2 == null ? void 0 : color2.trim()) || !(text == null ? void 0 : text.trim()) || !(explanation == null ? void 0 : explanation.trim())) return null;
+    return {
+      id: 0n,
+      color: color2.trim().toLowerCase(),
+      text: text.trim(),
+      explanation: explanation.trim(),
+      proposal: (proposal || "").trim(),
+      approved: false
+    };
+  }).filter(Boolean);
+  return annotations;
 }
-function validateAnnotations(data) {
-  if (!Array.isArray(data)) {
-    throw new Error("Oczekiwano tablicy adnotacji");
-  }
+function validateAnnotations(annotations) {
   const validColors = /* @__PURE__ */ new Set([
     "yellow",
     "red",
@@ -45635,7 +45643,7 @@ function validateAnnotations(data) {
     "orange",
     "purple"
   ]);
-  return data.map((item, idx) => {
+  return annotations.map((item, idx) => {
     if (!item || typeof item !== "object") {
       throw new Error(`Element ${idx} nie jest obiektem`);
     }
@@ -45643,7 +45651,6 @@ function validateAnnotations(data) {
     const color2 = item.color;
     const explanation = item.explanation;
     const proposal = item.proposal;
-    const alternativeProposal = item.alternativeProposal;
     if (typeof text !== "string" || typeof explanation !== "string" || typeof proposal !== "string") {
       throw new Error(`Element ${idx} ma nieprawidłowy typ pól`);
     }
@@ -45657,7 +45664,6 @@ function validateAnnotations(data) {
       color: colorStr,
       explanation,
       proposal,
-      alternativeProposal: typeof alternativeProposal === "string" ? alternativeProposal : void 0,
       approved: false
     };
   });
@@ -45717,9 +45723,9 @@ async function analyzeGrammarStyle(text, apiKey, provider, bookContext) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildGrammarPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, true);
-  const parsed = extractJsonArray(responseText);
-  return validateAnnotations(parsed);
+  const responseText = await callAi(prompt, apiKey, provider, false);
+  const annotations = parsePipeAnnotations(responseText);
+  return validateAnnotations(annotations);
 }
 async function analyzeWithContext(currentChapterText, previousChaptersSummaries, apiKey, provider, bookContext) {
   if (currentChapterText.length > 8e3) {
@@ -45730,37 +45736,37 @@ async function analyzeWithContext(currentChapterText, previousChaptersSummaries,
     previousChaptersSummaries,
     bookContext
   );
-  const responseText = await callAi(prompt, apiKey, provider, true);
-  const parsed = extractJsonArray(responseText);
-  return validateAnnotations(parsed);
+  const responseText = await callAi(prompt, apiKey, provider, false);
+  const annotations = parsePipeAnnotations(responseText);
+  return validateAnnotations(annotations);
 }
 async function analyzeDialogue(text, apiKey, provider, bookContext) {
   if (text.length > 8e3) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildDialoguePrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, true);
-  const parsed = extractJsonArray(responseText);
-  return validateAnnotations(parsed);
+  const responseText = await callAi(prompt, apiKey, provider, false);
+  const annotations = parsePipeAnnotations(responseText);
+  return validateAnnotations(annotations);
 }
 async function analyzeSceneExpansion(text, apiKey, provider, bookContext) {
   if (text.length > 8e3) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildSceneExpansionPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, true);
-  const parsed = extractJsonArray(responseText);
-  return validateAnnotations(parsed);
+  const responseText = await callAi(prompt, apiKey, provider, false);
+  const annotations = parsePipeAnnotations(responseText);
+  return validateAnnotations(annotations);
 }
 async function analyzeEmotion(text, apiKey, provider, bookContext) {
   if (text.length > 8e3) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildEmotionPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, true);
-  const parsed = extractJsonArray(responseText);
-  const annotations = validateAnnotations(parsed);
-  return annotations.map((a2) => ({ ...a2, color: "purple" }));
+  const responseText = await callAi(prompt, apiKey, provider, false);
+  const annotations = parsePipeAnnotations(responseText);
+  const validated = validateAnnotations(annotations);
+  return validated.map((a2) => ({ ...a2, color: "purple" }));
 }
 async function analyzeConsistency(allChaptersText, apiKey, provider) {
   if (allChaptersText.length > 12e3) {
@@ -45797,17 +45803,22 @@ async function getSynonyms(word, apiKey, provider) {
   const cleanWord = word.trim();
   const prompt = `Podaj 5-8 synonimów polskiego słowa "${cleanWord}" w kontekście języka literackiego. Zwróć wynik jako JSON array zawierający tylko synonimy jako stringi. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
   const responseText = await callAi(prompt, apiKey, provider, true);
-  const parsed = extractJsonArray(responseText);
-  if (!Array.isArray(parsed)) {
-    throw new Error("Oczekiwano tablicy synonimów");
-  }
-  return parsed.map((item) => {
-    if (typeof item === "string") return item;
-    if (item && typeof item === "object" && "synonym" in item) {
-      return String(item.synonym);
+  try {
+    const parsed = JSON.parse(responseText);
+    if (!Array.isArray(parsed)) {
+      throw new Error("Oczekiwano tablicy synonimów");
     }
-    return String(item);
-  }).filter((s2) => s2.length > 0);
+    return parsed.map((item) => {
+      if (typeof item === "string") return item;
+      if (item && typeof item === "object" && "synonym" in item) {
+        return String(item.synonym);
+      }
+      return String(item);
+    }).filter((s2) => s2.length > 0);
+  } catch {
+    console.error("Nie udało się sparsować synonimów:", responseText);
+    return [];
+  }
 }
 async function chatWithBook(messages2, bookContext, apiKey, provider) {
   const prompt = buildChatPrompt(messages2, bookContext);
@@ -105469,7 +105480,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Dz8LVzZm.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DKrIMXZ2.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
