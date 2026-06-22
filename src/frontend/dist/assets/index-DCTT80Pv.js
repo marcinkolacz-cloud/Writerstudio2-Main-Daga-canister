@@ -38732,36 +38732,12 @@ const createLucideIcon = (iconName, iconNode) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$L = [
+const __iconNode$J = [
   ["path", { d: "M15 12H3", key: "6jk70r" }],
   ["path", { d: "M17 18H3", key: "1amg6g" }],
   ["path", { d: "M21 6H3", key: "1jwq7v" }]
 ];
-const AlignLeft = createLucideIcon("align-left", __iconNode$L);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$K = [
-  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
-  ["path", { d: "M19 12H5", key: "x3x0zl" }]
-];
-const ArrowLeft = createLucideIcon("arrow-left", __iconNode$K);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$J = [
-  [
-    "path",
-    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
-  ]
-];
-const Bold$1 = createLucideIcon("bold", __iconNode$J);
+const AlignLeft = createLucideIcon("align-left", __iconNode$J);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38769,6 +38745,30 @@ const Bold$1 = createLucideIcon("bold", __iconNode$J);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$I = [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+];
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$I);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$H = [
+  [
+    "path",
+    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
+  ]
+];
+const Bold$1 = createLucideIcon("bold", __iconNode$H);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$G = [
   ["path", { d: "M12 7v14", key: "1akyts" }],
   [
     "path",
@@ -38778,14 +38778,14 @@ const __iconNode$I = [
     }
   ]
 ];
-const BookOpen = createLucideIcon("book-open", __iconNode$I);
+const BookOpen = createLucideIcon("book-open", __iconNode$G);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$H = [
+const __iconNode$F = [
   [
     "path",
     {
@@ -38796,66 +38796,44 @@ const __iconNode$H = [
   ["path", { d: "M8 11h8", key: "vwpz6n" }],
   ["path", { d: "M8 7h6", key: "1f0q6e" }]
 ];
-const BookText = createLucideIcon("book-text", __iconNode$H);
+const BookText = createLucideIcon("book-text", __iconNode$F);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$G = [
+const __iconNode$E = [
   ["path", { d: "M3 3v16a2 2 0 0 0 2 2h16", key: "c24i48" }],
   ["path", { d: "M18 17V9", key: "2bz60n" }],
   ["path", { d: "M13 17V5", key: "1frdt8" }],
   ["path", { d: "M8 17v-3", key: "17ska0" }]
 ];
-const ChartColumn = createLucideIcon("chart-column", __iconNode$G);
+const ChartColumn = createLucideIcon("chart-column", __iconNode$E);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$F = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$F);
+const __iconNode$D = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$D);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$E = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$E);
+const __iconNode$C = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$C);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$D = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-const ChevronUp = createLucideIcon("chevron-up", __iconNode$D);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$C = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
-];
-const CircleCheck = createLucideIcon("circle-check", __iconNode$C);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$B = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
-];
-const Clock = createLucideIcon("clock", __iconNode$B);
+const __iconNode$B = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+const ChevronUp = createLucideIcon("chevron-up", __iconNode$B);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38863,10 +38841,10 @@ const Clock = createLucideIcon("clock", __iconNode$B);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$A = [
-  ["path", { d: "M20 4v7a4 4 0 0 1-4 4H4", key: "6o5b7l" }],
-  ["path", { d: "m9 10-5 5 5 5", key: "1kshq7" }]
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
 ];
-const CornerDownLeft = createLucideIcon("corner-down-left", __iconNode$A);
+const CircleCheck = createLucideIcon("circle-check", __iconNode$A);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38874,11 +38852,10 @@ const CornerDownLeft = createLucideIcon("corner-down-left", __iconNode$A);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$z = [
-  ["path", { d: "M12 15V3", key: "m9g1x1" }],
-  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
-  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
 ];
-const Download = createLucideIcon("download", __iconNode$z);
+const Clock = createLucideIcon("clock", __iconNode$z);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38886,24 +38863,10 @@ const Download = createLucideIcon("download", __iconNode$z);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$y = [
-  [
-    "path",
-    {
-      d: "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49",
-      key: "ct8e1f"
-    }
-  ],
-  ["path", { d: "M14.084 14.158a3 3 0 0 1-4.242-4.242", key: "151rxh" }],
-  [
-    "path",
-    {
-      d: "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143",
-      key: "13bj9a"
-    }
-  ],
-  ["path", { d: "m2 2 20 20", key: "1ooewy" }]
+  ["path", { d: "M20 4v7a4 4 0 0 1-4 4H4", key: "6o5b7l" }],
+  ["path", { d: "m9 10-5 5 5 5", key: "1kshq7" }]
 ];
-const EyeOff = createLucideIcon("eye-off", __iconNode$y);
+const CornerDownLeft = createLucideIcon("corner-down-left", __iconNode$y);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38911,16 +38874,11 @@ const EyeOff = createLucideIcon("eye-off", __iconNode$y);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$x = [
-  [
-    "path",
-    {
-      d: "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0",
-      key: "1nclc0"
-    }
-  ],
-  ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
+  ["path", { d: "M12 15V3", key: "m9g1x1" }],
+  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
+  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
 ];
-const Eye = createLucideIcon("eye", __iconNode$x);
+const Download = createLucideIcon("download", __iconNode$x);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -104741,7 +104699,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-gJXn_d7N.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BiD4HPtb.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -105969,7 +105927,6 @@ function ChapterEditorPage() {
   const [synonymMessage, setSynonymMessage] = reactExports.useState(null);
   const synonymSelectionRef = reactExports.useRef(null);
   const synonymButtonRef = reactExports.useRef(null);
-  const [annotationsVisible, setAnnotationsVisible] = reactExports.useState(true);
   const [currentAnnotations, setCurrentAnnotations] = reactExports.useState(
     []
   );
@@ -106000,12 +105957,8 @@ function ChapterEditorPage() {
       lastSyncedChapterIdRef.current = chapterId;
     }
   }, [chapter, chapterId]);
-  const annotationsVisibleRef = reactExports.useRef(annotationsVisible);
   reactExports.useEffect(() => {
-    annotationsVisibleRef.current = annotationsVisible;
-  });
-  reactExports.useEffect(() => {
-    if (editorRef.current && persistedAnnotations && persistedAnnotations.length > 0 && annotationsVisibleRef.current) {
+    if (editorRef.current && persistedAnnotations && persistedAnnotations.length > 0) {
       const anns = persistedAnnotations.map((pa) => ({
         id: pa.id,
         text: pa.text,
@@ -106373,7 +106326,7 @@ ${ch.content}`).join("\n\n---\n\n");
                       );
                     }
                     setCurrentAnnotations(annotations);
-                    setAnnotationsVisible(true);
+                    setCurrentAnnotations(annotations);
                     applyAnnotationsToEditor(editorRef.current, annotations, {
                       clearRange: selectionRange
                     });
@@ -106435,42 +106388,6 @@ ${ch.content}`).join("\n\n---\n\n");
               ]
             }
           ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
-          (currentAnnotations.length > 0 || persistedAnnotations && persistedAnnotations.length > 0) && /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Button,
-            {
-              size: "sm",
-              variant: "outline",
-              onClick: () => {
-                if (!editorRef.current) return;
-                if (annotationsVisible) {
-                  applyAnnotationsToEditor(editorRef.current, []);
-                  setAnnotationsVisible(false);
-                } else {
-                  const anns = currentAnnotations.length > 0 ? currentAnnotations : (persistedAnnotations ?? []).map((pa) => ({
-                    id: pa.id,
-                    text: pa.text,
-                    color: pa.color,
-                    explanation: pa.explanation,
-                    proposal: pa.proposal,
-                    approved: pa.approved
-                  }));
-                  applyAnnotationsToEditor(editorRef.current, anns, {
-                    skipApproved: true
-                  });
-                  setAnnotationsVisible(true);
-                }
-              },
-              "data-ocid": "chapter.annotation_visibility_toggle",
-              children: annotationsVisible ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(EyeOff, { className: "h-3.5 w-3.5 mr-1.5" }),
-                "Ukryj kolorowanie"
-              ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(Eye, { className: "h-3.5 w-3.5 mr-1.5" }),
-                "Pokaż kolorowanie"
-              ] })
-            }
-          ),
           (currentAnnotations.length > 0 || persistedAnnotations && persistedAnnotations.length > 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
             Button,
             {
@@ -106524,7 +106441,6 @@ ${ch.content}`).join("\n\n---\n\n");
                   editor.view.dispatch(tr2);
                 }
                 setCurrentAnnotations([]);
-                setAnnotationsVisible(true);
               },
               "data-ocid": "chapter.approve_changes_button",
               children: [
@@ -106731,7 +106647,7 @@ ${ch.content}`).join("\n\n---\n\n");
             setHistoryPanelOpen(false);
             if (editorRef.current) {
               setCurrentAnnotations(annotations);
-              setAnnotationsVisible(true);
+              setCurrentAnnotations(annotations);
               applyAnnotationsToEditor(editorRef.current, annotations, {
                 skipApproved: true
               });

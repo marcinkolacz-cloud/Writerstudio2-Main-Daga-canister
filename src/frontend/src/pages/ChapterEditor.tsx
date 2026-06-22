@@ -70,8 +70,6 @@ import {
   BookText,
   Check,
   Download,
-  Eye,
-  EyeOff,
   FileText,
   Headphones,
   Heart,
@@ -328,8 +326,6 @@ export function ChapterEditorPage() {
   const synonymSelectionRef = useRef<{ from: number; to: number } | null>(null);
   const synonymButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Annotation visibility toggle state
-  const [annotationsVisible, setAnnotationsVisible] = useState(true);
   const [currentAnnotations, setCurrentAnnotations] = useState<Annotation[]>(
     [],
   );
@@ -369,18 +365,11 @@ export function ChapterEditorPage() {
   }, [chapter, chapterId]);
 
   // Apply persisted annotations (only non-approved ones) when editor is ready
-  // Guarded by annotationsVisible ref to avoid re-applying when user explicitly hid them
-  const annotationsVisibleRef = useRef(annotationsVisible);
-  useEffect(() => {
-    annotationsVisibleRef.current = annotationsVisible;
-  });
-
   useEffect(() => {
     if (
       editorRef.current &&
       persistedAnnotations &&
-      persistedAnnotations.length > 0 &&
-      annotationsVisibleRef.current
+      persistedAnnotations.length > 0
     ) {
       const anns: Annotation[] = persistedAnnotations.map((pa) => ({
         id: pa.id,
@@ -784,7 +773,7 @@ export function ChapterEditorPage() {
                   }
 
                   setCurrentAnnotations(annotations);
-                  setAnnotationsVisible(true);
+                  setCurrentAnnotations(annotations);
                   applyAnnotationsToEditor(editorRef.current, annotations, {
                     clearRange: selectionRange,
                   });
@@ -855,55 +844,6 @@ export function ChapterEditorPage() {
           Lektor
         </Button>
 
-        <div className="w-px h-6 bg-border hidden sm:block" />
-
-        {/* Annotation visibility toggle */}
-        {(currentAnnotations.length > 0 ||
-          (persistedAnnotations && persistedAnnotations.length > 0)) && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              if (!editorRef.current) return;
-              if (annotationsVisible) {
-                // Hide: remove all annotation marks from editor
-                applyAnnotationsToEditor(editorRef.current, []);
-                setAnnotationsVisible(false);
-              } else {
-                // Show: re-apply known annotations
-                const anns: Annotation[] =
-                  currentAnnotations.length > 0
-                    ? currentAnnotations
-                    : (persistedAnnotations ?? []).map((pa) => ({
-                        id: pa.id,
-                        text: pa.text,
-                        color: pa.color as Annotation["color"],
-                        explanation: pa.explanation,
-                        proposal: pa.proposal,
-                        approved: pa.approved,
-                      }));
-                applyAnnotationsToEditor(editorRef.current, anns, {
-                  skipApproved: true,
-                });
-                setAnnotationsVisible(true);
-              }
-            }}
-            data-ocid="chapter.annotation_visibility_toggle"
-          >
-            {annotationsVisible ? (
-              <>
-                <EyeOff className="h-3.5 w-3.5 mr-1.5" />
-                Ukryj kolorowanie
-              </>
-            ) : (
-              <>
-                <Eye className="h-3.5 w-3.5 mr-1.5" />
-                Pokaż kolorowanie
-              </>
-            )}
-          </Button>
-        )}
-
         {/* Approve changes button */}
         {(currentAnnotations.length > 0 ||
           (persistedAnnotations && persistedAnnotations.length > 0)) && (
@@ -969,7 +909,6 @@ export function ChapterEditorPage() {
 
               // Clear current annotations state
               setCurrentAnnotations([]);
-              setAnnotationsVisible(true);
             }}
             data-ocid="chapter.approve_changes_button"
           >
@@ -1176,7 +1115,7 @@ export function ChapterEditorPage() {
               setHistoryPanelOpen(false);
               if (editorRef.current) {
                 setCurrentAnnotations(annotations);
-                setAnnotationsVisible(true);
+                setCurrentAnnotations(annotations);
                 applyAnnotationsToEditor(editorRef.current, annotations, {
                   skipApproved: true,
                 });
