@@ -1804,6 +1804,9 @@ video {
 .w-8 {
   width: 2rem;
 }
+.w-80 {
+  width: 20rem;
+}
 .w-9 {
   width: 2.25rem;
 }
@@ -2103,9 +2106,6 @@ video {
 }
 .justify-items-start {
   justify-items: start;
-}
-.gap-0 {
-  gap: 0px;
 }
 .gap-0\.5 {
   gap: 0.125rem;

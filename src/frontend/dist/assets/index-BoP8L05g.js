@@ -105505,7 +105505,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-KXgMylMP.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DkgnnRJD.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107579,11 +107579,11 @@ ${ch.content}`).join("\n\n---\n\n");
         }
       }
     ),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-1 min-h-0 gap-0", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-1 min-h-0 gap-4", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs(
         "div",
         {
-          className: "flex-1 min-h-0",
+          className: "flex-1 min-w-0 max-w-2xl mx-auto w-full",
           style: {
             paddingLeft: `${getGlobalIndents().left}px`,
             paddingRight: `${getGlobalIndents().right}px`
@@ -107632,7 +107632,7 @@ ${ch.content}`).join("\n\n---\n\n");
           ]
         }
       ),
-      contextChatPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      contextChatPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 w-80", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         ContextChatPanel,
         {
           chapterId: chapter.id,
@@ -107643,8 +107643,8 @@ ${ch.content}`).join("\n\n---\n\n");
           bookAnalyses: bookAnalyses ?? [],
           onClose: () => setContextChatPanelOpen(false)
         }
-      ),
-      commentsPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      ) }),
+      commentsPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 w-80", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         CommentsPanel,
         {
           comments: comments ?? [],
@@ -107658,7 +107658,10 @@ ${ch.content}`).join("\n\n---\n\n");
                   (m2) => m2.type.name === "comment" && m2.attrs["data-comment-id"] === String(id)
                 );
                 if (mark) {
-                  editor.chain().focus().setTextSelection({ from: pos, to: pos + node.nodeSize }).unsetMark("comment").run();
+                  editor.chain().focus().setTextSelection({
+                    from: pos,
+                    to: pos + node.nodeSize
+                  }).unsetMark("comment").run();
                 }
                 return false;
               });
@@ -107676,7 +107679,7 @@ ${ch.content}`).join("\n\n---\n\n");
           },
           onClose: () => setCommentsPanelOpen(false)
         }
-      )
+      ) })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       SettingsModal,

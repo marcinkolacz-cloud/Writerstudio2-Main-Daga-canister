@@ -1294,10 +1294,10 @@ export function ChapterEditorPage() {
         }}
       />
 
-      {/* Editor + Comments panel */}
-      <div className="flex flex-1 min-h-0 gap-0">
+      {/* Editor + side panels */}
+      <div className="flex flex-1 min-h-0 gap-4">
         <div
-          className="flex-1 min-h-0"
+          className="flex-1 min-w-0 max-w-2xl mx-auto w-full"
           style={{
             paddingLeft: `${getGlobalIndents().left}px`,
             paddingRight: `${getGlobalIndents().right}px`,
@@ -1351,61 +1351,68 @@ export function ChapterEditorPage() {
         </div>
 
         {contextChatPanelOpen && (
-          <ContextChatPanel
-            chapterId={chapter.id}
-            apiKey={apiKey}
-            provider={provider}
-            editor={editorRef.current}
-            chapters={chapters ?? []}
-            bookAnalyses={bookAnalyses ?? []}
-            onClose={() => setContextChatPanelOpen(false)}
-          />
+          <div className="shrink-0 w-80">
+            <ContextChatPanel
+              chapterId={chapter.id}
+              apiKey={apiKey}
+              provider={provider}
+              editor={editorRef.current}
+              chapters={chapters ?? []}
+              bookAnalyses={bookAnalyses ?? []}
+              onClose={() => setContextChatPanelOpen(false)}
+            />
+          </div>
         )}
 
         {commentsPanelOpen && (
-          <CommentsPanel
-            comments={comments ?? []}
-            onDelete={(id) => {
-              deleteComment.mutate({ id });
-              // Remove mark from editor
-              if (editorRef.current) {
+          <div className="shrink-0 w-80">
+            <CommentsPanel
+              comments={comments ?? []}
+              onDelete={(id) => {
+                deleteComment.mutate({ id });
+                // Remove mark from editor
+                if (editorRef.current) {
+                  const editor = editorRef.current;
+                  editor.state.doc.descendants((node, pos) => {
+                    if (!node.isText) return false;
+                    const mark = node.marks.find(
+                      (m) =>
+                        m.type.name === "comment" &&
+                        m.attrs["data-comment-id"] === String(id),
+                    );
+                    if (mark) {
+                      editor
+                        .chain()
+                        .focus()
+                        .setTextSelection({
+                          from: pos,
+                          to: pos + node.nodeSize,
+                        })
+                        .unsetMark("comment")
+                        .run();
+                    }
+                    return false;
+                  });
+                }
+              }}
+              onHighlight={(anchorText) => {
+                if (!editorRef.current) return;
                 const editor = editorRef.current;
-                editor.state.doc.descendants((node, pos) => {
-                  if (!node.isText) return false;
-                  const mark = node.marks.find(
-                    (m) =>
-                      m.type.name === "comment" &&
-                      m.attrs["data-comment-id"] === String(id),
-                  );
-                  if (mark) {
-                    editor
-                      .chain()
-                      .focus()
-                      .setTextSelection({ from: pos, to: pos + node.nodeSize })
-                      .unsetMark("comment")
-                      .run();
-                  }
-                  return false;
-                });
-              }
-            }}
-            onHighlight={(anchorText) => {
-              if (!editorRef.current) return;
-              const editor = editorRef.current;
-              const docText = editor.getText();
-              const idx = docText.indexOf(anchorText);
-              if (idx === -1) return;
-              const from = editor.state.doc.resolve(idx);
-              const to = editor.state.doc.resolve(idx + anchorText.length);
-              editor
-                .chain()
-                .focus()
-                .setTextSelection({ from: from.pos, to: to.pos })
-                .scrollIntoView()
-                .run();
-            }}
-            onClose={() => setCommentsPanelOpen(false)}
-          />
+                const docText = editor.getText();
+                const idx = docText.indexOf(anchorText);
+                if (idx === -1) return;
+                const from = editor.state.doc.resolve(idx);
+                const to = editor.state.doc.resolve(idx + anchorText.length);
+                editor
+                  .chain()
+                  .focus()
+                  .setTextSelection({ from: from.pos, to: to.pos })
+                  .scrollIntoView()
+                  .run();
+              }}
+              onClose={() => setCommentsPanelOpen(false)}
+            />
+          </div>
         )}
       </div>
 
