@@ -46,6 +46,7 @@ import {
   useRecordings,
   useSaveAnalysis,
   useSaveAnnotations,
+  useSendMessage,
   useUpdateAnnotationApproved,
   useUpdateChapter,
 } from "@/hooks/useBackend";
@@ -288,6 +289,7 @@ export function ChapterEditorPage() {
   );
 
   const updateChapter = useUpdateChapter();
+  const sendMessage = useSendMessage();
   const saveAnalysis = useSaveAnalysis();
   const saveAnnotations = useSaveAnnotations();
 
@@ -408,6 +410,17 @@ export function ChapterEditorPage() {
     },
     [chapter, updateChapter],
   );
+
+  const handleSendToChat = (text: string) => {
+    if (!book) return;
+    localStorage.setItem("writerstudio-chat-open", "true");
+    sendMessage.mutate({
+      bookId: book.id,
+      role: "user",
+      content: text,
+      provider,
+    });
+  };
 
   const handleTitleChange = useCallback(
     (val: string) => {
@@ -716,12 +729,24 @@ export function ChapterEditorPage() {
                     return;
                   }
 
+                  const bookContext = book
+                    ? {
+                        title: book.title,
+                        ageCategory: book.ageCategory,
+                        authorSummary: book.authorSummary,
+                        keyContext: book.keyContext,
+                        themes: book.themes,
+                        writingStyle: book.writingStyle,
+                      }
+                    : undefined;
+
                   let annotations: Annotation[] = [];
                   if (analysisMode === "grammar") {
                     annotations = await analyzeGrammarStyle(
                       text,
                       apiKey.trim(),
                       provider,
+                      bookContext,
                     );
                   } else if (analysisMode === "context") {
                     // Fetch previous chapter summaries
@@ -751,24 +776,28 @@ export function ChapterEditorPage() {
                       previousSummaries,
                       apiKey.trim(),
                       provider,
+                      bookContext,
                     );
                   } else if (analysisMode === "dialogue") {
                     annotations = await analyzeDialogue(
                       text,
                       apiKey.trim(),
                       provider,
+                      bookContext,
                     );
                   } else if (analysisMode === "scene") {
                     annotations = await analyzeSceneExpansion(
                       text,
                       apiKey.trim(),
                       provider,
+                      bookContext,
                     );
                   } else if (analysisMode === "emotion") {
                     annotations = await analyzeEmotion(
                       text,
                       apiKey.trim(),
                       provider,
+                      bookContext,
                     );
                   }
 
@@ -1284,6 +1313,7 @@ export function ChapterEditorPage() {
           <RichTextEditor
             value={content}
             onChange={handleContentChange}
+            onSendToChat={handleSendToChat}
             placeholder="Zacznij pisać..."
             onEditorReady={(editor) => {
               editorRef.current = editor;

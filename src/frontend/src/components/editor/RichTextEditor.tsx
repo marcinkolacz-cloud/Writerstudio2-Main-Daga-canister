@@ -15,6 +15,7 @@ import {
   Bold,
   Check,
   Italic,
+  MessageCircle,
   Redo,
   RotateCcw,
   Underline as UnderlineIcon,
@@ -28,6 +29,7 @@ interface RichTextEditorProps {
   onChange: (html: string) => void;
   placeholder?: string;
   onEditorReady?: (editor: Editor) => void;
+  onSendToChat?: (text: string) => void;
 }
 
 export function RichTextEditor({
@@ -35,6 +37,7 @@ export function RichTextEditor({
   onChange,
   placeholder,
   onEditorReady,
+  onSendToChat,
 }: RichTextEditorProps) {
   const lastEmittedValue = useRef(value);
 
@@ -294,12 +297,14 @@ export function RichTextEditor({
     handleApply,
     handleKeepOriginal,
     handleRevert,
+    handleSendToChat,
     clearHideTimeout,
   } = useAnnotationTooltip(
     editor,
     handleApplyProposal,
     handleKeepOriginalProposal,
     handleRevertProposal,
+    onSendToChat,
   );
 
   useEffect(() => {
@@ -462,15 +467,26 @@ export function RichTextEditor({
                 </button>
               )}
               {!tooltip.approved && (
-                <button
-                  type="button"
-                  onClick={handleKeepOriginal}
-                  className="px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors"
-                  data-ocid="editor.keep_original_button"
-                >
-                  <X className="h-3 w-3 inline mr-1" />
-                  Zostaw oryginał
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={handleKeepOriginal}
+                    className="px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors"
+                    data-ocid="editor.keep_original_button"
+                  >
+                    <X className="h-3 w-3 inline mr-1" />
+                    Zostaw oryginał
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSendToChat}
+                    className="px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors"
+                    data-ocid="editor.send_to_chat_button"
+                  >
+                    <MessageCircle className="h-3 w-3 inline mr-1" />
+                    Wyślij do chatbota
+                  </button>
+                </>
               )}
             </div>
             <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">

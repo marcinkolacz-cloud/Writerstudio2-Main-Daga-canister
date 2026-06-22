@@ -1,4 +1,14 @@
 import { useRef } from "react";
+
+export interface BookContext {
+  title?: string;
+  ageCategory?: string;
+  authorSummary?: string;
+  keyContext?: string;
+  themes?: string;
+  writingStyle?: string;
+}
+
 export interface Annotation {
   id: bigint;
   text: string;
@@ -9,8 +19,25 @@ export interface Annotation {
   approved: boolean;
 }
 
-function buildGrammarPrompt(text: string): string {
-  return `Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+function buildBookContextPrompt(bookContext?: BookContext): string {
+  if (!bookContext) return "";
+  const parts: string[] = [];
+  if (bookContext.title) parts.push(`- Tytuł: ${bookContext.title}`);
+  if (bookContext.ageCategory)
+    parts.push(`- Kategoria wiekowa: ${bookContext.ageCategory}`);
+  if (bookContext.authorSummary)
+    parts.push(`- Streszczenie autorskie: ${bookContext.authorSummary}`);
+  if (bookContext.keyContext)
+    parts.push(`- Kluczowe informacje: ${bookContext.keyContext}`);
+  if (bookContext.themes) parts.push(`- Motywy: ${bookContext.themes}`);
+  if (bookContext.writingStyle)
+    parts.push(`- Styl pisarski: ${bookContext.writingStyle}`);
+  if (parts.length === 0) return "";
+  return `Kontekst książki:\n${parts.join("\n")}\n\n`;
+}
+
+function buildGrammarPrompt(text: string, bookContext?: BookContext): string {
+  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
@@ -18,7 +45,11 @@ ${text}
 """`;
 }
 
-function buildContextPrompt(text: string, previousSummaries: string[]): string {
+function buildContextPrompt(
+  text: string,
+  previousSummaries: string[],
+  bookContext?: BookContext,
+): string {
   const summariesBlock =
     previousSummaries.length > 0
       ? previousSummaries
@@ -26,7 +57,7 @@ function buildContextPrompt(text: string, previousSummaries: string[]): string {
           .join("\n\n")
       : "Brak wcześniejszych rozdziałów.";
 
-  return `Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+  return `${buildBookContextPrompt(bookContext)}Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 KONTEKST POPRZEDNICH ROZDZIAŁÓW:
 ${summariesBlock}
@@ -37,8 +68,8 @@ ${text}
 """`;
 }
 
-function buildDialoguePrompt(text: string): string {
-  return `Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+function buildDialoguePrompt(text: string, bookContext?: BookContext): string {
+  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
@@ -46,8 +77,11 @@ ${text}
 """`;
 }
 
-function buildSceneExpansionPrompt(text: string): string {
-  return `Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+function buildSceneExpansionPrompt(
+  text: string,
+  bookContext?: BookContext,
+): string {
+  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
@@ -55,8 +89,8 @@ ${text}
 """`;
 }
 
-function buildEmotionPrompt(text: string): string {
-  return `Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+function buildEmotionPrompt(text: string, bookContext?: BookContext): string {
+  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
@@ -218,11 +252,12 @@ export async function analyzeGrammarStyle(
   text: string,
   apiKey: string,
   provider: "openai" | "claude",
+  bookContext?: BookContext,
 ): Promise<Annotation[]> {
   if (text.length > 8000) {
     throw new Error("Tekst za długi");
   }
-  const prompt = buildGrammarPrompt(text);
+  const prompt = buildGrammarPrompt(text, bookContext);
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   return validateAnnotations(parsed);
@@ -233,6 +268,7 @@ export async function analyzeWithContext(
   previousChaptersSummaries: string[],
   apiKey: string,
   provider: "openai" | "claude",
+  bookContext?: BookContext,
 ): Promise<Annotation[]> {
   if (currentChapterText.length > 8000) {
     throw new Error("Tekst za długi");
@@ -240,6 +276,7 @@ export async function analyzeWithContext(
   const prompt = buildContextPrompt(
     currentChapterText,
     previousChaptersSummaries,
+    bookContext,
   );
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
@@ -250,11 +287,12 @@ export async function analyzeDialogue(
   text: string,
   apiKey: string,
   provider: "openai" | "claude",
+  bookContext?: BookContext,
 ): Promise<Annotation[]> {
   if (text.length > 8000) {
     throw new Error("Tekst za długi");
   }
-  const prompt = buildDialoguePrompt(text);
+  const prompt = buildDialoguePrompt(text, bookContext);
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   return validateAnnotations(parsed);
@@ -264,11 +302,12 @@ export async function analyzeSceneExpansion(
   text: string,
   apiKey: string,
   provider: "openai" | "claude",
+  bookContext?: BookContext,
 ): Promise<Annotation[]> {
   if (text.length > 8000) {
     throw new Error("Tekst za długi");
   }
-  const prompt = buildSceneExpansionPrompt(text);
+  const prompt = buildSceneExpansionPrompt(text, bookContext);
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   return validateAnnotations(parsed);
@@ -278,11 +317,12 @@ export async function analyzeEmotion(
   text: string,
   apiKey: string,
   provider: "openai" | "claude",
+  bookContext?: BookContext,
 ): Promise<Annotation[]> {
   if (text.length > 8000) {
     throw new Error("Tekst za długi");
   }
-  const prompt = buildEmotionPrompt(text);
+  const prompt = buildEmotionPrompt(text, bookContext);
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   const annotations = validateAnnotations(parsed);

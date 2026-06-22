@@ -10,7 +10,7 @@ import {
   useCreateChatSession,
   useDeleteChatSession,
 } from "@/hooks/useBackend";
-import { analyzeWithContext } from "@/lib/aiAnalysis";
+import { type BookContext, analyzeWithContext } from "@/lib/aiAnalysis";
 import type { Editor } from "@tiptap/react";
 import {
   ArrowLeft,
@@ -25,7 +25,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 interface ContextChatPanelProps {
   chapterId: bigint;
-
+  bookContext?: BookContext;
   apiKey: string;
   provider: "openai" | "claude";
   editor: Editor | null;
@@ -46,7 +46,7 @@ function truncateToWord(text: string, maxLen: number): string {
 
 export function ContextChatPanel({
   chapterId,
-
+  bookContext,
   apiKey,
   provider,
   editor,
@@ -132,6 +132,7 @@ export function ContextChatPanel({
           prevSummaries,
           apiKey,
           provider,
+          bookContext,
         );
 
         // Build a summary from annotations as the first assistant message
@@ -175,6 +176,7 @@ export function ContextChatPanel({
     chapterId,
     isAutoStarting,
     createSession,
+    bookContext,
     addMessage,
   ]);
 

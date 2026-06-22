@@ -1,5 +1,5 @@
 import type { Editor } from "@tiptap/core";
-import { Check, RotateCcw, X } from "lucide-react";
+import { Check, MessageCircle, RotateCcw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface TooltipData {
@@ -32,6 +32,7 @@ export function useAnnotationTooltip(
     to: number;
     originalText: string;
   }) => void,
+  onSendToChat?: (text: string) => void,
 ) {
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -197,12 +198,20 @@ export function useAnnotationTooltip(
     setTooltip(null);
   }, [tooltip, editor, onRevertProposal]);
 
+  const handleSendToChat = useCallback(() => {
+    if (!tooltip || !onSendToChat) return;
+    const text = `Adnotacja AI: ${tooltip.explanation}\nProponowana zmiana: ${tooltip.proposal}\nOryginalny tekst: ${tooltip.text}`;
+    onSendToChat(text);
+    setTooltip(null);
+  }, [tooltip, onSendToChat]);
+
   return {
     tooltip,
     tooltipRef,
     handleApply,
     handleKeepOriginal,
     handleRevert,
+    handleSendToChat,
     hideTooltip,
     clearHideTimeout,
   };

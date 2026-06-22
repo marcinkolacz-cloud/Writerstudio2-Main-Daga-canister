@@ -38359,18 +38359,37 @@ function useDeleteChatSession() {
     }
   });
 }
-function buildGrammarPrompt(text) {
-  return `Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+function buildBookContextPrompt(bookContext) {
+  if (!bookContext) return "";
+  const parts = [];
+  if (bookContext.title) parts.push(`- Tytuł: ${bookContext.title}`);
+  if (bookContext.ageCategory)
+    parts.push(`- Kategoria wiekowa: ${bookContext.ageCategory}`);
+  if (bookContext.authorSummary)
+    parts.push(`- Streszczenie autorskie: ${bookContext.authorSummary}`);
+  if (bookContext.keyContext)
+    parts.push(`- Kluczowe informacje: ${bookContext.keyContext}`);
+  if (bookContext.themes) parts.push(`- Motywy: ${bookContext.themes}`);
+  if (bookContext.writingStyle)
+    parts.push(`- Styl pisarski: ${bookContext.writingStyle}`);
+  if (parts.length === 0) return "";
+  return `Kontekst książki:
+${parts.join("\n")}
+
+`;
+}
+function buildGrammarPrompt(text, bookContext) {
+  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
 ${text}
 """`;
 }
-function buildContextPrompt(text, previousSummaries) {
+function buildContextPrompt(text, previousSummaries, bookContext) {
   const summariesBlock = previousSummaries.length > 0 ? previousSummaries.map((s2, i2) => `Streszczenie rozdziału ${i2 + 1}:
 ${s2}`).join("\n\n") : "Brak wcześniejszych rozdziałów.";
-  return `Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+  return `${buildBookContextPrompt(bookContext)}Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 KONTEKST POPRZEDNICH ROZDZIAŁÓW:
 ${summariesBlock}
@@ -38380,24 +38399,24 @@ BIĄŻĄCY ROZDZIAŁ DO ANALIZY:
 ${text}
 """`;
 }
-function buildDialoguePrompt(text) {
-  return `Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+function buildDialoguePrompt(text, bookContext) {
+  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
 ${text}
 """`;
 }
-function buildSceneExpansionPrompt(text) {
-  return `Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+function buildSceneExpansionPrompt(text, bookContext) {
+  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
 ${text}
 """`;
 }
-function buildEmotionPrompt(text) {
-  return `Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
+function buildEmotionPrompt(text, bookContext) {
+  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
 
 Tekst do analizy:
 """
@@ -38527,50 +38546,51 @@ async function callAi(prompt, apiKey, provider, expectJson) {
   const data = await res.json();
   return ((_e3 = (_d2 = data.content) == null ? void 0 : _d2.find((c2) => c2.type === "text")) == null ? void 0 : _e3.text) ?? "";
 }
-async function analyzeGrammarStyle(text, apiKey, provider) {
+async function analyzeGrammarStyle(text, apiKey, provider, bookContext) {
   if (text.length > 8e3) {
     throw new Error("Tekst za długi");
   }
-  const prompt = buildGrammarPrompt(text);
+  const prompt = buildGrammarPrompt(text, bookContext);
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   return validateAnnotations(parsed);
 }
-async function analyzeWithContext(currentChapterText, previousChaptersSummaries, apiKey, provider) {
+async function analyzeWithContext(currentChapterText, previousChaptersSummaries, apiKey, provider, bookContext) {
   if (currentChapterText.length > 8e3) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildContextPrompt(
     currentChapterText,
-    previousChaptersSummaries
+    previousChaptersSummaries,
+    bookContext
   );
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   return validateAnnotations(parsed);
 }
-async function analyzeDialogue(text, apiKey, provider) {
+async function analyzeDialogue(text, apiKey, provider, bookContext) {
   if (text.length > 8e3) {
     throw new Error("Tekst za długi");
   }
-  const prompt = buildDialoguePrompt(text);
+  const prompt = buildDialoguePrompt(text, bookContext);
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   return validateAnnotations(parsed);
 }
-async function analyzeSceneExpansion(text, apiKey, provider) {
+async function analyzeSceneExpansion(text, apiKey, provider, bookContext) {
   if (text.length > 8e3) {
     throw new Error("Tekst za długi");
   }
-  const prompt = buildSceneExpansionPrompt(text);
+  const prompt = buildSceneExpansionPrompt(text, bookContext);
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   return validateAnnotations(parsed);
 }
-async function analyzeEmotion(text, apiKey, provider) {
+async function analyzeEmotion(text, apiKey, provider, bookContext) {
   if (text.length > 8e3) {
     throw new Error("Tekst za długi");
   }
-  const prompt = buildEmotionPrompt(text);
+  const prompt = buildEmotionPrompt(text, bookContext);
   const responseText = await callAi(prompt, apiKey, provider, true);
   const parsed = extractJsonArray(responseText);
   const annotations = validateAnnotations(parsed);
@@ -47605,6 +47625,7 @@ function truncateToWord(text, maxLen) {
 }
 function ContextChatPanel({
   chapterId,
+  bookContext,
   apiKey,
   provider,
   editor,
@@ -47666,7 +47687,8 @@ ${plain.slice(0, 500)}`;
           currentText,
           prevSummaries,
           apiKey,
-          provider
+          provider,
+          bookContext
         );
         const summaryLines = annotations.map(
           (a2) => `- ${a2.text}: ${a2.explanation}`
@@ -47702,6 +47724,7 @@ ${summaryLines.join("\n")}` : "Analiza kontekstowa nie wykryła żadnych problem
     chapterId,
     isAutoStarting,
     createSession,
+    bookContext,
     addMessage
   ]);
   reactExports.useEffect(() => {
@@ -67040,7 +67063,7 @@ const commentMark = Mark2.create({
     ];
   }
 });
-function useAnnotationTooltip(editor, onApplyProposal, onKeepOriginal, onRevertProposal) {
+function useAnnotationTooltip(editor, onApplyProposal, onKeepOriginal, onRevertProposal, onSendToChat) {
   const [tooltip, setTooltip] = reactExports.useState(null);
   const hideTimeoutRef = reactExports.useRef(null);
   const tooltipRef = reactExports.useRef(null);
@@ -67171,12 +67194,21 @@ function useAnnotationTooltip(editor, onApplyProposal, onKeepOriginal, onRevertP
     });
     setTooltip(null);
   }, [tooltip, editor, onRevertProposal]);
+  const handleSendToChat = reactExports.useCallback(() => {
+    if (!tooltip || !onSendToChat) return;
+    const text = `Adnotacja AI: ${tooltip.explanation}
+Proponowana zmiana: ${tooltip.proposal}
+Oryginalny tekst: ${tooltip.text}`;
+    onSendToChat(text);
+    setTooltip(null);
+  }, [tooltip, onSendToChat]);
   return {
     tooltip,
     tooltipRef,
     handleApply,
     handleKeepOriginal,
     handleRevert,
+    handleSendToChat,
     hideTooltip,
     clearHideTimeout
   };
@@ -75580,7 +75612,8 @@ function RichTextEditor({
   value,
   onChange,
   placeholder,
-  onEditorReady
+  onEditorReady,
+  onSendToChat
 }) {
   const lastEmittedValue = reactExports.useRef(value);
   const editor = useEditor({
@@ -75778,12 +75811,14 @@ function RichTextEditor({
     handleApply,
     handleKeepOriginal,
     handleRevert,
+    handleSendToChat,
     clearHideTimeout
   } = useAnnotationTooltip(
     editor,
     handleApplyProposal,
     handleKeepOriginalProposal,
-    handleRevertProposal
+    handleRevertProposal,
+    onSendToChat
   );
   reactExports.useEffect(() => {
     if (editor && value !== lastEmittedValue.current) {
@@ -75932,19 +75967,34 @@ function RichTextEditor({
                   ]
                 }
               ),
-              !tooltip.approved && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                "button",
-                {
-                  type: "button",
-                  onClick: handleKeepOriginal,
-                  className: "px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors",
-                  "data-ocid": "editor.keep_original_button",
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-3 w-3 inline mr-1" }),
-                    "Zostaw oryginał"
-                  ]
-                }
-              )
+              !tooltip.approved && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: handleKeepOriginal,
+                    className: "px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors",
+                    "data-ocid": "editor.keep_original_button",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-3 w-3 inline mr-1" }),
+                      "Zostaw oryginał"
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: handleSendToChat,
+                    className: "px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors",
+                    "data-ocid": "editor.send_to_chat_button",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-3 w-3 inline mr-1" }),
+                      "Wyślij do chatbota"
+                    ]
+                  }
+                )
+              ] })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1.5 mt-2 text-xs text-muted-foreground", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -104699,7 +104749,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BiD4HPtb.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CqFPDkVV.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -105900,6 +105950,7 @@ function ChapterEditorPage() {
     latestAnalysisId ? String(latestAnalysisId) : ""
   );
   const updateChapter = useUpdateChapter();
+  const sendMessage = useSendMessage();
   const saveAnalysis = useSaveAnalysis();
   const saveAnnotations = useSaveAnnotations();
   const [title, setTitle] = reactExports.useState("");
@@ -105995,6 +106046,16 @@ function ChapterEditorPage() {
     },
     [chapter, updateChapter]
   );
+  const handleSendToChat = (text) => {
+    if (!book) return;
+    localStorage.setItem("writerstudio-chat-open", "true");
+    sendMessage.mutate({
+      bookId: book.id,
+      role: "user",
+      content: text,
+      provider
+    });
+  };
   const handleTitleChange = reactExports.useCallback(
     (val) => {
       setTitle(val);
@@ -106274,12 +106335,21 @@ ${ch.content}`).join("\n\n---\n\n");
                       setTimeout(() => setAnalysisStatus("idle"), 3e3);
                       return;
                     }
+                    const bookContext = book ? {
+                      title: book.title,
+                      ageCategory: book.ageCategory,
+                      authorSummary: book.authorSummary,
+                      keyContext: book.keyContext,
+                      themes: book.themes,
+                      writingStyle: book.writingStyle
+                    } : void 0;
                     let annotations = [];
                     if (analysisMode === "grammar") {
                       annotations = await analyzeGrammarStyle(
                         text,
                         apiKey.trim(),
-                        provider
+                        provider,
+                        bookContext
                       );
                     } else if (analysisMode === "context") {
                       const previousSummaries = [];
@@ -106304,25 +106374,29 @@ ${ch.content}`).join("\n\n---\n\n");
                         text,
                         previousSummaries,
                         apiKey.trim(),
-                        provider
+                        provider,
+                        bookContext
                       );
                     } else if (analysisMode === "dialogue") {
                       annotations = await analyzeDialogue(
                         text,
                         apiKey.trim(),
-                        provider
+                        provider,
+                        bookContext
                       );
                     } else if (analysisMode === "scene") {
                       annotations = await analyzeSceneExpansion(
                         text,
                         apiKey.trim(),
-                        provider
+                        provider,
+                        bookContext
                       );
                     } else if (analysisMode === "emotion") {
                       annotations = await analyzeEmotion(
                         text,
                         apiKey.trim(),
-                        provider
+                        provider,
+                        bookContext
                       );
                     }
                     setCurrentAnnotations(annotations);
@@ -106778,6 +106852,7 @@ ${ch.content}`).join("\n\n---\n\n");
               {
                 value: content,
                 onChange: handleContentChange,
+                onSendToChat: handleSendToChat,
                 placeholder: "Zacznij pisać...",
                 onEditorReady: (editor) => {
                   editorRef.current = editor;
