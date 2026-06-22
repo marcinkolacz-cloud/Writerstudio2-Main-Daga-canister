@@ -10,9 +10,6 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export type AccessCheckResult = { 'ExistingUser' : null } |
-  { 'Admin' : null } |
-  { 'NewUserNeedsCode' : null };
 export interface Analysis {
   'id' : bigint,
   'provider' : string,
@@ -79,17 +76,11 @@ export interface Comment {
   'anchorText' : string,
 }
 export interface InviteCode {
-  'status' : InviteCodeStatus,
-  'expiresAt' : [] | [bigint],
   'code' : string,
+  'usedAt' : [] | [bigint],
+  'usedBy' : [] | [Principal],
   'createdAt' : bigint,
-  'usedCount' : bigint,
-  'claimedBy' : Array<Principal>,
-  'maxUses' : bigint,
 }
-export type InviteCodeStatus = { 'active' : null } |
-  { 'revoked' : null } |
-  { 'exhausted' : null };
 export interface Recording {
   'id' : bigint,
   'voice' : string,
@@ -153,15 +144,13 @@ export interface _SERVICE {
   '__nextChatSessionId' : ActorMethod<[], bigint>,
   '__nextChatSessionMessageId' : ActorMethod<[], bigint>,
   '__nextCommentId' : ActorMethod<[], bigint>,
-  '__nextInviteCodeId' : ActorMethod<[], bigint>,
   '__nextRecordingId' : ActorMethod<[], bigint>,
   '__recordings' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Recording]>
   >,
   'addChatMessage' : ActorMethod<[bigint, string, string], bigint>,
-  'checkAccess' : ActorMethod<[], AccessCheckResult>,
-  'claimInviteCode' : ActorMethod<[string], boolean>,
+  'checkAccess' : ActorMethod<[string], boolean>,
   'clearChat' : ActorMethod<[bigint], boolean>,
   'createBook' : ActorMethod<[string, string, string], bigint>,
   'createChapter' : ActorMethod<[bigint, string], bigint>,
@@ -174,7 +163,7 @@ export interface _SERVICE {
   'deleteComment' : ActorMethod<[bigint], boolean>,
   'deleteMessage' : ActorMethod<[bigint], boolean>,
   'deleteRecording' : ActorMethod<[bigint], boolean>,
-  'generateInviteCode' : ActorMethod<[bigint, [] | [bigint]], string>,
+  'generateInviteCode' : ActorMethod<[], string>,
   'getAnalysis' : ActorMethod<[bigint], [] | [Analysis]>,
   'getAnnotation' : ActorMethod<[bigint], [] | [TextAnnotation]>,
   'getAnnotations' : ActorMethod<[bigint], Array<TextAnnotation>>,
@@ -209,7 +198,7 @@ export interface _SERVICE {
     Array<{ 'id' : bigint, 'voice' : string, 'createdAt' : bigint }>
   >,
   'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
-  'revokeInviteCode' : ActorMethod<[string], boolean>,
+  'revokeInviteCode' : ActorMethod<[string], undefined>,
   'saveAnalysis' : ActorMethod<
     [bigint, [] | [bigint], string, string, string],
     bigint

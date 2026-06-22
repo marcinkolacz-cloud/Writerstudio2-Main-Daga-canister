@@ -1,4 +1,4 @@
-import { Recording, createActor } from "@/backend";
+import { type InviteCode, Recording, createActor } from "@/backend";
 import type {
   Analysis,
   Book,
@@ -697,6 +697,95 @@ export function useAddChatMessage() {
         queryKey: ["chatMessages", variables.sessionId],
       });
     },
+  });
+}
+
+export function useCheckAccess(code?: string) {
+  const { actor } = useActor(createActor);
+  return useQuery<boolean>({
+    queryKey: ["checkAccess", code ?? "local"],
+    queryFn: async () => {
+      if (code && code.length > 0) {
+        if (!actor) return false;
+        return actor.checkAccess(code);
+      }
+      return localStorage.getItem("ws_access_granted") === "true";
+    },
+    enabled: code ? !!actor && code.length > 0 : true,
+  });
+}
+
+export function useClaimInviteCode() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ code }: { code: string }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.checkAccess(code);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["checkAccess"] });
+    },
+  });
+}
+
+export function useGenerateInviteCode() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.generateInviteCode();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inviteCodes"] });
+    },
+  });
+}
+
+export function useListInviteCodes() {
+  const { actor } = useActor(createActor);
+  return useQuery<InviteCode[]>({
+    queryKey: ["inviteCodes"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listInviteCodes();
+    },
+    enabled: !!actor,
+  });
+}
+
+export function useRevokeInviteCode() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ code }: { code: string }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.revokeInviteCode(code);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inviteCodes"] });
+    },
+  });
+}
+
+export function useIsAdmin() {
+  const { actor } = useActor(createActor);
+  return useQuery<boolean>({
+    queryKey: ["isAdmin"],
+    queryFn: async () => {
+      if (!actor) return false;
+      try {
+        await actor.listInviteCodes();
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    enabled: !!actor,
   });
 }
 

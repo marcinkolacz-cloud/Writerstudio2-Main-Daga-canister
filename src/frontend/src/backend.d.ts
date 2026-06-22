@@ -14,13 +14,11 @@ export interface ChatSessionMessage {
     role: string;
     sessionId: bigint;
 }
-export interface Recording {
-    id: bigint;
-    voice: string;
+export interface InviteCode {
+    code: string;
+    usedAt?: bigint;
+    usedBy?: Principal;
     createdAt: bigint;
-    audioData: Uint8Array;
-    bookId: bigint;
-    chapterId: bigint;
 }
 export interface Comment {
     id: bigint;
@@ -84,35 +82,23 @@ export interface Chapter {
     updatedAt: bigint;
     orderIndex: bigint;
 }
-export interface InviteCode {
-    status: InviteCodeStatus;
-    expiresAt?: bigint;
-    code: string;
-    createdAt: bigint;
-    usedCount: bigint;
-    claimedBy: Array<Principal>;
-    maxUses: bigint;
-}
 export interface ChatSession {
     id: bigint;
     title: string;
     createdAt: bigint;
     chapterId: bigint;
 }
-export enum AccessCheckResult {
-    ExistingUser = "ExistingUser",
-    Admin = "Admin",
-    NewUserNeedsCode = "NewUserNeedsCode"
-}
-export enum InviteCodeStatus {
-    active = "active",
-    revoked = "revoked",
-    exhausted = "exhausted"
+export interface Recording {
+    id: bigint;
+    voice: string;
+    createdAt: bigint;
+    audioData: Uint8Array;
+    bookId: bigint;
+    chapterId: bigint;
 }
 export interface backendInterface {
     addChatMessage(sessionId: bigint, role: string, content: string): Promise<bigint>;
-    checkAccess(): Promise<AccessCheckResult>;
-    claimInviteCode(code: string): Promise<boolean>;
+    checkAccess(code: string): Promise<boolean>;
     clearChat(bookId: bigint): Promise<boolean>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
@@ -125,7 +111,7 @@ export interface backendInterface {
     deleteComment(id: bigint): Promise<boolean>;
     deleteMessage(id: bigint): Promise<boolean>;
     deleteRecording(id: bigint): Promise<boolean>;
-    generateInviteCode(maxUses: bigint, expiresAt: bigint | null): Promise<string>;
+    generateInviteCode(): Promise<string>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotation(id: bigint): Promise<TextAnnotation | null>;
     getAnnotations(analysisId: bigint): Promise<Array<TextAnnotation>>;
@@ -159,7 +145,7 @@ export interface backendInterface {
         createdAt: bigint;
     }>>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
-    revokeInviteCode(code: string): Promise<boolean>;
+    revokeInviteCode(code: string): Promise<void>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
     saveAnnotations(analysisId: bigint, annotationData: Array<{
         alternativeProposal?: string;

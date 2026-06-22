@@ -94,21 +94,11 @@ module {
     createdAt : Int;
   };
 
-  public type InviteCodeStatus = { #active; #exhausted; #revoked };
-
   public type InviteCode = {
     code : Text;
-    status : InviteCodeStatus;
     createdAt : Int;
-    expiresAt : ?Int;
-    maxUses : Nat;
-    usedCount : Nat;
-    claimedBy : [Principal];
+    usedBy : ?Principal;
+    usedAt : ?Int;
   };
 
-  public type AccessCheckResult = {
-    #Admin;
-    #ExistingUser;
-    #NewUserNeedsCode;
-  };
 };

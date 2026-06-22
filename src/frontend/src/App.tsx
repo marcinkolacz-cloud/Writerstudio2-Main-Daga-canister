@@ -1,4 +1,7 @@
+import { AccessGatePage } from "@/pages/AccessGatePage";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { useState } from "react";
 import { adminRoute } from "./routes/admin";
 import { bookRoute } from "./routes/book";
 import { chapterRoute } from "./routes/chapter";
@@ -30,5 +33,20 @@ declare module "@tanstack/react-router" {
 }
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  const [queryClient] = useState(() => new QueryClient());
+  const accessGranted = localStorage.getItem("ws_access_granted") === "true";
+
+  if (!accessGranted) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <AccessGatePage />
+      </QueryClientProvider>
+    );
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  );
 }

@@ -34,7 +34,6 @@ actor {
   var nextChatSessionMessageId : Nat;
   var nextCommentId : Nat;
   var nextRecordingId : Nat;
-  var nextInviteCodeId : Nat;
 
   include MixinViews();
   include BooksApi(books, chapters);
