@@ -66323,7 +66323,7 @@ const commentMark = Mark2.create({
     ];
   }
 });
-function useAnnotationTooltip(editor, onApplyProposal, onRevertProposal) {
+function useAnnotationTooltip(editor, onApplyProposal, onKeepOriginal, onRevertProposal) {
   const [tooltip, setTooltip] = reactExports.useState(null);
   const hideTimeoutRef = reactExports.useRef(null);
   const tooltipRef = reactExports.useRef(null);
@@ -66435,6 +66435,15 @@ function useAnnotationTooltip(editor, onApplyProposal, onRevertProposal) {
     });
     setTooltip(null);
   }, [tooltip, editor, onApplyProposal]);
+  const handleKeepOriginal = reactExports.useCallback(() => {
+    if (!tooltip || !editor) return;
+    onKeepOriginal({
+      id: tooltip.id,
+      from: tooltip.from,
+      to: tooltip.to
+    });
+    setTooltip(null);
+  }, [tooltip, editor, onKeepOriginal]);
   const handleRevert = reactExports.useCallback(() => {
     if (!tooltip || !editor) return;
     onRevertProposal({
@@ -66449,6 +66458,7 @@ function useAnnotationTooltip(editor, onApplyProposal, onRevertProposal) {
     tooltip,
     tooltipRef,
     handleApply,
+    handleKeepOriginal,
     handleRevert,
     hideTooltip,
     clearHideTimeout
@@ -74969,6 +74979,28 @@ function RichTextEditor({
     },
     [editor, updateAnnotationApproved, findTextRangeInDoc]
   );
+  const handleKeepOriginalProposal = reactExports.useCallback(
+    ({ id, from: from2, to }) => {
+      if (!editor) return;
+      let markTypeName = "";
+      editor.state.doc.nodesBetween(from2, to, (node) => {
+        if (!node.isText) return true;
+        for (const mark of node.marks) {
+          if (mark.type.name.startsWith("annotation")) {
+            markTypeName = mark.type.name;
+            return false;
+          }
+        }
+        return true;
+      });
+      if (!markTypeName) return;
+      editor.chain().focus().setTextSelection({ from: from2, to }).unsetMark(markTypeName).run();
+      if (id !== 0n) {
+        updateAnnotationApproved.mutate({ id, approved: true });
+      }
+    },
+    [editor, updateAnnotationApproved]
+  );
   const handleRevertProposal = reactExports.useCallback(
     ({
       id,
@@ -75023,7 +75055,19 @@ function RichTextEditor({
     },
     [editor, updateAnnotationApproved]
   );
-  const { tooltip, tooltipRef, handleApply, handleRevert, clearHideTimeout } = useAnnotationTooltip(editor, handleApplyProposal, handleRevertProposal);
+  const {
+    tooltip,
+    tooltipRef,
+    handleApply,
+    handleKeepOriginal,
+    handleRevert,
+    clearHideTimeout
+  } = useAnnotationTooltip(
+    editor,
+    handleApplyProposal,
+    handleKeepOriginalProposal,
+    handleRevertProposal
+  );
   reactExports.useEffect(() => {
     if (editor && value !== lastEmittedValue.current) {
       editor.commands.setContent(value, { emitUpdate: false });
@@ -75168,6 +75212,19 @@ function RichTextEditor({
                   children: [
                     /* @__PURE__ */ jsxRuntimeExports.jsx(RotateCcw, { className: "h-3 w-3 inline mr-1" }),
                     "Cofnij zmianę"
+                  ]
+                }
+              ),
+              !tooltip.approved && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "button",
+                {
+                  type: "button",
+                  onClick: handleKeepOriginal,
+                  className: "px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors",
+                  "data-ocid": "editor.keep_original_button",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-3 w-3 inline mr-1" }),
+                    "Zostaw oryginał"
                   ]
                 }
               )
@@ -103941,7 +103998,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CHOYn_9D.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BORNolXb.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

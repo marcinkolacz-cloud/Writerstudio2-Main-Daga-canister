@@ -1,5 +1,5 @@
 import type { Editor } from "@tiptap/core";
-import { Check, RotateCcw } from "lucide-react";
+import { Check, RotateCcw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface TooltipData {
@@ -25,6 +25,7 @@ export function useAnnotationTooltip(
     proposal: string;
     text: string;
   }) => void,
+  onKeepOriginal: (params: { id: bigint; from: number; to: number }) => void,
   onRevertProposal: (params: {
     id: bigint;
     from: number;
@@ -175,6 +176,16 @@ export function useAnnotationTooltip(
     setTooltip(null);
   }, [tooltip, editor, onApplyProposal]);
 
+  const handleKeepOriginal = useCallback(() => {
+    if (!tooltip || !editor) return;
+    onKeepOriginal({
+      id: tooltip.id,
+      from: tooltip.from,
+      to: tooltip.to,
+    });
+    setTooltip(null);
+  }, [tooltip, editor, onKeepOriginal]);
+
   const handleRevert = useCallback(() => {
     if (!tooltip || !editor) return;
     onRevertProposal({
@@ -190,6 +201,7 @@ export function useAnnotationTooltip(
     tooltip,
     tooltipRef,
     handleApply,
+    handleKeepOriginal,
     handleRevert,
     hideTooltip,
     clearHideTimeout,

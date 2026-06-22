@@ -19,6 +19,7 @@ import {
   RotateCcw,
   Underline as UnderlineIcon,
   Undo,
+  X,
 } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -181,6 +182,41 @@ export function RichTextEditor({
     [editor, updateAnnotationApproved, findTextRangeInDoc],
   );
 
+  const handleKeepOriginalProposal = useCallback(
+    ({ id, from, to }: { id: bigint; from: number; to: number }) => {
+      if (!editor) return;
+
+      // Read the existing mark type at the given position
+      let markTypeName = "";
+      editor.state.doc.nodesBetween(from, to, (node) => {
+        if (!node.isText) return true;
+        for (const mark of node.marks) {
+          if (mark.type.name.startsWith("annotation")) {
+            markTypeName = mark.type.name;
+            return false;
+          }
+        }
+        return true;
+      });
+
+      if (!markTypeName) return;
+
+      // Remove the annotation mark from the range, leaving original text intact
+      editor
+        .chain()
+        .focus()
+        .setTextSelection({ from, to })
+        .unsetMark(markTypeName)
+        .run();
+
+      // Update backend approval status
+      if (id !== 0n) {
+        updateAnnotationApproved.mutate({ id, approved: true });
+      }
+    },
+    [editor, updateAnnotationApproved],
+  );
+
   const handleRevertProposal = useCallback(
     ({
       id,
@@ -252,8 +288,19 @@ export function RichTextEditor({
     [editor, updateAnnotationApproved],
   );
 
-  const { tooltip, tooltipRef, handleApply, handleRevert, clearHideTimeout } =
-    useAnnotationTooltip(editor, handleApplyProposal, handleRevertProposal);
+  const {
+    tooltip,
+    tooltipRef,
+    handleApply,
+    handleKeepOriginal,
+    handleRevert,
+    clearHideTimeout,
+  } = useAnnotationTooltip(
+    editor,
+    handleApplyProposal,
+    handleKeepOriginalProposal,
+    handleRevertProposal,
+  );
 
   useEffect(() => {
     if (editor && value !== lastEmittedValue.current) {
@@ -412,6 +459,17 @@ export function RichTextEditor({
                 >
                   <RotateCcw className="h-3 w-3 inline mr-1" />
                   Cofnij zmianę
+                </button>
+              )}
+              {!tooltip.approved && (
+                <button
+                  type="button"
+                  onClick={handleKeepOriginal}
+                  className="px-3 py-1.5 text-xs font-medium rounded-md border border-border bg-background text-foreground hover:bg-muted transition-colors"
+                  data-ocid="editor.keep_original_button"
+                >
+                  <X className="h-3 w-3 inline mr-1" />
+                  Zostaw oryginał
                 </button>
               )}
             </div>
