@@ -18,7 +18,7 @@ import {
   useListInviteCodes,
   useRevokeInviteCode,
 } from "@/hooks/useBackend";
-import { Copy, Loader2, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Copy, Loader2, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 export function AdminPage() {
@@ -26,13 +26,18 @@ export function AdminPage() {
   const generateMutation = useGenerateInviteCode();
   const revokeMutation = useRevokeInviteCode();
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  const [generateError, setGenerateError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const handleGenerate = async () => {
+    setGenerateError(null);
+    setGeneratedCode(null);
     try {
       const code = await generateMutation.mutateAsync();
       setGeneratedCode(code);
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Nieznany błąd";
+      setGenerateError(`Błąd: ${message}`);
       // error handled by mutation
     }
   };
@@ -63,18 +68,26 @@ export function AdminPage() {
             Zarządzanie kodami zaproszeń
           </p>
         </div>
-        <Button
-          onClick={handleGenerate}
-          disabled={generateMutation.isPending}
-          data-ocid="admin.generate_invite_button"
-        >
-          {generateMutation.isPending ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Plus className="mr-2 h-4 w-4" />
+        <div className="flex flex-col items-end gap-2">
+          {generateError && (
+            <div className="flex items-center gap-1.5 text-sm text-destructive">
+              <AlertCircle className="h-4 w-4" />
+              <span>{generateError}</span>
+            </div>
           )}
-          Generuj nowy kod
-        </Button>
+          <Button
+            onClick={handleGenerate}
+            disabled={generateMutation.isPending}
+            data-ocid="admin.generate_invite_button"
+          >
+            {generateMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Plus className="mr-2 h-4 w-4" />
+            )}
+            Generuj nowy kod
+          </Button>
+        </div>
       </div>
 
       <Dialog
