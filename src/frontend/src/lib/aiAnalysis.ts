@@ -421,22 +421,35 @@ export interface ChatMessage {
   content: string;
 }
 
-function buildChatPrompt(messages: ChatMessage[], bookContext: string): string {
+function buildChatPrompt(
+  messages: ChatMessage[],
+  bookContext: string,
+  chapterSummaries?: string[],
+): string {
   const history = messages
     .map(
       (m) => `${m.role === "user" ? "Użytkownik" : "Asystent"}: ${m.content}`,
     )
     .join("\n\n");
 
-  return `Jesteś asystentem pisarskim dla pisarza. Pomagasz w tworzeniu powieści, odpowiadasz na pytania, proponujesz pomysły na fabułę, postacie, dialogi i rozwój wątków.
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+
+  let system = `Jesteś asystentem pisarskim dla pisarza. Pomagasz w tworzeniu powieści, odpowiadasz na pytania, proponujesz pomysły na fabułę, postacie, dialogi i rozwój wątków.
 
 KONTEKST KSIĄŻKI:
-${bookContext}
+${bookContext}`;
 
-HISTORIA ROZMOWY:
-${history}
+  if (chapterSummaries && chapterSummaries.length > 0) {
+    system += `\n\nSTRESZCZENIA ROZDZIAŁÓW KSIĄŻKI:\n${chapterSummaries.map((s, i) => `Rozdział ${i + 1}:\n${s}`).join("\n\n")}`;
+  }
 
-Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
+  system += `\n\nHISTORIA ROZMOWY:\n${history}\n\nOdpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
+
+  if (customPrompt) {
+    system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
+  }
+
+  return system;
 }
 
 export async function getSynonyms(
@@ -475,7 +488,8 @@ export async function chatWithBook(
   bookContext: string,
   apiKey: string,
   provider: "openai" | "claude",
+  chapterSummaries?: string[],
 ): Promise<string> {
-  const prompt = buildChatPrompt(messages, bookContext);
+  const prompt = buildChatPrompt(messages, bookContext, chapterSummaries);
   return await callAi(prompt, apiKey, provider, false);
 }

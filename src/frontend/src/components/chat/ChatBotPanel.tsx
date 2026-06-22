@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import {
+  useAnalysesByBook,
   useBook,
   useChapters,
   useChatMessages,
@@ -30,6 +31,7 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
   const { data: book } = useBook(bookId);
   const { data: chapters } = useChapters(bookId);
   const { data: messages, isLoading } = useChatMessages(bookId);
+  const { data: analyses } = useAnalysesByBook(bookId);
   const sendMessage = useSendMessage();
   const deleteMessage = useDeleteMessage();
   const clearChat = useClearChat();
@@ -188,12 +190,19 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
       }));
       currentMessages.push({ role: "user", content: trimmed });
 
+      // Build chapter summaries from saved analyses
+      const chapterSummaries = (analyses ?? [])
+        .filter((a) => a.analysisType === "summary")
+        .sort((a, b) => Number(a.createdAt - b.createdAt))
+        .map((a) => a.resultContent);
+
       // Call AI
       const reply = await chatWithBook(
         currentMessages,
         bookContext,
         apiKey.trim(),
         provider,
+        chapterSummaries.length > 0 ? chapterSummaries : undefined,
       );
 
       // Save assistant message
@@ -208,7 +217,16 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
     } finally {
       setIsSending(false);
     }
-  }, [input, isSending, book, bookId, chapters, messages, sendMessage]);
+  }, [
+    input,
+    isSending,
+    book,
+    bookId,
+    chapters,
+    messages,
+    analyses,
+    sendMessage,
+  ]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {

@@ -45807,19 +45807,35 @@ async function generateSummary(allChaptersText, summaryType, apiKey, provider) {
   const prompt = buildSummaryPrompt(allChaptersText, summaryType);
   return await callAi(prompt, apiKey, provider, false);
 }
-function buildChatPrompt(messages2, bookContext) {
+function buildChatPrompt(messages2, bookContext, chapterSummaries) {
   const history2 = messages2.map(
     (m2) => `${m2.role === "user" ? "Użytkownik" : "Asystent"}: ${m2.content}`
   ).join("\n\n");
-  return `Jesteś asystentem pisarskim dla pisarza. Pomagasz w tworzeniu powieści, odpowiadasz na pytania, proponujesz pomysły na fabułę, postacie, dialogi i rozwój wątków.
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `Jesteś asystentem pisarskim dla pisarza. Pomagasz w tworzeniu powieści, odpowiadasz na pytania, proponujesz pomysły na fabułę, postacie, dialogi i rozwój wątków.
 
 KONTEKST KSIĄŻKI:
-${bookContext}
+${bookContext}`;
+  if (chapterSummaries && chapterSummaries.length > 0) {
+    system += `
+
+STRESZCZENIA ROZDZIAŁÓW KSIĄŻKI:
+${chapterSummaries.map((s2, i2) => `Rozdział ${i2 + 1}:
+${s2}`).join("\n\n")}`;
+  }
+  system += `
 
 HISTORIA ROZMOWY:
 ${history2}
 
 Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
+  if (customPrompt) {
+    system += `
+
+Dodatkowe instrukcje autora:
+${customPrompt}`;
+  }
+  return system;
 }
 async function getSynonyms(word, apiKey, provider) {
   if (!word || word.trim().length === 0) {
@@ -45845,8 +45861,8 @@ async function getSynonyms(word, apiKey, provider) {
     return [];
   }
 }
-async function chatWithBook(messages2, bookContext, apiKey, provider) {
-  const prompt = buildChatPrompt(messages2, bookContext);
+async function chatWithBook(messages2, bookContext, apiKey, provider, chapterSummaries) {
+  const prompt = buildChatPrompt(messages2, bookContext, chapterSummaries);
   return await callAi(prompt, apiKey, provider, false);
 }
 function ChatBotPanel({ bookId }) {
@@ -45860,6 +45876,7 @@ function ChatBotPanel({ bookId }) {
   const { data: book } = useBook(bookId);
   const { data: chapters } = useChapters(bookId);
   const { data: messages2, isLoading } = useChatMessages(bookId);
+  const { data: analyses } = useAnalysesByBook(bookId);
   const sendMessage = useSendMessage();
   const deleteMessage = useDeleteMessage();
   const clearChat = useClearChat();
@@ -45984,11 +46001,13 @@ ${chapterTitles}`;
         content: m2.content
       }));
       currentMessages.push({ role: "user", content: trimmed });
+      const chapterSummaries = (analyses ?? []).filter((a2) => a2.analysisType === "summary").sort((a2, b2) => Number(a2.createdAt - b2.createdAt)).map((a2) => a2.resultContent);
       const reply = await chatWithBook(
         currentMessages,
         bookContext,
         apiKey.trim(),
-        provider
+        provider,
+        chapterSummaries.length > 0 ? chapterSummaries : void 0
       );
       await sendMessage.mutateAsync({
         bookId: BigInt(bookId),
@@ -46000,7 +46019,16 @@ ${chapterTitles}`;
     } finally {
       setIsSending(false);
     }
-  }, [input, isSending, book, bookId, chapters, messages2, sendMessage]);
+  }, [
+    input,
+    isSending,
+    book,
+    bookId,
+    chapters,
+    messages2,
+    analyses,
+    sendMessage
+  ]);
   const handleKeyDown2 = (e3) => {
     if (e3.key === "Enter" && !e3.shiftKey) {
       e3.preventDefault();
@@ -105505,7 +105533,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DyD_GWlI.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Bu6AqoB-.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
