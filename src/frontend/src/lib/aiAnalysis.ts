@@ -37,12 +37,12 @@ function buildBookContextPrompt(bookContext?: BookContext): string {
 }
 
 function buildGrammarPrompt(text: string, bookContext?: BookContext): string {
-  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
-
-Tekst do analizy:
-"""
-${text}
-"""`;
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Jeśli istnieją dwa poprawne sposoby poprawy danego fragmentu, podaj oba: "proposal" jako główną sugestię oraz "alternativeProposal" jako alternatywne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  if (customPrompt) {
+    system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
+  }
+  return `${system}\n\nTekst do analizy:\n"""\n${text}\n"""`;
 }
 
 function buildContextPrompt(
@@ -57,54 +57,51 @@ function buildContextPrompt(
           .join("\n\n")
       : "Brak wcześniejszych rozdziałów.";
 
-  return `${buildBookContextPrompt(bookContext)}Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
-
-KONTEKST POPRZEDNICH ROZDZIAŁÓW:
-${summariesBlock}
-
-BIĄŻĄCY ROZDZIAŁ DO ANALIZY:
-"""
-${text}
-"""`;
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `${buildBookContextPrompt(bookContext)}Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = błąd gramatyczny, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  if (customPrompt) {
+    system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
+  }
+  return `${system}\n\nKONTEKST POPRZEDNICH ROZDZIAŁÓW:\n${summariesBlock}\n\nBIĄŻĄCY ROZDZIAŁ DO ANALIZY:\n"""\n${text}\n"""`;
 }
 
 function buildDialoguePrompt(text: string, bookContext?: BookContext): string {
-  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
-
-Tekst do analizy:
-"""
-${text}
-"""`;
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu, którego dotyczy adnotacja), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie problemu), "proposal" (propozycja poprawy). Kolory oznaczają: yellow = drobna uwaga stylistyczna, red = poważny problem z dialogiem, blue = sugestia stylistyczna, orange = powtórzenie lub nadmiarowość, purple = niejasność lub nieprecyzyjne sformułowanie. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  if (customPrompt) {
+    system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
+  }
+  return `${system}\n\nTekst do analizy:\n"""\n${text}\n"""`;
 }
 
 function buildSceneExpansionPrompt(
   text: string,
   bookContext?: BookContext,
 ): string {
-  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
-
-Tekst do analizy:
-"""
-${text}
-"""`;
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do rozbudowy), "color" (jeden z: yellow, red, blue, orange, purple), "explanation" (wyjaśnienie, czego brakuje — np. "brak opisu dźwięków otoczenia"), "proposal" (rozszerzona wersja fragmentu). Kolory oznaczają: yellow = drobna uwaga, red = znaczący brak szczegółów, blue = sugestia rozbudowy, orange = powtórzenie, purple = niejasność. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  if (customPrompt) {
+    system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
+  }
+  return `${system}\n\nTekst do analizy:\n"""\n${text}\n"""`;
 }
 
 function buildEmotionPrompt(text: string, bookContext?: BookContext): string {
-  return `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.
-
-Tekst do analizy:
-"""
-${text}
-"""`;
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć wynik jako JSON array, gdzie każdy element ma pola: "text" (fragment tekstu do poprawy), "color" (zawsze "purple"), "explanation" (wyjaśnienie, dlaczego to "tell" zamiast "show"), "proposal" (przepisana wersja pokazująca emocję). Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  if (customPrompt) {
+    system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
+  }
+  return `${system}\n\nTekst do analizy:\n"""\n${text}\n"""`;
 }
 
 function buildConsistencyPrompt(allChaptersText: string): string {
-  return `Przeanalizuj poniższy tekst całej książki (wszystkie rozdziały) pod kątem niespójności między rozdziałami. Szukaj: sprzecznych faktów (np. postać ma inny kolor oczu w różnych rozdziałach), nielogicznych skoków czasowych, zapomnianych wątków, niespójnych cech postaci, zmiennych nazw miejsc lub postaci, błędów chronologicznych. Zwróć czytelny tekstowy raport listujący znalezione problemy z odniesieniem do konkretnych rozdziałów. Format: każdy problem w osobnym akapicie, zacznij od numeru rozdziału lub "Ogólne" jeśli dotyczy całości. Nie używaj JSON — zwróć zwykły tekst.
-
-Tekst do analizy:
-"""
-${allChaptersText}
-"""`;
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `Przeanalizuj poniższy tekst całej książki (wszystkie rozdziały) pod kątem niespójności między rozdziałami. Szukaj: sprzecznych faktów (np. postać ma inny kolor oczu w różnych rozdziałach), nielogicznych skoków czasowych, zapomnianych wątków, niespójnych cech postaci, zmiennych nazw miejsc lub postaci, błędów chronologicznych. Zwróć czytelny tekstowy raport listujący znalezione problemy z odniesieniem do konkretnych rozdziałów. Format: każdy problem w osobnym akapicie, zacznij od numeru rozdziału lub "Ogólne" jeśli dotyczy całości. Nie używaj JSON — zwróć zwykły tekst.`;
+  if (customPrompt) {
+    system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
+  }
+  return `${system}\n\nTekst do analizy:\n"""\n${allChaptersText}\n"""`;
 }
 
 function buildSummaryPrompt(

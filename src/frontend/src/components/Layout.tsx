@@ -1,3 +1,4 @@
+import { SettingsModal } from "@/components/SettingsModal";
 import { ChatBotPanel } from "@/components/chat/ChatBotPanel";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,7 @@ import {
   GripVertical,
   LogOut,
   Moon,
+  Settings,
   Shield,
   Sun,
   WifiOff,
@@ -58,6 +60,7 @@ export function Layout() {
     return "light";
   });
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -261,6 +264,15 @@ export function Layout() {
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={() => setSettingsModalOpen(true)}
+                aria-label="Ustawienia"
+                data-ocid="settings.open_modal_button"
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleLogout}
                 data-ocid="auth.logout_button"
               >
@@ -272,6 +284,10 @@ export function Layout() {
         </header>
 
         {/* Page content */}
+        <SettingsModal
+          open={settingsModalOpen}
+          onOpenChange={setSettingsModalOpen}
+        />
         <main className="flex-1 overflow-auto p-6">
           <Outlet />
         </main>

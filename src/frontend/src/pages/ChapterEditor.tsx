@@ -1,3 +1,4 @@
+import { SettingsModal } from "@/components/SettingsModal";
 import { AnalysisHistoryPanel } from "@/components/editor/AnalysisHistoryPanel";
 import { CommentDialog } from "@/components/editor/CommentDialog";
 import { CommentsPanel } from "@/components/editor/CommentsPanel";
@@ -75,6 +76,7 @@ import {
   Headphones,
   Heart,
   History,
+  Key,
   MessageCircle,
   MessageSquare,
   Save,
@@ -332,11 +334,11 @@ export function ChapterEditorPage() {
     [],
   );
 
-  const [apiKey, setApiKey] = useState(
+  const [apiKey, _setApiKey] = useState(
     () => localStorage.getItem("ws_api_key") ?? "",
   );
-  const [apiKeyFocused, setApiKeyFocused] = useState(false);
-  const [provider, setProvider] = useState<"openai" | "claude">(() => {
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [provider, _setProvider] = useState<"openai" | "claude">(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
   });
@@ -537,38 +539,15 @@ export function ChapterEditorPage() {
               <Sparkles className="h-3.5 w-3.5" />
               AI
             </div>
-            <div className="relative flex-1 min-w-[120px]">
-              <Input
-                type="password"
-                placeholder="Klucz API"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                onFocus={() => setApiKeyFocused(true)}
-                onBlur={() => setApiKeyFocused(false)}
-                className="h-8 text-sm w-full"
-                data-ocid="chapter.api_key_input"
-              />
-              {!apiKeyFocused && apiKey.trim().length > 0 && (
-                <span className="absolute left-0 -bottom-4 text-[10px] text-muted-foreground/60 whitespace-nowrap">
-                  {apiKey.slice(0, 8)}...
-                </span>
-              )}
-            </div>
-            <Select
-              value={provider}
-              onValueChange={(v) => setProvider(v as "openai" | "claude")}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setSettingsModalOpen(true)}
+              data-ocid="chapter.api_key_button"
             >
-              <SelectTrigger
-                className="h-8 w-[110px] text-sm"
-                data-ocid="chapter.provider_select"
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="openai">OpenAI</SelectItem>
-                <SelectItem value="claude">Claude</SelectItem>
-              </SelectContent>
-            </Select>
+              <Key className="h-3.5 w-3.5 mr-1.5" />
+              Klucz API
+            </Button>
             <Select
               value={analysisMode}
               onValueChange={(v) => {
@@ -1411,6 +1390,11 @@ export function ChapterEditorPage() {
           />
         )}
       </div>
+
+      <SettingsModal
+        open={settingsModalOpen}
+        onOpenChange={setSettingsModalOpen}
+      />
     </div>
   );
 }
