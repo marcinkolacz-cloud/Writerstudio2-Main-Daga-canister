@@ -37,7 +37,7 @@ module {
     let jsonBody = "{ \"model\": \"tts-1\", \"input\": \"" # escapeJson(text) # "\", \"voice\": \"" # voice # "\" }";
 
     let request = {
-      url = "https://api.openai.com/v1/audio/speech";
+      url = "https://writerstudio-tts.marcinkolacz.workers.dev";
       max_response_bytes = null;
       method = #post;
       headers = [
