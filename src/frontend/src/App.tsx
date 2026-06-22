@@ -1,7 +1,7 @@
 import { AccessGatePage } from "@/pages/AccessGatePage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { adminRoute } from "./routes/admin";
 import { bookRoute } from "./routes/book";
 import { chapterRoute } from "./routes/chapter";
@@ -32,9 +32,23 @@ declare module "@tanstack/react-router" {
   }
 }
 
+function getAccessGranted() {
+  return localStorage.getItem("ws_access_granted") === "true";
+}
+
+function subscribeAccess(callback: () => void) {
+  const handler = () => callback();
+  window.addEventListener("storage", handler);
+  return () => window.removeEventListener("storage", handler);
+}
+
 export default function App() {
   const [queryClient] = useState(() => new QueryClient());
-  const accessGranted = localStorage.getItem("ws_access_granted") === "true";
+  const accessGranted = useSyncExternalStore(
+    subscribeAccess,
+    getAccessGranted,
+    getAccessGranted,
+  );
 
   if (!accessGranted) {
     return (

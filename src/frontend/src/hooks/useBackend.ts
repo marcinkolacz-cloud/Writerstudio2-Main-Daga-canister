@@ -473,12 +473,14 @@ export function useDeleteRecording() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id }: { id: bigint }) => {
+    mutationFn: async ({ id }: { id: bigint; chapterId: bigint }) => {
       if (!actor) throw new Error("Actor not available");
       return actor.deleteRecording(id);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recordings"] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["recordings", variables.chapterId],
+      });
     },
   });
 }

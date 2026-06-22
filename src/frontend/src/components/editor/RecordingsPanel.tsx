@@ -92,9 +92,9 @@ export function RecordingsPanel({ chapterId }: RecordingsPanelProps) {
       if (playingId === id) {
         cleanupAudio();
       }
-      deleteRecording.mutate({ id });
+      deleteRecording.mutate({ id, chapterId });
     },
-    [playingId, cleanupAudio, deleteRecording],
+    [playingId, cleanupAudio, deleteRecording, chapterId],
   );
 
   const formatDate = (timestamp: bigint) => {

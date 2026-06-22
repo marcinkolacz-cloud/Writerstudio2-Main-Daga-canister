@@ -33864,8 +33864,10 @@ function useDeleteRecording() {
       if (!actor) throw new Error("Actor not available");
       return actor.deleteRecording(id);
     },
-    onSuccess: () => {
-      queryClient2.invalidateQueries({ queryKey: ["recordings"] });
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["recordings", variables.chapterId]
+      });
     }
   });
 }
@@ -49721,9 +49723,9 @@ function RecordingsPanel({ chapterId }) {
       if (playingId === id) {
         cleanupAudio();
       }
-      deleteRecording.mutate({ id });
+      deleteRecording.mutate({ id, chapterId });
     },
-    [playingId, cleanupAudio, deleteRecording]
+    [playingId, cleanupAudio, deleteRecording, chapterId]
   );
   const formatDate2 = (timestamp) => {
     return new Date(Number(timestamp) / 1e6).toLocaleDateString("pl-PL", {
@@ -105422,7 +105424,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DE-NbLRA.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-AgB0yYGC.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -128760,9 +128762,21 @@ const routeTree = rootRoute.addChildren([
   ])
 ]);
 const router = createRouter({ routeTree });
+function getAccessGranted() {
+  return localStorage.getItem("ws_access_granted") === "true";
+}
+function subscribeAccess(callback) {
+  const handler = () => callback();
+  window.addEventListener("storage", handler);
+  return () => window.removeEventListener("storage", handler);
+}
 function App() {
   const [queryClient2] = reactExports.useState(() => new QueryClient());
-  const accessGranted = localStorage.getItem("ws_access_granted") === "true";
+  const accessGranted = reactExports.useSyncExternalStore(
+    subscribeAccess,
+    getAccessGranted,
+    getAccessGranted
+  );
   if (!accessGranted) {
     return /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientProvider, { client: queryClient2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AccessGatePage, {}) });
   }
