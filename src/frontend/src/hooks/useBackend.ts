@@ -11,6 +11,7 @@ import type {
   TextAnnotation,
 } from "@/backend";
 import { useActor } from "@caffeineai/core-infrastructure";
+import type { Principal } from "@icp-sdk/core/principal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
@@ -769,6 +770,17 @@ export function useRevokeInviteCode() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inviteCodes"] });
+    },
+  });
+}
+
+export function useSetAdminPrincipal() {
+  const { actor } = useActor(createActor);
+
+  return useMutation({
+    mutationFn: async (principal: Principal) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.setAdminPrincipal(principal);
     },
   });
 }

@@ -13,6 +13,7 @@ import StatsApi "mixins/StatsApi";
 import RecordingsApi "mixins/RecordingsApi";
 import InvitesApi "mixins/InvitesApi";
 import TtsApi "mixins/TtsApi";
+import Runtime "mo:core/Runtime";
 
 actor {
   let books : Map.Map<Nat, Types.Book>;
@@ -48,4 +49,52 @@ actor {
   include RecordingsApi(books, chapters, recordings);
   include TtsApi();
   include InvitesApi(books, inviteCodes);
+
+  var adminPrincipal : ?Principal;
+
+  func _callerIsAdmin(caller : Principal) : Bool {
+    switch (adminPrincipal) {
+      case null { true };
+      case (?admin) { caller == admin };
+    }
+  };
+
+  public shared ({ caller }) func setAdminPrincipal(p : Principal) : async () {
+    switch (adminPrincipal) {
+      case null {
+        adminPrincipal := ?p;
+      };
+      case (?admin) {
+        if (admin != caller) {
+          Runtime.trap("Only current admin can change admin principal");
+        };
+        adminPrincipal := ?p;
+      };
+    }
+  };
+
+  public shared ({ caller }) func generateInviteCode() : async Text {
+    if (not _callerIsAdmin(caller)) {
+      Runtime.trap("Only admin can generate invite codes");
+    };
+    _generateInviteCode(caller)
+  };
+
+  public shared ({ caller }) func checkAccess(code : Text) : async Bool {
+    _checkAccess(code, caller)
+  };
+
+  public shared ({ caller }) func listInviteCodes() : async [Types.InviteCode] {
+    if (not _callerIsAdmin(caller)) {
+      Runtime.trap("Only admin can list invite codes");
+    };
+    _listInviteCodes()
+  };
+
+  public shared ({ caller }) func revokeInviteCode(code : Text) : async () {
+    if (not _callerIsAdmin(caller)) {
+      Runtime.trap("Only admin can revoke invite codes");
+    };
+    _revokeInviteCode(code);
+  };
 };

@@ -17,11 +17,21 @@ import {
   useGenerateInviteCode,
   useListInviteCodes,
   useRevokeInviteCode,
+  useSetAdminPrincipal,
 } from "@/hooks/useBackend";
+import { useAppStore } from "@/store/useAppStore";
 import { AlertCircle, Copy, Loader2, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function AdminPage() {
+  const principal = useAppStore((s) => s.principal);
+  const setAdminMutation = useSetAdminPrincipal();
+
+  useEffect(() => {
+    if (principal) {
+      setAdminMutation.mutate(principal);
+    }
+  }, [principal, setAdminMutation]);
   const { data: inviteCodes, isLoading } = useListInviteCodes();
   const generateMutation = useGenerateInviteCode();
   const revokeMutation = useRevokeInviteCode();

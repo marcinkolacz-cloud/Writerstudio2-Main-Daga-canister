@@ -31914,6 +31914,7 @@ const Recording = Record({
   "chapterId": Nat
 });
 Service({
+  "__adminPrincipal": Func([], [Opt(Principal2)], ["query"]),
   "__analyses": Func(
     [Opt(Nat), Opt(Nat)],
     [Vec(Tuple(Nat, Analysis))],
@@ -32077,6 +32078,7 @@ Service({
     [Nat],
     []
   ),
+  "setAdminPrincipal": Func([Principal2], [], []),
   "synthesizeSpeech": Func(
     [Text$4, Text$4, Text$4],
     [Vec(Nat8)],
@@ -32215,6 +32217,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "chapterId": IDL2.Nat
   });
   return IDL2.Service({
+    "__adminPrincipal": IDL2.Func([], [IDL2.Opt(IDL2.Principal)], ["query"]),
     "__analyses": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Analysis2))],
@@ -32382,6 +32385,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Nat],
       []
     ),
+    "setAdminPrincipal": IDL2.Func([IDL2.Principal], [], []),
     "synthesizeSpeech": IDL2.Func(
       [IDL2.Text, IDL2.Text, IDL2.Text],
       [IDL2.Vec(IDL2.Nat8)],
@@ -32448,130 +32452,144 @@ class Backend {
     this._downloadFile = _downloadFile;
     this.processError = processError2;
   }
-  async __analyses(arg0, arg1) {
+  async __adminPrincipal() {
     if (this.processError) {
       try {
-        const result = await this.actor.__analyses(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-        return from_candid_vec_n2(this._uploadFile, this._downloadFile, result);
+        const result = await this.actor.__adminPrincipal();
+        return from_candid_opt_n1(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__analyses(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-      return from_candid_vec_n2(this._uploadFile, this._downloadFile, result);
+      const result = await this.actor.__adminPrincipal();
+      return from_candid_opt_n1(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async __analyses(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__analyses(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+        return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__analyses(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+      return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
     }
   }
   async __annotations(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.__annotations(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-        return from_candid_vec_n7(this._uploadFile, this._downloadFile, result);
+        const result = await this.actor.__annotations(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+        return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__annotations(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-      return from_candid_vec_n7(this._uploadFile, this._downloadFile, result);
+      const result = await this.actor.__annotations(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+      return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
     }
   }
   async __books(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.__books(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        const result = await this.actor.__books(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__books(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      const result = await this.actor.__books(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
   async __chapters(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.__chapters(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        const result = await this.actor.__chapters(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__chapters(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      const result = await this.actor.__chapters(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
   async __chatMessages(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.__chatMessages(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        const result = await this.actor.__chatMessages(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__chatMessages(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      const result = await this.actor.__chatMessages(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
   async __chatSessionMessages(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.__chatSessionMessages(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        const result = await this.actor.__chatSessionMessages(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__chatSessionMessages(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      const result = await this.actor.__chatSessionMessages(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
   async __chatSessions(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.__chatSessions(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        const result = await this.actor.__chatSessions(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__chatSessions(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      const result = await this.actor.__chatSessions(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
   async __comments(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.__comments(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        const result = await this.actor.__comments(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__comments(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      const result = await this.actor.__comments(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
   async __inviteCodes(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.__inviteCodes(to_candid_opt_n12(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-        return from_candid_vec_n13(this._uploadFile, this._downloadFile, result);
+        const result = await this.actor.__inviteCodes(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+        return from_candid_vec_n14(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__inviteCodes(to_candid_opt_n12(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
-      return from_candid_vec_n13(this._uploadFile, this._downloadFile, result);
+      const result = await this.actor.__inviteCodes(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+      return from_candid_vec_n14(this._uploadFile, this._downloadFile, result);
     }
   }
   async __nextAnalysisId() {
@@ -32703,14 +32721,14 @@ class Backend {
   async __recordings(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.__recordings(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        const result = await this.actor.__recordings(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.__recordings(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      const result = await this.actor.__recordings(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
@@ -33221,14 +33239,14 @@ class Backend {
   async saveAnalysis(arg0, arg1, arg2, arg3, arg4) {
     if (this.processError) {
       try {
-        const result = await this.actor.saveAnalysis(arg0, to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1), arg2, arg3, arg4);
+        const result = await this.actor.saveAnalysis(arg0, to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1), arg2, arg3, arg4);
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.saveAnalysis(arg0, to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1), arg2, arg3, arg4);
+      const result = await this.actor.saveAnalysis(arg0, to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1), arg2, arg3, arg4);
       return result;
     }
   }
@@ -33271,6 +33289,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3);
+      return result;
+    }
+  }
+  async setAdminPrincipal(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.setAdminPrincipal(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.setAdminPrincipal(arg0);
       return result;
     }
   }
@@ -33373,29 +33405,29 @@ class Backend {
     }
   }
 }
-function from_candid_Analysis_n4(_uploadFile, _downloadFile, value) {
-  return from_candid_record_n5(_uploadFile, _downloadFile, value);
+function from_candid_Analysis_n5(_uploadFile, _downloadFile, value) {
+  return from_candid_record_n6(_uploadFile, _downloadFile, value);
 }
-function from_candid_InviteCode_n15(_uploadFile, _downloadFile, value) {
-  return from_candid_record_n16(_uploadFile, _downloadFile, value);
+function from_candid_InviteCode_n16(_uploadFile, _downloadFile, value) {
+  return from_candid_record_n17(_uploadFile, _downloadFile, value);
 }
-function from_candid_TextAnnotation_n9(_uploadFile, _downloadFile, value) {
-  return from_candid_record_n10(_uploadFile, _downloadFile, value);
+function from_candid_TextAnnotation_n10(_uploadFile, _downloadFile, value) {
+  return from_candid_record_n11(_uploadFile, _downloadFile, value);
 }
-function from_candid_opt_n11(_uploadFile, _downloadFile, value) {
+function from_candid_opt_n1(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n17(_uploadFile, _downloadFile, value) {
+function from_candid_opt_n12(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n18(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
 function from_candid_opt_n19(_uploadFile, _downloadFile, value) {
-  return value.length === 0 ? null : from_candid_Analysis_n4(_uploadFile, _downloadFile, value[0]);
+  return value.length === 0 ? null : from_candid_Analysis_n5(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_opt_n20(_uploadFile, _downloadFile, value) {
-  return value.length === 0 ? null : from_candid_TextAnnotation_n9(_uploadFile, _downloadFile, value[0]);
+  return value.length === 0 ? null : from_candid_TextAnnotation_n10(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_opt_n22(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
@@ -33406,13 +33438,13 @@ function from_candid_opt_n23(_uploadFile, _downloadFile, value) {
 function from_candid_opt_n24(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n6(_uploadFile, _downloadFile, value) {
+function from_candid_opt_n7(_uploadFile, _downloadFile, value) {
   return value.length === 0 ? null : value[0];
 }
-function from_candid_record_n10(_uploadFile, _downloadFile, value) {
+function from_candid_record_n11(_uploadFile, _downloadFile, value) {
   return {
     id: value.id,
-    alternativeProposal: record_opt_to_undefined(from_candid_opt_n11(_uploadFile, _downloadFile, value.alternativeProposal)),
+    alternativeProposal: record_opt_to_undefined(from_candid_opt_n12(_uploadFile, _downloadFile, value.alternativeProposal)),
     explanation: value.explanation,
     color: value.color,
     text: value.text,
@@ -33421,65 +33453,65 @@ function from_candid_record_n10(_uploadFile, _downloadFile, value) {
     proposal: value.proposal
   };
 }
-function from_candid_record_n16(_uploadFile, _downloadFile, value) {
+function from_candid_record_n17(_uploadFile, _downloadFile, value) {
   return {
     code: value.code,
-    usedAt: record_opt_to_undefined(from_candid_opt_n17(_uploadFile, _downloadFile, value.usedAt)),
-    usedBy: record_opt_to_undefined(from_candid_opt_n18(_uploadFile, _downloadFile, value.usedBy)),
+    usedAt: record_opt_to_undefined(from_candid_opt_n18(_uploadFile, _downloadFile, value.usedAt)),
+    usedBy: record_opt_to_undefined(from_candid_opt_n1(_uploadFile, _downloadFile, value.usedBy)),
     createdAt: value.createdAt
   };
 }
-function from_candid_record_n5(_uploadFile, _downloadFile, value) {
+function from_candid_record_n6(_uploadFile, _downloadFile, value) {
   return {
     id: value.id,
     provider: value.provider,
     analysisType: value.analysisType,
     createdAt: value.createdAt,
     bookId: value.bookId,
-    chapterId: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.chapterId)),
+    chapterId: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.chapterId)),
     resultContent: value.resultContent
   };
 }
-function from_candid_tuple_n14(_uploadFile, _downloadFile, value) {
+function from_candid_tuple_n15(_uploadFile, _downloadFile, value) {
   return [
     value[0],
-    from_candid_InviteCode_n15(_uploadFile, _downloadFile, value[1])
+    from_candid_InviteCode_n16(_uploadFile, _downloadFile, value[1])
   ];
 }
-function from_candid_tuple_n3(_uploadFile, _downloadFile, value) {
+function from_candid_tuple_n4(_uploadFile, _downloadFile, value) {
   return [
     value[0],
-    from_candid_Analysis_n4(_uploadFile, _downloadFile, value[1])
+    from_candid_Analysis_n5(_uploadFile, _downloadFile, value[1])
   ];
 }
-function from_candid_tuple_n8(_uploadFile, _downloadFile, value) {
+function from_candid_tuple_n9(_uploadFile, _downloadFile, value) {
   return [
     value[0],
-    from_candid_TextAnnotation_n9(_uploadFile, _downloadFile, value[1])
+    from_candid_TextAnnotation_n10(_uploadFile, _downloadFile, value[1])
   ];
 }
-function from_candid_vec_n13(_uploadFile, _downloadFile, value) {
-  return value.map((x3) => from_candid_tuple_n14(_uploadFile, _downloadFile, x3));
-}
-function from_candid_vec_n2(_uploadFile, _downloadFile, value) {
-  return value.map((x3) => from_candid_tuple_n3(_uploadFile, _downloadFile, x3));
+function from_candid_vec_n14(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_tuple_n15(_uploadFile, _downloadFile, x3));
 }
 function from_candid_vec_n21(_uploadFile, _downloadFile, value) {
-  return value.map((x3) => from_candid_TextAnnotation_n9(_uploadFile, _downloadFile, x3));
+  return value.map((x3) => from_candid_TextAnnotation_n10(_uploadFile, _downloadFile, x3));
 }
 function from_candid_vec_n25(_uploadFile, _downloadFile, value) {
-  return value.map((x3) => from_candid_Analysis_n4(_uploadFile, _downloadFile, x3));
+  return value.map((x3) => from_candid_Analysis_n5(_uploadFile, _downloadFile, x3));
 }
 function from_candid_vec_n26(_uploadFile, _downloadFile, value) {
-  return value.map((x3) => from_candid_InviteCode_n15(_uploadFile, _downloadFile, x3));
+  return value.map((x3) => from_candid_InviteCode_n16(_uploadFile, _downloadFile, x3));
 }
-function from_candid_vec_n7(_uploadFile, _downloadFile, value) {
-  return value.map((x3) => from_candid_tuple_n8(_uploadFile, _downloadFile, x3));
+function from_candid_vec_n3(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_tuple_n4(_uploadFile, _downloadFile, x3));
 }
-function to_candid_opt_n1(_uploadFile, _downloadFile, value) {
+function from_candid_vec_n8(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_tuple_n9(_uploadFile, _downloadFile, x3));
+}
+function to_candid_opt_n13(_uploadFile, _downloadFile, value) {
   return value === null ? candid_none() : candid_some(value);
 }
-function to_candid_opt_n12(_uploadFile, _downloadFile, value) {
+function to_candid_opt_n2(_uploadFile, _downloadFile, value) {
   return value === null ? candid_none() : candid_some(value);
 }
 function to_candid_record_n28(_uploadFile, _downloadFile, value) {
@@ -34054,6 +34086,15 @@ function useRevokeInviteCode() {
     },
     onSuccess: () => {
       queryClient2.invalidateQueries({ queryKey: ["inviteCodes"] });
+    }
+  });
+}
+function useSetAdminPrincipal() {
+  const { actor } = useActor(createActor);
+  return useMutation({
+    mutationFn: async (principal) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.setAdminPrincipal(principal);
     }
   });
 }
@@ -41384,7 +41425,59 @@ function TableCell({ className, ...props }) {
     }
   );
 }
+const createStoreImpl = (createState) => {
+  let state;
+  const listeners = /* @__PURE__ */ new Set();
+  const setState = (partial, replace2) => {
+    const nextState = typeof partial === "function" ? partial(state) : partial;
+    if (!Object.is(nextState, state)) {
+      const previousState = state;
+      state = (replace2 != null ? replace2 : typeof nextState !== "object" || nextState === null) ? nextState : Object.assign({}, state, nextState);
+      listeners.forEach((listener) => listener(state, previousState));
+    }
+  };
+  const getState2 = () => state;
+  const getInitialState = () => initialState;
+  const subscribe = (listener) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  };
+  const api = { setState, getState: getState2, getInitialState, subscribe };
+  const initialState = state = createState(setState, getState2, api);
+  return api;
+};
+const createStore = (createState) => createState ? createStoreImpl(createState) : createStoreImpl;
+const identity$c = (arg) => arg;
+function useStore(api, selector = identity$c) {
+  const slice2 = React$4.useSyncExternalStore(
+    api.subscribe,
+    () => selector(api.getState()),
+    () => selector(api.getInitialState())
+  );
+  React$4.useDebugValue(slice2);
+  return slice2;
+}
+const createImpl = (createState) => {
+  const api = createStore(createState);
+  const useBoundStore = (selector) => useStore(api, selector);
+  Object.assign(useBoundStore, api);
+  return useBoundStore;
+};
+const create = (createState) => createState ? createImpl(createState) : createImpl;
+const useAppStore = create((set) => ({
+  principal: null,
+  isAuthenticated: false,
+  setPrincipal: (principal) => set({ principal, isAuthenticated: principal !== null }),
+  clearAuth: () => set({ principal: null, isAuthenticated: false })
+}));
 function AdminPage() {
+  const principal = useAppStore((s2) => s2.principal);
+  const setAdminMutation = useSetAdminPrincipal();
+  reactExports.useEffect(() => {
+    if (principal) {
+      setAdminMutation.mutate(principal);
+    }
+  }, [principal, setAdminMutation]);
   const { data: inviteCodes, isLoading } = useListInviteCodes();
   const generateMutation = useGenerateInviteCode();
   const revokeMutation = useRevokeInviteCode();
@@ -41518,51 +41611,6 @@ function AdminPage() {
     ] }) })
   ] });
 }
-const createStoreImpl = (createState) => {
-  let state;
-  const listeners = /* @__PURE__ */ new Set();
-  const setState = (partial, replace2) => {
-    const nextState = typeof partial === "function" ? partial(state) : partial;
-    if (!Object.is(nextState, state)) {
-      const previousState = state;
-      state = (replace2 != null ? replace2 : typeof nextState !== "object" || nextState === null) ? nextState : Object.assign({}, state, nextState);
-      listeners.forEach((listener) => listener(state, previousState));
-    }
-  };
-  const getState2 = () => state;
-  const getInitialState = () => initialState;
-  const subscribe = (listener) => {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-  };
-  const api = { setState, getState: getState2, getInitialState, subscribe };
-  const initialState = state = createState(setState, getState2, api);
-  return api;
-};
-const createStore = (createState) => createState ? createStoreImpl(createState) : createStoreImpl;
-const identity$c = (arg) => arg;
-function useStore(api, selector = identity$c) {
-  const slice2 = React$4.useSyncExternalStore(
-    api.subscribe,
-    () => selector(api.getState()),
-    () => selector(api.getInitialState())
-  );
-  React$4.useDebugValue(slice2);
-  return slice2;
-}
-const createImpl = (createState) => {
-  const api = createStore(createState);
-  const useBoundStore = (selector) => useStore(api, selector);
-  Object.assign(useBoundStore, api);
-  return useBoundStore;
-};
-const create = (createState) => createState ? createImpl(createState) : createImpl;
-const useAppStore = create((set) => ({
-  principal: null,
-  isAuthenticated: false,
-  setPrincipal: (principal) => set({ principal, isAuthenticated: principal !== null }),
-  clearAuth: () => set({ principal: null, isAuthenticated: false })
-}));
 var NODES = [
   "a",
   "button",
@@ -105367,7 +105415,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BpmH5fWE.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DdJF6smN.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

@@ -98,6 +98,7 @@ type Analysis =
    resultContent: text;
  };
 service : {
+  __adminPrincipal: () -> (opt principal) query;
   __analyses: (ko: opt nat, count: opt nat) ->
    (vec record {
           nat;
@@ -223,6 +224,7 @@ service : {
    blob) -> (nat);
   sendMessage: (bookId: nat, role: text, content: text, provider: text) ->
    (nat);
+  setAdminPrincipal: (p: principal) -> ();
   synthesizeSpeech: ("text": text, voice: text, apiKey: text) -> (blob);
   ttsTransform: (raw:
    record {

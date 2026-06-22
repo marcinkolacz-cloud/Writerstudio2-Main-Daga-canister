@@ -100,6 +100,7 @@ export interface TextAnnotation {
   'proposal' : string,
 }
 export interface _SERVICE {
+  '__adminPrincipal' : ActorMethod<[], [] | [Principal]>,
   '__analyses' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Analysis]>
@@ -220,6 +221,7 @@ export interface _SERVICE {
   >,
   'saveRecording' : ActorMethod<[bigint, bigint, string, Uint8Array], bigint>,
   'sendMessage' : ActorMethod<[bigint, string, string, string], bigint>,
+  'setAdminPrincipal' : ActorMethod<[Principal], undefined>,
   'synthesizeSpeech' : ActorMethod<[string, string, string], Uint8Array>,
   'ttsTransform' : ActorMethod<
     [

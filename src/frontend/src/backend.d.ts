@@ -156,6 +156,7 @@ export interface backendInterface {
     }>): Promise<Array<bigint>>;
     saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
     sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
+    setAdminPrincipal(p: Principal): Promise<void>;
     synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
     ttsTransform(raw: {
         context: Uint8Array;

@@ -99,6 +99,7 @@ export const Recording = IDL.Record({
 });
 
 export const idlService = IDL.Service({
+  '__adminPrincipal' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
   '__analyses' : IDL.Func(
       [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
       [IDL.Vec(IDL.Tuple(IDL.Nat, Analysis))],
@@ -262,6 +263,7 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'setAdminPrincipal' : IDL.Func([IDL.Principal], [], []),
   'synthesizeSpeech' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text],
       [IDL.Vec(IDL.Nat8)],
@@ -404,6 +406,7 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
+    '__adminPrincipal' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
     '__analyses' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Analysis))],
@@ -571,6 +574,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat],
         [],
       ),
+    'setAdminPrincipal' : IDL.Func([IDL.Principal], [], []),
     'synthesizeSpeech' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text],
         [IDL.Vec(IDL.Nat8)],

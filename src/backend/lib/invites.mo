@@ -56,7 +56,7 @@ module {
   };
 
   public func listCodes(codes : Map.Map<Text, InviteCode>) : [InviteCode] {
-    var result = List.empty<InviteCode>();
+    let result = List.empty<InviteCode>();
     for ((_, inviteCode) in codes.entries()) {
       result.add(inviteCode);
     };
@@ -64,6 +64,6 @@ module {
   };
 
   public func revokeCode(codes : Map.Map<Text, InviteCode>, code : Text) : () {
-    let _ = codes.delete(code);
+    let _ = codes.remove(code);
   };
 }
