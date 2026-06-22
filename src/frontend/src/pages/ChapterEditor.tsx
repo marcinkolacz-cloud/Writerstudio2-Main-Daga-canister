@@ -506,7 +506,7 @@ export function ChapterEditorPage() {
       </div>
 
       {/* Title input */}
-      <div className="shrink-0">
+      <div className="shrink-0 -mt-2">
         <Input
           value={title}
           onChange={(e) => handleTitleChange(e.target.value)}
@@ -529,563 +529,561 @@ export function ChapterEditorPage() {
 
       {/* Analysis + Indent controls */}
       <div
-        className="shrink-0 flex flex-wrap items-center gap-4 p-3 rounded-lg border border-border bg-card"
+        className="shrink-0 flex flex-col gap-2 p-3 rounded-lg border border-border bg-card"
         data-ocid="chapter.tools_panel"
       >
-        {/* Analysis section */}
-        <div className="flex flex-col gap-1 flex-1 min-w-[280px]">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">
-              <Sparkles className="h-3.5 w-3.5" />
-              AI
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setSettingsModalOpen(true)}
-              data-ocid="chapter.api_key_button"
+        {/* Row 1: primary AI controls */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setSettingsModalOpen(true)}
+            data-ocid="chapter.api_key_button"
+          >
+            <Key className="h-3.5 w-3.5 mr-1.5" />
+            Klucz API
+          </Button>
+          <Select
+            value={analysisMode}
+            onValueChange={(v) => {
+              setAnalysisMode(v as AnalysisMode);
+              setAnalysisStatus("idle");
+              setAnalysisError(null);
+              setSummaryResult(null);
+            }}
+          >
+            <SelectTrigger
+              className="h-8 w-[180px] text-sm"
+              data-ocid="chapter.analysis_mode_select"
             >
-              <Key className="h-3.5 w-3.5 mr-1.5" />
-              Klucz API
-            </Button>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="grammar">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Gramatyka i styl
+                </div>
+              </SelectItem>
+              <SelectItem value="context">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Analizuj z kontekstem
+                </div>
+              </SelectItem>
+              <SelectItem value="dialogue">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-3.5 w-3.5" />
+                  Dialogi
+                </div>
+              </SelectItem>
+              <SelectItem value="scene">
+                <div className="flex items-center gap-2">
+                  <Wand2 className="h-3.5 w-3.5" />
+                  Rozszerzenie sceny
+                </div>
+              </SelectItem>
+              <SelectItem value="emotion">
+                <div className="flex items-center gap-2">
+                  <Heart className="h-3.5 w-3.5" />
+                  Emocja
+                </div>
+              </SelectItem>
+              <SelectItem value="consistency">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-3.5 w-3.5" />
+                  Analiza spójności książki
+                </div>
+              </SelectItem>
+              <SelectItem value="summary">
+                <div className="flex items-center gap-2">
+                  <AlignLeft className="h-3.5 w-3.5" />
+                  Streszczenie książki
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          {analysisMode === "summary" && (
             <Select
-              value={analysisMode}
-              onValueChange={(v) => {
-                setAnalysisMode(v as AnalysisMode);
-                setAnalysisStatus("idle");
-                setAnalysisError(null);
-                setSummaryResult(null);
-              }}
+              value={summaryType}
+              onValueChange={(v) => setSummaryType(v as SummaryType)}
             >
               <SelectTrigger
-                className="h-8 w-[180px] text-sm"
-                data-ocid="chapter.analysis_mode_select"
+                className="h-8 w-[130px] text-sm"
+                data-ocid="chapter.summary_type_select"
               >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="grammar">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Gramatyka i styl
-                  </div>
-                </SelectItem>
-                <SelectItem value="context">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    Analizuj z kontekstem
-                  </div>
-                </SelectItem>
-                <SelectItem value="dialogue">
-                  <div className="flex items-center gap-2">
-                    <MessageCircle className="h-3.5 w-3.5" />
-                    Dialogi
-                  </div>
-                </SelectItem>
-                <SelectItem value="scene">
-                  <div className="flex items-center gap-2">
-                    <Wand2 className="h-3.5 w-3.5" />
-                    Rozszerzenie sceny
-                  </div>
-                </SelectItem>
-                <SelectItem value="emotion">
-                  <div className="flex items-center gap-2">
-                    <Heart className="h-3.5 w-3.5" />
-                    Emocja
-                  </div>
-                </SelectItem>
-                <SelectItem value="consistency">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="h-3.5 w-3.5" />
-                    Analiza spójności książki
-                  </div>
-                </SelectItem>
-                <SelectItem value="summary">
-                  <div className="flex items-center gap-2">
-                    <AlignLeft className="h-3.5 w-3.5" />
-                    Streszczenie książki
-                  </div>
-                </SelectItem>
+                <SelectItem value="short">Krótkie</SelectItem>
+                <SelectItem value="long">Długie</SelectItem>
+                <SelectItem value="hooks">Haki</SelectItem>
               </SelectContent>
             </Select>
+          )}
 
-            {analysisMode === "summary" && (
-              <Select
-                value={summaryType}
-                onValueChange={(v) => setSummaryType(v as SummaryType)}
-              >
-                <SelectTrigger
-                  className="h-8 w-[130px] text-sm"
-                  data-ocid="chapter.summary_type_select"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="short">Krótkie</SelectItem>
-                  <SelectItem value="long">Długie</SelectItem>
-                  <SelectItem value="hooks">Haki</SelectItem>
-                </SelectContent>
-              </Select>
-            )}
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-[1.5px] border-solid border-primary font-medium"
+            disabled={analysisStatus === "loading" || !apiKey.trim()}
+            onClick={async () => {
+              if (!editorRef.current || !chapter || !book) return;
 
-            <Button
-              size="sm"
-              variant="secondary"
-              disabled={analysisStatus === "loading" || !apiKey.trim()}
-              onClick={async () => {
-                if (!editorRef.current || !chapter || !book) return;
+              // Determine text to analyze: selection for grammar/context/dialogue, full text for summary
+              let text: string;
+              let selectionRange: { from: number; to: number } | undefined;
+              const editor = editorRef.current;
+              const { from: selFrom, to: selTo } = editor.state.selection;
 
-                // Determine text to analyze: selection for grammar/context/dialogue, full text for summary
-                let text: string;
-                let selectionRange: { from: number; to: number } | undefined;
-                const editor = editorRef.current;
-                const { from: selFrom, to: selTo } = editor.state.selection;
+              if (
+                analysisMode === "summary" ||
+                analysisMode === "consistency"
+              ) {
+                text = editor.getText();
+              } else if (selFrom !== selTo) {
+                text = editor.state.doc.textBetween(selFrom, selTo, " ");
+                selectionRange = { from: selFrom, to: selTo };
+              } else {
+                text = editor.getText();
+              }
 
+              if (!text.trim()) {
+                setAnalysisError("Brak tekstu do analizy");
+                setAnalysisStatus("error");
+                return;
+              }
+              setAnalysisStatus("loading");
+              setAnalysisError(null);
+              setSummaryResult(null);
+              try {
                 if (
                   analysisMode === "summary" ||
                   analysisMode === "consistency"
                 ) {
-                  text = editor.getText();
-                } else if (selFrom !== selTo) {
-                  text = editor.state.doc.textBetween(selFrom, selTo, " ");
-                  selectionRange = { from: selFrom, to: selTo };
-                } else {
-                  text = editor.getText();
-                }
-
-                if (!text.trim()) {
-                  setAnalysisError("Brak tekstu do analizy");
-                  setAnalysisStatus("error");
-                  return;
-                }
-                setAnalysisStatus("loading");
-                setAnalysisError(null);
-                setSummaryResult(null);
-                try {
-                  if (
-                    analysisMode === "summary" ||
-                    analysisMode === "consistency"
-                  ) {
-                    // Build all chapters text
-                    const allChaptersText = (chapters ?? [])
-                      .sort((a, b) => Number(a.orderIndex - b.orderIndex))
-                      .map((ch) => `## ${ch.title}\n\n${ch.content}`)
-                      .join("\n\n---\n\n");
-                    if (analysisMode === "summary") {
-                      const summary = await generateSummary(
-                        allChaptersText,
-                        summaryType,
-                        apiKey.trim(),
-                        provider,
-                      );
-                      setSummaryResult(summary);
-                      // Save as book-level analysis
-                      await saveAnalysis.mutateAsync({
-                        bookId: book.id,
-                        chapterId: null,
-                        analysisType: "summary",
-                        provider,
-                        resultContent: summary,
-                      });
-                    } else {
-                      const consistencyReport = await analyzeConsistency(
-                        allChaptersText,
-                        apiKey.trim(),
-                        provider,
-                      );
-                      setSummaryResult(consistencyReport);
-                      // Save as book-level analysis
-                      await saveAnalysis.mutateAsync({
-                        bookId: book.id,
-                        chapterId: null,
-                        analysisType: "consistency",
-                        provider,
-                        resultContent: consistencyReport,
-                      });
-                    }
-                    setAnalysisStatus("success");
-                    setTimeout(() => setAnalysisStatus("idle"), 3000);
-                    return;
+                  // Build all chapters text
+                  const allChaptersText = (chapters ?? [])
+                    .sort((a, b) => Number(a.orderIndex - b.orderIndex))
+                    .map((ch) => `## ${ch.title}\n\n${ch.content}`)
+                    .join("\n\n---\n\n");
+                  if (analysisMode === "summary") {
+                    const summary = await generateSummary(
+                      allChaptersText,
+                      summaryType,
+                      apiKey.trim(),
+                      provider,
+                    );
+                    setSummaryResult(summary);
+                    // Save as book-level analysis
+                    await saveAnalysis.mutateAsync({
+                      bookId: book.id,
+                      chapterId: null,
+                      analysisType: "summary",
+                      provider,
+                      resultContent: summary,
+                    });
+                  } else {
+                    const consistencyReport = await analyzeConsistency(
+                      allChaptersText,
+                      apiKey.trim(),
+                      provider,
+                    );
+                    setSummaryResult(consistencyReport);
+                    // Save as book-level analysis
+                    await saveAnalysis.mutateAsync({
+                      bookId: book.id,
+                      chapterId: null,
+                      analysisType: "consistency",
+                      provider,
+                      resultContent: consistencyReport,
+                    });
                   }
-
-                  const bookContext = book
-                    ? {
-                        title: book.title,
-                        ageCategory: book.ageCategory,
-                        authorSummary: book.authorSummary,
-                        keyContext: book.keyContext,
-                        themes: book.themes,
-                        writingStyle: book.writingStyle,
-                      }
-                    : undefined;
-
-                  let annotations: Annotation[] = [];
-                  if (analysisMode === "grammar") {
-                    annotations = await analyzeGrammarStyle(
-                      text,
-                      apiKey.trim(),
-                      provider,
-                      bookContext,
-                    );
-                  } else if (analysisMode === "context") {
-                    // Fetch previous chapter summaries
-                    const previousSummaries: string[] = [];
-                    const sortedChapters = (chapters ?? []).sort((a, b) =>
-                      Number(a.orderIndex - b.orderIndex),
-                    );
-                    const currentIdx = sortedChapters.findIndex(
-                      (ch) => ch.id === chapter.id,
-                    );
-                    for (let i = 0; i < currentIdx; i++) {
-                      const prevChapter = sortedChapters[i];
-                      if (!prevChapter) continue;
-                      const prevChapterId = prevChapter.id;
-                      const matchingAnalyses = (bookAnalyses ?? []).filter(
-                        (a) =>
-                          a.analysisType === "summary" &&
-                          (a.chapterId === null ||
-                            a.chapterId === prevChapterId),
-                      );
-                      for (const analysis of matchingAnalyses) {
-                        previousSummaries.push(analysis.resultContent);
-                      }
-                    }
-                    annotations = await analyzeWithContext(
-                      text,
-                      previousSummaries,
-                      apiKey.trim(),
-                      provider,
-                      bookContext,
-                    );
-                  } else if (analysisMode === "dialogue") {
-                    annotations = await analyzeDialogue(
-                      text,
-                      apiKey.trim(),
-                      provider,
-                      bookContext,
-                    );
-                  } else if (analysisMode === "scene") {
-                    annotations = await analyzeSceneExpansion(
-                      text,
-                      apiKey.trim(),
-                      provider,
-                      bookContext,
-                    );
-                  } else if (analysisMode === "emotion") {
-                    annotations = await analyzeEmotion(
-                      text,
-                      apiKey.trim(),
-                      provider,
-                      bookContext,
-                    );
-                  }
-
-                  setCurrentAnnotations(annotations);
-                  setCurrentAnnotations(annotations);
-                  applyAnnotationsToEditor(editorRef.current, annotations, {
-                    clearRange: selectionRange,
-                  });
-                  // Save analysis + annotations to backend
-                  const analysisId = await saveAnalysis.mutateAsync({
-                    bookId: book.id,
-                    chapterId: chapter.id,
-                    analysisType: analysisMode,
-                    provider,
-                    resultContent: JSON.stringify(annotations),
-                  });
-                  const newIds = await saveAnnotations.mutateAsync({
-                    analysisId,
-                    annotations,
-                  });
-                  // Assign returned IDs to annotations and re-apply marks with real IDs
-                  for (let i = 0; i < annotations.length; i++) {
-                    if (newIds[i] !== undefined) {
-                      annotations[i].id = newIds[i];
-                    }
-                  }
-                  setCurrentAnnotations(annotations);
-                  applyAnnotationsToEditor(editorRef.current, annotations, {
-                    clearRange: selectionRange,
-                  });
                   setAnalysisStatus("success");
                   setTimeout(() => setAnalysisStatus("idle"), 3000);
-                } catch (err) {
-                  setAnalysisError(
-                    err instanceof Error ? err.message : "Błąd analizy",
-                  );
-                  setAnalysisStatus("error");
+                  return;
                 }
-              }}
-              data-ocid="chapter.analyze_button"
-            >
-              {analysisStatus === "loading" ? (
-                <>
-                  <Wand2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                  Analizowanie...
-                </>
-              ) : analysisMode === "summary" ? (
-                <>
-                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                  Generuj streszczenie
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                  Analizuj
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
 
-        <div className="w-px h-6 bg-border hidden sm:block" />
+                const bookContext = book
+                  ? {
+                      title: book.title,
+                      ageCategory: book.ageCategory,
+                      authorSummary: book.authorSummary,
+                      keyContext: book.keyContext,
+                      themes: book.themes,
+                      writingStyle: book.writingStyle,
+                    }
+                  : undefined;
 
-        {/* Lektor toggle */}
-        <Button
-          size="sm"
-          variant={lektorPanelOpen ? "default" : "outline"}
-          onClick={() => setLektorPanelOpen((v) => !v)}
-          disabled={provider === "claude"}
-          data-ocid="chapter.lektor_toggle_button"
-        >
-          <Volume2 className="h-3.5 w-3.5 mr-1.5" />
-          Lektor
-        </Button>
-
-        {/* Approve changes button */}
-        {(currentAnnotations.length > 0 ||
-          (persistedAnnotations && persistedAnnotations.length > 0)) && (
-          <Button
-            size="sm"
-            variant="default"
-            onClick={() => {
-              if (!editorRef.current) return;
-              const editor = editorRef.current;
-              const annotationMarkNames = [
-                "annotationYellow",
-                "annotationRed",
-                "annotationBlue",
-                "annotationOrange",
-                "annotationPurple",
-              ];
-
-              const annotationsToApprove: Annotation[] =
-                currentAnnotations.length > 0
-                  ? currentAnnotations
-                  : (persistedAnnotations ?? []).map((pa) => ({
-                      id: pa.id,
-                      text: pa.text,
-                      color: pa.color as Annotation["color"],
-                      explanation: pa.explanation,
-                      proposal: pa.proposal,
-                      approved: pa.approved,
-                    }));
-
-              // Build a single atomic transaction to remove all annotation marks
-              // by finding each annotation via its unique data-annotation-id
-              const tr = editor.state.tr;
-              for (const ann of annotationsToApprove) {
-                let foundFrom: number | null = null;
-                let foundTo: number | null = null;
-                editor.state.doc.descendants((node, pos) => {
-                  if (foundFrom !== null) return false;
-                  if (!node.isText) return true;
-                  const mark = node.marks.find(
-                    (m) =>
-                      annotationMarkNames.includes(m.type.name) &&
-                      m.attrs["data-annotation-id"] === String(ann.id),
+                let annotations: Annotation[] = [];
+                if (analysisMode === "grammar") {
+                  annotations = await analyzeGrammarStyle(
+                    text,
+                    apiKey.trim(),
+                    provider,
+                    bookContext,
                   );
-                  if (mark) {
-                    foundFrom = pos;
-                    foundTo = pos + node.nodeSize;
-                    return false;
+                } else if (analysisMode === "context") {
+                  // Fetch previous chapter summaries
+                  const previousSummaries: string[] = [];
+                  const sortedChapters = (chapters ?? []).sort((a, b) =>
+                    Number(a.orderIndex - b.orderIndex),
+                  );
+                  const currentIdx = sortedChapters.findIndex(
+                    (ch) => ch.id === chapter.id,
+                  );
+                  for (let i = 0; i < currentIdx; i++) {
+                    const prevChapter = sortedChapters[i];
+                    if (!prevChapter) continue;
+                    const prevChapterId = prevChapter.id;
+                    const matchingAnalyses = (bookAnalyses ?? []).filter(
+                      (a) =>
+                        a.analysisType === "summary" &&
+                        (a.chapterId === null || a.chapterId === prevChapterId),
+                    );
+                    for (const analysis of matchingAnalyses) {
+                      previousSummaries.push(analysis.resultContent);
+                    }
                   }
-                  return true;
+                  annotations = await analyzeWithContext(
+                    text,
+                    previousSummaries,
+                    apiKey.trim(),
+                    provider,
+                    bookContext,
+                  );
+                } else if (analysisMode === "dialogue") {
+                  annotations = await analyzeDialogue(
+                    text,
+                    apiKey.trim(),
+                    provider,
+                    bookContext,
+                  );
+                } else if (analysisMode === "scene") {
+                  annotations = await analyzeSceneExpansion(
+                    text,
+                    apiKey.trim(),
+                    provider,
+                    bookContext,
+                  );
+                } else if (analysisMode === "emotion") {
+                  annotations = await analyzeEmotion(
+                    text,
+                    apiKey.trim(),
+                    provider,
+                    bookContext,
+                  );
+                }
+
+                setCurrentAnnotations(annotations);
+                setCurrentAnnotations(annotations);
+                applyAnnotationsToEditor(editorRef.current, annotations, {
+                  clearRange: selectionRange,
                 });
-                if (foundFrom !== null && foundTo !== null) {
-                  for (const markName of annotationMarkNames) {
-                    const markType = editor.schema.marks[markName];
-                    if (markType) {
-                      tr.removeMark(foundFrom, foundTo, markType);
+                // Save analysis + annotations to backend
+                const analysisId = await saveAnalysis.mutateAsync({
+                  bookId: book.id,
+                  chapterId: chapter.id,
+                  analysisType: analysisMode,
+                  provider,
+                  resultContent: JSON.stringify(annotations),
+                });
+                const newIds = await saveAnnotations.mutateAsync({
+                  analysisId,
+                  annotations,
+                });
+                // Assign returned IDs to annotations and re-apply marks with real IDs
+                for (let i = 0; i < annotations.length; i++) {
+                  if (newIds[i] !== undefined) {
+                    annotations[i].id = newIds[i];
+                  }
+                }
+                setCurrentAnnotations(annotations);
+                applyAnnotationsToEditor(editorRef.current, annotations, {
+                  clearRange: selectionRange,
+                });
+                setAnalysisStatus("success");
+                setTimeout(() => setAnalysisStatus("idle"), 3000);
+              } catch (err) {
+                setAnalysisError(
+                  err instanceof Error ? err.message : "Błąd analizy",
+                );
+                setAnalysisStatus("error");
+              }
+            }}
+            data-ocid="chapter.analyze_button"
+          >
+            {analysisStatus === "loading" ? (
+              <>
+                <Wand2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                Analizowanie...
+              </>
+            ) : analysisMode === "summary" ? (
+              <>
+                <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                Generuj streszczenie
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                Analizuj
+              </>
+            )}
+          </Button>
+
+          {/* Approve changes button */}
+          {(currentAnnotations.length > 0 ||
+            (persistedAnnotations && persistedAnnotations.length > 0)) && (
+            <Button
+              size="sm"
+              variant="default"
+              className="bg-info text-info-foreground hover:bg-info/90"
+              onClick={() => {
+                if (!editorRef.current) return;
+                const editor = editorRef.current;
+                const annotationMarkNames = [
+                  "annotationYellow",
+                  "annotationRed",
+                  "annotationBlue",
+                  "annotationOrange",
+                  "annotationPurple",
+                ];
+
+                const annotationsToApprove: Annotation[] =
+                  currentAnnotations.length > 0
+                    ? currentAnnotations
+                    : (persistedAnnotations ?? []).map((pa) => ({
+                        id: pa.id,
+                        text: pa.text,
+                        color: pa.color as Annotation["color"],
+                        explanation: pa.explanation,
+                        proposal: pa.proposal,
+                        approved: pa.approved,
+                      }));
+
+                // Build a single atomic transaction to remove all annotation marks
+                // by finding each annotation via its unique data-annotation-id
+                const tr = editor.state.tr;
+                for (const ann of annotationsToApprove) {
+                  let foundFrom: number | null = null;
+                  let foundTo: number | null = null;
+                  editor.state.doc.descendants((node, pos) => {
+                    if (foundFrom !== null) return false;
+                    if (!node.isText) return true;
+                    const mark = node.marks.find(
+                      (m) =>
+                        annotationMarkNames.includes(m.type.name) &&
+                        m.attrs["data-annotation-id"] === String(ann.id),
+                    );
+                    if (mark) {
+                      foundFrom = pos;
+                      foundTo = pos + node.nodeSize;
+                      return false;
+                    }
+                    return true;
+                  });
+                  if (foundFrom !== null && foundTo !== null) {
+                    for (const markName of annotationMarkNames) {
+                      const markType = editor.schema.marks[markName];
+                      if (markType) {
+                        tr.removeMark(foundFrom, foundTo, markType);
+                      }
                     }
                   }
                 }
-              }
-              if (tr.steps.length > 0) {
-                editor.view.dispatch(tr);
-              }
+                if (tr.steps.length > 0) {
+                  editor.view.dispatch(tr);
+                }
 
-              // Clear current annotations state
-              setCurrentAnnotations([]);
-            }}
-            data-ocid="chapter.approve_changes_button"
-          >
-            <Check className="h-3.5 w-3.5 mr-1.5" />
-            Zatwierdź zmiany
-          </Button>
-        )}
-
-        <div className="w-px h-6 bg-border hidden sm:block" />
-
-        {/* History toggle */}
-        <Button
-          size="sm"
-          variant={historyPanelOpen ? "default" : "outline"}
-          onClick={() => setHistoryPanelOpen((v) => !v)}
-          data-ocid="chapter.history_toggle_button"
-        >
-          <History className="h-3.5 w-3.5 mr-1.5" />
-          Historia
-        </Button>
-
-        <div className="w-px h-6 bg-border hidden sm:block" />
-
-        {/* Recordings toggle */}
-        <Button
-          size="sm"
-          variant={recordingsPanelOpen ? "default" : "outline"}
-          onClick={() => setRecordingsPanelOpen((v) => !v)}
-          data-ocid="chapter.recordings_toggle_button"
-        >
-          <Headphones className="h-3.5 w-3.5 mr-1.5" />
-          Nagrania
-        </Button>
-
-        <div className="w-px h-6 bg-border hidden sm:block" />
-
-        {/* Context chat toggle */}
-        <Button
-          size="sm"
-          variant={contextChatPanelOpen ? "default" : "outline"}
-          onClick={() => setContextChatPanelOpen((v) => !v)}
-          data-ocid="chapter.context_chat_toggle_button"
-        >
-          <MessageCircle className="h-3.5 w-3.5 mr-1.5" />
-          Kontekst
-        </Button>
-
-        <div className="w-px h-6 bg-border hidden sm:block" />
-
-        {/* Comments toggle */}
-        <Button
-          size="sm"
-          variant={commentsPanelOpen ? "default" : "outline"}
-          onClick={() => setCommentsPanelOpen((v) => !v)}
-          data-ocid="chapter.comments_toggle_button"
-        >
-          <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
-          Komentarze
-        </Button>
-
-        <div className="w-px h-6 bg-border hidden sm:block" />
-
-        {/* Synonyms toggle */}
-        <Button
-          ref={synonymButtonRef}
-          size="sm"
-          variant={synonymPopupOpen ? "default" : "outline"}
-          onClick={async () => {
-            if (synonymPopupOpen) {
-              setSynonymPopupOpen(false);
-              setSynonyms([]);
-              setSelectedWord("");
-              setSynonymMessage(null);
-              synonymSelectionRef.current = null;
-              return;
-            }
-            if (!editorRef.current) return;
-            const { from, to } = editorRef.current.state.selection;
-            if (from === to) {
-              setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
-              setTimeout(() => setSynonymMessage(null), 3000);
-              return;
-            }
-            const text = editorRef.current.state.doc.textBetween(from, to, " ");
-            const trimmed = text.replace(
-              /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,
-              "",
-            );
-            if (!trimmed.trim()) {
-              setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
-              setTimeout(() => setSynonymMessage(null), 3000);
-              return;
-            }
-            setSelectedWord(trimmed);
-            synonymSelectionRef.current = { from, to };
-            setSynonymPopupOpen(true);
-            setSynonymLoading(true);
-            setSynonymError(null);
-            setSynonymMessage(null);
-            try {
-              const results = await getSynonyms(
-                trimmed,
-                apiKey.trim(),
-                provider,
-              );
-              setSynonyms(results);
-            } catch (err) {
-              setSynonymError(
-                err instanceof Error
-                  ? err.message
-                  : "Błąd wyszukiwania synonimów",
-              );
-            } finally {
-              setSynonymLoading(false);
-            }
-          }}
-          data-ocid="chapter.synonyms_toggle_button"
-        >
-          <BookText className="h-3.5 w-3.5 mr-1.5" />
-          Synonimy
-        </Button>
-
-        <div className="w-px h-6 bg-border hidden sm:block" />
-        {/* Export dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              size="sm"
-              variant="outline"
-              data-ocid="chapter.export_dropdown_trigger"
+                // Clear current annotations state
+                setCurrentAnnotations([]);
+              }}
+              data-ocid="chapter.approve_changes_button"
             >
-              <Download className="h-3.5 w-3.5 mr-1.5" />
-              Eksportuj
+              <Check className="h-3.5 w-3.5 mr-1.5" />
+              Zatwierdź zmiany
             </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => {
-                if (editorRef.current) {
-                  exportToPDF(title, editorRef.current.getHTML());
-                }
-              }}
-              data-ocid="chapter.export_pdf_item"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Eksportuj do PDF
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                if (editorRef.current) {
-                  const indents = getGlobalIndents();
-                  exportToDOCX(
-                    title,
-                    editorRef.current.getHTML(),
-                    indents.left,
-                    indents.right,
-                    indents.firstLine,
-                  );
-                }
-              }}
-              data-ocid="chapter.export_docx_item"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Eksportuj do DOCX
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          )}
+        </div>
 
-        <div className="w-px h-6 bg-border hidden sm:block" />
+        {/* Row 2: auxiliary tools */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Lektor toggle */}
+          <Button
+            size="sm"
+            variant="ghost"
+            className={`text-xs ${lektorPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setLektorPanelOpen((v) => !v)}
+            disabled={provider === "claude"}
+            data-ocid="chapter.lektor_toggle_button"
+          >
+            <Volume2 className="h-3.5 w-3.5 mr-1" />
+            Lektor
+          </Button>
+
+          {/* History toggle */}
+          <Button
+            size="sm"
+            variant="ghost"
+            className={`text-xs ${historyPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setHistoryPanelOpen((v) => !v)}
+            data-ocid="chapter.history_toggle_button"
+          >
+            <History className="h-3.5 w-3.5 mr-1" />
+            Historia
+          </Button>
+
+          {/* Recordings toggle */}
+          <Button
+            size="sm"
+            variant="ghost"
+            className={`text-xs ${recordingsPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setRecordingsPanelOpen((v) => !v)}
+            data-ocid="chapter.recordings_toggle_button"
+          >
+            <Headphones className="h-3.5 w-3.5 mr-1" />
+            Nagrania
+          </Button>
+
+          {/* Context chat toggle */}
+          <Button
+            size="sm"
+            variant="ghost"
+            className={`text-xs ${contextChatPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setContextChatPanelOpen((v) => !v)}
+            data-ocid="chapter.context_chat_toggle_button"
+          >
+            <MessageCircle className="h-3.5 w-3.5 mr-1" />
+            Kontekst
+          </Button>
+
+          {/* Comments toggle */}
+          <Button
+            size="sm"
+            variant="ghost"
+            className={`text-xs ${commentsPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setCommentsPanelOpen((v) => !v)}
+            data-ocid="chapter.comments_toggle_button"
+          >
+            <MessageSquare className="h-3.5 w-3.5 mr-1" />
+            Komentarze
+          </Button>
+
+          {/* Synonyms toggle */}
+          <Button
+            ref={synonymButtonRef}
+            size="sm"
+            variant="ghost"
+            className={`text-xs ${synonymPopupOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={async () => {
+              if (synonymPopupOpen) {
+                setSynonymPopupOpen(false);
+                setSynonyms([]);
+                setSelectedWord("");
+                setSynonymMessage(null);
+                synonymSelectionRef.current = null;
+                return;
+              }
+              if (!editorRef.current) return;
+              const { from, to } = editorRef.current.state.selection;
+              if (from === to) {
+                setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
+                setTimeout(() => setSynonymMessage(null), 3000);
+                return;
+              }
+              const text = editorRef.current.state.doc.textBetween(
+                from,
+                to,
+                " ",
+              );
+              const trimmed = text.replace(
+                /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,
+                "",
+              );
+              if (!trimmed.trim()) {
+                setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
+                setTimeout(() => setSynonymMessage(null), 3000);
+                return;
+              }
+              setSelectedWord(trimmed);
+              synonymSelectionRef.current = { from, to };
+              setSynonymPopupOpen(true);
+              setSynonymLoading(true);
+              setSynonymError(null);
+              setSynonymMessage(null);
+              try {
+                const results = await getSynonyms(
+                  trimmed,
+                  apiKey.trim(),
+                  provider,
+                );
+                setSynonyms(results);
+              } catch (err) {
+                setSynonymError(
+                  err instanceof Error
+                    ? err.message
+                    : "Błąd wyszukiwania synonimów",
+                );
+              } finally {
+                setSynonymLoading(false);
+              }
+            }}
+            data-ocid="chapter.synonyms_toggle_button"
+          >
+            <BookText className="h-3.5 w-3.5 mr-1" />
+            Synonimy
+          </Button>
+
+          {/* Export dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-xs text-muted-foreground hover:text-foreground"
+                data-ocid="chapter.export_dropdown_trigger"
+              >
+                <Download className="h-3.5 w-3.5 mr-1" />
+                Eksportuj
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => {
+                  if (editorRef.current) {
+                    exportToPDF(title, editorRef.current.getHTML());
+                  }
+                }}
+                data-ocid="chapter.export_pdf_item"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Eksportuj do PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  if (editorRef.current) {
+                    const indents = getGlobalIndents();
+                    exportToDOCX(
+                      title,
+                      editorRef.current.getHTML(),
+                      indents.left,
+                      indents.right,
+                      indents.firstLine,
+                    );
+                  }
+                }}
+                data-ocid="chapter.export_docx_item"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Eksportuj do DOCX
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Lektor panel */}

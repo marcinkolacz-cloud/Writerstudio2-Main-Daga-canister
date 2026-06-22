@@ -67538,27 +67538,27 @@ function createAnnotationMark(name, options) {
 }
 const annotationYellow = createAnnotationMark("annotationYellow", {
   color: "yellow",
-  bgClass: "bg-yellow-500/25 dark:bg-yellow-400/30",
+  bgClass: "bg-yellow-500/25 dark:bg-yellow-400/50",
   underlineClass: "border-b-2 border-yellow-500 dark:border-yellow-400"
 });
 const annotationRed = createAnnotationMark("annotationRed", {
   color: "red",
-  bgClass: "bg-red-500/25 dark:bg-red-400/30",
+  bgClass: "bg-red-500/25 dark:bg-red-400/50",
   underlineClass: "border-b-2 border-red-500 dark:border-red-400"
 });
 const annotationBlue = createAnnotationMark("annotationBlue", {
   color: "blue",
-  bgClass: "bg-blue-500/25 dark:bg-blue-400/30",
+  bgClass: "bg-blue-500/25 dark:bg-blue-400/50",
   underlineClass: "border-b-2 border-blue-500 dark:border-blue-400"
 });
 const annotationOrange = createAnnotationMark("annotationOrange", {
   color: "orange",
-  bgClass: "bg-orange-500/25 dark:bg-orange-400/30",
+  bgClass: "bg-orange-500/25 dark:bg-orange-400/50",
   underlineClass: "border-b-2 border-orange-500 dark:border-orange-400"
 });
 const annotationPurple = createAnnotationMark("annotationPurple", {
   color: "purple",
-  bgClass: "bg-purple-500/25 dark:bg-purple-400/30",
+  bgClass: "bg-purple-500/25 dark:bg-purple-400/50",
   underlineClass: "border-b-2 border-purple-500 dark:border-purple-400"
 });
 createAnnotationMark("annotationApplied", {
@@ -105286,7 +105286,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BQBVv5EJ.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CetN6h5R.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -106662,7 +106662,7 @@ function ChapterEditorPage() {
       ) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(SaveIndicator, { status: saveStatus })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 -mt-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
       Input,
       {
         value: title,
@@ -106683,10 +106683,10 @@ function ChapterEditorPage() {
     /* @__PURE__ */ jsxRuntimeExports.jsxs(
       "div",
       {
-        className: "shrink-0 flex flex-wrap items-center gap-4 p-3 rounded-lg border border-border bg-card",
+        className: "shrink-0 flex flex-col gap-2 p-3 rounded-lg border border-border bg-card",
         "data-ocid": "chapter.tools_panel",
         children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col gap-1 flex-1 min-w-[280px]", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-3", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "h-3.5 w-3.5" }),
               "AI"
@@ -106782,7 +106782,8 @@ function ChapterEditorPage() {
               Button,
               {
                 size: "sm",
-                variant: "secondary",
+                variant: "outline",
+                className: "border-[1.5px] border-solid border-primary font-medium",
                 disabled: analysisStatus === "loading" || !apiKey.trim(),
                 onClick: async () => {
                   if (!editorRef.current || !chapter || !book) return;
@@ -106955,256 +106956,262 @@ ${ch.content}`).join("\n\n---\n\n");
                   "Analizuj"
                 ] })
               }
-            )
-          ] }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Button,
-            {
-              size: "sm",
-              variant: lektorPanelOpen ? "default" : "outline",
-              onClick: () => setLektorPanelOpen((v2) => !v2),
-              disabled: provider === "claude",
-              "data-ocid": "chapter.lektor_toggle_button",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(Volume2, { className: "h-3.5 w-3.5 mr-1.5" }),
-                "Lektor"
-              ]
-            }
-          ),
-          (currentAnnotations.length > 0 || persistedAnnotations && persistedAnnotations.length > 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Button,
-            {
-              size: "sm",
-              variant: "default",
-              onClick: () => {
-                if (!editorRef.current) return;
-                const editor = editorRef.current;
-                const annotationMarkNames = [
-                  "annotationYellow",
-                  "annotationRed",
-                  "annotationBlue",
-                  "annotationOrange",
-                  "annotationPurple"
-                ];
-                const annotationsToApprove = currentAnnotations.length > 0 ? currentAnnotations : (persistedAnnotations ?? []).map((pa) => ({
-                  id: pa.id,
-                  text: pa.text,
-                  color: pa.color,
-                  explanation: pa.explanation,
-                  proposal: pa.proposal,
-                  approved: pa.approved
-                }));
-                const tr2 = editor.state.tr;
-                for (const ann of annotationsToApprove) {
-                  let foundFrom = null;
-                  let foundTo = null;
-                  editor.state.doc.descendants((node, pos) => {
-                    if (foundFrom !== null) return false;
-                    if (!node.isText) return true;
-                    const mark = node.marks.find(
-                      (m2) => annotationMarkNames.includes(m2.type.name) && m2.attrs["data-annotation-id"] === String(ann.id)
-                    );
-                    if (mark) {
-                      foundFrom = pos;
-                      foundTo = pos + node.nodeSize;
-                      return false;
-                    }
-                    return true;
-                  });
-                  if (foundFrom !== null && foundTo !== null) {
-                    for (const markName of annotationMarkNames) {
-                      const markType = editor.schema.marks[markName];
-                      if (markType) {
-                        tr2.removeMark(foundFrom, foundTo, markType);
-                      }
-                    }
-                  }
-                }
-                if (tr2.steps.length > 0) {
-                  editor.view.dispatch(tr2);
-                }
-                setCurrentAnnotations([]);
-              },
-              "data-ocid": "chapter.approve_changes_button",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-3.5 w-3.5 mr-1.5" }),
-                "Zatwierdź zmiany"
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Button,
-            {
-              size: "sm",
-              variant: historyPanelOpen ? "default" : "outline",
-              onClick: () => setHistoryPanelOpen((v2) => !v2),
-              "data-ocid": "chapter.history_toggle_button",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(History, { className: "h-3.5 w-3.5 mr-1.5" }),
-                "Historia"
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Button,
-            {
-              size: "sm",
-              variant: recordingsPanelOpen ? "default" : "outline",
-              onClick: () => setRecordingsPanelOpen((v2) => !v2),
-              "data-ocid": "chapter.recordings_toggle_button",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(Headphones, { className: "h-3.5 w-3.5 mr-1.5" }),
-                "Nagrania"
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Button,
-            {
-              size: "sm",
-              variant: contextChatPanelOpen ? "default" : "outline",
-              onClick: () => setContextChatPanelOpen((v2) => !v2),
-              "data-ocid": "chapter.context_chat_toggle_button",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-3.5 w-3.5 mr-1.5" }),
-                "Kontekst"
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Button,
-            {
-              size: "sm",
-              variant: commentsPanelOpen ? "default" : "outline",
-              onClick: () => setCommentsPanelOpen((v2) => !v2),
-              "data-ocid": "chapter.comments_toggle_button",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(MessageSquare, { className: "h-3.5 w-3.5 mr-1.5" }),
-                "Komentarze"
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Button,
-            {
-              ref: synonymButtonRef,
-              size: "sm",
-              variant: synonymPopupOpen ? "default" : "outline",
-              onClick: async () => {
-                if (synonymPopupOpen) {
-                  setSynonymPopupOpen(false);
-                  setSynonyms([]);
-                  setSelectedWord("");
-                  setSynonymMessage(null);
-                  synonymSelectionRef.current = null;
-                  return;
-                }
-                if (!editorRef.current) return;
-                const { from: from2, to } = editorRef.current.state.selection;
-                if (from2 === to) {
-                  setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
-                  setTimeout(() => setSynonymMessage(null), 3e3);
-                  return;
-                }
-                const text = editorRef.current.state.doc.textBetween(from2, to, " ");
-                const trimmed = text.replace(
-                  /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,
-                  ""
-                );
-                if (!trimmed.trim()) {
-                  setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
-                  setTimeout(() => setSynonymMessage(null), 3e3);
-                  return;
-                }
-                setSelectedWord(trimmed);
-                synonymSelectionRef.current = { from: from2, to };
-                setSynonymPopupOpen(true);
-                setSynonymLoading(true);
-                setSynonymError(null);
-                setSynonymMessage(null);
-                try {
-                  const results = await getSynonyms(
-                    trimmed,
-                    apiKey.trim(),
-                    provider
-                  );
-                  setSynonyms(results);
-                } catch (err) {
-                  setSynonymError(
-                    err instanceof Error ? err.message : "Błąd wyszukiwania synonimów"
-                  );
-                } finally {
-                  setSynonymLoading(false);
-                }
-              },
-              "data-ocid": "chapter.synonyms_toggle_button",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(BookText, { className: "h-3.5 w-3.5 mr-1.5" }),
-                "Synonimy"
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(DropdownMenu, { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            ),
+            (currentAnnotations.length > 0 || persistedAnnotations && persistedAnnotations.length > 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
               Button,
               {
                 size: "sm",
-                variant: "outline",
-                "data-ocid": "chapter.export_dropdown_trigger",
+                variant: "default",
+                className: "bg-info text-info-foreground hover:bg-info/90",
+                onClick: () => {
+                  if (!editorRef.current) return;
+                  const editor = editorRef.current;
+                  const annotationMarkNames = [
+                    "annotationYellow",
+                    "annotationRed",
+                    "annotationBlue",
+                    "annotationOrange",
+                    "annotationPurple"
+                  ];
+                  const annotationsToApprove = currentAnnotations.length > 0 ? currentAnnotations : (persistedAnnotations ?? []).map((pa) => ({
+                    id: pa.id,
+                    text: pa.text,
+                    color: pa.color,
+                    explanation: pa.explanation,
+                    proposal: pa.proposal,
+                    approved: pa.approved
+                  }));
+                  const tr2 = editor.state.tr;
+                  for (const ann of annotationsToApprove) {
+                    let foundFrom = null;
+                    let foundTo = null;
+                    editor.state.doc.descendants((node, pos) => {
+                      if (foundFrom !== null) return false;
+                      if (!node.isText) return true;
+                      const mark = node.marks.find(
+                        (m2) => annotationMarkNames.includes(m2.type.name) && m2.attrs["data-annotation-id"] === String(ann.id)
+                      );
+                      if (mark) {
+                        foundFrom = pos;
+                        foundTo = pos + node.nodeSize;
+                        return false;
+                      }
+                      return true;
+                    });
+                    if (foundFrom !== null && foundTo !== null) {
+                      for (const markName of annotationMarkNames) {
+                        const markType = editor.schema.marks[markName];
+                        if (markType) {
+                          tr2.removeMark(foundFrom, foundTo, markType);
+                        }
+                      }
+                    }
+                  }
+                  if (tr2.steps.length > 0) {
+                    editor.view.dispatch(tr2);
+                  }
+                  setCurrentAnnotations([]);
+                },
+                "data-ocid": "chapter.approve_changes_button",
                 children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Download, { className: "h-3.5 w-3.5 mr-1.5" }),
-                  "Eksportuj"
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "h-3.5 w-3.5 mr-1.5" }),
+                  "Zatwierdź zmiany"
                 ]
               }
-            ) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(DropdownMenuContent, { align: "end", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                DropdownMenuItem,
-                {
-                  onClick: () => {
-                    if (editorRef.current) {
-                      exportToPDF(title, editorRef.current.getHTML());
-                    }
-                  },
-                  "data-ocid": "chapter.export_pdf_item",
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 mr-2" }),
-                    "Eksportuj do PDF"
-                  ]
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                DropdownMenuItem,
-                {
-                  onClick: () => {
-                    if (editorRef.current) {
-                      const indents = getGlobalIndents();
-                      exportToDOCX(
-                        title,
-                        editorRef.current.getHTML(),
-                        indents.left,
-                        indents.right,
-                        indents.firstLine
-                      );
-                    }
-                  },
-                  "data-ocid": "chapter.export_docx_item",
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 mr-2" }),
-                    "Eksportuj do DOCX"
-                  ]
-                }
-              )
-            ] })
+            )
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" })
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                size: "sm",
+                variant: "ghost",
+                className: `text-xs ${lektorPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`,
+                onClick: () => setLektorPanelOpen((v2) => !v2),
+                disabled: provider === "claude",
+                "data-ocid": "chapter.lektor_toggle_button",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Volume2, { className: "h-3.5 w-3.5 mr-1" }),
+                  "Lektor"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                size: "sm",
+                variant: "ghost",
+                className: `text-xs ${historyPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`,
+                onClick: () => setHistoryPanelOpen((v2) => !v2),
+                "data-ocid": "chapter.history_toggle_button",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(History, { className: "h-3.5 w-3.5 mr-1" }),
+                  "Historia"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                size: "sm",
+                variant: "ghost",
+                className: `text-xs ${recordingsPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`,
+                onClick: () => setRecordingsPanelOpen((v2) => !v2),
+                "data-ocid": "chapter.recordings_toggle_button",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(Headphones, { className: "h-3.5 w-3.5 mr-1" }),
+                  "Nagrania"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                size: "sm",
+                variant: "ghost",
+                className: `text-xs ${contextChatPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`,
+                onClick: () => setContextChatPanelOpen((v2) => !v2),
+                "data-ocid": "chapter.context_chat_toggle_button",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-3.5 w-3.5 mr-1" }),
+                  "Kontekst"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                size: "sm",
+                variant: "ghost",
+                className: `text-xs ${commentsPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`,
+                onClick: () => setCommentsPanelOpen((v2) => !v2),
+                "data-ocid": "chapter.comments_toggle_button",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(MessageSquare, { className: "h-3.5 w-3.5 mr-1" }),
+                  "Komentarze"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                ref: synonymButtonRef,
+                size: "sm",
+                variant: "ghost",
+                className: `text-xs ${synonymPopupOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`,
+                onClick: async () => {
+                  if (synonymPopupOpen) {
+                    setSynonymPopupOpen(false);
+                    setSynonyms([]);
+                    setSelectedWord("");
+                    setSynonymMessage(null);
+                    synonymSelectionRef.current = null;
+                    return;
+                  }
+                  if (!editorRef.current) return;
+                  const { from: from2, to } = editorRef.current.state.selection;
+                  if (from2 === to) {
+                    setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
+                    setTimeout(() => setSynonymMessage(null), 3e3);
+                    return;
+                  }
+                  const text = editorRef.current.state.doc.textBetween(
+                    from2,
+                    to,
+                    " "
+                  );
+                  const trimmed = text.replace(
+                    /^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,
+                    ""
+                  );
+                  if (!trimmed.trim()) {
+                    setSynonymMessage("Zaznacz słowo, aby znaleźć synonimy");
+                    setTimeout(() => setSynonymMessage(null), 3e3);
+                    return;
+                  }
+                  setSelectedWord(trimmed);
+                  synonymSelectionRef.current = { from: from2, to };
+                  setSynonymPopupOpen(true);
+                  setSynonymLoading(true);
+                  setSynonymError(null);
+                  setSynonymMessage(null);
+                  try {
+                    const results = await getSynonyms(
+                      trimmed,
+                      apiKey.trim(),
+                      provider
+                    );
+                    setSynonyms(results);
+                  } catch (err) {
+                    setSynonymError(
+                      err instanceof Error ? err.message : "Błąd wyszukiwania synonimów"
+                    );
+                  } finally {
+                    setSynonymLoading(false);
+                  }
+                },
+                "data-ocid": "chapter.synonyms_toggle_button",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(BookText, { className: "h-3.5 w-3.5 mr-1" }),
+                  "Synonimy"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(DropdownMenu, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                Button,
+                {
+                  size: "sm",
+                  variant: "ghost",
+                  className: "text-xs text-muted-foreground hover:text-foreground",
+                  "data-ocid": "chapter.export_dropdown_trigger",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(Download, { className: "h-3.5 w-3.5 mr-1" }),
+                    "Eksportuj"
+                  ]
+                }
+              ) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(DropdownMenuContent, { align: "end", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  DropdownMenuItem,
+                  {
+                    onClick: () => {
+                      if (editorRef.current) {
+                        exportToPDF(title, editorRef.current.getHTML());
+                      }
+                    },
+                    "data-ocid": "chapter.export_pdf_item",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 mr-2" }),
+                      "Eksportuj do PDF"
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  DropdownMenuItem,
+                  {
+                    onClick: () => {
+                      if (editorRef.current) {
+                        const indents = getGlobalIndents();
+                        exportToDOCX(
+                          title,
+                          editorRef.current.getHTML(),
+                          indents.left,
+                          indents.right,
+                          indents.firstLine
+                        );
+                      }
+                    },
+                    "data-ocid": "chapter.export_docx_item",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 mr-2" }),
+                      "Eksportuj do DOCX"
+                    ]
+                  }
+                )
+              ] })
+            ] })
+          ] })
         ]
       }
     ),

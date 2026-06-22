@@ -97,31 +97,31 @@ function createAnnotationMark(name: string, options: AnnotationMarkOptions) {
 
 export const annotationYellow = createAnnotationMark("annotationYellow", {
   color: "yellow",
-  bgClass: "bg-yellow-500/25 dark:bg-yellow-400/30",
+  bgClass: "bg-yellow-500/25 dark:bg-yellow-400/50",
   underlineClass: "border-b-2 border-yellow-500 dark:border-yellow-400",
 });
 
 export const annotationRed = createAnnotationMark("annotationRed", {
   color: "red",
-  bgClass: "bg-red-500/25 dark:bg-red-400/30",
+  bgClass: "bg-red-500/25 dark:bg-red-400/50",
   underlineClass: "border-b-2 border-red-500 dark:border-red-400",
 });
 
 export const annotationBlue = createAnnotationMark("annotationBlue", {
   color: "blue",
-  bgClass: "bg-blue-500/25 dark:bg-blue-400/30",
+  bgClass: "bg-blue-500/25 dark:bg-blue-400/50",
   underlineClass: "border-b-2 border-blue-500 dark:border-blue-400",
 });
 
 export const annotationOrange = createAnnotationMark("annotationOrange", {
   color: "orange",
-  bgClass: "bg-orange-500/25 dark:bg-orange-400/30",
+  bgClass: "bg-orange-500/25 dark:bg-orange-400/50",
   underlineClass: "border-b-2 border-orange-500 dark:border-orange-400",
 });
 
 export const annotationPurple = createAnnotationMark("annotationPurple", {
   color: "purple",
-  bgClass: "bg-purple-500/25 dark:bg-purple-400/30",
+  bgClass: "bg-purple-500/25 dark:bg-purple-400/50",
   underlineClass: "border-b-2 border-purple-500 dark:border-purple-400",
 });
 
