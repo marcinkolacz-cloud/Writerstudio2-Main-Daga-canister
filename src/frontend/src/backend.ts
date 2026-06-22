@@ -257,6 +257,25 @@ export interface backendInterface {
     }>): Promise<Array<bigint>>;
     saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
     sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
+    synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
+    ttsTransform(raw: {
+        context: Uint8Array;
+        response: {
+            status: bigint;
+            body: Uint8Array;
+            headers: Array<{
+                value: string;
+                name: string;
+            }>;
+        };
+    }): Promise<{
+        status: bigint;
+        body: Uint8Array;
+        headers: Array<{
+            value: string;
+            name: string;
+        }>;
+    }>;
     updateAnnotationApproved(id: bigint, approved: boolean): Promise<boolean>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
     updateBookMetadata(id: bigint, ageCategory: string, authorSummary: string, keyContext: string, themes: string, writingStyle: string): Promise<boolean>;
@@ -1108,6 +1127,51 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3);
+            return result;
+        }
+    }
+    async synthesizeSpeech(arg0: string, arg1: string, arg2: string): Promise<Uint8Array> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.synthesizeSpeech(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.synthesizeSpeech(arg0, arg1, arg2);
+            return result;
+        }
+    }
+    async ttsTransform(arg0: {
+        context: Uint8Array;
+        response: {
+            status: bigint;
+            body: Uint8Array;
+            headers: Array<{
+                value: string;
+                name: string;
+            }>;
+        };
+    }): Promise<{
+        status: bigint;
+        body: Uint8Array;
+        headers: Array<{
+            value: string;
+            name: string;
+        }>;
+    }> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.ttsTransform(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.ttsTransform(arg0);
             return result;
         }
     }

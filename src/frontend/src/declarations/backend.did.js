@@ -262,6 +262,35 @@ export const idlService = IDL.Service({
       [IDL.Nat],
       [],
     ),
+  'synthesizeSpeech' : IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text],
+      [IDL.Vec(IDL.Nat8)],
+      [],
+    ),
+  'ttsTransform' : IDL.Func(
+      [
+        IDL.Record({
+          'context' : IDL.Vec(IDL.Nat8),
+          'response' : IDL.Record({
+            'status' : IDL.Nat,
+            'body' : IDL.Vec(IDL.Nat8),
+            'headers' : IDL.Vec(
+              IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text })
+            ),
+          }),
+        }),
+      ],
+      [
+        IDL.Record({
+          'status' : IDL.Nat,
+          'body' : IDL.Vec(IDL.Nat8),
+          'headers' : IDL.Vec(
+            IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text })
+          ),
+        }),
+      ],
+      ['query'],
+    ),
   'updateAnnotationApproved' : IDL.Func([IDL.Nat, IDL.Bool], [IDL.Bool], []),
   'updateBook' : IDL.Func(
       [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
@@ -541,6 +570,35 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
         [IDL.Nat],
         [],
+      ),
+    'synthesizeSpeech' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text],
+        [IDL.Vec(IDL.Nat8)],
+        [],
+      ),
+    'ttsTransform' : IDL.Func(
+        [
+          IDL.Record({
+            'context' : IDL.Vec(IDL.Nat8),
+            'response' : IDL.Record({
+              'status' : IDL.Nat,
+              'body' : IDL.Vec(IDL.Nat8),
+              'headers' : IDL.Vec(
+                IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text })
+              ),
+            }),
+          }),
+        ],
+        [
+          IDL.Record({
+            'status' : IDL.Nat,
+            'body' : IDL.Vec(IDL.Nat8),
+            'headers' : IDL.Vec(
+              IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text })
+            ),
+          }),
+        ],
+        ['query'],
       ),
     'updateAnnotationApproved' : IDL.Func([IDL.Nat, IDL.Bool], [IDL.Bool], []),
     'updateBook' : IDL.Func(

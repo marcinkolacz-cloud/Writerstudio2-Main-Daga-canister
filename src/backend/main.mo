@@ -12,6 +12,7 @@ import CommentsApi "mixins/CommentsApi";
 import StatsApi "mixins/StatsApi";
 import RecordingsApi "mixins/RecordingsApi";
 import InvitesApi "mixins/InvitesApi";
+import TtsApi "mixins/TtsApi";
 
 actor {
   let books : Map.Map<Nat, Types.Book>;
@@ -45,5 +46,6 @@ actor {
   include CommentsApi(books, chapters, comments);
   include StatsApi(books, chapters);
   include RecordingsApi(books, chapters, recordings);
+  include TtsApi();
   include InvitesApi(books, inviteCodes);
 };

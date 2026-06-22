@@ -1,4 +1,4 @@
-import { type InviteCode, Recording, createActor } from "@/backend";
+import { Recording, createActor } from "@/backend";
 import type {
   Analysis,
   Book,
@@ -7,6 +7,7 @@ import type {
   ChatSession,
   ChatSessionMessage,
   Comment,
+  InviteCode,
   TextAnnotation,
 } from "@/backend";
 import { useActor } from "@caffeineai/core-infrastructure";
@@ -786,6 +787,25 @@ export function useIsAdmin() {
       }
     },
     enabled: !!actor,
+  });
+}
+
+export function useSynthesizeSpeech() {
+  const { actor } = useActor(createActor);
+
+  return useMutation({
+    mutationFn: async ({
+      text,
+      voice,
+      apiKey,
+    }: {
+      text: string;
+      voice: string;
+      apiKey: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.synthesizeSpeech(text, voice, apiKey);
+    },
   });
 }
 

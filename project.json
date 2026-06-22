@@ -1,11 +1,13 @@
 {
-  "overview": "WriterStudio TipTap — platforma do wspólnego pisania książek z systemem kodów zaproszeń",
+  "overview": "Writer Studio 2 — advanced collaborative book writing platform with AI-powered analysis, TTS, and contextual chat.",
   "features": [
-    "Zarządzanie książkami i rozdziałami",
-    "Edycja tekstu z TipTap",
-    "Analiza AI tekstu",
-    "System kodów zaproszeń z panelem admina",
-    "Czat kontekstowy per rozdział"
+    "Book and chapter management with drag-and-drop reorder",
+    "TipTap rich text editor with AI annotations and inline comments",
+    "AI analysis modes: grammar, style, dialogue, scene expansion, emotion, consistency",
+    "Text-to-speech via backend IC HTTPS outcalls",
+    "Contextual per-chapter AI chat with sessions",
+    "PDF/DOCX export",
+    "Statistics and invite code system"
   ],
   "category": "productivity",
   "tags": [
@@ -15,5 +17,5 @@
     "editor",
     "books"
   ],
-  "last_updated": "2026-06-22T07:41:30.051Z"
+  "last_updated": "2026-06-22T08:45:36.191Z"
 }

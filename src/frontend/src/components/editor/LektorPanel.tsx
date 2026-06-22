@@ -1,3 +1,4 @@
+import { createActor } from "@/backend";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -10,8 +11,16 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { useSaveRecording } from "@/hooks/useBackend";
 import { generateSpeech } from "@/lib/tts";
+import { useActor } from "@caffeineai/core-infrastructure";
 import type { Editor } from "@tiptap/core";
-import { Pause, Play, Save, Square, Volume2 } from "lucide-react";
+import {
+  AlertTriangle,
+  Pause,
+  Play,
+  Save,
+  Square,
+  Volume2,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const VOICES = [
@@ -25,19 +34,15 @@ const VOICES = [
 
 interface LektorPanelProps {
   editor: Editor | null;
-  apiKey: string;
   chapterId: bigint;
   bookId: bigint;
 }
 
 type PlaybackState = "idle" | "loading" | "playing" | "paused";
 
-export function LektorPanel({
-  editor,
-  apiKey,
-  chapterId,
-  bookId,
-}: LektorPanelProps) {
+export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
+  const { actor } = useActor(createActor);
+  const apiKey = localStorage.getItem("ws_api_key") ?? "";
   const [voice, setVoice] = useState("alloy");
   const [speed, setSpeed] = useState([1.0]);
   const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");
@@ -105,7 +110,13 @@ export function LektorPanel({
     setPlaybackState("loading");
 
     try {
-      const blob = await generateSpeech(text, apiKey.trim(), voice, speed[0]);
+      if (!actor) {
+        setError("Brak połączenia z backendem");
+        setPlaybackState("idle");
+        return;
+      }
+
+      const blob = await generateSpeech(text, voice, apiKey.trim(), actor);
       setGeneratedBlob(blob);
 
       // Clean up previous audio if any
@@ -141,7 +152,7 @@ export function LektorPanel({
       setError(err instanceof Error ? err.message : "Błąd generowania audio");
       setPlaybackState("idle");
     }
-  }, [editor, apiKey, voice, speed, cleanupAudio]);
+  }, [editor, apiKey, voice, actor, cleanupAudio]);
 
   const handlePause = useCallback(() => {
     if (audioRef.current && playbackState === "playing") {
@@ -220,7 +231,7 @@ export function LektorPanel({
         <Button
           size="sm"
           variant={playbackState === "playing" ? "outline" : "default"}
-          disabled={playbackState === "loading" || !apiKey.trim()}
+          disabled={playbackState === "loading" || !apiKey.trim() || !actor}
           onClick={
             playbackState === "playing" || playbackState === "paused"
               ? handlePause
@@ -281,6 +292,15 @@ export function LektorPanel({
           <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">
             {formatTime(progress)} / {formatTime(duration)}
           </span>
+        </div>
+      )}
+
+      {/* Word count warning */}
+      {editor && editor.getText().trim().split(/\s+/).length > 5000 && (
+        <div className="w-full flex items-center gap-2 text-xs text-amber-600 bg-amber-50 rounded-md px-3 py-2">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+          Długie rozdziały (ponad 5000 słów) mogą nie zmieścić się w limicie —
+          podziel tekst na mniejsze fragmenty.
         </div>
       )}
 

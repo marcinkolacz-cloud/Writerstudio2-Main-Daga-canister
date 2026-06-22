@@ -32077,6 +32077,35 @@ Service({
     [Nat],
     []
   ),
+  "synthesizeSpeech": Func(
+    [Text$4, Text$4, Text$4],
+    [Vec(Nat8)],
+    []
+  ),
+  "ttsTransform": Func(
+    [
+      Record({
+        "context": Vec(Nat8),
+        "response": Record({
+          "status": Nat,
+          "body": Vec(Nat8),
+          "headers": Vec(
+            Record({ "value": Text$4, "name": Text$4 })
+          )
+        })
+      })
+    ],
+    [
+      Record({
+        "status": Nat,
+        "body": Vec(Nat8),
+        "headers": Vec(
+          Record({ "value": Text$4, "name": Text$4 })
+        )
+      })
+    ],
+    ["query"]
+  ),
   "updateAnnotationApproved": Func([Nat, Bool], [Bool], []),
   "updateBook": Func(
     [Nat, Text$4, Text$4, Text$4],
@@ -32352,6 +32381,35 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Nat, IDL2.Text, IDL2.Text, IDL2.Text],
       [IDL2.Nat],
       []
+    ),
+    "synthesizeSpeech": IDL2.Func(
+      [IDL2.Text, IDL2.Text, IDL2.Text],
+      [IDL2.Vec(IDL2.Nat8)],
+      []
+    ),
+    "ttsTransform": IDL2.Func(
+      [
+        IDL2.Record({
+          "context": IDL2.Vec(IDL2.Nat8),
+          "response": IDL2.Record({
+            "status": IDL2.Nat,
+            "body": IDL2.Vec(IDL2.Nat8),
+            "headers": IDL2.Vec(
+              IDL2.Record({ "value": IDL2.Text, "name": IDL2.Text })
+            )
+          })
+        })
+      ],
+      [
+        IDL2.Record({
+          "status": IDL2.Nat,
+          "body": IDL2.Vec(IDL2.Nat8),
+          "headers": IDL2.Vec(
+            IDL2.Record({ "value": IDL2.Text, "name": IDL2.Text })
+          )
+        })
+      ],
+      ["query"]
     ),
     "updateAnnotationApproved": IDL2.Func([IDL2.Nat, IDL2.Bool], [IDL2.Bool], []),
     "updateBook": IDL2.Func(
@@ -33213,6 +33271,34 @@ class Backend {
       }
     } else {
       const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3);
+      return result;
+    }
+  }
+  async synthesizeSpeech(arg0, arg1, arg2) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.synthesizeSpeech(arg0, arg1, arg2);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.synthesizeSpeech(arg0, arg1, arg2);
+      return result;
+    }
+  }
+  async ttsTransform(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.ttsTransform(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.ttsTransform(arg0);
       return result;
     }
   }
@@ -49259,37 +49345,21 @@ function splitTextIntoChunks(text) {
   }
   return chunks;
 }
-async function generateSpeechChunk(text, apiKey, voice, speed) {
-  const res = await fetch("https://api.openai.com/v1/audio/speech", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: "tts-1",
-      input: text,
-      voice,
-      speed
-    })
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`OpenAI TTS error ${res.status}: ${err}`);
-  }
-  return res.blob();
+async function generateSpeechChunk(text, voice, apiKey, actor) {
+  const bytes = await actor.synthesizeSpeech(text, voice, apiKey);
+  return new Blob([new Uint8Array(bytes)], { type: "audio/mpeg" });
 }
-async function generateSpeech(text, apiKey, voice, speed) {
+async function generateSpeech(text, voice, apiKey, actor) {
   if (!text.trim()) {
     throw new Error("Brak tekstu do odczytania");
   }
   const chunks = splitTextIntoChunks(text);
   if (chunks.length === 1) {
-    return generateSpeechChunk(chunks[0], apiKey, voice, speed);
+    return generateSpeechChunk(chunks[0], voice, apiKey, actor);
   }
   const blobs = [];
   for (let i2 = 0; i2 < chunks.length; i2++) {
-    const blob = await generateSpeechChunk(chunks[i2], apiKey, voice, speed);
+    const blob = await generateSpeechChunk(chunks[i2], voice, apiKey, actor);
     blobs.push(blob);
   }
   return new Blob(blobs, { type: "audio/mpeg" });
@@ -49302,12 +49372,9 @@ const VOICES = [
   { value: "nova", label: "Nova" },
   { value: "shimmer", label: "Shimmer" }
 ];
-function LektorPanel({
-  editor,
-  apiKey,
-  chapterId,
-  bookId
-}) {
+function LektorPanel({ editor, chapterId, bookId }) {
+  const { actor } = useActor(createActor);
+  const apiKey = localStorage.getItem("ws_api_key") ?? "";
   const [voice, setVoice] = reactExports.useState("alloy");
   const [speed, setSpeed] = reactExports.useState([1]);
   const [playbackState, setPlaybackState] = reactExports.useState("idle");
@@ -49367,7 +49434,12 @@ function LektorPanel({
     setError(null);
     setPlaybackState("loading");
     try {
-      const blob = await generateSpeech(text, apiKey.trim(), voice, speed[0]);
+      if (!actor) {
+        setError("Brak połączenia z backendem");
+        setPlaybackState("idle");
+        return;
+      }
+      const blob = await generateSpeech(text, voice, apiKey.trim(), actor);
       setGeneratedBlob(blob);
       cleanupAudio();
       const url = URL.createObjectURL(blob);
@@ -49394,7 +49466,7 @@ function LektorPanel({
       setError(err instanceof Error ? err.message : "Błąd generowania audio");
       setPlaybackState("idle");
     }
-  }, [editor, apiKey, voice, speed, cleanupAudio]);
+  }, [editor, apiKey, voice, actor, cleanupAudio]);
   const handlePause = reactExports.useCallback(() => {
     if (audioRef.current && playbackState === "playing") {
       audioRef.current.pause();
@@ -49463,7 +49535,7 @@ function LektorPanel({
             {
               size: "sm",
               variant: playbackState === "playing" ? "outline" : "default",
-              disabled: playbackState === "loading" || !apiKey.trim(),
+              disabled: playbackState === "loading" || !apiKey.trim() || !actor,
               onClick: playbackState === "playing" || playbackState === "paused" ? handlePause : handlePlay,
               "data-ocid": "lektor.play_pause_button",
               children: [
@@ -49514,6 +49586,10 @@ function LektorPanel({
             " / ",
             formatTime(duration)
           ] })
+        ] }),
+        editor && editor.getText().trim().split(/\s+/).length > 5e3 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full flex items-center gap-2 text-xs text-amber-600 bg-amber-50 rounded-md px-3 py-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(TriangleAlert, { className: "h-3.5 w-3.5 shrink-0" }),
+          "Długie rozdziały (ponad 5000 słów) mogą nie zmieścić się w limicie — podziel tekst na mniejsze fragmenty."
         ] }),
         error && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full text-xs text-destructive bg-destructive/10 rounded-md px-3 py-2", children: error })
       ]
@@ -105286,7 +105362,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CetN6h5R.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DCJL1jNP.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107215,11 +107291,10 @@ ${ch.content}`).join("\n\n---\n\n");
         ]
       }
     ),
-    lektorPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { "data-ocid": "chapter.lektor_panel_container", children: provider === "claude" ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border", children: "Lektor wymaga klucza API OpenAI. Przełącz provider na OpenAI lub wprowadź klucz OpenAI." }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+    lektorPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { "data-ocid": "chapter.lektor_panel_container", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
       LektorPanel,
       {
         editor: editorRef.current,
-        apiKey,
         chapterId: chapter.id,
         bookId: book.id
       }

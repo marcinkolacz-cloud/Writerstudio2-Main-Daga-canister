@@ -1089,19 +1089,11 @@ export function ChapterEditorPage() {
       {/* Lektor panel */}
       {lektorPanelOpen && (
         <div data-ocid="chapter.lektor_panel_container">
-          {provider === "claude" ? (
-            <div className="shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border">
-              Lektor wymaga klucza API OpenAI. Przełącz provider na OpenAI lub
-              wprowadź klucz OpenAI.
-            </div>
-          ) : (
-            <LektorPanel
-              editor={editorRef.current}
-              apiKey={apiKey}
-              chapterId={chapter.id}
-              bookId={book.id}
-            />
-          )}
+          <LektorPanel
+            editor={editorRef.current}
+            chapterId={chapter.id}
+            bookId={book.id}
+          />
         </div>
       )}
 

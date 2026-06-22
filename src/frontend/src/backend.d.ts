@@ -156,6 +156,25 @@ export interface backendInterface {
     }>): Promise<Array<bigint>>;
     saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
     sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
+    synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
+    ttsTransform(raw: {
+        context: Uint8Array;
+        response: {
+            status: bigint;
+            body: Uint8Array;
+            headers: Array<{
+                value: string;
+                name: string;
+            }>;
+        };
+    }): Promise<{
+        status: bigint;
+        body: Uint8Array;
+        headers: Array<{
+            value: string;
+            name: string;
+        }>;
+    }>;
     updateAnnotationApproved(id: bigint, approved: boolean): Promise<boolean>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
     updateBookMetadata(id: bigint, ageCategory: string, authorSummary: string, keyContext: string, themes: string, writingStyle: string): Promise<boolean>;

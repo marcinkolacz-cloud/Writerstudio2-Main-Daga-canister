@@ -2390,6 +2390,10 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(254 243 199 / var(--tw-bg-opacity, 1));
 }
+.bg-amber-50 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 251 235 / var(--tw-bg-opacity, 1));
+}
 .bg-background {
   background-color: oklch(var(--background));
 }
@@ -2731,6 +2735,10 @@ video {
 }
 .text-accent-foreground {
   color: oklch(var(--accent-foreground));
+}
+.text-amber-600 {
+  --tw-text-opacity: 1;
+  color: rgb(217 119 6 / var(--tw-text-opacity, 1));
 }
 .text-amber-700 {
   --tw-text-opacity: 1;

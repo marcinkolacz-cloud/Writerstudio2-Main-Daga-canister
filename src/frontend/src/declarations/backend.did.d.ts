@@ -220,6 +220,24 @@ export interface _SERVICE {
   >,
   'saveRecording' : ActorMethod<[bigint, bigint, string, Uint8Array], bigint>,
   'sendMessage' : ActorMethod<[bigint, string, string, string], bigint>,
+  'synthesizeSpeech' : ActorMethod<[string, string, string], Uint8Array>,
+  'ttsTransform' : ActorMethod<
+    [
+      {
+        'context' : Uint8Array,
+        'response' : {
+          'status' : bigint,
+          'body' : Uint8Array,
+          'headers' : Array<{ 'value' : string, 'name' : string }>,
+        },
+      },
+    ],
+    {
+      'status' : bigint,
+      'body' : Uint8Array,
+      'headers' : Array<{ 'value' : string, 'name' : string }>,
+    }
+  >,
   'updateAnnotationApproved' : ActorMethod<[bigint, boolean], boolean>,
   'updateBook' : ActorMethod<[bigint, string, string, string], boolean>,
   'updateBookMetadata' : ActorMethod<
