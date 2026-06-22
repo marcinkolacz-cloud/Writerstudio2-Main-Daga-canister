@@ -105505,7 +105505,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Bs9bS0Al.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-KXgMylMP.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -106580,13 +106580,16 @@ function SaveIndicator({ status }) {
   );
 }
 function findFirstTextRangeInDoc(editor, searchText) {
+  const normalizedSearch = searchText.replace(/\r/g, "").replace(/\s+/g, " ").trim();
+  if (!normalizedSearch) return null;
   let result = null;
   editor.state.doc.descendants((node, pos) => {
     if (result) return false;
     if (!node.isText || !node.text) return true;
-    const idx = node.text.indexOf(searchText);
+    const normalizedNodeText = node.text.replace(/\r/g, "").replace(/\s+/g, " ").trim();
+    const idx = normalizedNodeText.indexOf(normalizedSearch);
     if (idx !== -1) {
-      result = { from: pos + idx, to: pos + idx + searchText.length };
+      result = { from: pos + idx, to: pos + idx + normalizedSearch.length };
       return false;
     }
     return true;
@@ -106645,8 +106648,12 @@ function applyAnnotationsToEditor(editor, annotations, options) {
   }
   const rangedAnnotations = annotations.map((ann) => {
     if ((options == null ? void 0 : options.skipApproved) && ann.approved) return null;
-    const range3 = findFirstTextRangeInDoc(editor, ann.text);
-    if (!range3) return null;
+    const normalizedSearch = ann.text.replace(/\r/g, "").replace(/\s+/g, " ").trim();
+    const range3 = findFirstTextRangeInDoc(editor, normalizedSearch);
+    if (!range3) {
+      console.log("[NOT FOUND]", ann.text.substring(0, 50));
+      return null;
+    }
     return {
       ann,
       start: range3.from,

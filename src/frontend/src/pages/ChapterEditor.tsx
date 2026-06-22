@@ -131,13 +131,22 @@ function findFirstTextRangeInDoc(
   editor: Editor,
   searchText: string,
 ): { from: number; to: number } | null {
+  const normalizedSearch = searchText
+    .replace(/\r/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!normalizedSearch) return null;
   let result: { from: number; to: number } | null = null;
   editor.state.doc.descendants((node, pos) => {
     if (result) return false;
     if (!node.isText || !node.text) return true;
-    const idx = node.text.indexOf(searchText);
+    const normalizedNodeText = node.text
+      .replace(/\r/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    const idx = normalizedNodeText.indexOf(normalizedSearch);
     if (idx !== -1) {
-      result = { from: pos + idx, to: pos + idx + searchText.length };
+      result = { from: pos + idx, to: pos + idx + normalizedSearch.length };
       return false;
     }
     return true;
@@ -213,8 +222,15 @@ function applyAnnotationsToEditor(
   const rangedAnnotations = annotations
     .map((ann) => {
       if (options?.skipApproved && ann.approved) return null;
-      const range = findFirstTextRangeInDoc(editor, ann.text);
-      if (!range) return null;
+      const normalizedSearch = ann.text
+        .replace(/\r/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+      const range = findFirstTextRangeInDoc(editor, normalizedSearch);
+      if (!range) {
+        console.log("[NOT FOUND]", ann.text.substring(0, 50));
+        return null;
+      }
       return {
         ann,
         start: range.from,
