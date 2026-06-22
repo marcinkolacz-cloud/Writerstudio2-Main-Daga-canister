@@ -1,11 +1,7 @@
 import { SettingsModal } from "@/components/SettingsModal";
 import { ChatBotPanel } from "@/components/chat/ChatBotPanel";
 import { Button } from "@/components/ui/button";
-import {
-  useChapters,
-  useIsAdmin,
-  useReorderChapters,
-} from "@/hooks/useBackend";
+import { useChapters, useReorderChapters } from "@/hooks/useBackend";
 import { useAppStore } from "@/store/useAppStore";
 import { useInternetIdentity } from "@caffeineai/core-infrastructure";
 import {
@@ -50,8 +46,7 @@ export function Layout() {
   const activeBookId = useActiveBookId();
   const activeChapterId = useActiveChapterId();
   const { data: chapters } = useChapters(activeBookId ?? "");
-  const { data: isAdminData } = useIsAdmin();
-  const isAdmin = isAdminData === true;
+
   const reorderChapters = useReorderChapters();
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">(() => {
@@ -216,17 +211,15 @@ export function Layout() {
                 <BarChart3 className="h-4 w-4" />
                 Statystyki
               </button>
-              {isAdmin && (
-                <button
-                  type="button"
-                  onClick={() => navigate({ to: "/admin" })}
-                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                  data-ocid="nav.admin_link"
-                >
-                  <Shield className="h-4 w-4" />
-                  Admin
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/admin" })}
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                data-ocid="nav.admin_link"
+              >
+                <Shield className="h-4 w-4" />
+                Admin
+              </button>
             </>
           )}
         </div>

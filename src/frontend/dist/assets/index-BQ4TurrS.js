@@ -34057,22 +34057,6 @@ function useRevokeInviteCode() {
     }
   });
 }
-function useIsAdmin() {
-  const { actor } = useActor(createActor);
-  return useQuery({
-    queryKey: ["isAdmin"],
-    queryFn: async () => {
-      if (!actor) return false;
-      try {
-        await actor.listInviteCodes();
-        return true;
-      } catch {
-        return false;
-      }
-    },
-    enabled: !!actor
-  });
-}
 function useDeleteChatSession() {
   const { actor } = useActor(createActor);
   const queryClient2 = useQueryClient();
@@ -46099,8 +46083,6 @@ function Layout() {
   const activeBookId = useActiveBookId();
   const activeChapterId = useActiveChapterId();
   const { data: chapters } = useChapters(activeBookId ?? "");
-  const { data: isAdminData } = useIsAdmin();
-  const isAdmin = isAdminData === true;
   const reorderChapters = useReorderChapters();
   const [dragOverIndex, setDragOverIndex] = reactExports.useState(null);
   const [theme, setTheme] = reactExports.useState(() => {
@@ -46249,7 +46231,7 @@ function Layout() {
               ]
             }
           ),
-          isAdmin && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
             "button",
             {
               type: "button",
@@ -105362,7 +105344,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DCJL1jNP.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DhUIH6XI.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
