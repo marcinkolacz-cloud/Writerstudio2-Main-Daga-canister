@@ -38732,12 +38732,23 @@ const createLucideIcon = (iconName, iconNode) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$K = [
+const __iconNode$L = [
   ["path", { d: "M15 12H3", key: "6jk70r" }],
   ["path", { d: "M17 18H3", key: "1amg6g" }],
   ["path", { d: "M21 6H3", key: "1jwq7v" }]
 ];
-const AlignLeft = createLucideIcon("align-left", __iconNode$K);
+const AlignLeft = createLucideIcon("align-left", __iconNode$L);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$K = [
+  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
+  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+];
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$K);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38745,10 +38756,12 @@ const AlignLeft = createLucideIcon("align-left", __iconNode$K);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$J = [
-  ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
-  ["path", { d: "M19 12H5", key: "x3x0zl" }]
+  [
+    "path",
+    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
+  ]
 ];
-const ArrowLeft = createLucideIcon("arrow-left", __iconNode$J);
+const Bold$1 = createLucideIcon("bold", __iconNode$J);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38756,19 +38769,6 @@ const ArrowLeft = createLucideIcon("arrow-left", __iconNode$J);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$I = [
-  [
-    "path",
-    { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
-  ]
-];
-const Bold$1 = createLucideIcon("bold", __iconNode$I);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$H = [
   ["path", { d: "M12 7v14", key: "1akyts" }],
   [
     "path",
@@ -38778,14 +38778,14 @@ const __iconNode$H = [
     }
   ]
 ];
-const BookOpen = createLucideIcon("book-open", __iconNode$H);
+const BookOpen = createLucideIcon("book-open", __iconNode$I);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$G = [
+const __iconNode$H = [
   [
     "path",
     {
@@ -38796,44 +38796,55 @@ const __iconNode$G = [
   ["path", { d: "M8 11h8", key: "vwpz6n" }],
   ["path", { d: "M8 7h6", key: "1f0q6e" }]
 ];
-const BookText = createLucideIcon("book-text", __iconNode$G);
+const BookText = createLucideIcon("book-text", __iconNode$H);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$F = [
+const __iconNode$G = [
   ["path", { d: "M3 3v16a2 2 0 0 0 2 2h16", key: "c24i48" }],
   ["path", { d: "M18 17V9", key: "2bz60n" }],
   ["path", { d: "M13 17V5", key: "1frdt8" }],
   ["path", { d: "M8 17v-3", key: "17ska0" }]
 ];
-const ChartColumn = createLucideIcon("chart-column", __iconNode$F);
+const ChartColumn = createLucideIcon("chart-column", __iconNode$G);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$E = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$E);
+const __iconNode$F = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$F);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$D = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$D);
+const __iconNode$E = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$E);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$C = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-const ChevronUp = createLucideIcon("chevron-up", __iconNode$C);
+const __iconNode$D = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+const ChevronUp = createLucideIcon("chevron-up", __iconNode$D);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$C = [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
+];
+const CircleCheck = createLucideIcon("circle-check", __iconNode$C);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38842,9 +38853,9 @@ const ChevronUp = createLucideIcon("chevron-up", __iconNode$C);
  */
 const __iconNode$B = [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
+  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
 ];
-const CircleCheck = createLucideIcon("circle-check", __iconNode$B);
+const Clock = createLucideIcon("clock", __iconNode$B);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -38852,10 +38863,10 @@ const CircleCheck = createLucideIcon("circle-check", __iconNode$B);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$A = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
+  ["path", { d: "M20 4v7a4 4 0 0 1-4 4H4", key: "6o5b7l" }],
+  ["path", { d: "m9 10-5 5 5 5", key: "1kshq7" }]
 ];
-const Clock = createLucideIcon("clock", __iconNode$A);
+const CornerDownLeft = createLucideIcon("corner-down-left", __iconNode$A);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -47650,6 +47661,22 @@ function ContextChatPanel({
   const [isAutoStarting, setIsAutoStarting] = reactExports.useState(false);
   const scrollRef = reactExports.useRef(null);
   const inputRef = reactExports.useRef(null);
+  const splitObservations = reactExports.useCallback((text) => {
+    if (!text.trim()) return [];
+    const numbered = text.split(/\n(?=\d+\.\s)/);
+    if (numbered.length > 1) {
+      return numbered.map((s2) => s2.trim()).filter((s2) => s2.length > 0);
+    }
+    const bullets = text.split(/\n(?=[-–]\s)/);
+    if (bullets.length > 1) {
+      return bullets.map((s2) => s2.trim()).filter((s2) => s2.length > 0);
+    }
+    const paragraphs = text.split(/\n\n+/);
+    if (paragraphs.length > 1) {
+      return paragraphs.map((s2) => s2.trim()).filter((s2) => s2.length > 0);
+    }
+    return [text.trim()];
+  }, []);
   const { data: sessions = [], isLoading: sessionsLoading } = useChatSessions(
     String(chapterId)
   );
@@ -47841,6 +47868,18 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
     provider,
     apiKey
   ]);
+  const handleReplyToObservation = reactExports.useCallback((observationText) => {
+    const quote = `> "${observationText}"
+
+`;
+    setInputText(quote);
+    requestAnimationFrame(() => {
+      var _a4, _b3, _c2;
+      (_a4 = inputRef.current) == null ? void 0 : _a4.focus();
+      const len = ((_b3 = inputRef.current) == null ? void 0 : _b3.value.length) ?? 0;
+      (_c2 = inputRef.current) == null ? void 0 : _c2.setSelectionRange(len, len);
+    });
+  }, []);
   const handleKeyDown2 = reactExports.useCallback(
     (e3) => {
       if (e3.key === "Enter" && !e3.shiftKey) {
@@ -47955,6 +47994,50 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
         }
       ) : messages2.map((msg, index2) => {
         const isUser = msg.role === "user";
+        const isFirstAssistant = !isUser && index2 === messages2.findIndex((m2) => m2.role === "assistant");
+        if (!isUser && isFirstAssistant) {
+          const observations = splitObservations(msg.content);
+          return /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "flex justify-start",
+              "data-ocid": `context_chat.message.${index2 + 1}`,
+              children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-[90%] space-y-2", children: [
+                observations.map((obs) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "div",
+                  {
+                    className: "bg-muted rounded-lg px-3 py-2 text-sm text-foreground",
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "whitespace-pre-wrap break-words", children: obs }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                        Button,
+                        {
+                          variant: "ghost",
+                          size: "sm",
+                          className: "h-6 px-2 mt-1 text-xs text-muted-foreground hover:text-foreground",
+                          onClick: () => handleReplyToObservation(obs),
+                          "data-ocid": "context_chat.reply_button",
+                          children: [
+                            /* @__PURE__ */ jsxRuntimeExports.jsx(CornerDownLeft, { className: "h-3 w-3 mr-1" }),
+                            "Odpowiedz"
+                          ]
+                        }
+                      )
+                    ]
+                  },
+                  obs.trim().slice(0, 40).replace(/\s+/g, "-")
+                )),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] block text-muted-foreground/60", children: new Date(
+                  Number(msg.createdAt) / 1e6
+                ).toLocaleTimeString("pl-PL", {
+                  hour: "2-digit",
+                  minute: "2-digit"
+                }) })
+              ] })
+            },
+            String(msg.id)
+          );
+        }
         return /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
           {
@@ -104658,7 +104741,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Br_WCXAO.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-gJXn_d7N.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

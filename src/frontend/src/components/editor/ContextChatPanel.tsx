@@ -14,6 +14,7 @@ import { analyzeWithContext } from "@/lib/aiAnalysis";
 import type { Editor } from "@tiptap/react";
 import {
   ArrowLeft,
+  CornerDownLeft,
   Loader2,
   MessageCircle,
   Send,
@@ -59,6 +60,27 @@ export function ContextChatPanel({
   const [isAutoStarting, setIsAutoStarting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Helper: split first assistant message into observation points
+  const splitObservations = useCallback((text: string): string[] => {
+    if (!text.trim()) return [];
+    // Try numbered list first: "1. ", "2. " etc.
+    const numbered = text.split(/\n(?=\d+\.\s)/);
+    if (numbered.length > 1) {
+      return numbered.map((s) => s.trim()).filter((s) => s.length > 0);
+    }
+    // Try bullet list: "\n- " or "\n– "
+    const bullets = text.split(/\n(?=[-–]\s)/);
+    if (bullets.length > 1) {
+      return bullets.map((s) => s.trim()).filter((s) => s.length > 0);
+    }
+    // Fallback: split by double newlines
+    const paragraphs = text.split(/\n\n+/);
+    if (paragraphs.length > 1) {
+      return paragraphs.map((s) => s.trim()).filter((s) => s.length > 0);
+    }
+    return [text.trim()];
+  }, []);
 
   const { data: sessions = [], isLoading: sessionsLoading } = useChatSessions(
     String(chapterId),
@@ -316,6 +338,18 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
     apiKey,
   ]);
 
+  const handleReplyToObservation = useCallback((observationText: string) => {
+    const quote = `> "${observationText}"\n\n`;
+    setInputText(quote);
+    // Focus input after state update
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      // Move cursor to end
+      const len = inputRef.current?.value.length ?? 0;
+      inputRef.current?.setSelectionRange(len, len);
+    });
+  }, []);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -451,6 +485,52 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
           ) : (
             messages.map((msg, index) => {
               const isUser = msg.role === "user";
+              const isFirstAssistant =
+                !isUser &&
+                index === messages.findIndex((m) => m.role === "assistant");
+
+              if (!isUser && isFirstAssistant) {
+                const observations = splitObservations(msg.content);
+                return (
+                  <div
+                    key={String(msg.id)}
+                    className="flex justify-start"
+                    data-ocid={`context_chat.message.${index + 1}`}
+                  >
+                    <div className="max-w-[90%] space-y-2">
+                      {observations.map((obs) => (
+                        <div
+                          key={obs.trim().slice(0, 40).replace(/\s+/g, "-")}
+                          className="bg-muted rounded-lg px-3 py-2 text-sm text-foreground"
+                        >
+                          <p className="whitespace-pre-wrap break-words">
+                            {obs}
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 px-2 mt-1 text-xs text-muted-foreground hover:text-foreground"
+                            onClick={() => handleReplyToObservation(obs)}
+                            data-ocid="context_chat.reply_button"
+                          >
+                            <CornerDownLeft className="h-3 w-3 mr-1" />
+                            Odpowiedz
+                          </Button>
+                        </div>
+                      ))}
+                      <span className="text-[10px] block text-muted-foreground/60">
+                        {new Date(
+                          Number(msg.createdAt) / 1_000_000,
+                        ).toLocaleTimeString("pl-PL", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }
+
               return (
                 <div
                   key={String(msg.id)}
