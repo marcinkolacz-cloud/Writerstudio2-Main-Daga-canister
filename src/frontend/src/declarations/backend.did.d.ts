@@ -58,6 +58,19 @@ export interface ChatMessage {
   'role' : string,
   'bookId' : bigint,
 }
+export interface ChatSession {
+  'id' : bigint,
+  'title' : string,
+  'createdAt' : bigint,
+  'chapterId' : bigint,
+}
+export interface ChatSessionMessage {
+  'id' : bigint,
+  'content' : string,
+  'createdAt' : bigint,
+  'role' : string,
+  'sessionId' : bigint,
+}
 export interface Comment {
   'id' : bigint,
   'content' : string,
@@ -116,6 +129,14 @@ export interface _SERVICE {
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, ChatMessage]>
   >,
+  '__chatSessionMessages' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, ChatSessionMessage]>
+  >,
+  '__chatSessions' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, ChatSession]>
+  >,
   '__comments' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Comment]>
@@ -129,6 +150,8 @@ export interface _SERVICE {
   '__nextBookId' : ActorMethod<[], bigint>,
   '__nextChapterId' : ActorMethod<[], bigint>,
   '__nextChatMessageId' : ActorMethod<[], bigint>,
+  '__nextChatSessionId' : ActorMethod<[], bigint>,
+  '__nextChatSessionMessageId' : ActorMethod<[], bigint>,
   '__nextCommentId' : ActorMethod<[], bigint>,
   '__nextInviteCodeId' : ActorMethod<[], bigint>,
   '__nextRecordingId' : ActorMethod<[], bigint>,
@@ -136,15 +159,18 @@ export interface _SERVICE {
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Recording]>
   >,
+  'addChatMessage' : ActorMethod<[bigint, string, string], bigint>,
   'checkAccess' : ActorMethod<[], AccessCheckResult>,
   'claimInviteCode' : ActorMethod<[string], boolean>,
   'clearChat' : ActorMethod<[bigint], boolean>,
   'createBook' : ActorMethod<[string, string, string], bigint>,
   'createChapter' : ActorMethod<[bigint, string], bigint>,
+  'createChatSession' : ActorMethod<[bigint, string], bigint>,
   'createComment' : ActorMethod<[bigint, string, string], bigint>,
   'deleteAnalysis' : ActorMethod<[bigint], boolean>,
   'deleteBook' : ActorMethod<[bigint], boolean>,
   'deleteChapter' : ActorMethod<[bigint], boolean>,
+  'deleteChatSession' : ActorMethod<[bigint], undefined>,
   'deleteComment' : ActorMethod<[bigint], boolean>,
   'deleteMessage' : ActorMethod<[bigint], boolean>,
   'deleteRecording' : ActorMethod<[bigint], boolean>,
@@ -163,6 +189,8 @@ export interface _SERVICE {
     }
   >,
   'getChapter' : ActorMethod<[bigint], [] | [Chapter]>,
+  'getChatMessages' : ActorMethod<[bigint], Array<ChatSessionMessage>>,
+  'getChatSessionsByChapter' : ActorMethod<[bigint], Array<ChatSession>>,
   'getOverallStats' : ActorMethod<
     [],
     { 'totalBooks' : bigint, 'totalChapters' : bigint, 'totalWords' : bigint }

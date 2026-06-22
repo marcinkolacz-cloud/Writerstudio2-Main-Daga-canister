@@ -36222,6 +36222,19 @@ const ChatMessage = Record({
   "role": Text$4,
   "bookId": Nat
 });
+const ChatSessionMessage = Record({
+  "id": Nat,
+  "content": Text$4,
+  "createdAt": Int,
+  "role": Text$4,
+  "sessionId": Nat
+});
+const ChatSession = Record({
+  "id": Nat,
+  "title": Text$4,
+  "createdAt": Int,
+  "chapterId": Nat
+});
 const Comment$1 = Record({
   "id": Nat,
   "content": Text$4,
@@ -36282,6 +36295,16 @@ Service({
     [Vec(Tuple(Nat, ChatMessage))],
     ["query"]
   ),
+  "__chatSessionMessages": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, ChatSessionMessage))],
+    ["query"]
+  ),
+  "__chatSessions": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, ChatSession))],
+    ["query"]
+  ),
   "__comments": Func(
     [Opt(Nat), Opt(Nat)],
     [Vec(Tuple(Nat, Comment$1))],
@@ -36297,6 +36320,8 @@ Service({
   "__nextBookId": Func([], [Nat], ["query"]),
   "__nextChapterId": Func([], [Nat], ["query"]),
   "__nextChatMessageId": Func([], [Nat], ["query"]),
+  "__nextChatSessionId": Func([], [Nat], ["query"]),
+  "__nextChatSessionMessageId": Func([], [Nat], ["query"]),
   "__nextCommentId": Func([], [Nat], ["query"]),
   "__nextInviteCodeId": Func([], [Nat], ["query"]),
   "__nextRecordingId": Func([], [Nat], ["query"]),
@@ -36305,15 +36330,18 @@ Service({
     [Vec(Tuple(Nat, Recording))],
     ["query"]
   ),
+  "addChatMessage": Func([Nat, Text$4, Text$4], [Nat], []),
   "checkAccess": Func([], [AccessCheckResult], []),
   "claimInviteCode": Func([Text$4], [Bool], []),
   "clearChat": Func([Nat], [Bool], []),
   "createBook": Func([Text$4, Text$4, Text$4], [Nat], []),
   "createChapter": Func([Nat, Text$4], [Nat], []),
+  "createChatSession": Func([Nat, Text$4], [Nat], []),
   "createComment": Func([Nat, Text$4, Text$4], [Nat], []),
   "deleteAnalysis": Func([Nat], [Bool], []),
   "deleteBook": Func([Nat], [Bool], []),
   "deleteChapter": Func([Nat], [Bool], []),
+  "deleteChatSession": Func([Nat], [], []),
   "deleteComment": Func([Nat], [Bool], []),
   "deleteMessage": Func([Nat], [Bool], []),
   "deleteRecording": Func([Nat], [Bool], []),
@@ -36335,6 +36363,8 @@ Service({
     []
   ),
   "getChapter": Func([Nat], [Opt(Chapter)], []),
+  "getChatMessages": Func([Nat], [Vec(ChatSessionMessage)], []),
+  "getChatSessionsByChapter": Func([Nat], [Vec(ChatSession)], []),
   "getOverallStats": Func(
     [],
     [
@@ -36479,6 +36509,19 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "role": IDL2.Text,
     "bookId": IDL2.Nat
   });
+  const ChatSessionMessage2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "content": IDL2.Text,
+    "createdAt": IDL2.Int,
+    "role": IDL2.Text,
+    "sessionId": IDL2.Nat
+  });
+  const ChatSession2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "title": IDL2.Text,
+    "createdAt": IDL2.Int,
+    "chapterId": IDL2.Nat
+  });
   const Comment2 = IDL2.Record({
     "id": IDL2.Nat,
     "content": IDL2.Text,
@@ -36539,6 +36582,16 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, ChatMessage2))],
       ["query"]
     ),
+    "__chatSessionMessages": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, ChatSessionMessage2))],
+      ["query"]
+    ),
+    "__chatSessions": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, ChatSession2))],
+      ["query"]
+    ),
     "__comments": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Comment2))],
@@ -36554,6 +36607,8 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "__nextBookId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChapterId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChatMessageId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__nextChatSessionId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__nextChatSessionMessageId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextCommentId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextInviteCodeId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextRecordingId": IDL2.Func([], [IDL2.Nat], ["query"]),
@@ -36562,15 +36617,18 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Recording2))],
       ["query"]
     ),
+    "addChatMessage": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "checkAccess": IDL2.Func([], [AccessCheckResult2], []),
     "claimInviteCode": IDL2.Func([IDL2.Text], [IDL2.Bool], []),
     "clearChat": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "createBook": IDL2.Func([IDL2.Text, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "createChapter": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
+    "createChatSession": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
     "createComment": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "deleteAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteBook": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteChapter": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "deleteChatSession": IDL2.Func([IDL2.Nat], [], []),
     "deleteComment": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteMessage": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteRecording": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
@@ -36596,6 +36654,12 @@ const idlFactory = ({ IDL: IDL2 }) => {
       []
     ),
     "getChapter": IDL2.Func([IDL2.Nat], [IDL2.Opt(Chapter2)], []),
+    "getChatMessages": IDL2.Func([IDL2.Nat], [IDL2.Vec(ChatSessionMessage2)], []),
+    "getChatSessionsByChapter": IDL2.Func(
+      [IDL2.Nat],
+      [IDL2.Vec(ChatSession2)],
+      []
+    ),
     "getOverallStats": IDL2.Func(
       [],
       [
@@ -36773,6 +36837,34 @@ class Backend {
       return result;
     }
   }
+  async __chatSessionMessages(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__chatSessionMessages(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__chatSessionMessages(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
+  async __chatSessions(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__chatSessions(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__chatSessions(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
   async __comments(arg0, arg1) {
     if (this.processError) {
       try {
@@ -36871,6 +36963,34 @@ class Backend {
       return result;
     }
   }
+  async __nextChatSessionId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextChatSessionId();
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextChatSessionId();
+      return result;
+    }
+  }
+  async __nextChatSessionMessageId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextChatSessionMessageId();
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextChatSessionMessageId();
+      return result;
+    }
+  }
   async __nextCommentId() {
     if (this.processError) {
       try {
@@ -36924,6 +37044,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.__recordings(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
+  async addChatMessage(arg0, arg1, arg2) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.addChatMessage(arg0, arg1, arg2);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.addChatMessage(arg0, arg1, arg2);
       return result;
     }
   }
@@ -36997,6 +37131,20 @@ class Backend {
       return result;
     }
   }
+  async createChatSession(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.createChatSession(arg0, arg1);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.createChatSession(arg0, arg1);
+      return result;
+    }
+  }
   async createComment(arg0, arg1, arg2) {
     if (this.processError) {
       try {
@@ -37050,6 +37198,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.deleteChapter(arg0);
+      return result;
+    }
+  }
+  async deleteChatSession(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.deleteChatSession(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.deleteChatSession(arg0);
       return result;
     }
   }
@@ -37191,6 +37353,34 @@ class Backend {
     } else {
       const result = await this.actor.getChapter(arg0);
       return from_candid_opt_n27(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async getChatMessages(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getChatMessages(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getChatMessages(arg0);
+      return result;
+    }
+  }
+  async getChatSessionsByChapter(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getChatSessionsByChapter(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getChatSessionsByChapter(arg0);
+      return result;
     }
   }
   async getOverallStats() {
@@ -37746,7 +37936,7 @@ function useSaveAnalysis() {
   return useMutation({
     mutationFn: async ({
       bookId,
-      chapterId,
+      chapterId: _chapterId,
       analysisType,
       provider,
       resultContent
@@ -37754,7 +37944,7 @@ function useSaveAnalysis() {
       if (!actor) throw new Error("Actor not available");
       return actor.saveAnalysis(
         bookId,
-        chapterId,
+        _chapterId,
         analysisType,
         provider,
         resultContent
@@ -38084,6 +38274,87 @@ function useClearChat() {
     onSuccess: (_2, variables) => {
       queryClient2.invalidateQueries({
         queryKey: ["chat", variables.bookId]
+      });
+    }
+  });
+}
+function useChatSessions(chapterId) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(chapterId);
+  return useQuery({
+    queryKey: ["chatSessions", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      const sessions = await actor.getChatSessionsByChapter(id);
+      return sessions.sort((a2, b2) => Number(b2.createdAt - a2.createdAt));
+    },
+    enabled: !!actor && !!chapterId
+  });
+}
+function useCreateChatSession() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      chapterId,
+      title
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.createChatSession(chapterId, title);
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["chatSessions", variables.chapterId]
+      });
+    }
+  });
+}
+function useChatSessionMessages(sessionId) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(sessionId);
+  return useQuery({
+    queryKey: ["chatMessages", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      const messages2 = await actor.getChatMessages(id);
+      return messages2.sort((a2, b2) => Number(a2.createdAt - b2.createdAt));
+    },
+    enabled: !!actor && !!sessionId
+  });
+}
+function useAddChatMessage() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      sessionId,
+      role,
+      content
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.addChatMessage(sessionId, role, content);
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["chatMessages", variables.sessionId]
+      });
+    }
+  });
+}
+function useDeleteChatSession() {
+  const { actor } = useActor(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      sessionId,
+      chapterId: _chapterId
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteChatSession(sessionId);
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["chatSessions", variables.chapterId]
       });
     }
   });
@@ -47336,6 +47607,411 @@ function CommentsPanel({
       },
       String(comment.id)
     )) }) })
+  ] });
+}
+function Input({ className, type, ...props }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "input",
+    {
+      type,
+      "data-slot": "input",
+      className: cn(
+        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+        className
+      ),
+      ...props
+    }
+  );
+}
+function truncateToWord(text, maxLen) {
+  if (text.length <= maxLen) return text;
+  const truncated = text.slice(0, maxLen);
+  const lastSpace = truncated.lastIndexOf(" ");
+  if (lastSpace > 0) {
+    return `${truncated.slice(0, lastSpace)}...`;
+  }
+  return `${truncated}...`;
+}
+function ContextChatPanel({
+  chapterId,
+  apiKey,
+  provider,
+  editor,
+  chapters,
+  bookAnalyses,
+  onClose
+}) {
+  var _a3;
+  const [activeSessionId, setActiveSessionId] = reactExports.useState(null);
+  const [inputText, setInputText] = reactExports.useState("");
+  const [isLoading, setIsLoading] = reactExports.useState(false);
+  const [isAutoStarting, setIsAutoStarting] = reactExports.useState(false);
+  const scrollRef = reactExports.useRef(null);
+  const inputRef = reactExports.useRef(null);
+  const { data: sessions = [], isLoading: sessionsLoading } = useChatSessions(
+    String(chapterId)
+  );
+  const { data: messages2 = [], isLoading: messagesLoading } = useChatSessionMessages(activeSessionId ? String(activeSessionId) : "0");
+  const createSession = useCreateChatSession();
+  const addMessage = useAddChatMessage();
+  const deleteSession = useDeleteChatSession();
+  reactExports.useEffect(() => {
+    if (sessionsLoading || isAutoStarting || sessions.length > 0 || !editor || !apiKey)
+      return;
+    const autoStart = async () => {
+      setIsAutoStarting(true);
+      try {
+        const currentText = editor.getText();
+        if (!currentText.trim()) {
+          setIsAutoStarting(false);
+          return;
+        }
+        const currentChapter = chapters.find((c2) => c2.id === chapterId);
+        const prevChapters = currentChapter ? chapters.filter(
+          (c2) => c2.orderIndex < currentChapter.orderIndex && c2.id !== chapterId
+        ) : [];
+        const prevSummaries = prevChapters.map((c2) => {
+          const plain = c2.content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          return `${c2.title}:
+${plain.slice(0, 500)}`;
+        });
+        const annotations = await analyzeWithContext(
+          currentText,
+          prevSummaries,
+          apiKey,
+          provider
+        );
+        const summaryLines = annotations.map(
+          (a2) => `- ${a2.text}: ${a2.explanation}`
+        );
+        const analysisText = summaryLines.length > 0 ? `Analiza kontekstowa rozdziału:
+
+${summaryLines.join("\n")}` : "Analiza kontekstowa nie wykryła żadnych problemów ze spójnością. Rozdział jest spójny z wcześniejszymi wydarzeniami.";
+        const title = truncateToWord(analysisText, 50);
+        const sessionId = await createSession.mutateAsync({
+          chapterId,
+          title
+        });
+        await addMessage.mutateAsync({
+          sessionId,
+          role: "assistant",
+          content: analysisText
+        });
+        setActiveSessionId(sessionId);
+      } catch (err) {
+        console.error("Auto-start session failed:", err);
+      } finally {
+        setIsAutoStarting(false);
+      }
+    };
+    autoStart();
+  }, [
+    sessionsLoading,
+    sessions.length,
+    editor,
+    apiKey,
+    provider,
+    chapters,
+    chapterId,
+    isAutoStarting,
+    createSession,
+    addMessage
+  ]);
+  reactExports.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, []);
+  const handleDeleteSession = reactExports.useCallback(
+    async (sessionId) => {
+      await deleteSession.mutateAsync({ sessionId, chapterId });
+      if (activeSessionId === sessionId) {
+        setActiveSessionId(null);
+      }
+    },
+    [deleteSession, chapterId, activeSessionId]
+  );
+  const handleSendMessage = reactExports.useCallback(async () => {
+    var _a4, _b3, _c2, _d2, _e3, _f2;
+    if (!inputText.trim() || !activeSessionId || isLoading) return;
+    const userContent = inputText.trim();
+    setInputText("");
+    setIsLoading(true);
+    try {
+      await addMessage.mutateAsync({
+        sessionId: activeSessionId,
+        role: "user",
+        content: userContent
+      });
+      const allMessages = [
+        ...messages2,
+        {
+          id: 0n,
+          sessionId: activeSessionId,
+          role: "user",
+          content: userContent,
+          createdAt: BigInt(Date.now()) * 1000000n
+        }
+      ];
+      const currentChapter = chapters.find((c2) => c2.id === chapterId);
+      const prevChapters = currentChapter ? chapters.filter(
+        (c2) => c2.orderIndex < currentChapter.orderIndex && c2.id !== chapterId
+      ) : [];
+      const prevSummaries = prevChapters.map((c2) => {
+        const plain = c2.content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+        return `${c2.title}:
+${plain.slice(0, 500)}`;
+      });
+      const history2 = allMessages.map(
+        (m2) => `${m2.role === "user" ? "Użytkownik" : "Asystent"}: ${m2.content}`
+      ).join("\n\n");
+      const prompt = `Jesteś asystentem pisarskim dla pisarza. Pomagasz w tworzeniu powieści, odpowiadasz na pytania, proponujesz pomysły na fabułę, postacie, dialogi i rozwój wątków.
+
+KONTEKST KSIĄŻKI:
+${bookAnalyses.map((a2) => a2.resultContent).join("\n\n") || "Brak dodatkowego kontekstu."}
+
+STRESZCZENIA WCZEŚNIEJSZYCH ROZDZIAŁÓW:
+${prevSummaries.join("\n\n") || "Brak wcześniejszych rozdziałów."}
+
+HISTORIA ROZMOWY:
+${history2}
+
+Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
+      const response = await fetch(
+        provider === "openai" ? "https://api.openai.com/v1/chat/completions" : "https://api.anthropic.com/v1/messages",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...provider === "openai" ? { Authorization: `Bearer ${apiKey}` } : {
+              "x-api-key": apiKey,
+              "anthropic-version": "2023-06-01",
+              "anthropic-dangerous-direct-browser-access": "true"
+            }
+          },
+          body: JSON.stringify(
+            provider === "openai" ? {
+              model: "gpt-4o-mini",
+              messages: [{ role: "user", content: prompt }],
+              max_tokens: 4e3,
+              temperature: 0.7
+            } : {
+              model: "claude-sonnet-4-6",
+              max_tokens: 4e3,
+              messages: [{ role: "user", content: prompt }],
+              temperature: 0.7
+            }
+          )
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`AI API error: ${response.status}`);
+      }
+      const data = await response.json();
+      const assistantContent = provider === "openai" ? ((_c2 = (_b3 = (_a4 = data.choices) == null ? void 0 : _a4[0]) == null ? void 0 : _b3.message) == null ? void 0 : _c2.content) ?? "" : ((_e3 = (_d2 = data.content) == null ? void 0 : _d2.find(
+        (c2) => c2.type === "text"
+      )) == null ? void 0 : _e3.text) ?? "";
+      await addMessage.mutateAsync({
+        sessionId: activeSessionId,
+        role: "assistant",
+        content: assistantContent || "Przepraszam, nie udało się wygenerować odpowiedzi."
+      });
+    } catch (err) {
+      console.error("Send message failed:", err);
+      await addMessage.mutateAsync({
+        sessionId: activeSessionId,
+        role: "assistant",
+        content: "Wystąpił błąd podczas generowania odpowiedzi. Sprawdź połączenie z internetem i klucz API."
+      });
+    } finally {
+      setIsLoading(false);
+      (_f2 = inputRef.current) == null ? void 0 : _f2.focus();
+    }
+  }, [
+    inputText,
+    activeSessionId,
+    isLoading,
+    messages2,
+    addMessage,
+    chapters,
+    chapterId,
+    bookAnalyses,
+    provider,
+    apiKey
+  ]);
+  const handleKeyDown2 = reactExports.useCallback(
+    (e3) => {
+      if (e3.key === "Enter" && !e3.shiftKey) {
+        e3.preventDefault();
+        handleSendMessage();
+      }
+    },
+    [handleSendMessage]
+  );
+  if (!activeSessionId) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-72 border-l border-border bg-card flex flex-col h-full shrink-0", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between px-4 py-3 border-b border-border", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-muted-foreground" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold", children: "Czat kontekstowy" })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Button,
+          {
+            variant: "ghost",
+            size: "icon",
+            className: "h-7 w-7",
+            onClick: onClose,
+            "data-ocid": "context_chat.panel_close_button",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-4 w-4" })
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollArea, { className: "flex-1", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-3 space-y-2", children: isAutoStarting ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center py-8 text-sm text-muted-foreground", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "h-4 w-4 mr-2 animate-spin" }),
+        "Tworzenie sesji analizy..."
+      ] }) : sessions.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          className: "text-center py-8 text-sm text-muted-foreground",
+          "data-ocid": "context_chat.empty_state",
+          children: "Brak sesji czatu"
+        }
+      ) : sessions.map((session, index2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "button",
+        {
+          type: "button",
+          className: "group rounded-md border border-border bg-background p-3 hover:border-primary/40 transition-colors cursor-pointer text-left w-full",
+          onClick: () => setActiveSessionId(session.id),
+          "data-ocid": `context_chat.session_item.${index2 + 1}`,
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-medium text-foreground line-clamp-2", children: session.title }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mt-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] text-muted-foreground/60", children: new Date(
+                Number(session.createdAt) / 1e6
+              ).toLocaleDateString("pl-PL") }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "icon",
+                  className: "h-6 w-6 opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10",
+                  onClick: (e3) => {
+                    e3.stopPropagation();
+                    handleDeleteSession(session.id);
+                  },
+                  "data-ocid": `context_chat.session_delete_button.${index2 + 1}`,
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3 w-3" })
+                }
+              )
+            ] })
+          ]
+        },
+        String(session.id)
+      )) }) })
+    ] });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-72 border-l border-border bg-card flex flex-col h-full shrink-0", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between px-4 py-3 border-b border-border", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Button,
+          {
+            variant: "ghost",
+            size: "icon",
+            className: "h-6 w-6 -ml-1",
+            onClick: () => setActiveSessionId(null),
+            "data-ocid": "context_chat.back_button",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-3.5 w-3.5" })
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-muted-foreground" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold truncate max-w-[140px]", children: ((_a3 = sessions.find((s2) => s2.id === activeSessionId)) == null ? void 0 : _a3.title) || "Sesja" })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Button,
+        {
+          variant: "ghost",
+          size: "icon",
+          className: "h-7 w-7",
+          onClick: onClose,
+          "data-ocid": "context_chat.panel_close_button",
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-4 w-4" })
+        }
+      )
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollArea, { className: "flex-1", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { ref: scrollRef, className: "p-3 space-y-3", children: [
+      messagesLoading ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center py-8 text-sm text-muted-foreground", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "h-4 w-4 mr-2 animate-spin" }),
+        "Ładowanie wiadomości..."
+      ] }) : messages2.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "div",
+        {
+          className: "text-center py-8 text-sm text-muted-foreground",
+          "data-ocid": "context_chat.messages_empty_state",
+          children: "Brak wiadomości"
+        }
+      ) : messages2.map((msg, index2) => {
+        const isUser = msg.role === "user";
+        return /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            className: `flex ${isUser ? "justify-end" : "justify-start"}`,
+            "data-ocid": `context_chat.message.${index2 + 1}`,
+            children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "div",
+              {
+                className: `max-w-[90%] rounded-lg px-3 py-2 text-sm ${isUser ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`,
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "whitespace-pre-wrap break-words", children: msg.content }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(
+                    "span",
+                    {
+                      className: `text-[10px] mt-1 block ${isUser ? "text-primary-foreground/70" : "text-muted-foreground/60"}`,
+                      children: new Date(
+                        Number(msg.createdAt) / 1e6
+                      ).toLocaleTimeString("pl-PL", {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      })
+                    }
+                  )
+                ]
+              }
+            )
+          },
+          String(msg.id)
+        );
+      }),
+      isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-start", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-muted rounded-lg px-3 py-2 text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "h-4 w-4 animate-spin text-muted-foreground" }) }) })
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-3 border-t border-border", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Input,
+        {
+          ref: inputRef,
+          value: inputText,
+          onChange: (e3) => setInputText(e3.target.value),
+          onKeyDown: handleKeyDown2,
+          placeholder: "Napisz odpowiedź...",
+          disabled: isLoading,
+          className: "flex-1 text-sm",
+          "data-ocid": "context_chat.input"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Button,
+        {
+          size: "icon",
+          disabled: !inputText.trim() || isLoading,
+          onClick: handleSendMessage,
+          "data-ocid": "context_chat.send_button",
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx(Send, { className: "h-4 w-4" })
+        }
+      )
+    ] }) })
   ] });
 }
 var PAGE_KEYS = ["PageUp", "PageDown"];
@@ -76430,22 +77106,6 @@ function DropdownMenuItem({
     }
   );
 }
-function Input({ className, type, ...props }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "input",
-    {
-      type,
-      "data-slot": "input",
-      className: cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        className
-      ),
-      ...props
-    }
-  );
-}
 var __create = Object.create;
 var __defProp2 = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -103998,7 +104658,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BORNolXb.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Br_WCXAO.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -105211,6 +105871,7 @@ function ChapterEditorPage() {
   const [summaryType, setSummaryType] = reactExports.useState("short");
   const [summaryResult, setSummaryResult] = reactExports.useState(null);
   const [commentsPanelOpen, setCommentsPanelOpen] = reactExports.useState(false);
+  const [contextChatPanelOpen, setContextChatPanelOpen] = reactExports.useState(false);
   const [lektorPanelOpen, setLektorPanelOpen] = reactExports.useState(false);
   const [recordingsPanelOpen, setRecordingsPanelOpen] = reactExports.useState(false);
   const [historyPanelOpen, setHistoryPanelOpen] = reactExports.useState(false);
@@ -105822,6 +106483,20 @@ ${ch.content}`).join("\n\n---\n\n");
             Button,
             {
               size: "sm",
+              variant: contextChatPanelOpen ? "default" : "outline",
+              onClick: () => setContextChatPanelOpen((v2) => !v2),
+              "data-ocid": "chapter.context_chat_toggle_button",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-3.5 w-3.5 mr-1.5" }),
+                "Kontekst"
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-px h-6 bg-border hidden sm:block" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              size: "sm",
               variant: commentsPanelOpen ? "default" : "outline",
               onClick: () => setCommentsPanelOpen((v2) => !v2),
               "data-ocid": "chapter.comments_toggle_button",
@@ -106137,6 +106812,18 @@ ${ch.content}`).join("\n\n---\n\n");
               }
             )
           ]
+        }
+      ),
+      contextChatPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        ContextChatPanel,
+        {
+          chapterId: chapter.id,
+          apiKey,
+          provider,
+          editor: editorRef.current,
+          chapters: chapters ?? [],
+          bookAnalyses: bookAnalyses ?? [],
+          onClose: () => setContextChatPanelOpen(false)
         }
       ),
       commentsPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx(

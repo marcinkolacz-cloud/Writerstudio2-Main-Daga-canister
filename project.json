@@ -1,22 +1,21 @@
 {
-  "overview": "WriterStudio TipTap — aplikacja do wspólnego pisania książek z edytorem TipTap, analizami AI, czatem i eksportem.",
+  "overview": "WriterStudio TipTap — platforma do wspólnego pisania książek z edytorem TipTap, analizą AI, komentarzami i nowym czatem kontekstowym per rozdział",
   "features": [
     "Zarządzanie książkami i rozdziałami",
-    "Edytor TipTap z adnotacjami AI i komentarzami",
-    "Panel czatu AI per książka",
+    "Edycja tekstu z TipTap i AI-powered analizą",
+    "Komentarze inline per rozdział",
+    "Czat kontekstowy per rozdział z AI",
     "Eksport do PDF/DOCX",
-    "Statystyki pisarskie",
-    "System kodów zaproszeń",
-    "Lektor TTS i zapisywanie nagrań",
-    "Zakładka ustawień książki z kontekstem dla AI"
+    "Lektor TTS",
+    "Statystyki"
   ],
   "category": "productivity",
   "tags": [
     "writing",
-    "books",
     "editor",
     "ai",
-    "collaboration"
+    "collaboration",
+    "books"
   ],
-  "last_updated": "2026-06-21T07:36:46.165Z"
+  "last_updated": "2026-06-22T06:03:22.227Z"
 }

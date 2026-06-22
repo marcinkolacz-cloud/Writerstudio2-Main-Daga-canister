@@ -42,6 +42,21 @@ type Comment =
    createdAt: int;
    id: nat;
  };
+type ChatSessionMessage = 
+ record {
+   content: text;
+   createdAt: int;
+   id: nat;
+   role: text;
+   sessionId: nat;
+ };
+type ChatSession = 
+ record {
+   chapterId: nat;
+   createdAt: int;
+   id: nat;
+   title: text;
+ };
 type ChatMessage = 
  record {
    bookId: nat;
@@ -122,6 +137,16 @@ service : {
           nat;
           ChatMessage;
         }) query;
+  __chatSessionMessages: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          ChatSessionMessage;
+        }) query;
+  __chatSessions: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          ChatSession;
+        }) query;
   __comments: (ko: opt nat, count: opt nat) ->
    (vec record {
           nat;
@@ -137,6 +162,8 @@ service : {
   __nextBookId: () -> (nat) query;
   __nextChapterId: () -> (nat) query;
   __nextChatMessageId: () -> (nat) query;
+  __nextChatSessionId: () -> (nat) query;
+  __nextChatSessionMessageId: () -> (nat) query;
   __nextCommentId: () -> (nat) query;
   __nextInviteCodeId: () -> (nat) query;
   __nextRecordingId: () -> (nat) query;
@@ -145,15 +172,18 @@ service : {
           nat;
           Recording;
         }) query;
+  addChatMessage: (sessionId: nat, role: text, content: text) -> (nat);
   checkAccess: () -> (AccessCheckResult);
   claimInviteCode: (code: text) -> (bool);
   clearChat: (bookId: nat) -> (bool);
   createBook: (title: text, description: text, category: text) -> (nat);
   createChapter: (bookId: nat, title: text) -> (nat);
+  createChatSession: (chapterId: nat, title: text) -> (nat);
   createComment: (chapterId: nat, anchorText: text, content: text) -> (nat);
   deleteAnalysis: (id: nat) -> (bool);
   deleteBook: (id: nat) -> (bool);
   deleteChapter: (id: nat) -> (bool);
+  deleteChatSession: (sessionId: nat) -> ();
   deleteComment: (id: nat) -> (bool);
   deleteMessage: (id: nat) -> (bool);
   deleteRecording: (id: nat) -> (bool);
@@ -170,6 +200,8 @@ service : {
       totalWords: nat;
     });
   getChapter: (id: nat) -> (opt Chapter);
+  getChatMessages: (sessionId: nat) -> (vec ChatSessionMessage);
+  getChatSessionsByChapter: (chapterId: nat) -> (vec ChatSession);
   getOverallStats: () ->
    (record {
       totalBooks: nat;

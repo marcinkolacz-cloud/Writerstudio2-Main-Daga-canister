@@ -79,6 +79,21 @@ module {
     createdAt : Int;
   };
 
+  public type ChatSession = {
+    id : Nat;
+    chapterId : Nat;
+    title : Text;
+    createdAt : Int;
+  };
+
+  public type ChatSessionMessage = {
+    id : Nat;
+    sessionId : Nat;
+    role : Text;
+    content : Text;
+    createdAt : Int;
+  };
+
   public type InviteCodeStatus = { #active; #exhausted; #revoked };
 
   public type InviteCode = {

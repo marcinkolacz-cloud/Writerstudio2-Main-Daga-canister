@@ -63,6 +63,19 @@ export const ChatMessage = IDL.Record({
   'role' : IDL.Text,
   'bookId' : IDL.Nat,
 });
+export const ChatSessionMessage = IDL.Record({
+  'id' : IDL.Nat,
+  'content' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'role' : IDL.Text,
+  'sessionId' : IDL.Nat,
+});
+export const ChatSession = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'chapterId' : IDL.Nat,
+});
 export const Comment = IDL.Record({
   'id' : IDL.Nat,
   'content' : IDL.Text,
@@ -124,6 +137,16 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Tuple(IDL.Nat, ChatMessage))],
       ['query'],
     ),
+  '__chatSessionMessages' : IDL.Func(
+      [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, ChatSessionMessage))],
+      ['query'],
+    ),
+  '__chatSessions' : IDL.Func(
+      [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, ChatSession))],
+      ['query'],
+    ),
   '__comments' : IDL.Func(
       [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
       [IDL.Vec(IDL.Tuple(IDL.Nat, Comment))],
@@ -139,6 +162,8 @@ export const idlService = IDL.Service({
   '__nextBookId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextChapterId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextChatMessageId' : IDL.Func([], [IDL.Nat], ['query']),
+  '__nextChatSessionId' : IDL.Func([], [IDL.Nat], ['query']),
+  '__nextChatSessionMessageId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextCommentId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextInviteCodeId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextRecordingId' : IDL.Func([], [IDL.Nat], ['query']),
@@ -147,15 +172,18 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
       ['query'],
     ),
+  'addChatMessage' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
   'checkAccess' : IDL.Func([], [AccessCheckResult], []),
   'claimInviteCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'clearChat' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
   'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
+  'createChatSession' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
   'createComment' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
   'deleteAnalysis' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'deleteChatSession' : IDL.Func([IDL.Nat], [], []),
   'deleteComment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
@@ -177,6 +205,8 @@ export const idlService = IDL.Service({
       [],
     ),
   'getChapter' : IDL.Func([IDL.Nat], [IDL.Opt(Chapter)], []),
+  'getChatMessages' : IDL.Func([IDL.Nat], [IDL.Vec(ChatSessionMessage)], []),
+  'getChatSessionsByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(ChatSession)], []),
   'getOverallStats' : IDL.Func(
       [],
       [
@@ -324,6 +354,19 @@ export const idlFactory = ({ IDL }) => {
     'role' : IDL.Text,
     'bookId' : IDL.Nat,
   });
+  const ChatSessionMessage = IDL.Record({
+    'id' : IDL.Nat,
+    'content' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'role' : IDL.Text,
+    'sessionId' : IDL.Nat,
+  });
+  const ChatSession = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'chapterId' : IDL.Nat,
+  });
   const Comment = IDL.Record({
     'id' : IDL.Nat,
     'content' : IDL.Text,
@@ -385,6 +428,16 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, ChatMessage))],
         ['query'],
       ),
+    '__chatSessionMessages' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, ChatSessionMessage))],
+        ['query'],
+      ),
+    '__chatSessions' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, ChatSession))],
+        ['query'],
+      ),
     '__comments' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Comment))],
@@ -400,6 +453,8 @@ export const idlFactory = ({ IDL }) => {
     '__nextBookId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextChapterId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextChatMessageId' : IDL.Func([], [IDL.Nat], ['query']),
+    '__nextChatSessionId' : IDL.Func([], [IDL.Nat], ['query']),
+    '__nextChatSessionMessageId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextCommentId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextInviteCodeId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextRecordingId' : IDL.Func([], [IDL.Nat], ['query']),
@@ -408,15 +463,18 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
         ['query'],
       ),
+    'addChatMessage' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
     'checkAccess' : IDL.Func([], [AccessCheckResult], []),
     'claimInviteCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'clearChat' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
     'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
+    'createChatSession' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
     'createComment' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
     'deleteAnalysis' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'deleteChatSession' : IDL.Func([IDL.Nat], [], []),
     'deleteComment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
@@ -442,6 +500,12 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'getChapter' : IDL.Func([IDL.Nat], [IDL.Opt(Chapter)], []),
+    'getChatMessages' : IDL.Func([IDL.Nat], [IDL.Vec(ChatSessionMessage)], []),
+    'getChatSessionsByChapter' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(ChatSession)],
+        [],
+      ),
     'getOverallStats' : IDL.Func(
         [],
         [

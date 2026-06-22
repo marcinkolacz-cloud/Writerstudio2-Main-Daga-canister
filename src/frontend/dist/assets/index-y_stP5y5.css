@@ -1449,6 +1449,9 @@ video {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
 }
+.-ml-1 {
+  margin-left: -0.25rem;
+}
 .-ml-2 {
   margin-left: -0.5rem;
 }
@@ -1520,6 +1523,12 @@ video {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
+}
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 .line-clamp-3 {
   overflow: hidden;
@@ -1875,11 +1884,17 @@ video {
 .max-w-\[120px\] {
   max-width: 120px;
 }
+.max-w-\[140px\] {
+  max-width: 140px;
+}
 .max-w-\[280px\] {
   max-width: 280px;
 }
 .max-w-\[85\%\] {
   max-width: 85%;
+}
+.max-w-\[90\%\] {
+  max-width: 90%;
 }
 .max-w-\[calc\(100\%-2rem\)\] {
   max-width: calc(100% - 2rem);

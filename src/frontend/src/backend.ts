@@ -89,6 +89,21 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface ChatSessionMessage {
+    id: bigint;
+    content: string;
+    createdAt: bigint;
+    role: string;
+    sessionId: bigint;
+}
+export interface Recording {
+    id: bigint;
+    voice: string;
+    createdAt: bigint;
+    audioData: Uint8Array;
+    bookId: bigint;
+    chapterId: bigint;
+}
 export interface Comment {
     id: bigint;
     content: string;
@@ -160,12 +175,10 @@ export interface InviteCode {
     claimedBy: Array<Principal>;
     maxUses: bigint;
 }
-export interface Recording {
+export interface ChatSession {
     id: bigint;
-    voice: string;
+    title: string;
     createdAt: bigint;
-    audioData: Uint8Array;
-    bookId: bigint;
     chapterId: bigint;
 }
 export enum AccessCheckResult {
@@ -184,6 +197,8 @@ export interface backendInterface {
     __books(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Book]>>;
     __chapters(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Chapter]>>;
     __chatMessages(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, ChatMessage]>>;
+    __chatSessionMessages(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, ChatSessionMessage]>>;
+    __chatSessions(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, ChatSession]>>;
     __comments(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Comment]>>;
     __inviteCodes(ko: string | null, count: bigint | null): Promise<Array<[string, InviteCode]>>;
     __nextAnalysisId(): Promise<bigint>;
@@ -191,19 +206,24 @@ export interface backendInterface {
     __nextBookId(): Promise<bigint>;
     __nextChapterId(): Promise<bigint>;
     __nextChatMessageId(): Promise<bigint>;
+    __nextChatSessionId(): Promise<bigint>;
+    __nextChatSessionMessageId(): Promise<bigint>;
     __nextCommentId(): Promise<bigint>;
     __nextInviteCodeId(): Promise<bigint>;
     __nextRecordingId(): Promise<bigint>;
     __recordings(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Recording]>>;
+    addChatMessage(sessionId: bigint, role: string, content: string): Promise<bigint>;
     checkAccess(): Promise<AccessCheckResult>;
     claimInviteCode(code: string): Promise<boolean>;
     clearChat(bookId: bigint): Promise<boolean>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
+    createChatSession(chapterId: bigint, title: string): Promise<bigint>;
     createComment(chapterId: bigint, anchorText: string, content: string): Promise<bigint>;
     deleteAnalysis(id: bigint): Promise<boolean>;
     deleteBook(id: bigint): Promise<boolean>;
     deleteChapter(id: bigint): Promise<boolean>;
+    deleteChatSession(sessionId: bigint): Promise<void>;
     deleteComment(id: bigint): Promise<boolean>;
     deleteMessage(id: bigint): Promise<boolean>;
     deleteRecording(id: bigint): Promise<boolean>;
@@ -219,6 +239,8 @@ export interface backendInterface {
         totalWords: bigint;
     }>;
     getChapter(id: bigint): Promise<Chapter | null>;
+    getChatMessages(sessionId: bigint): Promise<Array<ChatSessionMessage>>;
+    getChatSessionsByChapter(chapterId: bigint): Promise<Array<ChatSession>>;
     getOverallStats(): Promise<{
         totalBooks: bigint;
         totalChapters: bigint;
@@ -329,6 +351,34 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async __chatSessionMessages(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, ChatSessionMessage]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__chatSessionMessages(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__chatSessionMessages(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async __chatSessions(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, ChatSession]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__chatSessions(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__chatSessions(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
     async __comments(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, Comment]>> {
         if (this.processError) {
             try {
@@ -427,6 +477,34 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async __nextChatSessionId(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__nextChatSessionId();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__nextChatSessionId();
+            return result;
+        }
+    }
+    async __nextChatSessionMessageId(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__nextChatSessionMessageId();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__nextChatSessionMessageId();
+            return result;
+        }
+    }
     async __nextCommentId(): Promise<bigint> {
         if (this.processError) {
             try {
@@ -480,6 +558,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.__recordings(to_candid_opt_n1(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async addChatMessage(arg0: bigint, arg1: string, arg2: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addChatMessage(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addChatMessage(arg0, arg1, arg2);
             return result;
         }
     }
@@ -553,6 +645,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async createChatSession(arg0: bigint, arg1: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createChatSession(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createChatSession(arg0, arg1);
+            return result;
+        }
+    }
     async createComment(arg0: bigint, arg1: string, arg2: string): Promise<bigint> {
         if (this.processError) {
             try {
@@ -606,6 +712,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.deleteChapter(arg0);
+            return result;
+        }
+    }
+    async deleteChatSession(arg0: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteChatSession(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteChatSession(arg0);
             return result;
         }
     }
@@ -752,6 +872,34 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getChapter(arg0);
             return from_candid_opt_n27(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getChatMessages(arg0: bigint): Promise<Array<ChatSessionMessage>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getChatMessages(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getChatMessages(arg0);
+            return result;
+        }
+    }
+    async getChatSessionsByChapter(arg0: bigint): Promise<Array<ChatSession>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getChatSessionsByChapter(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getChatSessionsByChapter(arg0);
+            return result;
         }
     }
     async getOverallStats(): Promise<{

@@ -4,6 +4,8 @@ import type {
   Book,
   Chapter,
   ChatMessage,
+  ChatSession,
+  ChatSessionMessage,
   Comment,
   TextAnnotation,
 } from "@/backend";
@@ -153,7 +155,7 @@ export function useSaveAnalysis() {
   return useMutation({
     mutationFn: async ({
       bookId,
-      chapterId,
+      chapterId: _chapterId,
       analysisType,
       provider,
       resultContent,
@@ -167,7 +169,7 @@ export function useSaveAnalysis() {
       if (!actor) throw new Error("Actor not available");
       return actor.saveAnalysis(
         bookId,
-        chapterId,
+        _chapterId,
         analysisType,
         provider,
         resultContent,
@@ -617,6 +619,105 @@ export function useClearChat() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["chat", variables.bookId],
+      });
+    },
+  });
+}
+
+export function useChatSessions(chapterId: string | number) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(chapterId);
+  return useQuery<ChatSession[]>({
+    queryKey: ["chatSessions", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      const sessions = await actor.getChatSessionsByChapter(id);
+      return sessions.sort((a, b) => Number(b.createdAt - a.createdAt));
+    },
+    enabled: !!actor && !!chapterId,
+  });
+}
+
+export function useCreateChatSession() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      chapterId,
+      title,
+    }: {
+      chapterId: bigint;
+      title: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.createChatSession(chapterId, title);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chatSessions", variables.chapterId],
+      });
+    },
+  });
+}
+
+export function useChatSessionMessages(sessionId: string | number) {
+  const { actor } = useActor(createActor);
+  const id = BigInt(sessionId);
+  return useQuery<ChatSessionMessage[]>({
+    queryKey: ["chatMessages", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      const messages = await actor.getChatMessages(id);
+      return messages.sort((a, b) => Number(a.createdAt - b.createdAt));
+    },
+    enabled: !!actor && !!sessionId,
+  });
+}
+
+export function useAddChatMessage() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      sessionId,
+      role,
+      content,
+    }: {
+      sessionId: bigint;
+      role: string;
+      content: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.addChatMessage(sessionId, role, content);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chatMessages", variables.sessionId],
+      });
+    },
+  });
+}
+
+export function useDeleteChatSession() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      sessionId,
+      chapterId: _chapterId,
+    }: {
+      sessionId: bigint;
+      chapterId: bigint;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteChatSession(sessionId);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chatSessions", variables.chapterId],
       });
     },
   });

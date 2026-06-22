@@ -7,6 +7,21 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface ChatSessionMessage {
+    id: bigint;
+    content: string;
+    createdAt: bigint;
+    role: string;
+    sessionId: bigint;
+}
+export interface Recording {
+    id: bigint;
+    voice: string;
+    createdAt: bigint;
+    audioData: Uint8Array;
+    bookId: bigint;
+    chapterId: bigint;
+}
 export interface Comment {
     id: bigint;
     content: string;
@@ -78,12 +93,10 @@ export interface InviteCode {
     claimedBy: Array<Principal>;
     maxUses: bigint;
 }
-export interface Recording {
+export interface ChatSession {
     id: bigint;
-    voice: string;
+    title: string;
     createdAt: bigint;
-    audioData: Uint8Array;
-    bookId: bigint;
     chapterId: bigint;
 }
 export enum AccessCheckResult {
@@ -97,15 +110,18 @@ export enum InviteCodeStatus {
     exhausted = "exhausted"
 }
 export interface backendInterface {
+    addChatMessage(sessionId: bigint, role: string, content: string): Promise<bigint>;
     checkAccess(): Promise<AccessCheckResult>;
     claimInviteCode(code: string): Promise<boolean>;
     clearChat(bookId: bigint): Promise<boolean>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
+    createChatSession(chapterId: bigint, title: string): Promise<bigint>;
     createComment(chapterId: bigint, anchorText: string, content: string): Promise<bigint>;
     deleteAnalysis(id: bigint): Promise<boolean>;
     deleteBook(id: bigint): Promise<boolean>;
     deleteChapter(id: bigint): Promise<boolean>;
+    deleteChatSession(sessionId: bigint): Promise<void>;
     deleteComment(id: bigint): Promise<boolean>;
     deleteMessage(id: bigint): Promise<boolean>;
     deleteRecording(id: bigint): Promise<boolean>;
@@ -121,6 +137,8 @@ export interface backendInterface {
         totalWords: bigint;
     }>;
     getChapter(id: bigint): Promise<Chapter | null>;
+    getChatMessages(sessionId: bigint): Promise<Array<ChatSessionMessage>>;
+    getChatSessionsByChapter(chapterId: bigint): Promise<Array<ChatSession>>;
     getOverallStats(): Promise<{
         totalBooks: bigint;
         totalChapters: bigint;
