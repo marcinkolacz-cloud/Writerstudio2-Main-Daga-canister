@@ -66,7 +66,7 @@ module {
     chapterId : Nat;
     bookId : Nat;
     voice : Text;
-    audioData : Blob;
+    audioData : [Nat8];
     createdAt : Int;
   };
 

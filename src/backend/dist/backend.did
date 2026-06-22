@@ -11,7 +11,7 @@ type TextAnnotation =
  };
 type Recording = 
  record {
-   audioData: blob;
+   audioData: vec nat8;
    bookId: nat;
    chapterId: nat;
    createdAt: int;
@@ -192,7 +192,7 @@ service : {
       totalChapters: nat;
       totalWords: nat;
     });
-  getRecordingAudio: (id: nat) -> (opt blob);
+  getRecordingAudio: (id: nat) -> (opt vec nat8);
   listAnalysesByBook: (bookId: nat) -> (vec Analysis);
   listAnalysesByChapter: (chapterId: nat) -> (vec Analysis);
   listAnnotationsByAnalysis: (analysisId: nat) -> (vec TextAnnotation);
@@ -221,7 +221,7 @@ service : {
       "text": text;
     }) -> (vec nat);
   saveRecording: (chapterId: nat, bookId: nat, voice: text, audioData:
-   blob) -> (nat);
+   vec nat8) -> (nat);
   sendMessage: (bookId: nat, role: text, content: text, provider: text) ->
    (nat);
   setAdminPrincipal: (p: principal) -> ();

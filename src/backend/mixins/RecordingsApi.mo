@@ -28,7 +28,7 @@ mixin (
     }
   };
 
-  public shared ({ caller }) func saveRecording(chapterId : Nat, bookId : Nat, voice : Text, audioData : Blob) : async Nat {
+  public shared ({ caller }) func saveRecording(chapterId : Nat, bookId : Nat, voice : Text, audioData : [Nat8]) : async Nat {
     switch (books.get(bookId)) {
       case (?book) {
         if (Principal.equal(book.ownerId, caller)) {
@@ -57,7 +57,7 @@ mixin (
     }
   };
 
-  public shared ({ caller }) func getRecordingAudio(id : Nat) : async ?Blob {
+  public shared ({ caller }) func getRecordingAudio(id : Nat) : async ?[Nat8] {
     switch (recordings.get(id)) {
       case (?recording) {
         if (isRecordingOwner(recording, caller)) {
