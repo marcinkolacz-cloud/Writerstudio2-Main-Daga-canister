@@ -1,4 +1,3 @@
-import { createActor } from "@/backend";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,7 +10,6 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { useSaveRecording } from "@/hooks/useBackend";
 import { generateSpeech } from "@/lib/tts";
-import { useActor } from "@caffeineai/core-infrastructure";
 import type { Editor } from "@tiptap/core";
 import {
   AlertTriangle,
@@ -41,7 +39,6 @@ interface LektorPanelProps {
 type PlaybackState = "idle" | "loading" | "playing" | "paused";
 
 export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
-  const { actor } = useActor(createActor);
   const apiKey = localStorage.getItem("ws_api_key") ?? "";
   const [voice, setVoice] = useState("alloy");
   const [speed, setSpeed] = useState([1.0]);
@@ -110,13 +107,7 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
     setPlaybackState("loading");
 
     try {
-      if (!actor) {
-        setError("Brak połączenia z backendem");
-        setPlaybackState("idle");
-        return;
-      }
-
-      const blob = await generateSpeech(text, voice, apiKey.trim(), actor);
+      const blob = await generateSpeech(text, voice, apiKey.trim());
       setGeneratedBlob(blob);
 
       // Clean up previous audio if any
@@ -152,7 +143,7 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
       setError(err instanceof Error ? err.message : "Błąd generowania audio");
       setPlaybackState("idle");
     }
-  }, [editor, apiKey, voice, actor, cleanupAudio]);
+  }, [editor, apiKey, voice, cleanupAudio]);
 
   const handlePause = useCallback(() => {
     if (audioRef.current && playbackState === "playing") {
@@ -231,7 +222,7 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
         <Button
           size="sm"
           variant={playbackState === "playing" ? "outline" : "default"}
-          disabled={playbackState === "loading" || !apiKey.trim() || !actor}
+          disabled={playbackState === "loading" || !apiKey.trim()}
           onClick={
             playbackState === "playing" || playbackState === "paused"
               ? handlePause

@@ -1,5 +1,3 @@
-import type { backendInterface } from "@/backend";
-
 const MAX_CHUNK_LENGTH = 4000;
 
 function splitTextIntoChunks(text: string): string[] {
@@ -65,17 +63,28 @@ async function generateSpeechChunk(
   text: string,
   voice: string,
   apiKey: string,
-  actor: backendInterface,
 ): Promise<Blob> {
-  const bytes = await actor.synthesizeSpeech(text, voice, apiKey);
-  return new Blob([new Uint8Array(bytes)], { type: "audio/mpeg" });
+  const response = await fetch(
+    "https://writerstudio-tts.marcinkolacz.workers.dev",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({ model: "tts-1", input: text, voice }),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Błąd TTS: ${response.status}`);
+  }
+  return response.blob();
 }
 
 export async function generateSpeech(
   text: string,
   voice: string,
   apiKey: string,
-  actor: backendInterface,
 ): Promise<Blob> {
   if (!text.trim()) {
     throw new Error("Brak tekstu do odczytania");
@@ -84,12 +93,12 @@ export async function generateSpeech(
   const chunks = splitTextIntoChunks(text);
 
   if (chunks.length === 1) {
-    return generateSpeechChunk(chunks[0], voice, apiKey, actor);
+    return generateSpeechChunk(chunks[0], voice, apiKey);
   }
 
   const blobs: Blob[] = [];
   for (let i = 0; i < chunks.length; i++) {
-    const blob = await generateSpeechChunk(chunks[i], voice, apiKey, actor);
+    const blob = await generateSpeechChunk(chunks[i], voice, apiKey);
     blobs.push(blob);
   }
 

@@ -49398,21 +49398,34 @@ function splitTextIntoChunks(text) {
   }
   return chunks;
 }
-async function generateSpeechChunk(text, voice, apiKey, actor) {
-  const bytes = await actor.synthesizeSpeech(text, voice, apiKey);
-  return new Blob([new Uint8Array(bytes)], { type: "audio/mpeg" });
+async function generateSpeechChunk(text, voice, apiKey) {
+  const response = await fetch(
+    "https://writerstudio-tts.marcinkolacz.workers.dev",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({ model: "tts-1", input: text, voice })
+    }
+  );
+  if (!response.ok) {
+    throw new Error(`Błąd TTS: ${response.status}`);
+  }
+  return response.blob();
 }
-async function generateSpeech(text, voice, apiKey, actor) {
+async function generateSpeech(text, voice, apiKey) {
   if (!text.trim()) {
     throw new Error("Brak tekstu do odczytania");
   }
   const chunks = splitTextIntoChunks(text);
   if (chunks.length === 1) {
-    return generateSpeechChunk(chunks[0], voice, apiKey, actor);
+    return generateSpeechChunk(chunks[0], voice, apiKey);
   }
   const blobs = [];
   for (let i2 = 0; i2 < chunks.length; i2++) {
-    const blob = await generateSpeechChunk(chunks[i2], voice, apiKey, actor);
+    const blob = await generateSpeechChunk(chunks[i2], voice, apiKey);
     blobs.push(blob);
   }
   return new Blob(blobs, { type: "audio/mpeg" });
@@ -49426,7 +49439,6 @@ const VOICES = [
   { value: "shimmer", label: "Shimmer" }
 ];
 function LektorPanel({ editor, chapterId, bookId }) {
-  const { actor } = useActor(createActor);
   const apiKey = localStorage.getItem("ws_api_key") ?? "";
   const [voice, setVoice] = reactExports.useState("alloy");
   const [speed, setSpeed] = reactExports.useState([1]);
@@ -49487,12 +49499,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
     setError(null);
     setPlaybackState("loading");
     try {
-      if (!actor) {
-        setError("Brak połączenia z backendem");
-        setPlaybackState("idle");
-        return;
-      }
-      const blob = await generateSpeech(text, voice, apiKey.trim(), actor);
+      const blob = await generateSpeech(text, voice, apiKey.trim());
       setGeneratedBlob(blob);
       cleanupAudio();
       const url = URL.createObjectURL(blob);
@@ -49519,7 +49526,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
       setError(err instanceof Error ? err.message : "Błąd generowania audio");
       setPlaybackState("idle");
     }
-  }, [editor, apiKey, voice, actor, cleanupAudio]);
+  }, [editor, apiKey, voice, cleanupAudio]);
   const handlePause = reactExports.useCallback(() => {
     if (audioRef.current && playbackState === "playing") {
       audioRef.current.pause();
@@ -49588,7 +49595,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
             {
               size: "sm",
               variant: playbackState === "playing" ? "outline" : "default",
-              disabled: playbackState === "loading" || !apiKey.trim() || !actor,
+              disabled: playbackState === "loading" || !apiKey.trim(),
               onClick: playbackState === "playing" || playbackState === "paused" ? handlePause : handlePlay,
               "data-ocid": "lektor.play_pause_button",
               children: [
@@ -105415,7 +105422,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DdJF6smN.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DE-NbLRA.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
