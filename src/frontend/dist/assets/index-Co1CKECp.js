@@ -105505,7 +105505,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Cn_5yy22.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DyD_GWlI.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -106579,6 +106579,11 @@ function SaveIndicator({ status }) {
     }
   );
 }
+const getPlainText = (html) => {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.textContent || div.innerText || "";
+};
 function findFirstTextRangeInDoc(editor, searchText) {
   const normalizedSearch = searchText.replace(/\r/g, "").replace(/\s+/g, " ").trim();
   if (!normalizedSearch) return null;
@@ -107041,9 +107046,11 @@ function ChapterEditorPage() {
                   setSummaryResult(null);
                   try {
                     if (analysisMode === "summary" || analysisMode === "consistency") {
-                      const allChaptersText = (chapters ?? []).sort((a2, b2) => Number(a2.orderIndex - b2.orderIndex)).map((ch) => `## ${ch.title}
+                      const allChaptersText = (chapters ?? []).sort((a2, b2) => Number(a2.orderIndex - b2.orderIndex)).map(
+                        (ch) => `## ${ch.title}
 
-${ch.content}`).join("\n\n---\n\n");
+${getPlainText(ch.content)}`
+                      ).join("\n\n---\n\n");
                       if (analysisMode === "summary") {
                         const summary = await generateSummary(
                           allChaptersText,

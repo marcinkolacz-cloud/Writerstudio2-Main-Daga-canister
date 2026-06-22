@@ -127,6 +127,12 @@ function SaveIndicator({ status }: { status: SaveStatus }) {
   );
 }
 
+const getPlainText = (html: string): string => {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  return div.textContent || div.innerText || "";
+};
+
 function findFirstTextRangeInDoc(
   editor: Editor,
   searchText: string,
@@ -702,7 +708,9 @@ export function ChapterEditorPage() {
                   // Build all chapters text
                   const allChaptersText = (chapters ?? [])
                     .sort((a, b) => Number(a.orderIndex - b.orderIndex))
-                    .map((ch) => `## ${ch.title}\n\n${ch.content}`)
+                    .map(
+                      (ch) => `## ${ch.title}\n\n${getPlainText(ch.content)}`,
+                    )
                     .join("\n\n---\n\n");
                   if (analysisMode === "summary") {
                     const summary = await generateSummary(
