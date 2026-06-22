@@ -396,7 +396,7 @@ export async function analyzeConsistency(
   apiKey: string,
   provider: "openai" | "claude",
 ): Promise<string> {
-  if (allChaptersText.length > 12000) {
+  if (allChaptersText.length > 50000) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildConsistencyPrompt(allChaptersText);
@@ -409,7 +409,7 @@ export async function generateSummary(
   apiKey: string,
   provider: "openai" | "claude",
 ): Promise<string> {
-  if (allChaptersText.length > 12000) {
+  if (allChaptersText.length > 50000) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildSummaryPrompt(allChaptersText, summaryType);

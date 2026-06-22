@@ -600,7 +600,7 @@ export function ChapterEditorPage() {
               <SelectItem value="context">
                 <div className="flex items-center gap-2">
                   <BookOpen className="h-3.5 w-3.5" />
-                  Analizuj z kontekstem
+                  Kontekst (panel czatu)
                 </div>
               </SelectItem>
               <SelectItem value="dialogue">
@@ -662,6 +662,11 @@ export function ChapterEditorPage() {
             disabled={analysisStatus === "loading" || !apiKey.trim()}
             onClick={async () => {
               if (!editorRef.current || !chapter || !book) return;
+
+              if (analysisMode === "context") {
+                setContextChatPanelOpen(true);
+                return;
+              }
 
               // Determine text to analyze: selection for grammar/context/dialogue, full text for summary
               let text: string;
@@ -751,35 +756,6 @@ export function ChapterEditorPage() {
                 if (analysisMode === "grammar") {
                   annotations = await analyzeGrammarStyle(
                     text,
-                    apiKey.trim(),
-                    provider,
-                    bookContext,
-                  );
-                } else if (analysisMode === "context") {
-                  // Fetch previous chapter summaries
-                  const previousSummaries: string[] = [];
-                  const sortedChapters = (chapters ?? []).sort((a, b) =>
-                    Number(a.orderIndex - b.orderIndex),
-                  );
-                  const currentIdx = sortedChapters.findIndex(
-                    (ch) => ch.id === chapter.id,
-                  );
-                  for (let i = 0; i < currentIdx; i++) {
-                    const prevChapter = sortedChapters[i];
-                    if (!prevChapter) continue;
-                    const prevChapterId = prevChapter.id;
-                    const matchingAnalyses = (bookAnalyses ?? []).filter(
-                      (a) =>
-                        a.analysisType === "summary" &&
-                        (a.chapterId === null || a.chapterId === prevChapterId),
-                    );
-                    for (const analysis of matchingAnalyses) {
-                      previousSummaries.push(analysis.resultContent);
-                    }
-                  }
-                  annotations = await analyzeWithContext(
-                    text,
-                    previousSummaries,
                     apiKey.trim(),
                     provider,
                     bookContext,

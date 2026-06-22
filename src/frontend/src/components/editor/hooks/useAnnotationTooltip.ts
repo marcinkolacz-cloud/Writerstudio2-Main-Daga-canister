@@ -49,7 +49,7 @@ export function useAnnotationTooltip(
     clearHideTimeout();
     hideTimeoutRef.current = setTimeout(() => {
       setTooltip(null);
-    }, 150);
+    }, 400);
   }, [clearHideTimeout]);
 
   const showTooltip = useCallback(

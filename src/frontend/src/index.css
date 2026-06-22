@@ -149,6 +149,15 @@
   }
 }
 
+.dark .ProseMirror {
+  color: white;
+}
+
+.dark .ProseMirror p,
+.dark .ProseMirror * {
+  color: white;
+}
+
 .font-serif-editor {
   font-family: var(--font-serif-editor);
 }

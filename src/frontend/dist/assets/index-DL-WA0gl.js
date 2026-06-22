@@ -45794,14 +45794,14 @@ async function analyzeEmotion(text, apiKey, provider, bookContext) {
   return validated.map((a2) => ({ ...a2, color: "purple" }));
 }
 async function analyzeConsistency(allChaptersText, apiKey, provider) {
-  if (allChaptersText.length > 12e3) {
+  if (allChaptersText.length > 5e4) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildConsistencyPrompt(allChaptersText);
   return await callAi(prompt, apiKey, provider, false);
 }
 async function generateSummary(allChaptersText, summaryType, apiKey, provider) {
-  if (allChaptersText.length > 12e3) {
+  if (allChaptersText.length > 5e4) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildSummaryPrompt(allChaptersText, summaryType);
@@ -67833,7 +67833,7 @@ function useAnnotationTooltip(editor, onApplyProposal, onKeepOriginal, onRevertP
     clearHideTimeout();
     hideTimeoutRef.current = setTimeout(() => {
       setTooltip(null);
-    }, 150);
+    }, 400);
   }, [clearHideTimeout]);
   const showTooltip = reactExports.useCallback(
     (data) => {
@@ -105505,7 +105505,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DkgnnRJD.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Cn_5yy22.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -106958,7 +106958,7 @@ function ChapterEditorPage() {
                     ] }) }),
                     /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "context", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
                       /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-3.5 w-3.5" }),
-                      "Analizuj z kontekstem"
+                      "Kontekst (panel czatu)"
                     ] }) }),
                     /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "dialogue", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
                       /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-3.5 w-3.5" }),
@@ -107015,6 +107015,10 @@ function ChapterEditorPage() {
                 disabled: analysisStatus === "loading" || !apiKey.trim(),
                 onClick: async () => {
                   if (!editorRef.current || !chapter || !book) return;
+                  if (analysisMode === "context") {
+                    setContextChatPanelOpen(true);
+                    return;
+                  }
                   let text;
                   let selectionRange;
                   const editor = editorRef.current;
@@ -107086,32 +107090,6 @@ ${ch.content}`).join("\n\n---\n\n");
                     if (analysisMode === "grammar") {
                       annotations = await analyzeGrammarStyle(
                         text,
-                        apiKey.trim(),
-                        provider,
-                        bookContext
-                      );
-                    } else if (analysisMode === "context") {
-                      const previousSummaries = [];
-                      const sortedChapters = (chapters ?? []).sort(
-                        (a2, b2) => Number(a2.orderIndex - b2.orderIndex)
-                      );
-                      const currentIdx = sortedChapters.findIndex(
-                        (ch) => ch.id === chapter.id
-                      );
-                      for (let i2 = 0; i2 < currentIdx; i2++) {
-                        const prevChapter = sortedChapters[i2];
-                        if (!prevChapter) continue;
-                        const prevChapterId = prevChapter.id;
-                        const matchingAnalyses = (bookAnalyses ?? []).filter(
-                          (a2) => a2.analysisType === "summary" && (a2.chapterId === null || a2.chapterId === prevChapterId)
-                        );
-                        for (const analysis of matchingAnalyses) {
-                          previousSummaries.push(analysis.resultContent);
-                        }
-                      }
-                      annotations = await analyzeWithContext(
-                        text,
-                        previousSummaries,
                         apiKey.trim(),
                         provider,
                         bookContext
