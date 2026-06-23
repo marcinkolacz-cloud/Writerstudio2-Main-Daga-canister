@@ -190,9 +190,13 @@ export function ContextChatPanel({
 
   const handleDeleteSession = useCallback(
     async (sessionId: bigint) => {
-      await deleteSession.mutateAsync({ sessionId, chapterId });
-      if (activeSessionId === sessionId) {
-        setActiveSessionId(null);
+      try {
+        await deleteSession.mutateAsync({ sessionId, chapterId });
+        if (activeSessionId === sessionId) {
+          setActiveSessionId(null);
+        }
+      } catch (err) {
+        console.error("Delete session failed:", err);
       }
     },
     [deleteSession, chapterId, activeSessionId],

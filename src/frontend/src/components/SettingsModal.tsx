@@ -7,13 +7,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Key, LogOut, Save, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -100,22 +93,33 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="settings-provider">Provider</Label>
-              <Select
-                value={provider}
-                onValueChange={(v) => setProvider(v as "openai" | "claude")}
-              >
-                <SelectTrigger
-                  id="settings-provider"
-                  data-ocid="settings.provider_select"
+              <Label>Provider</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={provider === "openai" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => {
+                    setProvider("openai");
+                    localStorage.setItem("ws_api_provider", "openai");
+                  }}
+                  data-ocid="settings.provider_openai_button"
                 >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="openai">OpenAI</SelectItem>
-                  <SelectItem value="claude">Claude</SelectItem>
-                </SelectContent>
-              </Select>
+                  OpenAI
+                </Button>
+                <Button
+                  type="button"
+                  variant={provider === "claude" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => {
+                    setProvider("claude");
+                    localStorage.setItem("ws_api_provider", "claude");
+                  }}
+                  data-ocid="settings.provider_claude_button"
+                >
+                  Claude
+                </Button>
+              </div>
             </div>
           </div>
 

@@ -41680,6 +41680,1238 @@ function Label$2({
     }
   );
 }
+function Textarea({ className, ...props }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "textarea",
+    {
+      "data-slot": "textarea",
+      className: cn(
+        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        className
+      ),
+      ...props
+    }
+  );
+}
+function SettingsModal({ open: open2, onOpenChange }) {
+  const [apiKeyOpenAI, setApiKeyOpenAI] = reactExports.useState("");
+  const [apiKeyClaude, setApiKeyClaude] = reactExports.useState("");
+  const [provider, setProvider] = reactExports.useState("openai");
+  const [systemPrompt, setSystemPrompt] = reactExports.useState("");
+  reactExports.useEffect(() => {
+    if (open2) {
+      const oldKey = localStorage.getItem("ws_api_key");
+      if (oldKey && !localStorage.getItem("ws_api_key_openai")) {
+        localStorage.setItem("ws_api_key_openai", oldKey);
+        localStorage.removeItem("ws_api_key");
+      }
+      setApiKeyOpenAI(localStorage.getItem("ws_api_key_openai") ?? "");
+      setApiKeyClaude(localStorage.getItem("ws_api_key_claude") ?? "");
+      const savedProvider = localStorage.getItem("ws_api_provider");
+      setProvider(savedProvider === "claude" ? "claude" : "openai");
+      setSystemPrompt(localStorage.getItem("ws_system_prompt") ?? "");
+    }
+  }, [open2]);
+  const handleSave = () => {
+    localStorage.setItem("ws_api_key_openai", apiKeyOpenAI);
+    localStorage.setItem("ws_api_key_claude", apiKeyClaude);
+    localStorage.setItem("ws_api_provider", provider);
+    localStorage.setItem("ws_system_prompt", systemPrompt);
+    onOpenChange(false);
+  };
+  const handleResetAccess = () => {
+    localStorage.removeItem("ws_access_granted");
+    window.location.reload();
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: open2, onOpenChange, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "max-w-lg max-h-[85vh] overflow-y-auto", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogTitle, { className: "flex items-center gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Settings$1, { className: "h-5 w-5" }),
+      "Ustawienia ogólnoaplikacyjne"
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6 py-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Key, { className: "h-4 w-4 text-primary" }),
+          "Klucz API i provider"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "settings-api-key-openai", children: "Klucz API OpenAI" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Input,
+            {
+              id: "settings-api-key-openai",
+              type: "password",
+              placeholder: "Wprowadź klucz API OpenAI",
+              value: apiKeyOpenAI,
+              onChange: (e3) => setApiKeyOpenAI(e3.target.value),
+              "data-ocid": "settings.api_key_openai_input"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "settings-api-key-claude", children: "Klucz API Claude" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Input,
+            {
+              id: "settings-api-key-claude",
+              type: "password",
+              placeholder: "Wprowadź klucz API Claude",
+              value: apiKeyClaude,
+              onChange: (e3) => setApiKeyClaude(e3.target.value),
+              "data-ocid": "settings.api_key_claude_input"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Provider" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Button,
+              {
+                type: "button",
+                variant: provider === "openai" ? "default" : "outline",
+                className: "flex-1",
+                onClick: () => {
+                  setProvider("openai");
+                  localStorage.setItem("ws_api_provider", "openai");
+                },
+                "data-ocid": "settings.provider_openai_button",
+                children: "OpenAI"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Button,
+              {
+                type: "button",
+                variant: provider === "claude" ? "default" : "outline",
+                className: "flex-1",
+                onClick: () => {
+                  setProvider("claude");
+                  localStorage.setItem("ws_api_provider", "claude");
+                },
+                "data-ocid": "settings.provider_claude_button",
+                children: "Claude"
+              }
+            )
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-border" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Settings$1, { className: "h-4 w-4 text-primary" }),
+          "Własny system prompt AI"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "settings-system-prompt", children: "Własny system prompt AI" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Textarea,
+            {
+              id: "settings-system-prompt",
+              placeholder: "Wpisz własne instrukcje dla AI, które będą dołączane do każdej analizy i rozmowy z asystentem (np. 'Pisz zawsze po polsku', 'Zachowaj styl noir', 'Unikaj słowa bardzo')...",
+              value: systemPrompt,
+              onChange: (e3) => setSystemPrompt(e3.target.value),
+              rows: 5,
+              "data-ocid": "settings.system_prompt_textarea"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-muted-foreground", children: "Ten prompt będzie dołączany na końcu każdego zapytania do AI." })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-border" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "h-4 w-4 text-destructive" }),
+          "Dostęp"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Button,
+          {
+            variant: "outline",
+            size: "sm",
+            onClick: handleResetAccess,
+            className: "w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10",
+            "data-ocid": "settings.reset_access_button",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "h-4 w-4 mr-2" }),
+              "Wyloguj / Zresetuj dostęp"
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-muted-foreground", children: "Usuwa flagę dostępu i przeładowuje stronę. Będziesz musiał ponownie aktywować dostęp kodem zaproszenia." })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-end gap-2 pt-2 border-t border-border", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Button,
+        {
+          variant: "outline",
+          onClick: () => onOpenChange(false),
+          "data-ocid": "settings.cancel_button",
+          children: "Anuluj"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { onClick: handleSave, "data-ocid": "settings.save_button", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Save, { className: "h-4 w-4 mr-2" }),
+        "Zapisz ustawienia"
+      ] })
+    ] })
+  ] }) });
+}
+function buildBookContextPrompt(bookContext) {
+  if (!bookContext) return "";
+  const parts = [];
+  if (bookContext.title) parts.push(`- Tytuł: ${bookContext.title}`);
+  if (bookContext.ageCategory)
+    parts.push(`- Kategoria wiekowa: ${bookContext.ageCategory}`);
+  if (bookContext.authorSummary)
+    parts.push(`- Streszczenie autorskie: ${bookContext.authorSummary}`);
+  if (bookContext.keyContext)
+    parts.push(`- Kluczowe informacje: ${bookContext.keyContext}`);
+  if (bookContext.themes) parts.push(`- Motywy: ${bookContext.themes}`);
+  if (bookContext.writingStyle)
+    parts.push(`- Styl pisarski: ${bookContext.writingStyle}`);
+  if (parts.length === 0) return "";
+  return `Kontekst książki:
+${parts.join("\n")}
+
+`;
+}
+function buildGrammarPrompt(text, bookContext) {
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
+Możliwe wartości COLOR: red, yellow, blue, orange, purple
+Przykład:
+red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
+yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+  if (customPrompt) {
+    system += `
+
+Dodatkowe instrukcje autora:
+${customPrompt}`;
+  }
+  return `${system}
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+function buildContextPrompt(text, previousSummaries, bookContext) {
+  const summariesBlock = previousSummaries.length > 0 ? previousSummaries.map((s2, i2) => `Streszczenie rozdziału ${i2 + 1}:
+${s2}`).join("\n\n") : "Brak wcześniejszych rozdziałów.";
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `${buildBookContextPrompt(bookContext)}Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
+Możliwe wartości COLOR: red, yellow, blue, orange, purple
+Przykład:
+red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
+yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+  if (customPrompt) {
+    system += `
+
+Dodatkowe instrukcje autora:
+${customPrompt}`;
+  }
+  return `${system}
+
+KONTEKST POPRZEDNICH ROZDZIAŁÓW:
+${summariesBlock}
+
+BIĄŻĄCY ROZDZIAŁ DO ANALIZY:
+"""
+${text}
+"""`;
+}
+function buildDialoguePrompt(text, bookContext) {
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
+Możliwe wartości COLOR: red, yellow, blue, orange, purple
+Przykład:
+red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
+yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+  if (customPrompt) {
+    system += `
+
+Dodatkowe instrukcje autora:
+${customPrompt}`;
+  }
+  return `${system}
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+function buildSceneExpansionPrompt(text, bookContext) {
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
+Możliwe wartości COLOR: red, yellow, blue, orange, purple
+Przykład:
+red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
+yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+  if (customPrompt) {
+    system += `
+
+Dodatkowe instrukcje autora:
+${customPrompt}`;
+  }
+  return `${system}
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+function buildEmotionPrompt(text, bookContext) {
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
+Możliwe wartości COLOR: red, yellow, blue, orange, purple
+Przykład:
+purple|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+  if (customPrompt) {
+    system += `
+
+Dodatkowe instrukcje autora:
+${customPrompt}`;
+  }
+  return `${system}
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+function buildConsistencyPrompt(allChaptersText) {
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `Przeanalizuj poniższy tekst całej książki (wszystkie rozdziały) pod kątem niespójności między rozdziałami. Szukaj: sprzecznych faktów (np. postać ma inny kolor oczu w różnych rozdziałach), nielogicznych skoków czasowych, zapomnianych wątków, niespójnych cech postaci, zmiennych nazw miejsc lub postaci, błędów chronologicznych. Zwróć czytelny tekstowy raport listujący znalezione problemy z odniesieniem do konkretnych rozdziałów. Format: każdy problem w osobnym akapicie, zacznij od numeru rozdziału lub "Ogólne" jeśli dotyczy całości. Nie używaj JSON — zwróć zwykły tekst.`;
+  if (customPrompt) {
+    system += `
+
+Dodatkowe instrukcje autora:
+${customPrompt}`;
+  }
+  return `${system}
+
+Tekst do analizy:
+"""
+${allChaptersText}
+"""`;
+}
+function buildSummaryPrompt(allChaptersText, summaryType) {
+  const typeInstructions = {
+    short: "Napisz KRÓTKIE streszczenie książki w 3-5 zdaniach, zachowując główne wątki i konflikt.",
+    long: "Napisz SZCZEGÓŁOWE streszczenie książki, obejmujące wszystkie główne wątki, rozwój postaci, zwroty akcji i zakończenie. Format: kilka akapitów.",
+    hooks: "Wymyśl 5-7 CHWYTliwych zdań (tzw. 'hooks') do promocji książki w mediach społecznościowych. Każde zdanie powinno być intrygujące, emocjonalne i zachęcać do przeczytania. Zwróć je jako listę punktowaną."
+  };
+  return `${typeInstructions[summaryType]}
+
+Oto pełny tekst wszystkich rozdziałów książki:
+"""
+${allChaptersText}
+"""`;
+}
+function parsePipeAnnotations(responseText) {
+  const validColors = /* @__PURE__ */ new Set([
+    "red",
+    "yellow",
+    "blue",
+    "orange",
+    "purple"
+  ]);
+  const lines = responseText.split("\n").map((line) => line.trim()).filter((line) => line.includes("|||"));
+  const annotations = lines.map((line) => {
+    let workingLine = line;
+    const colorMatch = workingLine.match(
+      /(red|yellow|blue|orange|purple)\|\|\|/i
+    );
+    if (colorMatch && colorMatch.index !== void 0 && colorMatch.index > 0) {
+      workingLine = workingLine.slice(colorMatch.index);
+    }
+    const parts = workingLine.split("|||");
+    if (parts.length < 3) return null;
+    const [color2, text, explanation, proposal] = parts;
+    if (!(color2 == null ? void 0 : color2.trim()) || !(text == null ? void 0 : text.trim()) || !(explanation == null ? void 0 : explanation.trim())) return null;
+    const colorLower = color2.trim().toLowerCase();
+    if (!validColors.has(colorLower)) return null;
+    return {
+      id: 0n,
+      color: colorLower,
+      text: text.trim(),
+      explanation: explanation.trim(),
+      proposal: (proposal || "").trim(),
+      approved: false
+    };
+  }).filter(Boolean);
+  return annotations;
+}
+function validateAnnotations(annotations) {
+  console.log("[VALIDATE]", annotations);
+  const validColors = /* @__PURE__ */ new Set([
+    "yellow",
+    "red",
+    "blue",
+    "orange",
+    "purple"
+  ]);
+  return annotations.map((item, idx) => {
+    if (!item || typeof item !== "object") {
+      console.warn(`Element ${idx} nie jest obiektem — pominięto`);
+      return null;
+    }
+    const text = item.text;
+    const color2 = item.color;
+    const explanation = item.explanation;
+    const proposal = item.proposal;
+    if (typeof text !== "string" || typeof explanation !== "string" || typeof proposal !== "string") {
+      console.warn(`Element ${idx} ma nieprawidłowy typ pól — pominięto`);
+      return null;
+    }
+    const colorStr = String(color2).toLowerCase();
+    if (!validColors.has(colorStr)) {
+      console.warn(
+        `Element ${idx} ma nieprawidłowy kolor: ${colorStr} — pominięto`
+      );
+      return null;
+    }
+    return {
+      id: 0n,
+      text,
+      color: colorStr,
+      explanation,
+      proposal,
+      approved: false
+    };
+  }).filter((item) => item !== null);
+}
+async function callAi(prompt, apiKey, provider, expectJson) {
+  var _a3, _b3, _c2, _d2, _e3;
+  const safeApiKey = apiKey.replace(/[^\x00-\xFF]/g, "").trim();
+  if (provider === "openai") {
+    const body = {
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 8e3,
+      temperature: 0.3
+    };
+    if (expectJson) {
+      body.response_format = { type: "json_object" };
+    }
+    const res2 = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${safeApiKey}`
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res2.ok) {
+      const err = await res2.text();
+      throw new Error(`OpenAI error ${res2.status}: ${err}`);
+    }
+    const data2 = await res2.json();
+    return ((_c2 = (_b3 = (_a3 = data2.choices) == null ? void 0 : _a3[0]) == null ? void 0 : _b3.message) == null ? void 0 : _c2.content) ?? "";
+  }
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": safeApiKey,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 8e3,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3
+    })
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Claude error ${res.status}: ${err}`);
+  }
+  const data = await res.json();
+  const responseText = ((_e3 = (_d2 = data.content) == null ? void 0 : _d2.find((c2) => c2.type === "text")) == null ? void 0 : _e3.text) ?? "";
+  console.log("[AI RESPONSE]", responseText.substring(0, 500));
+  return responseText;
+}
+async function analyzeGrammarStyle(text, apiKey, provider, bookContext) {
+  if (text.length > 8e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildGrammarPrompt(text, bookContext);
+  const responseText = await callAi(prompt, apiKey, provider, false);
+  const annotations = parsePipeAnnotations(responseText);
+  console.log("[PARSED]", annotations.length, annotations);
+  return validateAnnotations(annotations);
+}
+async function analyzeWithContext(currentChapterText, previousChaptersSummaries, apiKey, provider, bookContext) {
+  if (currentChapterText.length > 8e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildContextPrompt(
+    currentChapterText,
+    previousChaptersSummaries,
+    bookContext
+  );
+  const responseText = await callAi(prompt, apiKey, provider, false);
+  const annotations = parsePipeAnnotations(responseText);
+  return validateAnnotations(annotations);
+}
+async function analyzeDialogue(text, apiKey, provider, bookContext) {
+  if (text.length > 8e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildDialoguePrompt(text, bookContext);
+  const responseText = await callAi(prompt, apiKey, provider, false);
+  const annotations = parsePipeAnnotations(responseText);
+  return validateAnnotations(annotations);
+}
+async function analyzeSceneExpansion(text, apiKey, provider, bookContext) {
+  if (text.length > 8e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildSceneExpansionPrompt(text, bookContext);
+  const responseText = await callAi(prompt, apiKey, provider, false);
+  const annotations = parsePipeAnnotations(responseText);
+  return validateAnnotations(annotations);
+}
+async function analyzeEmotion(text, apiKey, provider, bookContext) {
+  if (text.length > 8e3) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildEmotionPrompt(text, bookContext);
+  const responseText = await callAi(prompt, apiKey, provider, false);
+  const annotations = parsePipeAnnotations(responseText);
+  const validated = validateAnnotations(annotations);
+  return validated.map((a2) => ({ ...a2, color: "purple" }));
+}
+async function analyzeConsistency(allChaptersText, apiKey, provider) {
+  if (allChaptersText.length > 5e4) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildConsistencyPrompt(allChaptersText);
+  return await callAi(prompt, apiKey, provider, false);
+}
+async function generateSummary(allChaptersText, summaryType, apiKey, provider) {
+  if (allChaptersText.length > 5e4) {
+    throw new Error("Tekst za długi");
+  }
+  const prompt = buildSummaryPrompt(allChaptersText, summaryType);
+  return await callAi(prompt, apiKey, provider, false);
+}
+function buildChatPrompt(messages2, bookContext, chapterSummaries) {
+  const history2 = messages2.map(
+    (m2) => `${m2.role === "user" ? "Użytkownik" : "Asystent"}: ${m2.content}`
+  ).join("\n\n");
+  const customPrompt = localStorage.getItem("ws_system_prompt");
+  let system = `Jesteś asystentem pisarskim dla pisarza. Pomagasz w tworzeniu powieści, odpowiadasz na pytania, proponujesz pomysły na fabułę, postacie, dialogi i rozwój wątków.
+
+KONTEKST KSIĄŻKI:
+${bookContext}`;
+  if (chapterSummaries && chapterSummaries.length > 0) {
+    system += `
+
+STRESZCZENIA ROZDZIAŁÓW KSIĄŻKI:
+${chapterSummaries.map((s2, i2) => `Rozdział ${i2 + 1}:
+${s2}`).join("\n\n")}`;
+  }
+  system += `
+
+HISTORIA ROZMOWY:
+${history2}
+
+Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
+  if (customPrompt) {
+    system += `
+
+Dodatkowe instrukcje autora:
+${customPrompt}`;
+  }
+  return system;
+}
+async function getSynonyms(word, apiKey, provider) {
+  if (!word || word.trim().length === 0) {
+    return [];
+  }
+  const cleanWord = word.trim();
+  const prompt = `Podaj 5-8 synonimów polskiego słowa "${cleanWord}" w kontekście języka literackiego. Zwróć wynik jako JSON array zawierający tylko synonimy jako stringi. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
+  const responseText = await callAi(prompt, apiKey, provider, true);
+  try {
+    const parsed = JSON.parse(responseText);
+    if (!Array.isArray(parsed)) {
+      throw new Error("Oczekiwano tablicy synonimów");
+    }
+    return parsed.map((item) => {
+      if (typeof item === "string") return item;
+      if (item && typeof item === "object" && "synonym" in item) {
+        return String(item.synonym);
+      }
+      return String(item);
+    }).filter((s2) => s2.length > 0);
+  } catch {
+    console.error("Nie udało się sparsować synonimów:", responseText);
+    return [];
+  }
+}
+async function chatWithBook(messages2, bookContext, apiKey, provider, chapterSummaries) {
+  const prompt = buildChatPrompt(messages2, bookContext, chapterSummaries);
+  return await callAi(prompt, apiKey, provider, false);
+}
+function ChatBotPanel({ bookId }) {
+  const [isOpen, setIsOpen] = reactExports.useState(() => {
+    const stored = localStorage.getItem("writerstudio-chat-open");
+    return stored === "true";
+  });
+  reactExports.useEffect(() => {
+    localStorage.setItem("writerstudio-chat-open", String(isOpen));
+  }, [isOpen]);
+  const { data: book } = useBook(bookId);
+  const { data: chapters } = useChapters(bookId);
+  const { data: messages2, isLoading } = useChatMessages(bookId);
+  const { data: analyses } = useAnalysesByBook(bookId);
+  const sendMessage = useSendMessage();
+  const deleteMessage = useDeleteMessage();
+  const clearChat = useClearChat();
+  const [input, setInput] = reactExports.useState("");
+  const [isSending, setIsSending] = reactExports.useState(false);
+  const messagesEndRef = reactExports.useRef(null);
+  const textareaRef = reactExports.useRef(null);
+  const [pos, setPos] = reactExports.useState({ x: 0, y: 0 });
+  const [size2, setSize] = reactExports.useState({ w: 380, h: 520 });
+  const panelRef = reactExports.useRef(null);
+  const dragState = reactExports.useRef({
+    dragging: false,
+    startX: 0,
+    startY: 0,
+    startPx: 0,
+    startPy: 0
+  });
+  const resizeState = reactExports.useRef({
+    resizing: false,
+    startX: 0,
+    startY: 0,
+    startW: 380,
+    startH: 520
+  });
+  const scrollToBottom = reactExports.useCallback(() => {
+    var _a3;
+    (_a3 = messagesEndRef.current) == null ? void 0 : _a3.scrollIntoView({ behavior: "smooth" });
+  }, []);
+  const messageCountRef = reactExports.useRef((messages2 == null ? void 0 : messages2.length) ?? 0);
+  reactExports.useEffect(() => {
+    const currentLength = (messages2 == null ? void 0 : messages2.length) ?? 0;
+    if (isOpen && currentLength > messageCountRef.current) {
+      scrollToBottom();
+    }
+    messageCountRef.current = currentLength;
+  }, [isOpen, scrollToBottom, messages2 == null ? void 0 : messages2.length]);
+  const onDragMouseDown = reactExports.useCallback(
+    (e3) => {
+      if (e3.target.closest("[data-chat-action]")) return;
+      dragState.current = {
+        dragging: true,
+        startX: e3.clientX,
+        startY: e3.clientY,
+        startPx: pos.x,
+        startPy: pos.y
+      };
+      e3.preventDefault();
+    },
+    [pos.x, pos.y]
+  );
+  const onResizeMouseDown = reactExports.useCallback(
+    (e3) => {
+      resizeState.current = {
+        resizing: true,
+        startX: e3.clientX,
+        startY: e3.clientY,
+        startW: size2.w,
+        startH: size2.h
+      };
+      e3.preventDefault();
+      e3.stopPropagation();
+    },
+    [size2.w, size2.h]
+  );
+  reactExports.useEffect(() => {
+    const onMouseMove = (e3) => {
+      if (dragState.current.dragging) {
+        const dx = e3.clientX - dragState.current.startX;
+        const dy = e3.clientY - dragState.current.startY;
+        setPos({
+          x: dragState.current.startPx + dx,
+          y: dragState.current.startPy + dy
+        });
+      }
+      if (resizeState.current.resizing) {
+        const dx = e3.clientX - resizeState.current.startX;
+        const dy = e3.clientY - resizeState.current.startY;
+        setSize({
+          w: Math.max(280, resizeState.current.startW + dx),
+          h: Math.max(320, resizeState.current.startH + dy)
+        });
+      }
+    };
+    const onMouseUp = () => {
+      dragState.current.dragging = false;
+      resizeState.current.resizing = false;
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+  const handleSend = reactExports.useCallback(async () => {
+    const trimmed = input.trim();
+    if (!trimmed || isSending || !book) return;
+    const apiKey = (localStorage.getItem("ws_api_provider") === "claude" ? localStorage.getItem("ws_api_key_claude") : localStorage.getItem("ws_api_key_openai")) ?? "";
+    const provider = localStorage.getItem("ws_api_provider") || "openai";
+    if (!apiKey.trim()) {
+      setInput("");
+      return;
+    }
+    setIsSending(true);
+    setInput("");
+    try {
+      await sendMessage.mutateAsync({
+        bookId: BigInt(bookId),
+        role: "user",
+        content: trimmed,
+        provider: ""
+      });
+      const chapterTitles = (chapters ?? []).sort((a2, b2) => Number(a2.orderIndex - b2.orderIndex)).map((ch) => `- ${ch.title}`).join("\n");
+      const bookContext = `Tytuł książki: ${book.title}
+Kategoria: ${book.category}
+Opis: ${book.description}
+
+Rozdziały:
+${chapterTitles}`;
+      const currentMessages = (messages2 ?? []).map((m2) => ({
+        role: m2.role === "user" ? "user" : "assistant",
+        content: m2.content
+      }));
+      currentMessages.push({ role: "user", content: trimmed });
+      const chapterSummaries = (analyses ?? []).filter((a2) => a2.analysisType === "summary").sort((a2, b2) => Number(a2.createdAt - b2.createdAt)).map((a2) => a2.resultContent);
+      const reply = await chatWithBook(
+        currentMessages,
+        bookContext,
+        apiKey.trim(),
+        provider,
+        chapterSummaries.length > 0 ? chapterSummaries : void 0
+      );
+      await sendMessage.mutateAsync({
+        bookId: BigInt(bookId),
+        role: "assistant",
+        content: reply,
+        provider
+      });
+    } catch {
+    } finally {
+      setIsSending(false);
+    }
+  }, [
+    input,
+    isSending,
+    book,
+    bookId,
+    chapters,
+    messages2,
+    analyses,
+    sendMessage
+  ]);
+  const handleKeyDown2 = (e3) => {
+    if (e3.key === "Enter" && !e3.shiftKey) {
+      e3.preventDefault();
+      handleSend();
+    }
+  };
+  const handleClear = () => {
+    if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
+      clearChat.mutate({ bookId: BigInt(bookId) });
+    }
+  };
+  if (!isOpen) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "button",
+      {
+        type: "button",
+        onClick: () => setIsOpen(true),
+        className: "fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-105 transition-transform",
+        "aria-label": "Otwórz czat",
+        "data-ocid": "chat.open_button",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-6 w-6" })
+      }
+    );
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      ref: panelRef,
+      className: "fixed z-50 flex flex-col rounded-xl border border-border bg-card shadow-elevated overflow-hidden",
+      style: {
+        right: 24 + pos.x,
+        bottom: 24 - pos.y,
+        width: size2.w,
+        height: size2.h
+      },
+      "data-ocid": "chat.panel",
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
+          {
+            className: "flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40 cursor-move select-none",
+            onMouseDown: onDragMouseDown,
+            "data-ocid": "chat.header",
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-primary" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-foreground", children: "Asystent AI" }),
+                book && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate max-w-[120px]", children: book.title })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Button,
+                  {
+                    variant: "ghost",
+                    size: "sm",
+                    className: "h-7 w-7 p-0 text-muted-foreground hover:text-destructive",
+                    onClick: handleClear,
+                    title: "Wyczyść historię",
+                    "data-chat-action": true,
+                    "data-ocid": "chat.clear_button",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3.5 w-3.5" })
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Button,
+                  {
+                    variant: "ghost",
+                    size: "sm",
+                    className: "h-7 w-7 p-0 text-muted-foreground hover:text-foreground",
+                    onClick: () => setIsOpen(false),
+                    title: "Zamknij",
+                    "data-chat-action": true,
+                    "data-ocid": "chat.close_button",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-3.5 w-3.5" })
+                  }
+                )
+              ] })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 space-y-3 min-h-0", children: [
+          isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "text-xs text-muted-foreground text-center py-4",
+              "data-ocid": "chat.loading_state",
+              children: "Ładowanie historii..."
+            }
+          ),
+          !isLoading && (!messages2 || messages2.length === 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: "text-xs text-muted-foreground text-center py-8",
+              "data-ocid": "chat.empty_state",
+              children: [
+                "Zacznij rozmowę z asystentem AI.",
+                /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+                "Możesz pytać o fabułę, postacie, dialogi i styl."
+              ]
+            }
+          ),
+          messages2 == null ? void 0 : messages2.map((msg, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+            ChatMessageItem,
+            {
+              msg,
+              onDelete: () => deleteMessage.mutate({ id: msg.id })
+            },
+            `${msg.id}-${idx}`
+          )),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: messagesEndRef })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-t border-border p-3 bg-card", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-end gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "textarea",
+            {
+              ref: textareaRef,
+              value: input,
+              onChange: (e3) => setInput(e3.target.value),
+              onKeyDown: handleKeyDown2,
+              placeholder: "Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)",
+              className: "flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+              rows: 1,
+              "data-ocid": "chat.input"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Button,
+            {
+              size: "sm",
+              disabled: !input.trim() || isSending,
+              onClick: handleSend,
+              className: "h-9 w-9 p-0 shrink-0",
+              "data-ocid": "chat.send_button",
+              children: isSending ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Send, { className: "h-4 w-4" })
+            }
+          )
+        ] }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            className: "absolute bottom-0 right-0 w-4 h-4 cursor-se-resize",
+            onMouseDown: onResizeMouseDown,
+            "data-ocid": "chat.resize_handle",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "svg",
+              {
+                role: "img",
+                "aria-label": "Resize handle",
+                width: "12",
+                height: "12",
+                viewBox: "0 0 12 12",
+                className: "absolute bottom-1 right-1 text-muted-foreground/40",
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "path",
+                  {
+                    d: "M8 12L12 8V12H8ZM4 12L12 4V8L8 12H4ZM0 12L12 0V4L4 12H0Z",
+                    fill: "currentColor"
+                  }
+                )
+              }
+            )
+          }
+        )
+      ]
+    }
+  );
+}
+function ChatMessageItem({
+  msg,
+  onDelete
+}) {
+  const isUser = msg.role === "user";
+  const [confirmDelete, setConfirmDelete] = reactExports.useState(false);
+  const timeoutRef = reactExports.useRef(null);
+  const handleDeleteClick = () => {
+    if (confirmDelete) {
+      onDelete();
+      setConfirmDelete(false);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    } else {
+      setConfirmDelete(true);
+      timeoutRef.current = setTimeout(() => setConfirmDelete(false), 2e3);
+    }
+  };
+  reactExports.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    "div",
+    {
+      className: `group flex ${isUser ? "justify-end" : "justify-start"}`,
+      "data-ocid": `chat.message.${msg.id}`,
+      children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "div",
+        {
+          className: `relative max-w-[85%] rounded-lg px-3 py-2 text-sm ${isUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted text-foreground rounded-bl-none"}`,
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "whitespace-pre-wrap break-words", children: msg.content }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                type: "button",
+                onClick: handleDeleteClick,
+                className: `absolute -top-2 ${isUser ? "-left-2" : "-right-2"} h-5 w-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${confirmDelete ? "bg-destructive text-destructive-foreground" : "bg-card border border-border text-muted-foreground hover:text-destructive"}`,
+                title: confirmDelete ? "Kliknij ponownie, aby usunąć" : "Usuń wiadomość",
+                "data-ocid": `chat.delete_button.${msg.id}`,
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3 w-3" })
+              }
+            )
+          ]
+        }
+      )
+    }
+  );
+}
+function useActiveBookId() {
+  const routerState = useRouterState();
+  const pathname = routerState.location.pathname;
+  const bookMatch = pathname.match(/\/books\/([^\/]+)/);
+  if (bookMatch) return bookMatch[1];
+  return null;
+}
+function useActiveChapterId() {
+  const params = useParams({ strict: false });
+  return params.chapterId ?? null;
+}
+function Layout() {
+  const navigate = useNavigate();
+  const { isAuthenticated, clearAuth } = useAppStore();
+  const { clear } = useInternetIdentity();
+  const activeBookId = useActiveBookId();
+  const activeChapterId = useActiveChapterId();
+  const { data: chapters } = useChapters(activeBookId ?? "");
+  const reorderChapters = useReorderChapters();
+  const [dragOverIndex, setDragOverIndex] = reactExports.useState(null);
+  const [theme, setTheme] = reactExports.useState(() => {
+    const stored = localStorage.getItem("writerstudio-theme");
+    if (stored === "dark") return "dark";
+    return "light";
+  });
+  const [isOnline, setIsOnline] = reactExports.useState(() => navigator.onLine);
+  const [settingsModalOpen, setSettingsModalOpen] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+  reactExports.useEffect(() => {
+    const root2 = document.documentElement;
+    if (theme === "dark") {
+      root2.classList.add("dark");
+    } else {
+      root2.classList.remove("dark");
+    }
+    localStorage.setItem("writerstudio-theme", theme);
+  }, [theme]);
+  const toggleTheme = () => {
+    setTheme((prev) => prev === "light" ? "dark" : "light");
+  };
+  const handleLogout = () => {
+    clear();
+    clearAuth();
+    navigate({ to: "/login" });
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex h-screen w-full bg-background", children: [
+    !isOnline && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        className: "fixed top-0 left-0 right-0 z-50 bg-destructive text-destructive-foreground px-4 py-2 text-sm font-medium flex items-center justify-center gap-2",
+        "data-ocid": "layout.offline_banner",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(WifiOff, { className: "h-4 w-4" }),
+          "Brak połączenia z internetem — zmiany mogą się nie zapisywać. Sprawdź swoje połączenie."
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { className: "w-[240px] flex-shrink-0 border-r border-border bg-sidebar flex flex-col", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b border-sidebar-border", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-sm font-semibold text-sidebar-foreground uppercase tracking-wider", children: "Lista rozdziałów" }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 p-4 space-y-2 overflow-y-auto", children: [
+        activeBookId && chapters && chapters.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-1", children: chapters.map((chapter, index2) => {
+          const isActive2 = activeChapterId === String(chapter.id);
+          return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              draggable: true,
+              onDragStart: (e3) => {
+                e3.dataTransfer.setData("text/plain", String(chapter.id));
+                e3.dataTransfer.effectAllowed = "move";
+              },
+              onDragOver: (e3) => {
+                e3.preventDefault();
+                e3.dataTransfer.dropEffect = "move";
+                setDragOverIndex(index2);
+              },
+              onDragLeave: () => {
+                setDragOverIndex(null);
+              },
+              onDrop: (e3) => {
+                e3.preventDefault();
+                const draggedId = e3.dataTransfer.getData("text/plain");
+                if (!draggedId || !chapters || !activeBookId) {
+                  setDragOverIndex(null);
+                  return;
+                }
+                const fromIndex = chapters.findIndex(
+                  (c2) => String(c2.id) === draggedId
+                );
+                if (fromIndex === -1 || fromIndex === index2 || fromIndex === index2 - 1) {
+                  setDragOverIndex(null);
+                  return;
+                }
+                const newOrder = chapters.map((c2) => c2.id);
+                const [moved] = newOrder.splice(fromIndex, 1);
+                const insertAt = fromIndex < index2 ? index2 - 1 : index2;
+                newOrder.splice(insertAt, 0, moved);
+                reorderChapters.mutate({
+                  bookId: BigInt(activeBookId),
+                  orderedChapterIds: newOrder
+                });
+                setDragOverIndex(null);
+              },
+              className: `flex items-center gap-1 rounded-md px-2 py-1.5 text-sm transition-colors ${isActive2 ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"} ${dragOverIndex === index2 ? "border-t-2 border-t-primary" : ""}`,
+              "data-ocid": `nav.chapter_row.item.${Number(chapter.orderIndex) + 1}`,
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 cursor-grab active:cursor-grabbing text-sidebar-foreground/40 hover:text-sidebar-foreground/70 transition-colors", children: /* @__PURE__ */ jsxRuntimeExports.jsx(GripVertical, { className: "h-4 w-4" }) }),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    type: "button",
+                    onClick: () => navigate({
+                      to: "/books/$bookId/chapters/$chapterId",
+                      params: {
+                        bookId: activeBookId,
+                        chapterId: String(chapter.id)
+                      }
+                    }),
+                    className: "flex flex-1 items-center gap-2 min-w-0",
+                    "data-ocid": `nav.chapter_link.item.${Number(chapter.orderIndex) + 1}`,
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 shrink-0" }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: chapter.title })
+                    ]
+                  }
+                )
+              ]
+            },
+            String(chapter.id)
+          );
+        }) }),
+        (!activeBookId || !chapters || chapters.length === 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: () => navigate({ to: "/dashboard" }),
+              className: "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+              "data-ocid": "nav.dashboard_link",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-4 w-4" }),
+                "Dashboard"
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: () => navigate({ to: "/statistics" }),
+              className: "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+              "data-ocid": "nav.statistics_link",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(ChartColumn, { className: "h-4 w-4" }),
+                "Statystyki"
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "button",
+            {
+              type: "button",
+              onClick: () => navigate({ to: "/admin" }),
+              className: "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
+              "data-ocid": "nav.admin_link",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Shield, { className: "h-4 w-4" }),
+                "Admin"
+              ]
+            }
+          )
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        className: `flex-1 flex flex-col min-w-0 ${!isOnline ? "pt-10" : ""}`,
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "h-14 border-b border-border bg-card flex items-center px-6 flex-shrink-0 justify-between", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-5 w-5 text-primary" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-display text-lg font-semibold text-foreground", children: "WriterStudio TipTap" })
+            ] }),
+            isAuthenticated && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "sm",
+                  onClick: toggleTheme,
+                  "aria-label": theme === "light" ? "Włącz ciemny motyw" : "Włącz jasny motyw",
+                  "data-ocid": "theme.toggle_button",
+                  children: theme === "light" ? /* @__PURE__ */ jsxRuntimeExports.jsx(Moon, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Sun, { className: "h-4 w-4" })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "sm",
+                  onClick: () => setSettingsModalOpen(true),
+                  "aria-label": "Ustawienia",
+                  "data-ocid": "settings.open_modal_button",
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(Settings$1, { className: "h-4 w-4" })
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "sm",
+                  onClick: handleLogout,
+                  "data-ocid": "auth.logout_button",
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "h-4 w-4 mr-2" }),
+                    "Wyloguj się"
+                  ]
+                }
+              )
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            SettingsModal,
+            {
+              open: settingsModalOpen,
+              onOpenChange: setSettingsModalOpen
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "flex-1 overflow-auto p-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) }),
+          isAuthenticated && activeBookId && /* @__PURE__ */ jsxRuntimeExports.jsx(ChatBotPanel, { bookId: activeBookId })
+        ]
+      }
+    )
+  ] });
+}
+const rootRoute = createRootRoute({
+  component: () => /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {})
+});
+const layoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "layout",
+  component: Layout
+});
+const adminRoute = createRoute({
+  getParentRoute: () => layoutRoute,
+  path: "/admin",
+  beforeLoad: () => {
+    const { isAuthenticated } = useAppStore.getState();
+    if (!isAuthenticated) {
+      throw redirect({ to: "/login" });
+    }
+  },
+  component: AdminPage
+});
 function clamp$1(value, [min2, max2]) {
   return Math.min(max2, Math.max(min2, value));
 }
@@ -45286,1229 +46518,6 @@ function SelectScrollDownButton({
     }
   );
 }
-function Textarea({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "textarea",
-    {
-      "data-slot": "textarea",
-      className: cn(
-        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        className
-      ),
-      ...props
-    }
-  );
-}
-function SettingsModal({ open: open2, onOpenChange }) {
-  const [apiKeyOpenAI, setApiKeyOpenAI] = reactExports.useState("");
-  const [apiKeyClaude, setApiKeyClaude] = reactExports.useState("");
-  const [provider, setProvider] = reactExports.useState("openai");
-  const [systemPrompt, setSystemPrompt] = reactExports.useState("");
-  reactExports.useEffect(() => {
-    if (open2) {
-      const oldKey = localStorage.getItem("ws_api_key");
-      if (oldKey && !localStorage.getItem("ws_api_key_openai")) {
-        localStorage.setItem("ws_api_key_openai", oldKey);
-        localStorage.removeItem("ws_api_key");
-      }
-      setApiKeyOpenAI(localStorage.getItem("ws_api_key_openai") ?? "");
-      setApiKeyClaude(localStorage.getItem("ws_api_key_claude") ?? "");
-      const savedProvider = localStorage.getItem("ws_api_provider");
-      setProvider(savedProvider === "claude" ? "claude" : "openai");
-      setSystemPrompt(localStorage.getItem("ws_system_prompt") ?? "");
-    }
-  }, [open2]);
-  const handleSave = () => {
-    localStorage.setItem("ws_api_key_openai", apiKeyOpenAI);
-    localStorage.setItem("ws_api_key_claude", apiKeyClaude);
-    localStorage.setItem("ws_api_provider", provider);
-    localStorage.setItem("ws_system_prompt", systemPrompt);
-    onOpenChange(false);
-  };
-  const handleResetAccess = () => {
-    localStorage.removeItem("ws_access_granted");
-    window.location.reload();
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open: open2, onOpenChange, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "max-w-lg max-h-[85vh] overflow-y-auto", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogTitle, { className: "flex items-center gap-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Settings$1, { className: "h-5 w-5" }),
-      "Ustawienia ogólnoaplikacyjne"
-    ] }) }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6 py-4", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Key, { className: "h-4 w-4 text-primary" }),
-          "Klucz API i provider"
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "settings-api-key-openai", children: "Klucz API OpenAI" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Input,
-            {
-              id: "settings-api-key-openai",
-              type: "password",
-              placeholder: "Wprowadź klucz API OpenAI",
-              value: apiKeyOpenAI,
-              onChange: (e3) => setApiKeyOpenAI(e3.target.value),
-              "data-ocid": "settings.api_key_openai_input"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "settings-api-key-claude", children: "Klucz API Claude" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Input,
-            {
-              id: "settings-api-key-claude",
-              type: "password",
-              placeholder: "Wprowadź klucz API Claude",
-              value: apiKeyClaude,
-              onChange: (e3) => setApiKeyClaude(e3.target.value),
-              "data-ocid": "settings.api_key_claude_input"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "settings-provider", children: "Provider" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Select,
-            {
-              value: provider,
-              onValueChange: (v2) => setProvider(v2),
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  SelectTrigger,
-                  {
-                    id: "settings-provider",
-                    "data-ocid": "settings.provider_select",
-                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, {})
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "openai", children: "OpenAI" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "claude", children: "Claude" })
-                ] })
-              ]
-            }
-          )
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-border" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Settings$1, { className: "h-4 w-4 text-primary" }),
-          "Własny system prompt AI"
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "settings-system-prompt", children: "Własny system prompt AI" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Textarea,
-            {
-              id: "settings-system-prompt",
-              placeholder: "Wpisz własne instrukcje dla AI, które będą dołączane do każdej analizy i rozmowy z asystentem (np. 'Pisz zawsze po polsku', 'Zachowaj styl noir', 'Unikaj słowa bardzo')...",
-              value: systemPrompt,
-              onChange: (e3) => setSystemPrompt(e3.target.value),
-              rows: 5,
-              "data-ocid": "settings.system_prompt_textarea"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-muted-foreground", children: "Ten prompt będzie dołączany na końcu każdego zapytania do AI." })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-border" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "h-4 w-4 text-destructive" }),
-          "Dostęp"
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          Button,
-          {
-            variant: "outline",
-            size: "sm",
-            onClick: handleResetAccess,
-            className: "w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10",
-            "data-ocid": "settings.reset_access_button",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "h-4 w-4 mr-2" }),
-              "Wyloguj / Zresetuj dostęp"
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-muted-foreground", children: "Usuwa flagę dostępu i przeładowuje stronę. Będziesz musiał ponownie aktywować dostęp kodem zaproszenia." })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-end gap-2 pt-2 border-t border-border", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        Button,
-        {
-          variant: "outline",
-          onClick: () => onOpenChange(false),
-          "data-ocid": "settings.cancel_button",
-          children: "Anuluj"
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(Button, { onClick: handleSave, "data-ocid": "settings.save_button", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Save, { className: "h-4 w-4 mr-2" }),
-        "Zapisz ustawienia"
-      ] })
-    ] })
-  ] }) });
-}
-function buildBookContextPrompt(bookContext) {
-  if (!bookContext) return "";
-  const parts = [];
-  if (bookContext.title) parts.push(`- Tytuł: ${bookContext.title}`);
-  if (bookContext.ageCategory)
-    parts.push(`- Kategoria wiekowa: ${bookContext.ageCategory}`);
-  if (bookContext.authorSummary)
-    parts.push(`- Streszczenie autorskie: ${bookContext.authorSummary}`);
-  if (bookContext.keyContext)
-    parts.push(`- Kluczowe informacje: ${bookContext.keyContext}`);
-  if (bookContext.themes) parts.push(`- Motywy: ${bookContext.themes}`);
-  if (bookContext.writingStyle)
-    parts.push(`- Styl pisarski: ${bookContext.writingStyle}`);
-  if (parts.length === 0) return "";
-  return `Kontekst książki:
-${parts.join("\n")}
-
-`;
-}
-function buildGrammarPrompt(text, bookContext) {
-  const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
-COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
-Możliwe wartości COLOR: red, yellow, blue, orange, purple
-Przykład:
-red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
-yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
-  if (customPrompt) {
-    system += `
-
-Dodatkowe instrukcje autora:
-${customPrompt}`;
-  }
-  return `${system}
-
-Tekst do analizy:
-"""
-${text}
-"""`;
-}
-function buildContextPrompt(text, previousSummaries, bookContext) {
-  const summariesBlock = previousSummaries.length > 0 ? previousSummaries.map((s2, i2) => `Streszczenie rozdziału ${i2 + 1}:
-${s2}`).join("\n\n") : "Brak wcześniejszych rozdziałów.";
-  const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Jesteś redaktorem powieści. Poniżej znajdują się streszczenia wcześniejszych rozdziałów, które stanowią kontekst dla bieżącego rozdziału. Przeanalizuj bieżący rozdział pod kątem spójności z wcześniejszymi wydarzeniami, błędów gramatycznych, stylistycznych oraz propozycji poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
-COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
-Możliwe wartości COLOR: red, yellow, blue, orange, purple
-Przykład:
-red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
-yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
-  if (customPrompt) {
-    system += `
-
-Dodatkowe instrukcje autora:
-${customPrompt}`;
-  }
-  return `${system}
-
-KONTEKST POPRZEDNICH ROZDZIAŁÓW:
-${summariesBlock}
-
-BIĄŻĄCY ROZDZIAŁ DO ANALIZY:
-"""
-${text}
-"""`;
-}
-function buildDialoguePrompt(text, bookContext) {
-  const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem jakości dialogów. Oceń: naturalność wypowiedzi, charakterystykę postaci przez dialog (czy każda postać ma swój unikalny sposób mówienia), użycie tagów dialogowych ("powiedział", "zawołał" itp.) — czy nie są nadmiarowe lub monotonne, czy dialogi napędzają akcję i emocje. Nawet jeśli dialogi są dobrze napisane, zawsze zaproponuj przynajmniej 2-3 drobne sugestie ulepszeń stylistycznych lub alternatywne sformułowania, które mogłyby wzbogacić tekst. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
-COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
-Możliwe wartości COLOR: red, yellow, blue, orange, purple
-Przykład:
-red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
-yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
-  if (customPrompt) {
-    system += `
-
-Dodatkowe instrukcje autora:
-${customPrompt}`;
-  }
-  return `${system}
-
-Tekst do analizy:
-"""
-${text}
-"""`;
-}
-function buildSceneExpansionPrompt(text, bookContext) {
-  const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
-COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
-Możliwe wartości COLOR: red, yellow, blue, orange, purple
-Przykład:
-red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
-yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
-  if (customPrompt) {
-    system += `
-
-Dodatkowe instrukcje autora:
-${customPrompt}`;
-  }
-  return `${system}
-
-Tekst do analizy:
-"""
-${text}
-"""`;
-}
-function buildEmotionPrompt(text, bookContext) {
-  const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst pod kątem zasady "show, don't tell" w odniesieniu do emocji. Znajdź miejsca, gdzie emocja jest nazwana wprost zamiast pokazana przez działanie, mowę ciała, szczegóły lub reakcję postaci (np. "był zły", "czuła smutek", "był przestraszony"). Dla każdego takiego miejsca zaproponuj przepisaną wersję, która pokazuje emocję przez czyny, gesty, mimikę, ton głosu lub szczegóły otoczenia. WSZYSTKIE adnotacje z tej analizy MUSZĄ używać koloru "purple". Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
-COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
-Możliwe wartości COLOR: red, yellow, blue, orange, purple
-Przykład:
-purple|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
-  if (customPrompt) {
-    system += `
-
-Dodatkowe instrukcje autora:
-${customPrompt}`;
-  }
-  return `${system}
-
-Tekst do analizy:
-"""
-${text}
-"""`;
-}
-function buildConsistencyPrompt(allChaptersText) {
-  const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `Przeanalizuj poniższy tekst całej książki (wszystkie rozdziały) pod kątem niespójności między rozdziałami. Szukaj: sprzecznych faktów (np. postać ma inny kolor oczu w różnych rozdziałach), nielogicznych skoków czasowych, zapomnianych wątków, niespójnych cech postaci, zmiennych nazw miejsc lub postaci, błędów chronologicznych. Zwróć czytelny tekstowy raport listujący znalezione problemy z odniesieniem do konkretnych rozdziałów. Format: każdy problem w osobnym akapicie, zacznij od numeru rozdziału lub "Ogólne" jeśli dotyczy całości. Nie używaj JSON — zwróć zwykły tekst.`;
-  if (customPrompt) {
-    system += `
-
-Dodatkowe instrukcje autora:
-${customPrompt}`;
-  }
-  return `${system}
-
-Tekst do analizy:
-"""
-${allChaptersText}
-"""`;
-}
-function buildSummaryPrompt(allChaptersText, summaryType) {
-  const typeInstructions = {
-    short: "Napisz KRÓTKIE streszczenie książki w 3-5 zdaniach, zachowując główne wątki i konflikt.",
-    long: "Napisz SZCZEGÓŁOWE streszczenie książki, obejmujące wszystkie główne wątki, rozwój postaci, zwroty akcji i zakończenie. Format: kilka akapitów.",
-    hooks: "Wymyśl 5-7 CHWYTliwych zdań (tzw. 'hooks') do promocji książki w mediach społecznościowych. Każde zdanie powinno być intrygujące, emocjonalne i zachęcać do przeczytania. Zwróć je jako listę punktowaną."
-  };
-  return `${typeInstructions[summaryType]}
-
-Oto pełny tekst wszystkich rozdziałów książki:
-"""
-${allChaptersText}
-"""`;
-}
-function parsePipeAnnotations(responseText) {
-  const validColors = /* @__PURE__ */ new Set([
-    "red",
-    "yellow",
-    "blue",
-    "orange",
-    "purple"
-  ]);
-  const lines = responseText.split("\n").map((line) => line.trim()).filter((line) => line.includes("|||"));
-  const annotations = lines.map((line) => {
-    let workingLine = line;
-    const colorMatch = workingLine.match(
-      /(red|yellow|blue|orange|purple)\|\|\|/i
-    );
-    if (colorMatch && colorMatch.index !== void 0 && colorMatch.index > 0) {
-      workingLine = workingLine.slice(colorMatch.index);
-    }
-    const parts = workingLine.split("|||");
-    if (parts.length < 3) return null;
-    const [color2, text, explanation, proposal] = parts;
-    if (!(color2 == null ? void 0 : color2.trim()) || !(text == null ? void 0 : text.trim()) || !(explanation == null ? void 0 : explanation.trim())) return null;
-    const colorLower = color2.trim().toLowerCase();
-    if (!validColors.has(colorLower)) return null;
-    return {
-      id: 0n,
-      color: colorLower,
-      text: text.trim(),
-      explanation: explanation.trim(),
-      proposal: (proposal || "").trim(),
-      approved: false
-    };
-  }).filter(Boolean);
-  return annotations;
-}
-function validateAnnotations(annotations) {
-  console.log("[VALIDATE]", annotations);
-  const validColors = /* @__PURE__ */ new Set([
-    "yellow",
-    "red",
-    "blue",
-    "orange",
-    "purple"
-  ]);
-  return annotations.map((item, idx) => {
-    if (!item || typeof item !== "object") {
-      console.warn(`Element ${idx} nie jest obiektem — pominięto`);
-      return null;
-    }
-    const text = item.text;
-    const color2 = item.color;
-    const explanation = item.explanation;
-    const proposal = item.proposal;
-    if (typeof text !== "string" || typeof explanation !== "string" || typeof proposal !== "string") {
-      console.warn(`Element ${idx} ma nieprawidłowy typ pól — pominięto`);
-      return null;
-    }
-    const colorStr = String(color2).toLowerCase();
-    if (!validColors.has(colorStr)) {
-      console.warn(
-        `Element ${idx} ma nieprawidłowy kolor: ${colorStr} — pominięto`
-      );
-      return null;
-    }
-    return {
-      id: 0n,
-      text,
-      color: colorStr,
-      explanation,
-      proposal,
-      approved: false
-    };
-  }).filter((item) => item !== null);
-}
-async function callAi(prompt, apiKey, provider, expectJson) {
-  var _a3, _b3, _c2, _d2, _e3;
-  const safeApiKey = apiKey.replace(/[^\x00-\xFF]/g, "").trim();
-  if (provider === "openai") {
-    const body = {
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 8e3,
-      temperature: 0.3
-    };
-    if (expectJson) {
-      body.response_format = { type: "json_object" };
-    }
-    const res2 = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${safeApiKey}`
-      },
-      body: JSON.stringify(body)
-    });
-    if (!res2.ok) {
-      const err = await res2.text();
-      throw new Error(`OpenAI error ${res2.status}: ${err}`);
-    }
-    const data2 = await res2.json();
-    return ((_c2 = (_b3 = (_a3 = data2.choices) == null ? void 0 : _a3[0]) == null ? void 0 : _b3.message) == null ? void 0 : _c2.content) ?? "";
-  }
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": safeApiKey,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true"
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 8e3,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3
-    })
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Claude error ${res.status}: ${err}`);
-  }
-  const data = await res.json();
-  const responseText = ((_e3 = (_d2 = data.content) == null ? void 0 : _d2.find((c2) => c2.type === "text")) == null ? void 0 : _e3.text) ?? "";
-  console.log("[AI RESPONSE]", responseText.substring(0, 500));
-  return responseText;
-}
-async function analyzeGrammarStyle(text, apiKey, provider, bookContext) {
-  if (text.length > 8e3) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildGrammarPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
-  const annotations = parsePipeAnnotations(responseText);
-  console.log("[PARSED]", annotations.length, annotations);
-  return validateAnnotations(annotations);
-}
-async function analyzeWithContext(currentChapterText, previousChaptersSummaries, apiKey, provider, bookContext) {
-  if (currentChapterText.length > 8e3) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildContextPrompt(
-    currentChapterText,
-    previousChaptersSummaries,
-    bookContext
-  );
-  const responseText = await callAi(prompt, apiKey, provider, false);
-  const annotations = parsePipeAnnotations(responseText);
-  return validateAnnotations(annotations);
-}
-async function analyzeDialogue(text, apiKey, provider, bookContext) {
-  if (text.length > 8e3) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildDialoguePrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
-  const annotations = parsePipeAnnotations(responseText);
-  return validateAnnotations(annotations);
-}
-async function analyzeSceneExpansion(text, apiKey, provider, bookContext) {
-  if (text.length > 8e3) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildSceneExpansionPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
-  const annotations = parsePipeAnnotations(responseText);
-  return validateAnnotations(annotations);
-}
-async function analyzeEmotion(text, apiKey, provider, bookContext) {
-  if (text.length > 8e3) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildEmotionPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
-  const annotations = parsePipeAnnotations(responseText);
-  const validated = validateAnnotations(annotations);
-  return validated.map((a2) => ({ ...a2, color: "purple" }));
-}
-async function analyzeConsistency(allChaptersText, apiKey, provider) {
-  if (allChaptersText.length > 5e4) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildConsistencyPrompt(allChaptersText);
-  return await callAi(prompt, apiKey, provider, false);
-}
-async function generateSummary(allChaptersText, summaryType, apiKey, provider) {
-  if (allChaptersText.length > 5e4) {
-    throw new Error("Tekst za długi");
-  }
-  const prompt = buildSummaryPrompt(allChaptersText, summaryType);
-  return await callAi(prompt, apiKey, provider, false);
-}
-function buildChatPrompt(messages2, bookContext, chapterSummaries) {
-  const history2 = messages2.map(
-    (m2) => `${m2.role === "user" ? "Użytkownik" : "Asystent"}: ${m2.content}`
-  ).join("\n\n");
-  const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `Jesteś asystentem pisarskim dla pisarza. Pomagasz w tworzeniu powieści, odpowiadasz na pytania, proponujesz pomysły na fabułę, postacie, dialogi i rozwój wątków.
-
-KONTEKST KSIĄŻKI:
-${bookContext}`;
-  if (chapterSummaries && chapterSummaries.length > 0) {
-    system += `
-
-STRESZCZENIA ROZDZIAŁÓW KSIĄŻKI:
-${chapterSummaries.map((s2, i2) => `Rozdział ${i2 + 1}:
-${s2}`).join("\n\n")}`;
-  }
-  system += `
-
-HISTORIA ROZMOWY:
-${history2}
-
-Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
-  if (customPrompt) {
-    system += `
-
-Dodatkowe instrukcje autora:
-${customPrompt}`;
-  }
-  return system;
-}
-async function getSynonyms(word, apiKey, provider) {
-  if (!word || word.trim().length === 0) {
-    return [];
-  }
-  const cleanWord = word.trim();
-  const prompt = `Podaj 5-8 synonimów polskiego słowa "${cleanWord}" w kontekście języka literackiego. Zwróć wynik jako JSON array zawierający tylko synonimy jako stringi. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
-  const responseText = await callAi(prompt, apiKey, provider, true);
-  try {
-    const parsed = JSON.parse(responseText);
-    if (!Array.isArray(parsed)) {
-      throw new Error("Oczekiwano tablicy synonimów");
-    }
-    return parsed.map((item) => {
-      if (typeof item === "string") return item;
-      if (item && typeof item === "object" && "synonym" in item) {
-        return String(item.synonym);
-      }
-      return String(item);
-    }).filter((s2) => s2.length > 0);
-  } catch {
-    console.error("Nie udało się sparsować synonimów:", responseText);
-    return [];
-  }
-}
-async function chatWithBook(messages2, bookContext, apiKey, provider, chapterSummaries) {
-  const prompt = buildChatPrompt(messages2, bookContext, chapterSummaries);
-  return await callAi(prompt, apiKey, provider, false);
-}
-function ChatBotPanel({ bookId }) {
-  const [isOpen, setIsOpen] = reactExports.useState(() => {
-    const stored = localStorage.getItem("writerstudio-chat-open");
-    return stored === "true";
-  });
-  reactExports.useEffect(() => {
-    localStorage.setItem("writerstudio-chat-open", String(isOpen));
-  }, [isOpen]);
-  const { data: book } = useBook(bookId);
-  const { data: chapters } = useChapters(bookId);
-  const { data: messages2, isLoading } = useChatMessages(bookId);
-  const { data: analyses } = useAnalysesByBook(bookId);
-  const sendMessage = useSendMessage();
-  const deleteMessage = useDeleteMessage();
-  const clearChat = useClearChat();
-  const [input, setInput] = reactExports.useState("");
-  const [isSending, setIsSending] = reactExports.useState(false);
-  const messagesEndRef = reactExports.useRef(null);
-  const textareaRef = reactExports.useRef(null);
-  const [pos, setPos] = reactExports.useState({ x: 0, y: 0 });
-  const [size2, setSize] = reactExports.useState({ w: 380, h: 520 });
-  const panelRef = reactExports.useRef(null);
-  const dragState = reactExports.useRef({
-    dragging: false,
-    startX: 0,
-    startY: 0,
-    startPx: 0,
-    startPy: 0
-  });
-  const resizeState = reactExports.useRef({
-    resizing: false,
-    startX: 0,
-    startY: 0,
-    startW: 380,
-    startH: 520
-  });
-  const scrollToBottom = reactExports.useCallback(() => {
-    var _a3;
-    (_a3 = messagesEndRef.current) == null ? void 0 : _a3.scrollIntoView({ behavior: "smooth" });
-  }, []);
-  const messageCountRef = reactExports.useRef((messages2 == null ? void 0 : messages2.length) ?? 0);
-  reactExports.useEffect(() => {
-    const currentLength = (messages2 == null ? void 0 : messages2.length) ?? 0;
-    if (isOpen && currentLength > messageCountRef.current) {
-      scrollToBottom();
-    }
-    messageCountRef.current = currentLength;
-  }, [isOpen, scrollToBottom, messages2 == null ? void 0 : messages2.length]);
-  const onDragMouseDown = reactExports.useCallback(
-    (e3) => {
-      if (e3.target.closest("[data-chat-action]")) return;
-      dragState.current = {
-        dragging: true,
-        startX: e3.clientX,
-        startY: e3.clientY,
-        startPx: pos.x,
-        startPy: pos.y
-      };
-      e3.preventDefault();
-    },
-    [pos.x, pos.y]
-  );
-  const onResizeMouseDown = reactExports.useCallback(
-    (e3) => {
-      resizeState.current = {
-        resizing: true,
-        startX: e3.clientX,
-        startY: e3.clientY,
-        startW: size2.w,
-        startH: size2.h
-      };
-      e3.preventDefault();
-      e3.stopPropagation();
-    },
-    [size2.w, size2.h]
-  );
-  reactExports.useEffect(() => {
-    const onMouseMove = (e3) => {
-      if (dragState.current.dragging) {
-        const dx = e3.clientX - dragState.current.startX;
-        const dy = e3.clientY - dragState.current.startY;
-        setPos({
-          x: dragState.current.startPx + dx,
-          y: dragState.current.startPy + dy
-        });
-      }
-      if (resizeState.current.resizing) {
-        const dx = e3.clientX - resizeState.current.startX;
-        const dy = e3.clientY - resizeState.current.startY;
-        setSize({
-          w: Math.max(280, resizeState.current.startW + dx),
-          h: Math.max(320, resizeState.current.startH + dy)
-        });
-      }
-    };
-    const onMouseUp = () => {
-      dragState.current.dragging = false;
-      resizeState.current.resizing = false;
-    };
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-  }, []);
-  const handleSend = reactExports.useCallback(async () => {
-    const trimmed = input.trim();
-    if (!trimmed || isSending || !book) return;
-    const apiKey = (localStorage.getItem("ws_api_provider") === "claude" ? localStorage.getItem("ws_api_key_claude") : localStorage.getItem("ws_api_key_openai")) ?? "";
-    const provider = localStorage.getItem("ws_api_provider") || "openai";
-    if (!apiKey.trim()) {
-      setInput("");
-      return;
-    }
-    setIsSending(true);
-    setInput("");
-    try {
-      await sendMessage.mutateAsync({
-        bookId: BigInt(bookId),
-        role: "user",
-        content: trimmed,
-        provider: ""
-      });
-      const chapterTitles = (chapters ?? []).sort((a2, b2) => Number(a2.orderIndex - b2.orderIndex)).map((ch) => `- ${ch.title}`).join("\n");
-      const bookContext = `Tytuł książki: ${book.title}
-Kategoria: ${book.category}
-Opis: ${book.description}
-
-Rozdziały:
-${chapterTitles}`;
-      const currentMessages = (messages2 ?? []).map((m2) => ({
-        role: m2.role === "user" ? "user" : "assistant",
-        content: m2.content
-      }));
-      currentMessages.push({ role: "user", content: trimmed });
-      const chapterSummaries = (analyses ?? []).filter((a2) => a2.analysisType === "summary").sort((a2, b2) => Number(a2.createdAt - b2.createdAt)).map((a2) => a2.resultContent);
-      const reply = await chatWithBook(
-        currentMessages,
-        bookContext,
-        apiKey.trim(),
-        provider,
-        chapterSummaries.length > 0 ? chapterSummaries : void 0
-      );
-      await sendMessage.mutateAsync({
-        bookId: BigInt(bookId),
-        role: "assistant",
-        content: reply,
-        provider
-      });
-    } catch {
-    } finally {
-      setIsSending(false);
-    }
-  }, [
-    input,
-    isSending,
-    book,
-    bookId,
-    chapters,
-    messages2,
-    analyses,
-    sendMessage
-  ]);
-  const handleKeyDown2 = (e3) => {
-    if (e3.key === "Enter" && !e3.shiftKey) {
-      e3.preventDefault();
-      handleSend();
-    }
-  };
-  const handleClear = () => {
-    if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
-      clearChat.mutate({ bookId: BigInt(bookId) });
-    }
-  };
-  if (!isOpen) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "button",
-      {
-        type: "button",
-        onClick: () => setIsOpen(true),
-        className: "fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-elevated flex items-center justify-center hover:scale-105 transition-transform",
-        "aria-label": "Otwórz czat",
-        "data-ocid": "chat.open_button",
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-6 w-6" })
-      }
-    );
-  }
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    "div",
-    {
-      ref: panelRef,
-      className: "fixed z-50 flex flex-col rounded-xl border border-border bg-card shadow-elevated overflow-hidden",
-      style: {
-        right: 24 + pos.x,
-        bottom: 24 - pos.y,
-        width: size2.w,
-        height: size2.h
-      },
-      "data-ocid": "chat.panel",
-      children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs(
-          "div",
-          {
-            className: "flex items-center justify-between px-4 py-3 border-b border-border bg-muted/40 cursor-move select-none",
-            onMouseDown: onDragMouseDown,
-            "data-ocid": "chat.header",
-            children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-primary" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-foreground", children: "Asystent AI" }),
-                book && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate max-w-[120px]", children: book.title })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  Button,
-                  {
-                    variant: "ghost",
-                    size: "sm",
-                    className: "h-7 w-7 p-0 text-muted-foreground hover:text-destructive",
-                    onClick: handleClear,
-                    title: "Wyczyść historię",
-                    "data-chat-action": true,
-                    "data-ocid": "chat.clear_button",
-                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3.5 w-3.5" })
-                  }
-                ),
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  Button,
-                  {
-                    variant: "ghost",
-                    size: "sm",
-                    className: "h-7 w-7 p-0 text-muted-foreground hover:text-foreground",
-                    onClick: () => setIsOpen(false),
-                    title: "Zamknij",
-                    "data-chat-action": true,
-                    "data-ocid": "chat.close_button",
-                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(X$1, { className: "h-3.5 w-3.5" })
-                  }
-                )
-              ] })
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 space-y-3 min-h-0", children: [
-          isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "text-xs text-muted-foreground text-center py-4",
-              "data-ocid": "chat.loading_state",
-              children: "Ładowanie historii..."
-            }
-          ),
-          !isLoading && (!messages2 || messages2.length === 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "div",
-            {
-              className: "text-xs text-muted-foreground text-center py-8",
-              "data-ocid": "chat.empty_state",
-              children: [
-                "Zacznij rozmowę z asystentem AI.",
-                /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-                "Możesz pytać o fabułę, postacie, dialogi i styl."
-              ]
-            }
-          ),
-          messages2 == null ? void 0 : messages2.map((msg, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-            ChatMessageItem,
-            {
-              msg,
-              onDelete: () => deleteMessage.mutate({ id: msg.id })
-            },
-            `${msg.id}-${idx}`
-          )),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: messagesEndRef })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-t border-border p-3 bg-card", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-end gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "textarea",
-            {
-              ref: textareaRef,
-              value: input,
-              onChange: (e3) => setInput(e3.target.value),
-              onKeyDown: handleKeyDown2,
-              placeholder: "Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)",
-              className: "flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-              rows: 1,
-              "data-ocid": "chat.input"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Button,
-            {
-              size: "sm",
-              disabled: !input.trim() || isSending,
-              onClick: handleSend,
-              className: "h-9 w-9 p-0 shrink-0",
-              "data-ocid": "chat.send_button",
-              children: isSending ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Send, { className: "h-4 w-4" })
-            }
-          )
-        ] }) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "div",
-          {
-            className: "absolute bottom-0 right-0 w-4 h-4 cursor-se-resize",
-            onMouseDown: onResizeMouseDown,
-            "data-ocid": "chat.resize_handle",
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "svg",
-              {
-                role: "img",
-                "aria-label": "Resize handle",
-                width: "12",
-                height: "12",
-                viewBox: "0 0 12 12",
-                className: "absolute bottom-1 right-1 text-muted-foreground/40",
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-                  "path",
-                  {
-                    d: "M8 12L12 8V12H8ZM4 12L12 4V8L8 12H4ZM0 12L12 0V4L4 12H0Z",
-                    fill: "currentColor"
-                  }
-                )
-              }
-            )
-          }
-        )
-      ]
-    }
-  );
-}
-function ChatMessageItem({
-  msg,
-  onDelete
-}) {
-  const isUser = msg.role === "user";
-  const [confirmDelete, setConfirmDelete] = reactExports.useState(false);
-  const timeoutRef = reactExports.useRef(null);
-  const handleDeleteClick = () => {
-    if (confirmDelete) {
-      onDelete();
-      setConfirmDelete(false);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    } else {
-      setConfirmDelete(true);
-      timeoutRef.current = setTimeout(() => setConfirmDelete(false), 2e3);
-    }
-  };
-  reactExports.useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(
-    "div",
-    {
-      className: `group flex ${isUser ? "justify-end" : "justify-start"}`,
-      "data-ocid": `chat.message.${msg.id}`,
-      children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "div",
-        {
-          className: `relative max-w-[85%] rounded-lg px-3 py-2 text-sm ${isUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted text-foreground rounded-bl-none"}`,
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "whitespace-pre-wrap break-words", children: msg.content }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "button",
-              {
-                type: "button",
-                onClick: handleDeleteClick,
-                className: `absolute -top-2 ${isUser ? "-left-2" : "-right-2"} h-5 w-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${confirmDelete ? "bg-destructive text-destructive-foreground" : "bg-card border border-border text-muted-foreground hover:text-destructive"}`,
-                title: confirmDelete ? "Kliknij ponownie, aby usunąć" : "Usuń wiadomość",
-                "data-ocid": `chat.delete_button.${msg.id}`,
-                children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3 w-3" })
-              }
-            )
-          ]
-        }
-      )
-    }
-  );
-}
-function useActiveBookId() {
-  const routerState = useRouterState();
-  const pathname = routerState.location.pathname;
-  const bookMatch = pathname.match(/\/books\/([^\/]+)/);
-  if (bookMatch) return bookMatch[1];
-  return null;
-}
-function useActiveChapterId() {
-  const params = useParams({ strict: false });
-  return params.chapterId ?? null;
-}
-function Layout() {
-  const navigate = useNavigate();
-  const { isAuthenticated, clearAuth } = useAppStore();
-  const { clear } = useInternetIdentity();
-  const activeBookId = useActiveBookId();
-  const activeChapterId = useActiveChapterId();
-  const { data: chapters } = useChapters(activeBookId ?? "");
-  const reorderChapters = useReorderChapters();
-  const [dragOverIndex, setDragOverIndex] = reactExports.useState(null);
-  const [theme, setTheme] = reactExports.useState(() => {
-    const stored = localStorage.getItem("writerstudio-theme");
-    if (stored === "dark") return "dark";
-    return "light";
-  });
-  const [isOnline, setIsOnline] = reactExports.useState(() => navigator.onLine);
-  const [settingsModalOpen, setSettingsModalOpen] = reactExports.useState(false);
-  reactExports.useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-  reactExports.useEffect(() => {
-    const root2 = document.documentElement;
-    if (theme === "dark") {
-      root2.classList.add("dark");
-    } else {
-      root2.classList.remove("dark");
-    }
-    localStorage.setItem("writerstudio-theme", theme);
-  }, [theme]);
-  const toggleTheme = () => {
-    setTheme((prev) => prev === "light" ? "dark" : "light");
-  };
-  const handleLogout = () => {
-    clear();
-    clearAuth();
-    navigate({ to: "/login" });
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex h-screen w-full bg-background", children: [
-    !isOnline && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "div",
-      {
-        className: "fixed top-0 left-0 right-0 z-50 bg-destructive text-destructive-foreground px-4 py-2 text-sm font-medium flex items-center justify-center gap-2",
-        "data-ocid": "layout.offline_banner",
-        children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(WifiOff, { className: "h-4 w-4" }),
-          "Brak połączenia z internetem — zmiany mogą się nie zapisywać. Sprawdź swoje połączenie."
-        ]
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { className: "w-[240px] flex-shrink-0 border-r border-border bg-sidebar flex flex-col", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-4 border-b border-sidebar-border", children: /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-sm font-semibold text-sidebar-foreground uppercase tracking-wider", children: "Lista rozdziałów" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 p-4 space-y-2 overflow-y-auto", children: [
-        activeBookId && chapters && chapters.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-1", children: chapters.map((chapter, index2) => {
-          const isActive2 = activeChapterId === String(chapter.id);
-          return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "div",
-            {
-              draggable: true,
-              onDragStart: (e3) => {
-                e3.dataTransfer.setData("text/plain", String(chapter.id));
-                e3.dataTransfer.effectAllowed = "move";
-              },
-              onDragOver: (e3) => {
-                e3.preventDefault();
-                e3.dataTransfer.dropEffect = "move";
-                setDragOverIndex(index2);
-              },
-              onDragLeave: () => {
-                setDragOverIndex(null);
-              },
-              onDrop: (e3) => {
-                e3.preventDefault();
-                const draggedId = e3.dataTransfer.getData("text/plain");
-                if (!draggedId || !chapters || !activeBookId) {
-                  setDragOverIndex(null);
-                  return;
-                }
-                const fromIndex = chapters.findIndex(
-                  (c2) => String(c2.id) === draggedId
-                );
-                if (fromIndex === -1 || fromIndex === index2 || fromIndex === index2 - 1) {
-                  setDragOverIndex(null);
-                  return;
-                }
-                const newOrder = chapters.map((c2) => c2.id);
-                const [moved] = newOrder.splice(fromIndex, 1);
-                const insertAt = fromIndex < index2 ? index2 - 1 : index2;
-                newOrder.splice(insertAt, 0, moved);
-                reorderChapters.mutate({
-                  bookId: BigInt(activeBookId),
-                  orderedChapterIds: newOrder
-                });
-                setDragOverIndex(null);
-              },
-              className: `flex items-center gap-1 rounded-md px-2 py-1.5 text-sm transition-colors ${isActive2 ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"} ${dragOverIndex === index2 ? "border-t-2 border-t-primary" : ""}`,
-              "data-ocid": `nav.chapter_row.item.${Number(chapter.orderIndex) + 1}`,
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 cursor-grab active:cursor-grabbing text-sidebar-foreground/40 hover:text-sidebar-foreground/70 transition-colors", children: /* @__PURE__ */ jsxRuntimeExports.jsx(GripVertical, { className: "h-4 w-4" }) }),
-                /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                  "button",
-                  {
-                    type: "button",
-                    onClick: () => navigate({
-                      to: "/books/$bookId/chapters/$chapterId",
-                      params: {
-                        bookId: activeBookId,
-                        chapterId: String(chapter.id)
-                      }
-                    }),
-                    className: "flex flex-1 items-center gap-2 min-w-0",
-                    "data-ocid": `nav.chapter_link.item.${Number(chapter.orderIndex) + 1}`,
-                    children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 shrink-0" }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "truncate", children: chapter.title })
-                    ]
-                  }
-                )
-              ]
-            },
-            String(chapter.id)
-          );
-        }) }),
-        (!activeBookId || !chapters || chapters.length === 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              type: "button",
-              onClick: () => navigate({ to: "/dashboard" }),
-              className: "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
-              "data-ocid": "nav.dashboard_link",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-4 w-4" }),
-                "Dashboard"
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              type: "button",
-              onClick: () => navigate({ to: "/statistics" }),
-              className: "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
-              "data-ocid": "nav.statistics_link",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(ChartColumn, { className: "h-4 w-4" }),
-                "Statystyki"
-              ]
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            "button",
-            {
-              type: "button",
-              onClick: () => navigate({ to: "/admin" }),
-              className: "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
-              "data-ocid": "nav.admin_link",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(Shield, { className: "h-4 w-4" }),
-                "Admin"
-              ]
-            }
-          )
-        ] })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "div",
-      {
-        className: `flex-1 flex flex-col min-w-0 ${!isOnline ? "pt-10" : ""}`,
-        children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "h-14 border-b border-border bg-card flex items-center px-6 flex-shrink-0 justify-between", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-5 w-5 text-primary" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "font-display text-lg font-semibold text-foreground", children: "WriterStudio TipTap" })
-            ] }),
-            isAuthenticated && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                Button,
-                {
-                  variant: "ghost",
-                  size: "sm",
-                  onClick: toggleTheme,
-                  "aria-label": theme === "light" ? "Włącz ciemny motyw" : "Włącz jasny motyw",
-                  "data-ocid": "theme.toggle_button",
-                  children: theme === "light" ? /* @__PURE__ */ jsxRuntimeExports.jsx(Moon, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Sun, { className: "h-4 w-4" })
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                Button,
-                {
-                  variant: "ghost",
-                  size: "sm",
-                  onClick: () => setSettingsModalOpen(true),
-                  "aria-label": "Ustawienia",
-                  "data-ocid": "settings.open_modal_button",
-                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(Settings$1, { className: "h-4 w-4" })
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs(
-                Button,
-                {
-                  variant: "ghost",
-                  size: "sm",
-                  onClick: handleLogout,
-                  "data-ocid": "auth.logout_button",
-                  children: [
-                    /* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "h-4 w-4 mr-2" }),
-                    "Wyloguj się"
-                  ]
-                }
-              )
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            SettingsModal,
-            {
-              open: settingsModalOpen,
-              onOpenChange: setSettingsModalOpen
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "flex-1 overflow-auto p-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) }),
-          isAuthenticated && activeBookId && /* @__PURE__ */ jsxRuntimeExports.jsx(ChatBotPanel, { bookId: activeBookId })
-        ]
-      }
-    )
-  ] });
-}
-const rootRoute = createRootRoute({
-  component: () => /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {})
-});
-const layoutRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  id: "layout",
-  component: Layout
-});
-const adminRoute = createRoute({
-  getParentRoute: () => layoutRoute,
-  path: "/admin",
-  beforeLoad: () => {
-    const { isAuthenticated } = useAppStore.getState();
-    if (!isAuthenticated) {
-      throw redirect({ to: "/login" });
-    }
-  },
-  component: AdminPage
-});
 function BookSettingsTab({
   bookId,
   ageCategory,
@@ -48520,9 +48529,13 @@ ${summaryLines.join("\n")}` : "Analiza kontekstowa nie wykryła żadnych problem
   }, []);
   const handleDeleteSession = reactExports.useCallback(
     async (sessionId) => {
-      await deleteSession.mutateAsync({ sessionId, chapterId });
-      if (activeSessionId === sessionId) {
-        setActiveSessionId(null);
+      try {
+        await deleteSession.mutateAsync({ sessionId, chapterId });
+        if (activeSessionId === sessionId) {
+          setActiveSessionId(null);
+        }
+      } catch (err) {
+        console.error("Delete session failed:", err);
       }
     },
     [deleteSession, chapterId, activeSessionId]
@@ -105533,7 +105546,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Bu6AqoB-.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BcfS1hED.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
