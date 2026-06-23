@@ -31977,7 +31977,7 @@ Service({
   ),
   "addChatMessage": Func([Nat, Text$4, Text$4], [Nat], []),
   "checkAccess": Func([Text$4], [Bool], []),
-  "clearChat": Func([Nat], [Bool], []),
+  "clearChat": Func([Nat, Text$4], [Bool], []),
   "createBook": Func([Text$4, Text$4, Text$4], [Nat], []),
   "createChapter": Func([Nat, Text$4], [Nat], []),
   "createChatSession": Func([Nat, Text$4], [Nat], []),
@@ -32032,7 +32032,11 @@ Service({
   "listChaptersByBook": Func([Nat], [Vec(Chapter)], []),
   "listCommentsByChapter": Func([Nat], [Vec(Comment$1)], []),
   "listInviteCodes": Func([], [Vec(InviteCode)], []),
-  "listMessagesByBook": Func([Nat], [Vec(ChatMessage)], []),
+  "listMessagesByBook": Func(
+    [Nat, Text$4],
+    [Vec(ChatMessage)],
+    []
+  ),
   "listRecordingsByChapter": Func(
     [Nat],
     [
@@ -32282,7 +32286,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     ),
     "addChatMessage": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "checkAccess": IDL2.Func([IDL2.Text], [IDL2.Bool], []),
-    "clearChat": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "clearChat": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Bool], []),
     "createBook": IDL2.Func([IDL2.Text, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "createChapter": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
     "createChatSession": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
@@ -32341,7 +32345,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "listChaptersByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Chapter2)], []),
     "listCommentsByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Comment2)], []),
     "listInviteCodes": IDL2.Func([], [IDL2.Vec(InviteCode2)], []),
-    "listMessagesByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(ChatMessage2)], []),
+    "listMessagesByBook": IDL2.Func(
+      [IDL2.Nat, IDL2.Text],
+      [IDL2.Vec(ChatMessage2)],
+      []
+    ),
     "listRecordingsByChapter": IDL2.Func(
       [IDL2.Nat],
       [
@@ -32764,17 +32772,17 @@ class Backend {
       return result;
     }
   }
-  async clearChat(arg0) {
+  async clearChat(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.clearChat(arg0);
+        const result = await this.actor.clearChat(arg0, arg1);
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.clearChat(arg0);
+      const result = await this.actor.clearChat(arg0, arg1);
       return result;
     }
   }
@@ -33184,17 +33192,17 @@ class Backend {
       return from_candid_vec_n26(this._uploadFile, this._downloadFile, result);
     }
   }
-  async listMessagesByBook(arg0) {
+  async listMessagesByBook(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.listMessagesByBook(arg0);
+        const result = await this.actor.listMessagesByBook(arg0, arg1);
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.listMessagesByBook(arg0);
+      const result = await this.actor.listMessagesByBook(arg0, arg1);
       return result;
     }
   }
@@ -33722,14 +33730,14 @@ function useCreateBook() {
     }
   });
 }
-function useChatMessages(bookId) {
+function useChatMessages(bookId, sessionId) {
   const { actor } = useActor(createActor);
   const id = BigInt(bookId);
   return useQuery({
-    queryKey: ["chat", id],
+    queryKey: ["chat", id, sessionId ?? "all"],
     queryFn: async () => {
       if (!actor) return [];
-      const messages2 = await actor.listMessagesByBook(id);
+      const messages2 = await actor.listMessagesByBook(id, sessionId ?? "");
       return messages2.sort((a2, b2) => Number(a2.createdAt - b2.createdAt));
     },
     enabled: !!actor && !!bookId
@@ -34004,9 +34012,12 @@ function useClearChat() {
   const { actor } = useActor(createActor);
   const queryClient2 = useQueryClient();
   return useMutation({
-    mutationFn: async ({ bookId }) => {
+    mutationFn: async ({
+      bookId,
+      sessionId
+    }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.clearChat(bookId);
+      return actor.clearChat(bookId, sessionId ?? "");
     },
     onSuccess: (_2, variables) => {
       queryClient2.invalidateQueries({
@@ -42305,17 +42316,24 @@ function ChatBotPanel({ bookId, book: bookProp }) {
   const { data: fetchedBook } = useBook(bookId);
   const book = bookProp ?? fetchedBook ?? null;
   const { data: chapters } = useChapters(bookId);
-  const { data: messages2, isLoading } = useChatMessages(bookId);
   const { data: analyses } = useAnalysesByBook(bookId);
   const sendMessage = useSendMessage();
   const deleteMessage = useDeleteMessage();
   const clearChat = useClearChat();
+  const queryClient2 = useQueryClient();
   const [input, setInput] = reactExports.useState("");
   const [isSending, setIsSending] = reactExports.useState(false);
+  const [optimisticMessages, setOptimisticMessages] = reactExports.useState(
+    []
+  );
   const messagesEndRef = reactExports.useRef(null);
   const textareaRef = reactExports.useRef(null);
   const [selectedSessionId, setSelectedSessionId] = reactExports.useState(
     null
+  );
+  const { data: messages2, isLoading } = useChatMessages(
+    bookId,
+    selectedSessionId ?? void 0
   );
   const [pos, setPos] = reactExports.useState({ x: 0, y: 0 });
   const [size2, setSize] = reactExports.useState(() => {
@@ -42367,9 +42385,23 @@ function ChatBotPanel({ bookId, book: bookProp }) {
   }, [messages2]);
   const currentMessages = reactExports.useMemo(() => {
     if (!selectedSessionId) return [];
-    const allMessages = messages2 ?? [];
-    return allMessages.filter((m2) => (m2.sessionId ?? "legacy") === selectedSessionId).sort((a2, b2) => Number(a2.createdAt - b2.createdAt));
-  }, [messages2, selectedSessionId]);
+    const backendMessages = (messages2 ?? []).filter(
+      (m2) => (m2.sessionId ?? "legacy") === selectedSessionId
+    );
+    const optimisticForSession = optimisticMessages.filter(
+      (m2) => m2.sessionId === selectedSessionId
+    );
+    const merged = /* @__PURE__ */ new Map();
+    for (const msg of backendMessages) {
+      merged.set(String(msg.id), msg);
+    }
+    for (const msg of optimisticForSession) {
+      merged.set(String(msg.id), msg);
+    }
+    return Array.from(merged.values()).sort(
+      (a2, b2) => Number(a2.createdAt - b2.createdAt)
+    );
+  }, [messages2, optimisticMessages, selectedSessionId]);
   reactExports.useEffect(() => {
     messageCountRef.current = currentMessages.length;
   }, [currentMessages.length]);
@@ -42492,6 +42524,9 @@ function ChatBotPanel({ bookId, book: bookProp }) {
         for (const msg of session.messages) {
           deleteMessage.mutate({ id: msg.id });
         }
+        setOptimisticMessages(
+          (prev) => prev.filter((m2) => m2.sessionId !== sessionId)
+        );
         if (selectedSessionId === sessionId) {
           setSelectedSessionId(null);
         }
@@ -42501,7 +42536,11 @@ function ChatBotPanel({ bookId, book: bookProp }) {
   );
   const handleClear = () => {
     if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
-      clearChat.mutate({ bookId: BigInt(bookId) });
+      clearChat.mutate({
+        bookId: BigInt(bookId),
+        sessionId: selectedSessionId ?? void 0
+      });
+      setOptimisticMessages([]);
       setSelectedSessionId(null);
     }
   };
@@ -42516,8 +42555,21 @@ function ChatBotPanel({ bookId, book: bookProp }) {
     }
     setIsSending(true);
     setInput("");
+    const now2 = BigInt(Date.now()) * 1000000n;
+    const userOptimisticId = BigInt(-Date.now() - 1);
+    const assistantOptimisticId = BigInt(-Date.now() - 2);
+    const userMsg = {
+      id: userOptimisticId,
+      content: trimmed,
+      provider: "",
+      createdAt: now2,
+      role: "user",
+      bookId: BigInt(bookId),
+      sessionId: selectedSessionId
+    };
+    setOptimisticMessages((prev) => [...prev, userMsg]);
     try {
-      await sendMessage.mutateAsync({
+      sendMessage.mutate({
         bookId: BigInt(bookId),
         sessionId: selectedSessionId,
         role: "user",
@@ -42567,7 +42619,17 @@ ${chapterTitles}`;
         provider,
         chapterSummaries.length > 0 ? chapterSummaries : void 0
       );
-      await sendMessage.mutateAsync({
+      const assistantMsg = {
+        id: assistantOptimisticId,
+        content: reply,
+        provider,
+        createdAt: BigInt(Date.now()) * 1000000n,
+        role: "assistant",
+        bookId: BigInt(bookId),
+        sessionId: selectedSessionId
+      };
+      setOptimisticMessages((prev) => [...prev, assistantMsg]);
+      sendMessage.mutate({
         bookId: BigInt(bookId),
         sessionId: selectedSessionId,
         role: "assistant",
@@ -42577,6 +42639,11 @@ ${chapterTitles}`;
     } catch {
     } finally {
       setIsSending(false);
+      setTimeout(() => {
+        queryClient2.invalidateQueries({
+          queryKey: ["chat", BigInt(bookId)]
+        });
+      }, 500);
     }
   }, [
     input,
@@ -42587,7 +42654,8 @@ ${chapterTitles}`;
     currentMessages,
     analyses,
     sendMessage,
-    selectedSessionId
+    selectedSessionId,
+    queryClient2
   ]);
   const handleKeyDown2 = (e3) => {
     if (e3.key === "Enter" && !e3.shiftKey) {
@@ -106025,7 +106093,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BzFG31mT.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-9p0NRN9N.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

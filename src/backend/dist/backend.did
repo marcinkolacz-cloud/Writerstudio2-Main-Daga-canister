@@ -160,7 +160,7 @@ service : {
         }) query;
   addChatMessage: (sessionId: nat, role: text, content: text) -> (nat);
   checkAccess: (code: text) -> (bool);
-  clearChat: (bookId: nat) -> (bool);
+  clearChat: (bookId: nat, sessionId: text) -> (bool);
   createBook: (title: text, description: text, category: text) -> (nat);
   createChapter: (bookId: nat, title: text) -> (nat);
   createChatSession: (chapterId: nat, title: text) -> (nat);
@@ -201,7 +201,7 @@ service : {
   listChaptersByBook: (bookId: nat) -> (vec Chapter);
   listCommentsByChapter: (chapterId: nat) -> (vec Comment);
   listInviteCodes: () -> (vec InviteCode);
-  listMessagesByBook: (bookId: nat) -> (vec ChatMessage);
+  listMessagesByBook: (bookId: nat, sessionId: text) -> (vec ChatMessage);
   listRecordingsByChapter: (chapterId: nat) ->
    (vec record {
           createdAt: int;

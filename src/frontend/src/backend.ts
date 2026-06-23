@@ -202,7 +202,7 @@ export interface backendInterface {
     __recordings(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Recording]>>;
     addChatMessage(sessionId: bigint, role: string, content: string): Promise<bigint>;
     checkAccess(code: string): Promise<boolean>;
-    clearChat(bookId: bigint): Promise<boolean>;
+    clearChat(bookId: bigint, sessionId: string): Promise<boolean>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
     createChatSession(chapterId: bigint, title: string): Promise<bigint>;
@@ -241,7 +241,7 @@ export interface backendInterface {
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
     listCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
     listInviteCodes(): Promise<Array<InviteCode>>;
-    listMessagesByBook(bookId: bigint): Promise<Array<ChatMessage>>;
+    listMessagesByBook(bookId: bigint, sessionId: string): Promise<Array<ChatMessage>>;
     listRecordingsByChapter(chapterId: bigint): Promise<Array<{
         id: bigint;
         voice: string;
@@ -597,17 +597,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async clearChat(arg0: bigint): Promise<boolean> {
+    async clearChat(arg0: bigint, arg1: string): Promise<boolean> {
         if (this.processError) {
             try {
-                const result = await this.actor.clearChat(arg0);
+                const result = await this.actor.clearChat(arg0, arg1);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.clearChat(arg0);
+            const result = await this.actor.clearChat(arg0, arg1);
             return result;
         }
     }
@@ -1026,17 +1026,17 @@ export class Backend implements backendInterface {
             return from_candid_vec_n26(this._uploadFile, this._downloadFile, result);
         }
     }
-    async listMessagesByBook(arg0: bigint): Promise<Array<ChatMessage>> {
+    async listMessagesByBook(arg0: bigint, arg1: string): Promise<Array<ChatMessage>> {
         if (this.processError) {
             try {
-                const result = await this.actor.listMessagesByBook(arg0);
+                const result = await this.actor.listMessagesByBook(arg0, arg1);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.listMessagesByBook(arg0);
+            const result = await this.actor.listMessagesByBook(arg0, arg1);
             return result;
         }
     }

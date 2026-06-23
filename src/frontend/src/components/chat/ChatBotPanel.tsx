@@ -11,6 +11,7 @@ import {
 } from "@/hooks/useBackend";
 import { chatWithBook } from "@/lib/aiAnalysis";
 import type { ChatMessage as AiChatMessage } from "@/lib/aiAnalysis";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "@tanstack/react-router";
 import { ArrowLeft, MessageCircle, Plus, Send, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -33,20 +34,28 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
   const { data: fetchedBook } = useBook(bookId);
   const book = bookProp ?? fetchedBook ?? null;
   const { data: chapters } = useChapters(bookId);
-  const { data: messages, isLoading } = useChatMessages(bookId);
   const { data: analyses } = useAnalysesByBook(bookId);
   const sendMessage = useSendMessage();
   const deleteMessage = useDeleteMessage();
   const clearChat = useClearChat();
 
+  const queryClient = useQueryClient();
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [optimisticMessages, setOptimisticMessages] = useState<ChatMessage[]>(
+    [],
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Session state
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null,
+  );
+
+  const { data: messages, isLoading } = useChatMessages(
+    bookId,
+    selectedSessionId ?? undefined,
   );
 
   // Panel position and size
@@ -118,11 +127,23 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
 
   const currentMessages = useMemo(() => {
     if (!selectedSessionId) return [];
-    const allMessages = messages ?? [];
-    return allMessages
-      .filter((m) => (m.sessionId ?? "legacy") === selectedSessionId)
-      .sort((a, b) => Number(a.createdAt - b.createdAt));
-  }, [messages, selectedSessionId]);
+    const backendMessages = (messages ?? []).filter(
+      (m) => (m.sessionId ?? "legacy") === selectedSessionId,
+    );
+    const optimisticForSession = optimisticMessages.filter(
+      (m) => m.sessionId === selectedSessionId,
+    );
+    const merged = new Map<string, ChatMessage>();
+    for (const msg of backendMessages) {
+      merged.set(String(msg.id), msg);
+    }
+    for (const msg of optimisticForSession) {
+      merged.set(String(msg.id), msg);
+    }
+    return Array.from(merged.values()).sort((a, b) =>
+      Number(a.createdAt - b.createdAt),
+    );
+  }, [messages, optimisticMessages, selectedSessionId]);
 
   useEffect(() => {
     messageCountRef.current = currentMessages.length;
@@ -261,6 +282,9 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
         for (const msg of session.messages) {
           deleteMessage.mutate({ id: msg.id });
         }
+        setOptimisticMessages((prev) =>
+          prev.filter((m) => m.sessionId !== sessionId),
+        );
         if (selectedSessionId === sessionId) {
           setSelectedSessionId(null);
         }
@@ -271,7 +295,11 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
 
   const handleClear = () => {
     if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
-      clearChat.mutate({ bookId: BigInt(bookId) });
+      clearChat.mutate({
+        bookId: BigInt(bookId),
+        sessionId: selectedSessionId ?? undefined,
+      });
+      setOptimisticMessages([]);
       setSelectedSessionId(null);
     }
   };
@@ -295,8 +323,25 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     setIsSending(true);
     setInput("");
 
+    const now = BigInt(Date.now()) * 1000000n;
+    const userOptimisticId = BigInt(-Date.now() - 1);
+    const assistantOptimisticId = BigInt(-Date.now() - 2);
+
+    const userMsg: ChatMessage = {
+      id: userOptimisticId,
+      content: trimmed,
+      provider: "",
+      createdAt: now,
+      role: "user",
+      bookId: BigInt(bookId),
+      sessionId: selectedSessionId,
+    };
+
+    setOptimisticMessages((prev) => [...prev, userMsg]);
+
     try {
-      await sendMessage.mutateAsync({
+      // Save user message in background
+      sendMessage.mutate({
         bookId: BigInt(bookId),
         sessionId: selectedSessionId,
         role: "user",
@@ -353,7 +398,20 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
         chapterSummaries.length > 0 ? chapterSummaries : undefined,
       );
 
-      await sendMessage.mutateAsync({
+      const assistantMsg: ChatMessage = {
+        id: assistantOptimisticId as unknown as bigint,
+        content: reply,
+        provider,
+        createdAt: BigInt(Date.now()) * 1000000n,
+        role: "assistant",
+        bookId: BigInt(bookId),
+        sessionId: selectedSessionId,
+      };
+
+      setOptimisticMessages((prev) => [...prev, assistantMsg]);
+
+      // Save assistant message in background
+      sendMessage.mutate({
         bookId: BigInt(bookId),
         sessionId: selectedSessionId,
         role: "assistant",
@@ -364,6 +422,12 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       // Silent fail — user can retry
     } finally {
       setIsSending(false);
+      // Refresh from backend after a short delay to merge real IDs
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["chat", BigInt(bookId)],
+        });
+      }, 500);
     }
   }, [
     input,
@@ -375,6 +439,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     analyses,
     sendMessage,
     selectedSessionId,
+    queryClient,
   ]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

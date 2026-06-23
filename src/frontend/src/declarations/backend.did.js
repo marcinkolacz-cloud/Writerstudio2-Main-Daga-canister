@@ -162,7 +162,7 @@ export const idlService = IDL.Service({
     ),
   'addChatMessage' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
   'checkAccess' : IDL.Func([IDL.Text], [IDL.Bool], []),
-  'clearChat' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'clearChat' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
   'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
   'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
   'createChatSession' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
@@ -217,7 +217,11 @@ export const idlService = IDL.Service({
   'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
   'listCommentsByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Comment)], []),
   'listInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], []),
-  'listMessagesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(ChatMessage)], []),
+  'listMessagesByBook' : IDL.Func(
+      [IDL.Nat, IDL.Text],
+      [IDL.Vec(ChatMessage)],
+      [],
+    ),
   'listRecordingsByChapter' : IDL.Func(
       [IDL.Nat],
       [
@@ -471,7 +475,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'addChatMessage' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
     'checkAccess' : IDL.Func([IDL.Text], [IDL.Bool], []),
-    'clearChat' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'clearChat' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
     'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
     'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
     'createChatSession' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
@@ -530,7 +534,11 @@ export const idlFactory = ({ IDL }) => {
     'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
     'listCommentsByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Comment)], []),
     'listInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], []),
-    'listMessagesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(ChatMessage)], []),
+    'listMessagesByBook' : IDL.Func(
+        [IDL.Nat, IDL.Text],
+        [IDL.Vec(ChatMessage)],
+        [],
+      ),
     'listRecordingsByChapter' : IDL.Func(
         [IDL.Nat],
         [

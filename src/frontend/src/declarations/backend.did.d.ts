@@ -153,7 +153,7 @@ export interface _SERVICE {
   >,
   'addChatMessage' : ActorMethod<[bigint, string, string], bigint>,
   'checkAccess' : ActorMethod<[string], boolean>,
-  'clearChat' : ActorMethod<[bigint], boolean>,
+  'clearChat' : ActorMethod<[bigint, string], boolean>,
   'createBook' : ActorMethod<[string, string, string], bigint>,
   'createChapter' : ActorMethod<[bigint, string], bigint>,
   'createChatSession' : ActorMethod<[bigint, string], bigint>,
@@ -194,7 +194,7 @@ export interface _SERVICE {
   'listChaptersByBook' : ActorMethod<[bigint], Array<Chapter>>,
   'listCommentsByChapter' : ActorMethod<[bigint], Array<Comment>>,
   'listInviteCodes' : ActorMethod<[], Array<InviteCode>>,
-  'listMessagesByBook' : ActorMethod<[bigint], Array<ChatMessage>>,
+  'listMessagesByBook' : ActorMethod<[bigint, string], Array<ChatMessage>>,
   'listRecordingsByChapter' : ActorMethod<
     [bigint],
     Array<{ 'id' : bigint, 'voice' : string, 'createdAt' : bigint }>

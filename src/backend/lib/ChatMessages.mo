@@ -47,4 +47,21 @@ module {
       Int.compare(a.createdAt, b.createdAt)
     })
   };
+
+  public func filterByBookAndSession(
+    chatMessages : Map.Map<Nat, Types.ChatMessage>,
+    bookId : Nat,
+    sessionId : Text,
+  ) : [Types.ChatMessage] {
+    var result = List.empty<Types.ChatMessage>();
+    for ((_, message) in chatMessages.entries()) {
+      if (message.bookId == bookId and message.sessionId == sessionId) {
+        result.add(message);
+      };
+    };
+    let arr = result.toArray();
+    arr.sort(func(a : Types.ChatMessage, b : Types.ChatMessage) : Order.Order {
+      Int.compare(a.createdAt, b.createdAt)
+    })
+  };
 };

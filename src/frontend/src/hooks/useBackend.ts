@@ -268,14 +268,14 @@ export function useCreateBook() {
   });
 }
 
-export function useChatMessages(bookId: string | number) {
+export function useChatMessages(bookId: string | number, sessionId?: string) {
   const { actor } = useActor(createActor);
   const id = BigInt(bookId);
   return useQuery<ChatMessage[]>({
-    queryKey: ["chat", id],
+    queryKey: ["chat", id, sessionId ?? "all"],
     queryFn: async () => {
       if (!actor) return [];
-      const messages = await actor.listMessagesByBook(id);
+      const messages = await actor.listMessagesByBook(id, sessionId ?? "");
       return messages.sort((a, b) => Number(a.createdAt - b.createdAt));
     },
     enabled: !!actor && !!bookId,
@@ -641,9 +641,12 @@ export function useClearChat() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ bookId }: { bookId: bigint }) => {
+    mutationFn: async ({
+      bookId,
+      sessionId,
+    }: { bookId: bigint; sessionId?: string }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.clearChat(bookId);
+      return actor.clearChat(bookId, sessionId ?? "");
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

@@ -45,11 +45,11 @@ mixin (
     }
   };
 
-  public shared ({ caller }) func listMessagesByBook(bookId : Nat) : async [Types.ChatMessage] {
+  public shared ({ caller }) func listMessagesByBook(bookId : Nat, sessionId : Text) : async [Types.ChatMessage] {
     switch (chatGetBookOwner(bookId)) {
       case (?ownerId) {
         if (Principal.equal(ownerId, caller)) {
-          ChatMessagesLib.filterByBook(chatMessages, bookId)
+          ChatMessagesLib.filterByBookAndSession(chatMessages, bookId, sessionId)
         } else {
           []
         }
@@ -72,13 +72,13 @@ mixin (
     }
   };
 
-  public shared ({ caller }) func clearChat(bookId : Nat) : async Bool {
+  public shared ({ caller }) func clearChat(bookId : Nat, sessionId : Text) : async Bool {
     switch (chatGetBookOwner(bookId)) {
       case (?ownerId) {
         if (Principal.equal(ownerId, caller)) {
           var idsToRemove = List.empty<Nat>();
           for ((id, message) in chatMessages.entries()) {
-            if (message.bookId == bookId) {
+            if (message.bookId == bookId and message.sessionId == sessionId) {
               idsToRemove.add(id);
             };
           };
