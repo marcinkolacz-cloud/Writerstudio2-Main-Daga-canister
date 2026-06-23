@@ -43,7 +43,14 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
 
   // Panel position and size
   const [pos, setPos] = useState({ x: 0, y: 0 });
-  const [size, setSize] = useState({ w: 380, h: 520 });
+  const [size, setSize] = useState(() => {
+    const storedW = localStorage.getItem("ws_chatbot_width");
+    const storedH = localStorage.getItem("ws_chatbot_height");
+    return {
+      w: storedW ? Number.parseInt(storedW, 10) : 380,
+      h: storedH ? Number.parseInt(storedH, 10) : 520,
+    };
+  });
   const panelRef = useRef<HTMLDivElement>(null);
   const dragState = useRef<{
     dragging: boolean;
@@ -131,14 +138,34 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
         const dx = e.clientX - resizeState.current.startX;
         const dy = e.clientY - resizeState.current.startY;
         setSize({
-          w: Math.max(280, resizeState.current.startW + dx),
-          h: Math.max(320, resizeState.current.startH + dy),
+          w: Math.max(
+            320,
+            Math.min(
+              Math.round(window.innerWidth * 0.9),
+              resizeState.current.startW + dx,
+            ),
+          ),
+          h: Math.max(
+            400,
+            Math.min(
+              Math.round(window.innerHeight * 0.9),
+              resizeState.current.startH + dy,
+            ),
+          ),
         });
       }
     };
     const onMouseUp = () => {
       dragState.current.dragging = false;
-      resizeState.current.resizing = false;
+      if (resizeState.current.resizing) {
+        resizeState.current.resizing = false;
+        // Persist final size
+        setSize((current) => {
+          localStorage.setItem("ws_chatbot_width", String(current.w));
+          localStorage.setItem("ws_chatbot_height", String(current.h));
+          return current;
+        });
+      }
     };
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
@@ -264,6 +291,12 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
         bottom: 24 - pos.y,
         width: size.w,
         height: size.h,
+        resize: "both",
+        overflow: "auto",
+        minWidth: 320,
+        minHeight: 400,
+        maxWidth: "90vw",
+        maxHeight: "90vh",
       }}
       data-ocid="chat.panel"
     >
@@ -349,8 +382,8 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)"
-            className="flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            rows={1}
+            className="flex-1 min-h-[96px] max-h-[200px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            rows={4}
             data-ocid="chat.input"
           />
           <Button

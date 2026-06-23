@@ -42309,7 +42309,14 @@ function ChatBotPanel({ bookId }) {
   const messagesEndRef = reactExports.useRef(null);
   const textareaRef = reactExports.useRef(null);
   const [pos, setPos] = reactExports.useState({ x: 0, y: 0 });
-  const [size2, setSize] = reactExports.useState({ w: 380, h: 520 });
+  const [size2, setSize] = reactExports.useState(() => {
+    const storedW = localStorage.getItem("ws_chatbot_width");
+    const storedH = localStorage.getItem("ws_chatbot_height");
+    return {
+      w: storedW ? Number.parseInt(storedW, 10) : 380,
+      h: storedH ? Number.parseInt(storedH, 10) : 520
+    };
+  });
   const panelRef = reactExports.useRef(null);
   const dragState = reactExports.useRef({
     dragging: false,
@@ -42379,14 +42386,33 @@ function ChatBotPanel({ bookId }) {
         const dx = e3.clientX - resizeState.current.startX;
         const dy = e3.clientY - resizeState.current.startY;
         setSize({
-          w: Math.max(280, resizeState.current.startW + dx),
-          h: Math.max(320, resizeState.current.startH + dy)
+          w: Math.max(
+            320,
+            Math.min(
+              Math.round(window.innerWidth * 0.9),
+              resizeState.current.startW + dx
+            )
+          ),
+          h: Math.max(
+            400,
+            Math.min(
+              Math.round(window.innerHeight * 0.9),
+              resizeState.current.startH + dy
+            )
+          )
         });
       }
     };
     const onMouseUp = () => {
       dragState.current.dragging = false;
-      resizeState.current.resizing = false;
+      if (resizeState.current.resizing) {
+        resizeState.current.resizing = false;
+        setSize((current) => {
+          localStorage.setItem("ws_chatbot_width", String(current.w));
+          localStorage.setItem("ws_chatbot_height", String(current.h));
+          return current;
+        });
+      }
     };
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
@@ -42486,7 +42512,13 @@ ${chapterTitles}`;
         right: 24 + pos.x,
         bottom: 24 - pos.y,
         width: size2.w,
-        height: size2.h
+        height: size2.h,
+        resize: "both",
+        overflow: "auto",
+        minWidth: 320,
+        minHeight: 400,
+        maxWidth: "90vw",
+        maxHeight: "90vh"
       },
       "data-ocid": "chat.panel",
       children: [
@@ -42573,8 +42605,8 @@ ${chapterTitles}`;
               onChange: (e3) => setInput(e3.target.value),
               onKeyDown: handleKeyDown2,
               placeholder: "Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)",
-              className: "flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-              rows: 1,
+              className: "flex-1 min-h-[96px] max-h-[200px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+              rows: 4,
               "data-ocid": "chat.input"
             }
           ),
@@ -105783,7 +105815,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-D5NxXNWN.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BlC35LZ4.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
