@@ -204,7 +204,7 @@ function applyAnnotationsToEditor(
     });
   } else {
     editor.state.doc.descendants((node, pos) => {
-      if (!node.isText) return false;
+      if (!node.isText) return true;
       for (const markName of annotationMarkNames) {
         const mark = node.marks.find((m) => m.type.name === markName);
         if (mark) {
