@@ -43,7 +43,11 @@ export function RichTextEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+      }),
 
       annotationYellow,
       annotationRed,

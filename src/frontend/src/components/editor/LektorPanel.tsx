@@ -46,6 +46,7 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -73,6 +74,7 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
     if (!generatedBlob) return;
     setSaving(true);
     setError(null);
+    setSuccess(null);
     try {
       const arrayBuffer = await generatedBlob.arrayBuffer();
       const audioData = new Uint8Array(arrayBuffer);
@@ -82,6 +84,7 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
         voice,
         audioData,
       });
+      setSuccess("Nagranie zostało zapisane pomyślnie.");
       setGeneratedBlob(null);
     } catch (err) {
       const errorMessage =
@@ -90,6 +93,15 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
       setError(errorMessage);
     } finally {
       setSaving(false);
+      // Trigger automatic browser download of the MP3 file
+      const downloadUrl = URL.createObjectURL(generatedBlob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `rozdzial_${chapterId}_${Date.now()}.mp3`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 10000);
     }
   }, [generatedBlob, chapterId, bookId, voice, saveRecording]);
 
@@ -294,6 +306,13 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
           Długie rozdziały (ponad 5000 słów) mogą nie zmieścić się w limicie —
           podziel tekst na mniejsze fragmenty.
+        </div>
+      )}
+
+      {/* Success message */}
+      {success && (
+        <div className="w-full text-xs text-success bg-success/10 rounded-md px-3 py-2">
+          {success}
         </div>
       )}
 

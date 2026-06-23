@@ -50032,6 +50032,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
   const [progress, setProgress] = reactExports.useState(0);
   const [duration, setDuration] = reactExports.useState(0);
   const [error, setError] = reactExports.useState(null);
+  const [success, setSuccess] = reactExports.useState(null);
   const [generatedBlob, setGeneratedBlob] = reactExports.useState(null);
   const [saving, setSaving] = reactExports.useState(false);
   const audioRef = reactExports.useRef(null);
@@ -50055,6 +50056,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
     if (!generatedBlob) return;
     setSaving(true);
     setError(null);
+    setSuccess(null);
     try {
       const arrayBuffer = await generatedBlob.arrayBuffer();
       const audioData = new Uint8Array(arrayBuffer);
@@ -50064,6 +50066,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
         voice,
         audioData
       });
+      setSuccess("Nagranie zostało zapisane pomyślnie.");
       setGeneratedBlob(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Błąd zapisywania nagrania";
@@ -50071,6 +50074,14 @@ function LektorPanel({ editor, chapterId, bookId }) {
       setError(errorMessage);
     } finally {
       setSaving(false);
+      const downloadUrl = URL.createObjectURL(generatedBlob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = `rozdzial_${chapterId}_${Date.now()}.mp3`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 1e4);
     }
   }, [generatedBlob, chapterId, bookId, voice, saveRecording]);
   reactExports.useEffect(() => {
@@ -50238,6 +50249,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
           /* @__PURE__ */ jsxRuntimeExports.jsx(TriangleAlert, { className: "h-3.5 w-3.5 shrink-0" }),
           "Długie rozdziały (ponad 5000 słów) mogą nie zmieścić się w limicie — podziel tekst na mniejsze fragmenty."
         ] }),
+        success && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full text-xs text-success bg-success/10 rounded-md px-3 py-2", children: success }),
         error && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full text-xs text-destructive bg-destructive/10 rounded-md px-3 py-2", children: error })
       ]
     }
@@ -76878,7 +76890,11 @@ function RichTextEditor({
   const lastEmittedValue = reactExports.useRef(value);
   const editor = useEditor({
     extensions: [
-      index_default,
+      index_default.configure({
+        bulletList: false,
+        orderedList: false,
+        listItem: false
+      }),
       annotationYellow,
       annotationRed,
       annotationBlue,
@@ -106009,7 +106025,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BYV9aTmd.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-C0oEgDwz.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
