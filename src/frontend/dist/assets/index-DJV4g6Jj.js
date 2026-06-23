@@ -33730,14 +33730,14 @@ function useCreateBook() {
     }
   });
 }
-function useChatMessages(bookId, sessionId) {
+function useChatMessages(bookId) {
   const { actor } = useActor(createActor);
   const id = BigInt(bookId);
   return useQuery({
-    queryKey: ["chat", id, sessionId ?? "all"],
+    queryKey: ["chat", id],
     queryFn: async () => {
       if (!actor) return [];
-      const messages2 = await actor.listMessagesByBook(id, sessionId ?? "");
+      const messages2 = await actor.listMessagesByBook(id, "");
       return messages2.sort((a2, b2) => Number(a2.createdAt - b2.createdAt));
     },
     enabled: !!actor && !!bookId
@@ -33749,13 +33749,12 @@ function useSendMessage() {
   return useMutation({
     mutationFn: async ({
       bookId,
-      sessionId,
       role,
       content,
       provider
     }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.sendMessage(bookId, sessionId, role, content, provider);
+      return actor.sendMessage(bookId, "", role, content, provider);
     },
     onSuccess: (_2, variables) => {
       queryClient2.invalidateQueries({
@@ -34012,12 +34011,9 @@ function useClearChat() {
   const { actor } = useActor(createActor);
   const queryClient2 = useQueryClient();
   return useMutation({
-    mutationFn: async ({
-      bookId,
-      sessionId
-    }) => {
+    mutationFn: async ({ bookId }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.clearChat(bookId, sessionId ?? "");
+      return actor.clearChat(bookId, "");
     },
     onSuccess: (_2, variables) => {
       queryClient2.invalidateQueries({
@@ -42305,6 +42301,22 @@ async function chatWithBook(messages2, bookContext, apiKey, provider, chapterSum
   const prompt = buildChatPrompt(messages2, bookContext, chapterSummaries);
   return await callAi(prompt, apiKey, provider, false);
 }
+function getArchiveKey(bookId) {
+  return `ws_chat_archives_${bookId}`;
+}
+function loadArchives(bookId) {
+  try {
+    const raw = localStorage.getItem(getArchiveKey(bookId));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {
+  }
+  return [];
+}
+function saveArchives(bookId, archives) {
+  localStorage.setItem(getArchiveKey(bookId), JSON.stringify(archives));
+}
 function ChatBotPanel({ bookId, book: bookProp }) {
   const [isOpen, setIsOpen] = reactExports.useState(() => {
     const stored = localStorage.getItem("writerstudio-chat-open");
@@ -42323,17 +42335,13 @@ function ChatBotPanel({ bookId, book: bookProp }) {
   const queryClient2 = useQueryClient();
   const [input, setInput] = reactExports.useState("");
   const [isSending, setIsSending] = reactExports.useState(false);
-  const [optimisticMessages, setOptimisticMessages] = reactExports.useState(
-    []
-  );
+  const [optimisticMessages, setOptimisticMessages] = reactExports.useState([]);
   const messagesEndRef = reactExports.useRef(null);
   const textareaRef = reactExports.useRef(null);
-  const [selectedSessionId, setSelectedSessionId] = reactExports.useState(
+  const { data: messages2, isLoading } = useChatMessages(bookId);
+  const [view, setView] = reactExports.useState("chat");
+  const [selectedArchive, setSelectedArchive] = reactExports.useState(
     null
-  );
-  const { data: messages2, isLoading } = useChatMessages(
-    bookId,
-    selectedSessionId ?? void 0
   );
   const [pos, setPos] = reactExports.useState({ x: 0, y: 0 });
   const [size2, setSize] = reactExports.useState(() => {
@@ -42364,60 +42372,27 @@ function ChatBotPanel({ bookId, book: bookProp }) {
     (_a3 = messagesEndRef.current) == null ? void 0 : _a3.scrollIntoView({ behavior: "smooth" });
   }, []);
   const messageCountRef = reactExports.useRef(0);
-  const sessions = reactExports.useMemo(() => {
-    const allMessages = messages2 ?? [];
-    const groups = /* @__PURE__ */ new Map();
-    for (const msg of allMessages) {
-      const sid = msg.sessionId ?? "legacy";
-      if (!groups.has(sid)) groups.set(sid, []);
-      groups.get(sid).push(msg);
-    }
-    const result = Array.from(groups.entries()).map(([id, msgs]) => ({
-      id,
-      messages: msgs.sort((a2, b2) => Number(a2.createdAt - b2.createdAt)),
-      title: getSessionTitle(msgs),
-      date: formatDate2(msgs[0].createdAt)
-    })).sort((a2, b2) => {
-      const aLatest = a2.messages[a2.messages.length - 1].createdAt;
-      const bLatest = b2.messages[b2.messages.length - 1].createdAt;
-      return Number(bLatest - aLatest);
-    });
-    console.log("[SESSION DEBUG]", {
-      allMessages,
-      groups: Array.from(groups.entries()),
-      result
-    });
-    return result;
-  }, [messages2]);
   const currentMessages = reactExports.useMemo(() => {
-    if (!selectedSessionId) return [];
-    const backendMessages = (messages2 ?? []).filter(
-      (m2) => (m2.sessionId ?? "legacy") === selectedSessionId
+    const backendMsgs = messages2 ?? [];
+    const optimisticOnly = optimisticMessages.filter(
+      (opt) => !backendMsgs.some(
+        (m2) => m2.content === opt.content && m2.role === opt.role
+      )
     );
-    const optimisticForSession = optimisticMessages.filter(
-      (m2) => m2.sessionId === selectedSessionId
-    );
-    const merged = /* @__PURE__ */ new Map();
-    for (const msg of backendMessages) {
-      merged.set(String(msg.id), msg);
-    }
-    for (const msg of optimisticForSession) {
-      merged.set(String(msg.id), msg);
-    }
-    return Array.from(merged.values()).sort(
+    return [...backendMsgs, ...optimisticOnly].sort(
       (a2, b2) => Number(a2.createdAt - b2.createdAt)
     );
-  }, [messages2, optimisticMessages, selectedSessionId]);
+  }, [messages2, optimisticMessages]);
   reactExports.useEffect(() => {
     messageCountRef.current = currentMessages.length;
   }, [currentMessages.length]);
   reactExports.useEffect(() => {
     const currentLength = currentMessages.length;
-    if (isOpen && selectedSessionId && currentLength > messageCountRef.current) {
+    if (isOpen && view === "chat" && currentLength > messageCountRef.current) {
       scrollToBottom();
     }
     messageCountRef.current = currentLength;
-  }, [isOpen, selectedSessionId, scrollToBottom, currentMessages.length]);
+  }, [isOpen, view, scrollToBottom, currentMessages.length]);
   const onDragMouseDown = reactExports.useCallback(
     (e3) => {
       if (e3.target.closest("[data-chat-action]")) return;
@@ -42495,64 +42470,53 @@ function ChatBotPanel({ bookId, book: bookProp }) {
       window.removeEventListener("mouseup", onMouseUp);
     };
   }, []);
-  const generateSessionId = reactExports.useCallback(() => {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) {
-      return crypto.randomUUID();
-    }
-    return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  }, []);
-  function getSessionTitle(msgs) {
-    const firstUser = msgs.find((m2) => m2.role === "user");
-    const text = (firstUser == null ? void 0 : firstUser.content) ?? "Rozmowa";
-    return text.length > 50 ? `${text.slice(0, 50)}…` : text;
-  }
-  function formatDate2(ts2) {
-    const ms = Number(ts2 / 1000000n);
-    return new Date(ms).toLocaleDateString("pl-PL", {
+  function formatArchiveDate(ts2) {
+    return new Date(ts2).toLocaleDateString("pl-PL", {
       day: "numeric",
       month: "short",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit"
     });
   }
-  const handleNewConversation = reactExports.useCallback(() => {
-    const newId = generateSessionId();
-    setSelectedSessionId(newId);
-  }, [generateSessionId]);
-  const handleBackToList = reactExports.useCallback(() => {
-    setSelectedSessionId(null);
-  }, []);
-  const handleDeleteSession = reactExports.useCallback(
-    (sessionId) => {
-      const session = sessions.find((s2) => s2.id === sessionId);
-      if (!session) return;
-      if (window.confirm("Czy na pewno chcesz usunąć tę rozmowę?")) {
-        for (const msg of session.messages) {
-          deleteMessage.mutate({ id: msg.id });
-        }
-        setOptimisticMessages(
-          (prev) => prev.filter((m2) => m2.sessionId !== sessionId)
-        );
-        if (selectedSessionId === sessionId) {
-          setSelectedSessionId(null);
-        }
+  const handleArchive = reactExports.useCallback(() => {
+    var _a3;
+    if (currentMessages.length === 0) return;
+    setOptimisticMessages([]);
+    const firstSentence = ((_a3 = currentMessages[0]) == null ? void 0 : _a3.content) ?? "";
+    const title = firstSentence.length > 50 ? `${firstSentence.slice(0, 50)}…` : firstSentence || "Archiwum";
+    const archive = {
+      timestamp: Date.now(),
+      title,
+      messages: currentMessages.map((m2) => ({
+        role: m2.role,
+        content: m2.content,
+        createdAt: Number(m2.createdAt / 1000000n)
+      }))
+    };
+    const archives2 = loadArchives(bookId);
+    archives2.unshift(archive);
+    saveArchives(bookId, archives2);
+    clearChat.mutate({ bookId: BigInt(bookId) });
+    setView("chat");
+  }, [currentMessages, bookId, clearChat]);
+  const handleDeleteArchive = reactExports.useCallback(
+    (timestamp) => {
+      const archives2 = loadArchives(bookId).filter(
+        (a2) => a2.timestamp !== timestamp
+      );
+      saveArchives(bookId, archives2);
+      if ((selectedArchive == null ? void 0 : selectedArchive.timestamp) === timestamp) {
+        setSelectedArchive(null);
+        setView("history");
       }
+      setInput((v2) => v2);
     },
-    [sessions, deleteMessage, selectedSessionId]
+    [bookId, selectedArchive]
   );
-  const handleClear = () => {
-    if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
-      clearChat.mutate({
-        bookId: BigInt(bookId),
-        sessionId: selectedSessionId ?? void 0
-      });
-      setOptimisticMessages([]);
-      setSelectedSessionId(null);
-    }
-  };
   const handleSend = reactExports.useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed || isSending || !book || !selectedSessionId) return;
+    if (!trimmed || isSending || !book) return;
     const apiKey = (localStorage.getItem("ws_api_provider") === "claude" ? localStorage.getItem("ws_api_key_claude") : localStorage.getItem("ws_api_key_openai")) ?? "";
     const provider = localStorage.getItem("ws_api_provider") || "openai";
     if (!apiKey.trim()) {
@@ -42561,23 +42525,22 @@ function ChatBotPanel({ bookId, book: bookProp }) {
     }
     setIsSending(true);
     setInput("");
+    const userOptId = `opt-user-${Date.now()}`;
+    const assistantOptId = `opt-assistant-${Date.now()}`;
     const now2 = BigInt(Date.now()) * 1000000n;
-    const userOptimisticId = BigInt(-Date.now() - 1);
-    const assistantOptimisticId = BigInt(-Date.now() - 2);
-    const userMsg = {
-      id: userOptimisticId,
-      content: trimmed,
-      provider: "",
-      createdAt: now2,
-      role: "user",
-      bookId: BigInt(bookId),
-      sessionId: selectedSessionId
-    };
-    setOptimisticMessages((prev) => [...prev, userMsg]);
+    setOptimisticMessages((prev) => [
+      ...prev,
+      { id: userOptId, role: "user", content: trimmed, createdAt: now2 },
+      {
+        id: assistantOptId,
+        role: "assistant",
+        content: "…",
+        createdAt: now2 + 1n
+      }
+    ]);
     try {
       sendMessage.mutate({
         bookId: BigInt(bookId),
-        sessionId: selectedSessionId,
         role: "user",
         content: trimmed,
         provider: ""
@@ -42600,7 +42563,6 @@ function ChatBotPanel({ bookId, book: bookProp }) {
         bookContextParts.push(`Postacie: ${book.characters}`);
       const bookContextBlock = bookContextParts.length > 0 ? `DANE KSIĄŻKI:
 ${bookContextParts.join("\n")}` : "";
-      console.log("[BOOK CONTEXT]", bookContextBlock);
       const chapterTitles = (chapters ?? []).sort((a2, b2) => Number(a2.orderIndex - b2.orderIndex)).map((ch) => `- ${ch.title}`).join("\n");
       const bookContext = `${bookContextBlock}
 
@@ -42625,19 +42587,13 @@ ${chapterTitles}`;
         provider,
         chapterSummaries.length > 0 ? chapterSummaries : void 0
       );
-      const assistantMsg = {
-        id: assistantOptimisticId,
-        content: reply,
-        provider,
-        createdAt: BigInt(Date.now()) * 1000000n,
-        role: "assistant",
-        bookId: BigInt(bookId),
-        sessionId: selectedSessionId
-      };
-      setOptimisticMessages((prev) => [...prev, assistantMsg]);
+      setOptimisticMessages(
+        (prev) => prev.map(
+          (m2) => m2.id === assistantOptId ? { ...m2, content: reply } : m2
+        )
+      );
       sendMessage.mutate({
         bookId: BigInt(bookId),
-        sessionId: selectedSessionId,
         role: "assistant",
         content: reply,
         provider
@@ -42649,6 +42605,7 @@ ${chapterTitles}`;
         queryClient2.invalidateQueries({
           queryKey: ["chat", BigInt(bookId)]
         });
+        setOptimisticMessages([]);
       }, 500);
     }
   }, [
@@ -42660,7 +42617,6 @@ ${chapterTitles}`;
     currentMessages,
     analyses,
     sendMessage,
-    selectedSessionId,
     queryClient2
   ]);
   const handleKeyDown2 = (e3) => {
@@ -42682,6 +42638,7 @@ ${chapterTitles}`;
       }
     );
   }
+  const archives = loadArchives(bookId);
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
     {
@@ -42709,33 +42666,41 @@ ${chapterTitles}`;
             "data-ocid": "chat.header",
             children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 min-w-0", children: [
-                selectedSessionId !== null && selectedSessionId !== void 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+                /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-primary shrink-0" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-foreground truncate", children: "Asystent AI" }),
+                book && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate max-w-[120px]", children: book.title })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1 shrink-0", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
                   Button,
                   {
                     variant: "ghost",
                     size: "sm",
-                    className: "h-7 w-7 p-0 text-muted-foreground hover:text-foreground shrink-0",
-                    onClick: handleBackToList,
-                    title: "Wróć do listy",
+                    className: `h-7 w-7 p-0 ${view === "history" || view === "archive" ? "text-primary" : "text-muted-foreground"} hover:text-foreground`,
+                    onClick: () => {
+                      if (view === "history" || view === "archive") {
+                        setView("chat");
+                        setSelectedArchive(null);
+                      } else {
+                        setView("history");
+                      }
+                    },
+                    title: "Historia",
                     "data-chat-action": true,
-                    "data-ocid": "chat.back_button",
-                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-3.5 w-3.5" })
+                    "data-ocid": "chat.history_button",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(Clock, { className: "h-3.5 w-3.5" })
                   }
-                ) : /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-primary shrink-0" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-foreground truncate", children: selectedSessionId !== null && selectedSessionId !== void 0 ? getSessionTitle(currentMessages) : "Asystent AI" }),
-                book && selectedSessionId === null && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate max-w-[120px]", children: book.title })
-              ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1 shrink-0", children: [
-                !selectedSessionId && /* @__PURE__ */ jsxRuntimeExports.jsx(
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
                   Button,
                   {
                     variant: "ghost",
                     size: "sm",
                     className: "h-7 w-7 p-0 text-muted-foreground hover:text-destructive",
-                    onClick: handleClear,
-                    title: "Wyczyść wszystko",
+                    onClick: handleArchive,
+                    title: "Archiwizuj",
                     "data-chat-action": true,
-                    "data-ocid": "chat.clear_button",
+                    "data-ocid": "chat.archive_button",
                     children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3.5 w-3.5" })
                   }
                 ),
@@ -42756,7 +42721,7 @@ ${chapterTitles}`;
             ]
           }
         ),
-        selectedSessionId !== null && selectedSessionId !== void 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        view === "chat" && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 space-y-3 min-h-0", children: [
             isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx(
               "div",
@@ -42783,7 +42748,13 @@ ${chapterTitles}`;
               {
                 msg,
                 index: idx,
-                onDelete: () => deleteMessage.mutate({ id: msg.id })
+                isOptimistic: typeof msg.id === "string" && String(msg.id).startsWith("opt-"),
+                onDelete: () => {
+                  if (typeof msg.id === "string" && String(msg.id).startsWith("opt-")) {
+                    return;
+                  }
+                  deleteMessage.mutate({ id: msg.id });
+                }
               },
               `${msg.id}-${idx}`
             )),
@@ -42815,46 +42786,25 @@ ${chapterTitles}`;
               }
             )
           ] }) })
-        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 min-h-0", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs(
-            Button,
-            {
-              variant: "default",
-              size: "sm",
-              className: "w-full mb-3",
-              onClick: handleNewConversation,
-              "data-ocid": "chat.new_conversation_button",
-              children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(Plus, { className: "h-4 w-4 mr-2" }),
-                "Nowa rozmowa"
-              ]
-            }
-          ),
-          isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "text-xs text-muted-foreground text-center py-4",
-              "data-ocid": "chat.loading_state",
-              children: "Ładowanie historii..."
-            }
-          ),
-          !isLoading && sessions.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        ] }),
+        view === "history" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 min-h-0", children: [
+          archives.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
             "div",
             {
               className: "text-xs text-muted-foreground text-center py-8",
-              "data-ocid": "chat.empty_state",
+              "data-ocid": "chat.history.empty_state",
               children: [
-                "Brak rozmów.",
+                "Brak archiwów.",
                 /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-                "Kliknij „Nowa rozmowa”, aby rozpocząć."
+                "Kliknij ikonę kosza, aby zarchiwizować bieżącą rozmowę."
               ]
             }
           ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2", children: sessions.map((session, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2", children: archives.map((archive, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
             "div",
             {
               className: "group flex items-center gap-2 p-3 rounded-lg border border-border bg-background hover:bg-muted/50 transition-colors",
-              "data-ocid": `chat.session.item.${idx + 1}`,
+              "data-ocid": `chat.archive.item.${idx + 1}`,
               children: [
                 /* @__PURE__ */ jsxRuntimeExports.jsxs(
                   "button",
@@ -42862,17 +42812,13 @@ ${chapterTitles}`;
                     type: "button",
                     className: "flex-1 min-w-0 text-left cursor-pointer",
                     onClick: () => {
-                      console.log(
-                        "[SESSION CLICK]",
-                        session.id,
-                        session.messages.length
-                      );
-                      setSelectedSessionId(session.id);
+                      setSelectedArchive(archive);
+                      setView("archive");
                     },
-                    "data-ocid": `chat.session.open_button.${idx + 1}`,
+                    "data-ocid": `chat.archive.open_button.${idx + 1}`,
                     children: [
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm font-medium text-foreground truncate", children: session.title }),
-                      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-muted-foreground", children: session.date })
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm font-medium text-foreground truncate", children: archive.title }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-muted-foreground", children: formatArchiveDate(archive.timestamp) })
                     ]
                   }
                 ),
@@ -42882,18 +42828,52 @@ ${chapterTitles}`;
                     variant: "ghost",
                     size: "sm",
                     className: "h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0",
-                    onClick: () => handleDeleteSession(session.id),
-                    title: "Usuń rozmowę",
+                    onClick: () => handleDeleteArchive(archive.timestamp),
+                    title: "Usuń archiwum",
                     "data-chat-action": true,
-                    "data-ocid": `chat.session.delete_button.${idx + 1}`,
+                    "data-ocid": `chat.archive.delete_button.${idx + 1}`,
                     children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3.5 w-3.5" })
                   }
                 )
               ]
             },
-            session.id
+            archive.timestamp
           )) })
-        ] }) }),
+        ] }),
+        view === "archive" && selectedArchive && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 space-y-3 min-h-0", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-muted-foreground mb-2", children: formatArchiveDate(selectedArchive.timestamp) }),
+            selectedArchive.messages.map((msg, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "div",
+              {
+                className: `flex ${msg.role === "user" ? "justify-end" : "justify-start"}`,
+                "data-ocid": `chat.archive.message.${idx + 1}`,
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "div",
+                  {
+                    className: `max-w-[85%] rounded-lg px-3 py-2 text-sm ${msg.role === "user" ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted text-foreground rounded-bl-none"}`,
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "whitespace-pre-wrap break-words", children: msg.content })
+                  }
+                )
+              },
+              `archive-msg-${msg.createdAt}`
+            ))
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-t border-border p-3 bg-card", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Button,
+            {
+              variant: "outline",
+              size: "sm",
+              className: "w-full",
+              onClick: () => {
+                setSelectedArchive(null);
+                setView("history");
+              },
+              "data-ocid": "chat.archive.back_button",
+              children: "Wróć do historii"
+            }
+          ) })
+        ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
           {
@@ -42928,6 +42908,7 @@ ${chapterTitles}`;
 function ChatMessageItem({
   msg,
   index: index2,
+  isOptimistic,
   onDelete
 }) {
   const isUser = msg.role === "user";
@@ -42958,8 +42939,14 @@ function ChatMessageItem({
         {
           className: `relative max-w-[85%] rounded-lg px-3 py-2 text-sm ${isUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted text-foreground rounded-bl-none"}`,
           children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "whitespace-pre-wrap break-words", children: msg.content }),
             /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "div",
+              {
+                className: `whitespace-pre-wrap break-words ${isOptimistic ? "opacity-70" : ""}`,
+                children: msg.content
+              }
+            ),
+            !isOptimistic && /* @__PURE__ */ jsxRuntimeExports.jsx(
               "button",
               {
                 type: "button",
@@ -106106,7 +106093,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DCmGbs2J.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CjpbCJZY.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107661,7 +107648,6 @@ function ChapterEditorPage() {
     localStorage.setItem("writerstudio-chat-open", "true");
     sendMessage.mutate({
       bookId: book.id,
-      sessionId: "legacy",
       role: "user",
       content: text,
       provider

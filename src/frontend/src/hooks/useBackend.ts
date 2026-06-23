@@ -268,14 +268,14 @@ export function useCreateBook() {
   });
 }
 
-export function useChatMessages(bookId: string | number, sessionId?: string) {
+export function useChatMessages(bookId: string | number) {
   const { actor } = useActor(createActor);
   const id = BigInt(bookId);
   return useQuery<ChatMessage[]>({
-    queryKey: ["chat", id, sessionId ?? "all"],
+    queryKey: ["chat", id],
     queryFn: async () => {
       if (!actor) return [];
-      const messages = await actor.listMessagesByBook(id, sessionId ?? "");
+      const messages = await actor.listMessagesByBook(id, "");
       return messages.sort((a, b) => Number(a.createdAt - b.createdAt));
     },
     enabled: !!actor && !!bookId,
@@ -289,19 +289,17 @@ export function useSendMessage() {
   return useMutation({
     mutationFn: async ({
       bookId,
-      sessionId,
       role,
       content,
       provider,
     }: {
       bookId: bigint;
-      sessionId: string;
       role: string;
       content: string;
       provider: string;
     }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.sendMessage(bookId, sessionId, role, content, provider);
+      return actor.sendMessage(bookId, "", role, content, provider);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
@@ -641,12 +639,9 @@ export function useClearChat() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      bookId,
-      sessionId,
-    }: { bookId: bigint; sessionId?: string }) => {
+    mutationFn: async ({ bookId }: { bookId: bigint }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.clearChat(bookId, sessionId ?? "");
+      return actor.clearChat(bookId, "");
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

@@ -1,4 +1,4 @@
-import type { Book, ChatMessage } from "@/backend";
+import type { Book } from "@/backend";
 import { Button } from "@/components/ui/button";
 import {
   useAnalysesByBook,
@@ -12,13 +12,38 @@ import {
 import { chatWithBook } from "@/lib/aiAnalysis";
 import type { ChatMessage as AiChatMessage } from "@/lib/aiAnalysis";
 import { useQueryClient } from "@tanstack/react-query";
-import { useParams } from "@tanstack/react-router";
-import { ArrowLeft, MessageCircle, Plus, Send, Trash2, X } from "lucide-react";
+import { Clock, MessageCircle, Send, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface ChatBotPanelProps {
   bookId: string;
   book?: Book;
+}
+
+interface ArchiveEntry {
+  timestamp: number;
+  title: string;
+  messages: Array<{ role: string; content: string; createdAt: number }>;
+}
+
+function getArchiveKey(bookId: string) {
+  return `ws_chat_archives_${bookId}`;
+}
+
+function loadArchives(bookId: string): ArchiveEntry[] {
+  try {
+    const raw = localStorage.getItem(getArchiveKey(bookId));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+function saveArchives(bookId: string, archives: ArchiveEntry[]) {
+  localStorage.setItem(getArchiveKey(bookId), JSON.stringify(archives));
 }
 
 export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
@@ -42,20 +67,18 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [optimisticMessages, setOptimisticMessages] = useState<ChatMessage[]>(
-    [],
-  );
+  const [optimisticMessages, setOptimisticMessages] = useState<
+    Array<{ id: string; role: string; content: string; createdAt: bigint }>
+  >([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Session state
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
-    null,
-  );
+  const { data: messages, isLoading } = useChatMessages(bookId);
 
-  const { data: messages, isLoading } = useChatMessages(
-    bookId,
-    selectedSessionId ?? undefined,
+  // View state: 'chat' | 'history' | 'archive'
+  const [view, setView] = useState<"chat" | "history" | "archive">("chat");
+  const [selectedArchive, setSelectedArchive] = useState<ArchiveEntry | null>(
+    null,
   );
 
   // Panel position and size
@@ -102,54 +125,18 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
 
   const messageCountRef = useRef(0);
 
-  // Group messages by session
-  const sessions = useMemo(() => {
-    const allMessages = messages ?? [];
-    const groups = new Map<string, ChatMessage[]>();
-    for (const msg of allMessages) {
-      const sid = msg.sessionId ?? "legacy";
-      if (!groups.has(sid)) groups.set(sid, []);
-      groups.get(sid)!.push(msg);
-    }
-    const result = Array.from(groups.entries())
-      .map(([id, msgs]) => ({
-        id,
-        messages: msgs.sort((a, b) => Number(a.createdAt - b.createdAt)),
-        title: getSessionTitle(msgs),
-        date: formatDate(msgs[0].createdAt),
-      }))
-      .sort((a, b) => {
-        const aLatest = a.messages[a.messages.length - 1].createdAt;
-        const bLatest = b.messages[b.messages.length - 1].createdAt;
-        return Number(bLatest - aLatest);
-      });
-    console.log("[SESSION DEBUG]", {
-      allMessages,
-      groups: Array.from(groups.entries()),
-      result,
-    });
-    return result;
-  }, [messages]);
-
   const currentMessages = useMemo(() => {
-    if (!selectedSessionId) return [];
-    const backendMessages = (messages ?? []).filter(
-      (m) => (m.sessionId ?? "legacy") === selectedSessionId,
+    const backendMsgs = messages ?? [];
+    const optimisticOnly = optimisticMessages.filter(
+      (opt) =>
+        !backendMsgs.some(
+          (m) => m.content === opt.content && m.role === opt.role,
+        ),
     );
-    const optimisticForSession = optimisticMessages.filter(
-      (m) => m.sessionId === selectedSessionId,
-    );
-    const merged = new Map<string, ChatMessage>();
-    for (const msg of backendMessages) {
-      merged.set(String(msg.id), msg);
-    }
-    for (const msg of optimisticForSession) {
-      merged.set(String(msg.id), msg);
-    }
-    return Array.from(merged.values()).sort((a, b) =>
+    return [...backendMsgs, ...optimisticOnly].sort((a, b) =>
       Number(a.createdAt - b.createdAt),
     );
-  }, [messages, optimisticMessages, selectedSessionId]);
+  }, [messages, optimisticMessages]);
 
   useEffect(() => {
     messageCountRef.current = currentMessages.length;
@@ -157,15 +144,11 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
 
   useEffect(() => {
     const currentLength = currentMessages.length;
-    if (
-      isOpen &&
-      selectedSessionId &&
-      currentLength > messageCountRef.current
-    ) {
+    if (isOpen && view === "chat" && currentLength > messageCountRef.current) {
       scrollToBottom();
     }
     messageCountRef.current = currentLength;
-  }, [isOpen, selectedSessionId, scrollToBottom, currentMessages.length]);
+  }, [isOpen, view, scrollToBottom, currentMessages.length]);
 
   // Drag handlers
   const onDragMouseDown = useCallback(
@@ -248,71 +231,59 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     };
   }, []);
 
-  const generateSessionId = useCallback((): string => {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) {
-      return crypto.randomUUID();
-    }
-    return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  }, []);
-
-  function getSessionTitle(msgs: ChatMessage[]): string {
-    const firstUser = msgs.find((m) => m.role === "user");
-    const text = firstUser?.content ?? "Rozmowa";
-    return text.length > 50 ? `${text.slice(0, 50)}…` : text;
-  }
-
-  function formatDate(ts: bigint): string {
-    const ms = Number(ts / 1000000n);
-    return new Date(ms).toLocaleDateString("pl-PL", {
+  function formatArchiveDate(ts: number): string {
+    return new Date(ts).toLocaleDateString("pl-PL", {
       day: "numeric",
       month: "short",
+      year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
   }
 
-  const handleNewConversation = useCallback(() => {
-    const newId = generateSessionId();
-    setSelectedSessionId(newId);
-  }, [generateSessionId]);
+  const handleArchive = useCallback(() => {
+    if (currentMessages.length === 0) return;
+    setOptimisticMessages([]);
+    const firstSentence = currentMessages[0]?.content ?? "";
+    const title =
+      firstSentence.length > 50
+        ? `${firstSentence.slice(0, 50)}…`
+        : firstSentence || "Archiwum";
+    const archive: ArchiveEntry = {
+      timestamp: Date.now(),
+      title,
+      messages: currentMessages.map((m) => ({
+        role: m.role,
+        content: m.content,
+        createdAt: Number(m.createdAt / 1000000n),
+      })),
+    };
+    const archives = loadArchives(bookId);
+    archives.unshift(archive);
+    saveArchives(bookId, archives);
+    clearChat.mutate({ bookId: BigInt(bookId) });
+    setView("chat");
+  }, [currentMessages, bookId, clearChat]);
 
-  const handleBackToList = useCallback(() => {
-    setSelectedSessionId(null);
-  }, []);
-
-  const handleDeleteSession = useCallback(
-    (sessionId: string) => {
-      const session = sessions.find((s) => s.id === sessionId);
-      if (!session) return;
-      if (window.confirm("Czy na pewno chcesz usunąć tę rozmowę?")) {
-        for (const msg of session.messages) {
-          deleteMessage.mutate({ id: msg.id });
-        }
-        setOptimisticMessages((prev) =>
-          prev.filter((m) => m.sessionId !== sessionId),
-        );
-        if (selectedSessionId === sessionId) {
-          setSelectedSessionId(null);
-        }
+  const handleDeleteArchive = useCallback(
+    (timestamp: number) => {
+      const archives = loadArchives(bookId).filter(
+        (a) => a.timestamp !== timestamp,
+      );
+      saveArchives(bookId, archives);
+      if (selectedArchive?.timestamp === timestamp) {
+        setSelectedArchive(null);
+        setView("history");
       }
+      // Force re-render by toggling a dummy state — we read from localStorage each time
+      setInput((v) => v);
     },
-    [sessions, deleteMessage, selectedSessionId],
+    [bookId, selectedArchive],
   );
-
-  const handleClear = () => {
-    if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
-      clearChat.mutate({
-        bookId: BigInt(bookId),
-        sessionId: selectedSessionId ?? undefined,
-      });
-      setOptimisticMessages([]);
-      setSelectedSessionId(null);
-    }
-  };
 
   const handleSend = useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed || isSending || !book || !selectedSessionId) return;
+    if (!trimmed || isSending || !book) return;
 
     const apiKey =
       (localStorage.getItem("ws_api_provider") === "claude"
@@ -329,27 +300,25 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     setIsSending(true);
     setInput("");
 
+    const userOptId = `opt-user-${Date.now()}`;
+    const assistantOptId = `opt-assistant-${Date.now()}`;
     const now = BigInt(Date.now()) * 1000000n;
-    const userOptimisticId = BigInt(-Date.now() - 1);
-    const assistantOptimisticId = BigInt(-Date.now() - 2);
 
-    const userMsg: ChatMessage = {
-      id: userOptimisticId,
-      content: trimmed,
-      provider: "",
-      createdAt: now,
-      role: "user",
-      bookId: BigInt(bookId),
-      sessionId: selectedSessionId,
-    };
-
-    setOptimisticMessages((prev) => [...prev, userMsg]);
+    setOptimisticMessages((prev) => [
+      ...prev,
+      { id: userOptId, role: "user", content: trimmed, createdAt: now },
+      {
+        id: assistantOptId,
+        role: "assistant",
+        content: "…",
+        createdAt: now + 1n,
+      },
+    ]);
 
     try {
-      // Save user message in background
+      // Save user message in background (fire-and-forget)
       sendMessage.mutate({
         bookId: BigInt(bookId),
-        sessionId: selectedSessionId,
         role: "user",
         content: trimmed,
         provider: "",
@@ -375,7 +344,6 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
         bookContextParts.length > 0
           ? `DANE KSIĄŻKI:\n${bookContextParts.join("\n")}`
           : "";
-      console.log("[BOOK CONTEXT]", bookContextBlock);
 
       const chapterTitles = (chapters ?? [])
         .sort((a, b) => Number(a.orderIndex - b.orderIndex))
@@ -404,35 +372,30 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
         chapterSummaries.length > 0 ? chapterSummaries : undefined,
       );
 
-      const assistantMsg: ChatMessage = {
-        id: assistantOptimisticId as unknown as bigint,
-        content: reply,
-        provider,
-        createdAt: BigInt(Date.now()) * 1000000n,
-        role: "assistant",
-        bookId: BigInt(bookId),
-        sessionId: selectedSessionId,
-      };
+      // Update optimistic placeholder with real reply
+      setOptimisticMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantOptId ? { ...m, content: reply } : m,
+        ),
+      );
 
-      setOptimisticMessages((prev) => [...prev, assistantMsg]);
-
-      // Save assistant message in background
+      // Save assistant message in background (fire-and-forget)
       sendMessage.mutate({
         bookId: BigInt(bookId),
-        sessionId: selectedSessionId,
         role: "assistant",
         content: reply,
         provider,
       });
     } catch {
-      // Silent fail — user can retry
+      // Silent fail — user can retry; placeholder stays visible
     } finally {
       setIsSending(false);
-      // Refresh from backend after a short delay to merge real IDs
+      // Refresh from backend and clear optimistic messages after a short delay
       setTimeout(() => {
         queryClient.invalidateQueries({
           queryKey: ["chat", BigInt(bookId)],
         });
+        setOptimisticMessages([]);
       }, 500);
     }
   }, [
@@ -444,7 +407,6 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     currentMessages,
     analyses,
     sendMessage,
-    selectedSessionId,
     queryClient,
   ]);
 
@@ -468,6 +430,8 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       </button>
     );
   }
+
+  const archives = loadArchives(bookId);
 
   return (
     <div
@@ -494,46 +458,46 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
         data-ocid="chat.header"
       >
         <div className="flex items-center gap-2 min-w-0">
-          {selectedSessionId !== null && selectedSessionId !== undefined ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground shrink-0"
-              onClick={handleBackToList}
-              title="Wróć do listy"
-              data-chat-action
-              data-ocid="chat.back_button"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-            </Button>
-          ) : (
-            <MessageCircle className="h-4 w-4 text-primary shrink-0" />
-          )}
+          <MessageCircle className="h-4 w-4 text-primary shrink-0" />
           <span className="text-sm font-semibold text-foreground truncate">
-            {selectedSessionId !== null && selectedSessionId !== undefined
-              ? getSessionTitle(currentMessages)
-              : "Asystent AI"}
+            Asystent AI
           </span>
-          {book && selectedSessionId === null && (
+          {book && (
             <span className="text-xs text-muted-foreground truncate max-w-[120px]">
               {book.title}
             </span>
           )}
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          {!selectedSessionId && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-              onClick={handleClear}
-              title="Wyczyść wszystko"
-              data-chat-action
-              data-ocid="chat.clear_button"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-7 w-7 p-0 ${view === "history" || view === "archive" ? "text-primary" : "text-muted-foreground"} hover:text-foreground`}
+            onClick={() => {
+              if (view === "history" || view === "archive") {
+                setView("chat");
+                setSelectedArchive(null);
+              } else {
+                setView("history");
+              }
+            }}
+            title="Historia"
+            data-chat-action
+            data-ocid="chat.history_button"
+          >
+            <Clock className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+            onClick={handleArchive}
+            title="Archiwizuj"
+            data-chat-action
+            data-ocid="chat.archive_button"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -549,9 +513,8 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       </div>
 
       {/* Content */}
-      {selectedSessionId !== null && selectedSessionId !== undefined ? (
+      {view === "chat" && (
         <>
-          {/* Chat view */}
           <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
             {isLoading && (
               <div
@@ -576,7 +539,19 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
                 key={`${msg.id}-${idx}`}
                 msg={msg}
                 index={idx}
-                onDelete={() => deleteMessage.mutate({ id: msg.id })}
+                isOptimistic={
+                  typeof msg.id === "string" &&
+                  String(msg.id).startsWith("opt-")
+                }
+                onDelete={() => {
+                  if (
+                    typeof msg.id === "string" &&
+                    String(msg.id).startsWith("opt-")
+                  ) {
+                    return;
+                  }
+                  deleteMessage.mutate({ id: msg.id as bigint });
+                }}
               />
             ))}
             <div ref={messagesEndRef} />
@@ -611,80 +586,99 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
             </div>
           </div>
         </>
-      ) : (
-        <>
-          {/* Session list view */}
-          <div className="flex-1 overflow-y-auto p-3 min-h-0">
-            <Button
-              variant="default"
-              size="sm"
-              className="w-full mb-3"
-              onClick={handleNewConversation}
-              data-ocid="chat.new_conversation_button"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nowa rozmowa
-            </Button>
+      )}
 
-            {isLoading && (
-              <div
-                className="text-xs text-muted-foreground text-center py-4"
-                data-ocid="chat.loading_state"
-              >
-                Ładowanie historii...
-              </div>
-            )}
-            {!isLoading && sessions.length === 0 && (
-              <div
-                className="text-xs text-muted-foreground text-center py-8"
-                data-ocid="chat.empty_state"
-              >
-                Brak rozmów.
-                <br />
-                Kliknij „Nowa rozmowa”, aby rozpocząć.
-              </div>
-            )}
-            <div className="space-y-2">
-              {sessions.map((session, idx) => (
-                <div
-                  key={session.id}
-                  className="group flex items-center gap-2 p-3 rounded-lg border border-border bg-background hover:bg-muted/50 transition-colors"
-                  data-ocid={`chat.session.item.${idx + 1}`}
-                >
-                  <button
-                    type="button"
-                    className="flex-1 min-w-0 text-left cursor-pointer"
-                    onClick={() => {
-                      console.log(
-                        "[SESSION CLICK]",
-                        session.id,
-                        session.messages.length,
-                      );
-                      setSelectedSessionId(session.id);
-                    }}
-                    data-ocid={`chat.session.open_button.${idx + 1}`}
-                  >
-                    <div className="text-sm font-medium text-foreground truncate">
-                      {session.title}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {session.date}
-                    </div>
-                  </button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
-                    onClick={() => handleDeleteSession(session.id)}
-                    title="Usuń rozmowę"
-                    data-chat-action
-                    data-ocid={`chat.session.delete_button.${idx + 1}`}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              ))}
+      {view === "history" && (
+        <div className="flex-1 overflow-y-auto p-3 min-h-0">
+          {archives.length === 0 && (
+            <div
+              className="text-xs text-muted-foreground text-center py-8"
+              data-ocid="chat.history.empty_state"
+            >
+              Brak archiwów.
+              <br />
+              Kliknij ikonę kosza, aby zarchiwizować bieżącą rozmowę.
             </div>
+          )}
+          <div className="space-y-2">
+            {archives.map((archive, idx) => (
+              <div
+                key={archive.timestamp}
+                className="group flex items-center gap-2 p-3 rounded-lg border border-border bg-background hover:bg-muted/50 transition-colors"
+                data-ocid={`chat.archive.item.${idx + 1}`}
+              >
+                <button
+                  type="button"
+                  className="flex-1 min-w-0 text-left cursor-pointer"
+                  onClick={() => {
+                    setSelectedArchive(archive);
+                    setView("archive");
+                  }}
+                  data-ocid={`chat.archive.open_button.${idx + 1}`}
+                >
+                  <div className="text-sm font-medium text-foreground truncate">
+                    {archive.title}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {formatArchiveDate(archive.timestamp)}
+                  </div>
+                </button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
+                  onClick={() => handleDeleteArchive(archive.timestamp)}
+                  title="Usuń archiwum"
+                  data-chat-action
+                  data-ocid={`chat.archive.delete_button.${idx + 1}`}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {view === "archive" && selectedArchive && (
+        <>
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+            <div className="text-xs text-muted-foreground mb-2">
+              {formatArchiveDate(selectedArchive.timestamp)}
+            </div>
+            {selectedArchive.messages.map((msg, idx) => (
+              <div
+                key={`archive-msg-${msg.createdAt}`}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                data-ocid={`chat.archive.message.${idx + 1}`}
+              >
+                <div
+                  className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                    msg.role === "user"
+                      ? "bg-primary text-primary-foreground rounded-br-none"
+                      : "bg-muted text-foreground rounded-bl-none"
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap break-words">
+                    {msg.content}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-border p-3 bg-card">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => {
+                setSelectedArchive(null);
+                setView("history");
+              }}
+              data-ocid="chat.archive.back_button"
+            >
+              Wróć do historii
+            </Button>
           </div>
         </>
       )}
@@ -717,10 +711,17 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
 function ChatMessageItem({
   msg,
   index,
+  isOptimistic,
   onDelete,
 }: {
-  msg: { id: bigint; role: string; content: string; createdAt: bigint };
+  msg: {
+    id: bigint | string;
+    role: string;
+    content: string;
+    createdAt: bigint;
+  };
   index: number;
+  isOptimistic?: boolean;
   onDelete: () => void;
 }) {
   const isUser = msg.role === "user";
@@ -756,22 +757,28 @@ function ChatMessageItem({
             : "bg-muted text-foreground rounded-bl-none"
         }`}
       >
-        <div className="whitespace-pre-wrap break-words">{msg.content}</div>
-        <button
-          type="button"
-          onClick={handleDeleteClick}
-          className={`absolute -top-2 ${isUser ? "-left-2" : "-right-2"} h-5 w-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${
-            confirmDelete
-              ? "bg-destructive text-destructive-foreground"
-              : "bg-card border border-border text-muted-foreground hover:text-destructive"
-          }`}
-          title={
-            confirmDelete ? "Kliknij ponownie, aby usunąć" : "Usuń wiadomość"
-          }
-          data-ocid={`chat.delete_button.${index + 1}`}
+        <div
+          className={`whitespace-pre-wrap break-words ${isOptimistic ? "opacity-70" : ""}`}
         >
-          <Trash2 className="h-3 w-3" />
-        </button>
+          {msg.content}
+        </div>
+        {!isOptimistic && (
+          <button
+            type="button"
+            onClick={handleDeleteClick}
+            className={`absolute -top-2 ${isUser ? "-left-2" : "-right-2"} h-5 w-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${
+              confirmDelete
+                ? "bg-destructive text-destructive-foreground"
+                : "bg-card border border-border text-muted-foreground hover:text-destructive"
+            }`}
+            title={
+              confirmDelete ? "Kliknij ponownie, aby usunąć" : "Usuń wiadomość"
+            }
+            data-ocid={`chat.delete_button.${index + 1}`}
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        )}
       </div>
     </div>
   );
