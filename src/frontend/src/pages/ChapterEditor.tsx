@@ -1315,10 +1315,11 @@ export function ChapterEditorPage() {
       />
 
       {/* Editor + side panels */}
-      <div className="flex flex-1 min-h-0 gap-4">
+      <div className="flex flex-1 min-h-0">
         <div
-          className="flex-1 min-w-0 max-w-2xl mx-auto w-full"
+          className="min-w-0 w-full"
           style={{
+            flex: "0 0 50%",
             paddingLeft: `${getGlobalIndents().left}px`,
             paddingRight: `${getGlobalIndents().right}px`,
           }}
@@ -1371,7 +1372,7 @@ export function ChapterEditorPage() {
         </div>
 
         {contextChatPanelOpen && (
-          <div className="shrink-0 w-80">
+          <div className="shrink-0" style={{ flex: "0 0 25%" }}>
             <ContextChatPanel
               chapterId={chapter.id}
               chapterTitle={chapter.title}
@@ -1387,7 +1388,7 @@ export function ChapterEditorPage() {
         )}
 
         {commentsPanelOpen && (
-          <div className="shrink-0 w-80">
+          <div className="shrink-0" style={{ flex: "0 0 25%" }}>
             <CommentsPanel
               comments={comments ?? []}
               onDelete={(id) => {

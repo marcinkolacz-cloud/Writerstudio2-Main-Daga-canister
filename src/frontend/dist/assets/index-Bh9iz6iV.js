@@ -48641,7 +48641,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
     },
     [handleSendMessage]
   );
-  if (!selectedSessionId) {
+  if (selectedSessionId === null) {
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-72 border-l border-border bg-card flex flex-col h-full shrink-0", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between px-4 py-3 border-b border-border", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
@@ -105525,7 +105525,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DHfuxFfX.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CeE3sNcW.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107619,12 +107619,13 @@ ${getPlainText(ch.content)}`
         }
       }
     ),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-1 min-h-0 gap-4", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-1 min-h-0", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs(
         "div",
         {
-          className: "flex-1 min-w-0 max-w-2xl mx-auto w-full",
+          className: "min-w-0 w-full",
           style: {
+            flex: "0 0 50%",
             paddingLeft: `${getGlobalIndents().left}px`,
             paddingRight: `${getGlobalIndents().right}px`
           },
@@ -107672,7 +107673,7 @@ ${getPlainText(ch.content)}`
           ]
         }
       ),
-      contextChatPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 w-80", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      contextChatPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0", style: { flex: "0 0 25%" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         ContextChatPanel,
         {
           chapterId: chapter.id,
@@ -107686,7 +107687,7 @@ ${getPlainText(ch.content)}`
           triggerAnalysis: triggerContextAnalysis
         }
       ) }),
-      commentsPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 w-80", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      commentsPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0", style: { flex: "0 0 25%" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         CommentsPanel,
         {
           comments: comments ?? [],

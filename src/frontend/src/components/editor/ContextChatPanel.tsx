@@ -380,7 +380,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
   );
 
   // Session list view
-  if (!selectedSessionId) {
+  if (selectedSessionId === null) {
     return (
       <div className="w-72 border-l border-border bg-card flex flex-col h-full shrink-0">
         {/* Header */}
