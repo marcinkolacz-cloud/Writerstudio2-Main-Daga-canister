@@ -41696,7 +41696,6 @@ function Textarea({ className, ...props }) {
 function SettingsModal({ open: open2, onOpenChange }) {
   const [apiKeyOpenAI, setApiKeyOpenAI] = reactExports.useState("");
   const [apiKeyClaude, setApiKeyClaude] = reactExports.useState("");
-  const [provider, setProvider] = reactExports.useState("openai");
   const [systemPrompt, setSystemPrompt] = reactExports.useState("");
   reactExports.useEffect(() => {
     if (open2) {
@@ -41707,15 +41706,12 @@ function SettingsModal({ open: open2, onOpenChange }) {
       }
       setApiKeyOpenAI(localStorage.getItem("ws_api_key_openai") ?? "");
       setApiKeyClaude(localStorage.getItem("ws_api_key_claude") ?? "");
-      const savedProvider = localStorage.getItem("ws_api_provider");
-      setProvider(savedProvider === "claude" ? "claude" : "openai");
       setSystemPrompt(localStorage.getItem("ws_system_prompt") ?? "");
     }
   }, [open2]);
   const handleSave = () => {
     localStorage.setItem("ws_api_key_openai", apiKeyOpenAI);
     localStorage.setItem("ws_api_key_claude", apiKeyClaude);
-    localStorage.setItem("ws_api_provider", provider);
     localStorage.setItem("ws_system_prompt", systemPrompt);
     onOpenChange(false);
   };
@@ -41761,39 +41757,6 @@ function SettingsModal({ open: open2, onOpenChange }) {
               "data-ocid": "settings.api_key_claude_input"
             }
           )
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { children: "Provider" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              Button,
-              {
-                type: "button",
-                variant: provider === "openai" ? "default" : "outline",
-                className: "flex-1",
-                onClick: () => {
-                  setProvider("openai");
-                  localStorage.setItem("ws_api_provider", "openai");
-                },
-                "data-ocid": "settings.provider_openai_button",
-                children: "OpenAI"
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              Button,
-              {
-                type: "button",
-                variant: provider === "claude" ? "default" : "outline",
-                className: "flex-1",
-                onClick: () => {
-                  setProvider("claude");
-                  localStorage.setItem("ws_api_provider", "claude");
-                },
-                "data-ocid": "settings.provider_claude_button",
-                children: "Claude"
-              }
-            )
-          ] })
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-border" }),
@@ -48420,21 +48383,26 @@ function truncateToWord(text, maxLen) {
 }
 function ContextChatPanel({
   chapterId,
+  chapterTitle,
   bookContext,
   apiKey,
   provider,
   editor,
   chapters,
   bookAnalyses,
-  onClose
+  onClose,
+  triggerAnalysis = false
 }) {
   var _a3;
-  const [activeSessionId, setActiveSessionId] = reactExports.useState(null);
+  const [selectedSessionId, setSelectedSessionId] = reactExports.useState(
+    null
+  );
   const [inputText, setInputText] = reactExports.useState("");
   const [isLoading, setIsLoading] = reactExports.useState(false);
   const [isAutoStarting, setIsAutoStarting] = reactExports.useState(false);
   const scrollRef = reactExports.useRef(null);
   const inputRef = reactExports.useRef(null);
+  const queryClient2 = useQueryClient();
   const splitObservations = reactExports.useCallback((text) => {
     if (!text.trim()) return [];
     const numbered = text.split(/\n(?=\d+\.\s)/);
@@ -48454,12 +48422,12 @@ function ContextChatPanel({
   const { data: sessions = [], isLoading: sessionsLoading } = useChatSessions(
     String(chapterId)
   );
-  const { data: messages2 = [], isLoading: messagesLoading } = useChatSessionMessages(activeSessionId ? String(activeSessionId) : "0");
+  const { data: messages2 = [], isLoading: messagesLoading } = useChatSessionMessages(selectedSessionId ? String(selectedSessionId) : "0");
   const createSession = useCreateChatSession();
   const addMessage = useAddChatMessage();
   const deleteSession = useDeleteChatSession();
   reactExports.useEffect(() => {
-    if (sessionsLoading || isAutoStarting || sessions.length > 0 || !editor || !apiKey)
+    if (!triggerAnalysis || sessionsLoading || isAutoStarting || sessions.length > 0 || !editor || !apiKey)
       return;
     const autoStart = async () => {
       setIsAutoStarting(true);
@@ -48501,7 +48469,7 @@ ${summaryLines.join("\n")}` : "Analiza kontekstowa nie wykryła żadnych problem
           role: "assistant",
           content: analysisText
         });
-        setActiveSessionId(sessionId);
+        setSelectedSessionId(sessionId);
       } catch (err) {
         console.error("Auto-start session failed:", err);
       } finally {
@@ -48510,6 +48478,7 @@ ${summaryLines.join("\n")}` : "Analiza kontekstowa nie wykryła żadnych problem
     };
     autoStart();
   }, [
+    triggerAnalysis,
     sessionsLoading,
     sessions.length,
     editor,
@@ -48531,24 +48500,27 @@ ${summaryLines.join("\n")}` : "Analiza kontekstowa nie wykryła żadnych problem
     async (sessionId) => {
       try {
         await deleteSession.mutateAsync({ sessionId, chapterId });
-        if (activeSessionId === sessionId) {
-          setActiveSessionId(null);
+        queryClient2.invalidateQueries({
+          queryKey: ["chatSessions", String(chapterId)]
+        });
+        if (selectedSessionId === sessionId) {
+          setSelectedSessionId(null);
         }
       } catch (err) {
         console.error("Delete session failed:", err);
       }
     },
-    [deleteSession, chapterId, activeSessionId]
+    [deleteSession, chapterId, selectedSessionId, queryClient2]
   );
   const handleSendMessage = reactExports.useCallback(async () => {
     var _a4, _b3, _c2, _d2, _e3, _f2;
-    if (!inputText.trim() || !activeSessionId || isLoading) return;
+    if (!inputText.trim() || !selectedSessionId || isLoading) return;
     const userContent = inputText.trim();
     setInputText("");
     setIsLoading(true);
     try {
       await addMessage.mutateAsync({
-        sessionId: activeSessionId,
+        sessionId: selectedSessionId,
         role: "user",
         content: userContent
       });
@@ -48556,7 +48528,7 @@ ${summaryLines.join("\n")}` : "Analiza kontekstowa nie wykryła żadnych problem
         ...messages2,
         {
           id: 0n,
-          sessionId: activeSessionId,
+          sessionId: selectedSessionId,
           role: "user",
           content: userContent,
           createdAt: BigInt(Date.now()) * 1000000n
@@ -48621,14 +48593,14 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
         (c2) => c2.type === "text"
       )) == null ? void 0 : _e3.text) ?? "";
       await addMessage.mutateAsync({
-        sessionId: activeSessionId,
+        sessionId: selectedSessionId,
         role: "assistant",
         content: assistantContent || "Przepraszam, nie udało się wygenerować odpowiedzi."
       });
     } catch (err) {
       console.error("Send message failed:", err);
       await addMessage.mutateAsync({
-        sessionId: activeSessionId,
+        sessionId: selectedSessionId,
         role: "assistant",
         content: "Wystąpił błąd podczas generowania odpowiedzi. Sprawdź połączenie z internetem i klucz API."
       });
@@ -48638,7 +48610,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
     }
   }, [
     inputText,
-    activeSessionId,
+    selectedSessionId,
     isLoading,
     messages2,
     addMessage,
@@ -48669,7 +48641,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
     },
     [handleSendMessage]
   );
-  if (!activeSessionId) {
+  if (!selectedSessionId) {
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-72 border-l border-border bg-card flex flex-col h-full shrink-0", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between px-4 py-3 border-b border-border", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
@@ -48703,14 +48675,21 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
         {
           type: "button",
           className: "group rounded-md border border-border bg-background p-3 hover:border-primary/40 transition-colors cursor-pointer text-left w-full",
-          onClick: () => setActiveSessionId(session.id),
+          onClick: () => setSelectedSessionId(session.id),
           "data-ocid": `context_chat.session_item.${index2 + 1}`,
           children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm font-medium text-foreground line-clamp-2", children: session.title }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-muted-foreground mt-1", children: chapterTitle }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mt-2", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] text-muted-foreground/60", children: new Date(
                 Number(session.createdAt) / 1e6
-              ).toLocaleDateString("pl-PL") }),
+              ).toLocaleString("pl-PL", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+              }) }),
               /* @__PURE__ */ jsxRuntimeExports.jsx(
                 Button,
                 {
@@ -48741,13 +48720,13 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
             variant: "ghost",
             size: "icon",
             className: "h-6 w-6 -ml-1",
-            onClick: () => setActiveSessionId(null),
+            onClick: () => setSelectedSessionId(null),
             "data-ocid": "context_chat.back_button",
             children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-3.5 w-3.5" })
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-muted-foreground" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold truncate max-w-[140px]", children: ((_a3 = sessions.find((s2) => s2.id === activeSessionId)) == null ? void 0 : _a3.title) || "Sesja" })
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-sm font-semibold truncate max-w-[140px]", children: ((_a3 = sessions.find((s2) => s2.id === selectedSessionId)) == null ? void 0 : _a3.title) || "Sesja" })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         Button,
@@ -105546,7 +105525,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BcfS1hED.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DHfuxFfX.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -106773,6 +106752,7 @@ function ChapterEditorPage() {
   const [summaryResult, setSummaryResult] = reactExports.useState(null);
   const [commentsPanelOpen, setCommentsPanelOpen] = reactExports.useState(false);
   const [contextChatPanelOpen, setContextChatPanelOpen] = reactExports.useState(false);
+  const [triggerContextAnalysis, setTriggerContextAnalysis] = reactExports.useState(false);
   const [lektorPanelOpen, setLektorPanelOpen] = reactExports.useState(false);
   const [recordingsPanelOpen, setRecordingsPanelOpen] = reactExports.useState(false);
   const [historyPanelOpen, setHistoryPanelOpen] = reactExports.useState(false);
@@ -106790,12 +106770,12 @@ function ChapterEditorPage() {
   const [currentAnnotations, setCurrentAnnotations] = reactExports.useState(
     []
   );
-  const [apiKey, _setApiKey] = reactExports.useState(() => {
-    const provider2 = localStorage.getItem("ws_api_provider") || "openai";
-    return provider2 === "claude" ? localStorage.getItem("ws_api_key_claude") ?? "" : localStorage.getItem("ws_api_key_openai") ?? "";
+  const [apiKey, setApiKey] = reactExports.useState(() => {
+    const prov = localStorage.getItem("ws_api_provider") || "openai";
+    return prov === "claude" ? localStorage.getItem("ws_api_key_claude") ?? "" : localStorage.getItem("ws_api_key_openai") ?? "";
   });
   const [settingsModalOpen, setSettingsModalOpen] = reactExports.useState(false);
-  const [provider, _setProvider] = reactExports.useState(() => {
+  const [provider, setProvider] = reactExports.useState(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
   });
@@ -106804,9 +106784,9 @@ function ChapterEditorPage() {
   const titleDebounceRef = reactExports.useRef(null);
   const contentDebounceRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
-    const provider2 = localStorage.getItem("ws_api_provider") || "openai";
-    const key = provider2 === "claude" ? localStorage.getItem("ws_api_key_claude") ?? "" : localStorage.getItem("ws_api_key_openai") ?? "";
-    _setApiKey(key);
+    const prov = localStorage.getItem("ws_api_provider") || "openai";
+    const key = prov === "claude" ? localStorage.getItem("ws_api_key_claude") ?? "" : localStorage.getItem("ws_api_key_openai") ?? "";
+    setApiKey(key);
   }, []);
   const lastSyncedChapterIdRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
@@ -106965,17 +106945,47 @@ function ChapterEditorPage() {
               /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "h-3.5 w-3.5" }),
               "AI"
             ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center h-8 rounded-md border border-border overflow-hidden shrink-0", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  type: "button",
+                  className: `h-8 px-2 text-xs font-medium transition-colors ${provider === "openai" ? "bg-primary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`,
+                  onClick: () => {
+                    setProvider("openai");
+                    localStorage.setItem("ws_api_provider", "openai");
+                    const key = localStorage.getItem("ws_api_key_openai") ?? "";
+                    setApiKey(key);
+                  },
+                  "data-ocid": "chapter.provider_gpt_button",
+                  children: "GPT"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "button",
+                {
+                  type: "button",
+                  className: `h-8 px-2 text-xs font-medium transition-colors ${provider === "claude" ? "bg-primary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`,
+                  onClick: () => {
+                    setProvider("claude");
+                    localStorage.setItem("ws_api_provider", "claude");
+                    const key = localStorage.getItem("ws_api_key_claude") ?? "";
+                    setApiKey(key);
+                  },
+                  "data-ocid": "chapter.provider_claude_button",
+                  children: "Claude"
+                }
+              )
+            ] }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
               Button,
               {
                 size: "sm",
                 variant: "outline",
+                className: "h-8 w-8 p-0",
                 onClick: () => setSettingsModalOpen(true),
                 "data-ocid": "chapter.api_key_button",
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(Key, { className: "h-3.5 w-3.5 mr-1.5" }),
-                  "Klucz API"
-                ]
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(Key, { className: "h-3.5 w-3.5" })
               }
             ),
             /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -107062,6 +107072,7 @@ function ChapterEditorPage() {
                 onClick: async () => {
                   if (!editorRef.current || !chapter || !book) return;
                   if (analysisMode === "context") {
+                    setTriggerContextAnalysis(true);
                     setContextChatPanelOpen(true);
                     return;
                   }
@@ -107324,7 +107335,10 @@ ${getPlainText(ch.content)}`
                 size: "sm",
                 variant: "ghost",
                 className: `text-xs ${contextChatPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`,
-                onClick: () => setContextChatPanelOpen((v2) => !v2),
+                onClick: () => {
+                  setTriggerContextAnalysis(false);
+                  setContextChatPanelOpen((v2) => !v2);
+                },
                 "data-ocid": "chapter.context_chat_toggle_button",
                 children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-3.5 w-3.5 mr-1" }),
@@ -107662,12 +107676,14 @@ ${getPlainText(ch.content)}`
         ContextChatPanel,
         {
           chapterId: chapter.id,
+          chapterTitle: chapter.title,
           apiKey,
           provider,
           editor: editorRef.current,
           chapters: chapters ?? [],
           bookAnalyses: bookAnalyses ?? [],
-          onClose: () => setContextChatPanelOpen(false)
+          onClose: () => setContextChatPanelOpen(false),
+          triggerAnalysis: triggerContextAnalysis
         }
       ) }),
       commentsPanelOpen && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "shrink-0 w-80", children: /* @__PURE__ */ jsxRuntimeExports.jsx(

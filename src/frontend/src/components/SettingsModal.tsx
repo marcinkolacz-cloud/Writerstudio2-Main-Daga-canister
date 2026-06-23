@@ -19,7 +19,6 @@ interface SettingsModalProps {
 export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const [apiKeyOpenAI, setApiKeyOpenAI] = useState("");
   const [apiKeyClaude, setApiKeyClaude] = useState("");
-  const [provider, setProvider] = useState<"openai" | "claude">("openai");
   const [systemPrompt, setSystemPrompt] = useState("");
 
   // Load values from localStorage when modal opens
@@ -34,8 +33,6 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
 
       setApiKeyOpenAI(localStorage.getItem("ws_api_key_openai") ?? "");
       setApiKeyClaude(localStorage.getItem("ws_api_key_claude") ?? "");
-      const savedProvider = localStorage.getItem("ws_api_provider");
-      setProvider(savedProvider === "claude" ? "claude" : "openai");
       setSystemPrompt(localStorage.getItem("ws_system_prompt") ?? "");
     }
   }, [open]);
@@ -43,7 +40,6 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const handleSave = () => {
     localStorage.setItem("ws_api_key_openai", apiKeyOpenAI);
     localStorage.setItem("ws_api_key_claude", apiKeyClaude);
-    localStorage.setItem("ws_api_provider", provider);
     localStorage.setItem("ws_system_prompt", systemPrompt);
     onOpenChange(false);
   };
@@ -91,35 +87,6 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 onChange={(e) => setApiKeyClaude(e.target.value)}
                 data-ocid="settings.api_key_claude_input"
               />
-            </div>
-            <div className="space-y-2">
-              <Label>Provider</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={provider === "openai" ? "default" : "outline"}
-                  className="flex-1"
-                  onClick={() => {
-                    setProvider("openai");
-                    localStorage.setItem("ws_api_provider", "openai");
-                  }}
-                  data-ocid="settings.provider_openai_button"
-                >
-                  OpenAI
-                </Button>
-                <Button
-                  type="button"
-                  variant={provider === "claude" ? "default" : "outline"}
-                  className="flex-1"
-                  onClick={() => {
-                    setProvider("claude");
-                    localStorage.setItem("ws_api_provider", "claude");
-                  }}
-                  data-ocid="settings.provider_claude_button"
-                >
-                  Claude
-                </Button>
-              </div>
             </div>
           </div>
 

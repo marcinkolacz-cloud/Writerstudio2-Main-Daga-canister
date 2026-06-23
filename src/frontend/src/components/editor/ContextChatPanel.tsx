@@ -11,6 +11,7 @@ import {
   useDeleteChatSession,
 } from "@/hooks/useBackend";
 import { type BookContext, analyzeWithContext } from "@/lib/aiAnalysis";
+import { useQueryClient } from "@tanstack/react-query";
 import type { Editor } from "@tiptap/react";
 import {
   ArrowLeft,
@@ -25,6 +26,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 interface ContextChatPanelProps {
   chapterId: bigint;
+  chapterTitle: string;
   bookContext?: BookContext;
   apiKey: string;
   provider: "openai" | "claude";
@@ -32,6 +34,7 @@ interface ContextChatPanelProps {
   chapters: Chapter[];
   bookAnalyses: Analysis[];
   onClose: () => void;
+  triggerAnalysis?: boolean;
 }
 
 function truncateToWord(text: string, maxLen: number): string {
@@ -46,6 +49,7 @@ function truncateToWord(text: string, maxLen: number): string {
 
 export function ContextChatPanel({
   chapterId,
+  chapterTitle,
   bookContext,
   apiKey,
   provider,
@@ -53,13 +57,17 @@ export function ContextChatPanel({
   chapters,
   bookAnalyses,
   onClose,
+  triggerAnalysis = false,
 }: ContextChatPanelProps) {
-  const [activeSessionId, setActiveSessionId] = useState<bigint | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<bigint | null>(
+    null,
+  );
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isAutoStarting, setIsAutoStarting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
   // Helper: split first assistant message into observation points
   const splitObservations = useCallback((text: string): string[] => {
@@ -86,7 +94,7 @@ export function ContextChatPanel({
     String(chapterId),
   );
   const { data: messages = [], isLoading: messagesLoading } =
-    useChatSessionMessages(activeSessionId ? String(activeSessionId) : "0");
+    useChatSessionMessages(selectedSessionId ? String(selectedSessionId) : "0");
   const createSession = useCreateChatSession();
   const addMessage = useAddChatMessage();
   const deleteSession = useDeleteChatSession();
@@ -94,6 +102,7 @@ export function ContextChatPanel({
   // Auto-start new session when panel opens and no sessions exist
   useEffect(() => {
     if (
+      !triggerAnalysis ||
       sessionsLoading ||
       isAutoStarting ||
       sessions.length > 0 ||
@@ -157,7 +166,7 @@ export function ContextChatPanel({
           content: analysisText,
         });
 
-        setActiveSessionId(sessionId);
+        setSelectedSessionId(sessionId);
       } catch (err) {
         console.error("Auto-start session failed:", err);
       } finally {
@@ -167,6 +176,7 @@ export function ContextChatPanel({
 
     autoStart();
   }, [
+    triggerAnalysis,
     sessionsLoading,
     sessions.length,
     editor,
@@ -192,18 +202,21 @@ export function ContextChatPanel({
     async (sessionId: bigint) => {
       try {
         await deleteSession.mutateAsync({ sessionId, chapterId });
-        if (activeSessionId === sessionId) {
-          setActiveSessionId(null);
+        queryClient.invalidateQueries({
+          queryKey: ["chatSessions", String(chapterId)],
+        });
+        if (selectedSessionId === sessionId) {
+          setSelectedSessionId(null);
         }
       } catch (err) {
         console.error("Delete session failed:", err);
       }
     },
-    [deleteSession, chapterId, activeSessionId],
+    [deleteSession, chapterId, selectedSessionId, queryClient],
   );
 
   const handleSendMessage = useCallback(async () => {
-    if (!inputText.trim() || !activeSessionId || isLoading) return;
+    if (!inputText.trim() || !selectedSessionId || isLoading) return;
 
     const userContent = inputText.trim();
     setInputText("");
@@ -212,7 +225,7 @@ export function ContextChatPanel({
     try {
       // Save user message
       await addMessage.mutateAsync({
-        sessionId: activeSessionId,
+        sessionId: selectedSessionId,
         role: "user",
         content: userContent,
       });
@@ -222,7 +235,7 @@ export function ContextChatPanel({
         ...messages,
         {
           id: 0n,
-          sessionId: activeSessionId,
+          sessionId: selectedSessionId,
           role: "user",
           content: userContent,
           createdAt: BigInt(Date.now()) * 1_000_000n,
@@ -312,7 +325,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
             )?.text ?? "");
 
       await addMessage.mutateAsync({
-        sessionId: activeSessionId,
+        sessionId: selectedSessionId,
         role: "assistant",
         content:
           assistantContent ||
@@ -322,7 +335,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
       console.error("Send message failed:", err);
       // Save error as assistant message
       await addMessage.mutateAsync({
-        sessionId: activeSessionId,
+        sessionId: selectedSessionId,
         role: "assistant",
         content:
           "Wystąpił błąd podczas generowania odpowiedzi. Sprawdź połączenie z internetem i klucz API.",
@@ -333,7 +346,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
     }
   }, [
     inputText,
-    activeSessionId,
+    selectedSessionId,
     isLoading,
     messages,
     addMessage,
@@ -367,7 +380,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
   );
 
   // Session list view
-  if (!activeSessionId) {
+  if (!selectedSessionId) {
     return (
       <div className="w-72 border-l border-border bg-card flex flex-col h-full shrink-0">
         {/* Header */}
@@ -408,17 +421,26 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
                   key={String(session.id)}
                   type="button"
                   className="group rounded-md border border-border bg-background p-3 hover:border-primary/40 transition-colors cursor-pointer text-left w-full"
-                  onClick={() => setActiveSessionId(session.id)}
+                  onClick={() => setSelectedSessionId(session.id)}
                   data-ocid={`context_chat.session_item.${index + 1}`}
                 >
                   <p className="text-sm font-medium text-foreground line-clamp-2">
                     {session.title}
                   </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {chapterTitle}
+                  </p>
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-[10px] text-muted-foreground/60">
                       {new Date(
                         Number(session.createdAt) / 1_000_000,
-                      ).toLocaleDateString("pl-PL")}
+                      ).toLocaleString("pl-PL", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                     <Button
                       variant="ghost"
@@ -452,14 +474,14 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
             variant="ghost"
             size="icon"
             className="h-6 w-6 -ml-1"
-            onClick={() => setActiveSessionId(null)}
+            onClick={() => setSelectedSessionId(null)}
             data-ocid="context_chat.back_button"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
           </Button>
           <MessageCircle className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold truncate max-w-[140px]">
-            {sessions.find((s) => s.id === activeSessionId)?.title || "Sesja"}
+            {sessions.find((s) => s.id === selectedSessionId)?.title || "Sesja"}
           </h3>
         </div>
         <Button

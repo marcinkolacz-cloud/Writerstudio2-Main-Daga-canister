@@ -332,6 +332,7 @@ export function ChapterEditorPage() {
   // Comments state
   const [commentsPanelOpen, setCommentsPanelOpen] = useState(false);
   const [contextChatPanelOpen, setContextChatPanelOpen] = useState(false);
+  const [triggerContextAnalysis, setTriggerContextAnalysis] = useState(false);
   const [lektorPanelOpen, setLektorPanelOpen] = useState(false);
   const [recordingsPanelOpen, setRecordingsPanelOpen] = useState(false);
   const [historyPanelOpen, setHistoryPanelOpen] = useState(false);
@@ -356,16 +357,16 @@ export function ChapterEditorPage() {
     [],
   );
 
-  const [apiKey, _setApiKey] = useState(() => {
-    const provider =
+  const [apiKey, setApiKey] = useState(() => {
+    const prov =
       (localStorage.getItem("ws_api_provider") as "openai" | "claude") ||
       "openai";
-    return provider === "claude"
+    return prov === "claude"
       ? (localStorage.getItem("ws_api_key_claude") ?? "")
       : (localStorage.getItem("ws_api_key_openai") ?? "");
   });
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
-  const [provider, _setProvider] = useState<"openai" | "claude">(() => {
+  const [provider, setProvider] = useState<"openai" | "claude">(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
   });
@@ -375,16 +376,16 @@ export function ChapterEditorPage() {
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Persist API key / provider to localStorage
+  // Sync apiKey when provider changes or on mount
   useEffect(() => {
-    const provider =
+    const prov =
       (localStorage.getItem("ws_api_provider") as "openai" | "claude") ||
       "openai";
     const key =
-      provider === "claude"
+      prov === "claude"
         ? (localStorage.getItem("ws_api_key_claude") ?? "")
         : (localStorage.getItem("ws_api_key_openai") ?? "");
-    _setApiKey(key);
+    setApiKey(key);
   }, []);
 
   // Sync from query data — only when chapterId changes, not on every background refetch
@@ -572,14 +573,45 @@ export function ChapterEditorPage() {
             <Sparkles className="h-3.5 w-3.5" />
             AI
           </div>
+          {/* Provider toggle */}
+          <div className="flex items-center h-8 rounded-md border border-border overflow-hidden shrink-0">
+            <button
+              type="button"
+              className={`h-8 px-2 text-xs font-medium transition-colors ${provider === "openai" ? "bg-primary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
+              onClick={() => {
+                setProvider("openai");
+                localStorage.setItem("ws_api_provider", "openai");
+                const key = localStorage.getItem("ws_api_key_openai") ?? "";
+                setApiKey(key);
+              }}
+              data-ocid="chapter.provider_gpt_button"
+            >
+              GPT
+            </button>
+            <button
+              type="button"
+              className={`h-8 px-2 text-xs font-medium transition-colors ${provider === "claude" ? "bg-primary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
+              onClick={() => {
+                setProvider("claude");
+                localStorage.setItem("ws_api_provider", "claude");
+                const key = localStorage.getItem("ws_api_key_claude") ?? "";
+                setApiKey(key);
+              }}
+              data-ocid="chapter.provider_claude_button"
+            >
+              Claude
+            </button>
+          </div>
+
+          {/* Settings key button */}
           <Button
             size="sm"
             variant="outline"
+            className="h-8 w-8 p-0"
             onClick={() => setSettingsModalOpen(true)}
             data-ocid="chapter.api_key_button"
           >
-            <Key className="h-3.5 w-3.5 mr-1.5" />
-            Klucz API
+            <Key className="h-3.5 w-3.5" />
           </Button>
           <Select
             value={analysisMode}
@@ -670,6 +702,7 @@ export function ChapterEditorPage() {
               if (!editorRef.current || !chapter || !book) return;
 
               if (analysisMode === "context") {
+                setTriggerContextAnalysis(true);
                 setContextChatPanelOpen(true);
                 return;
               }
@@ -966,7 +999,10 @@ export function ChapterEditorPage() {
             size="sm"
             variant="ghost"
             className={`text-xs ${contextChatPanelOpen ? "bg-info text-info-foreground hover:bg-info/90" : "text-muted-foreground hover:text-foreground"}`}
-            onClick={() => setContextChatPanelOpen((v) => !v)}
+            onClick={() => {
+              setTriggerContextAnalysis(false);
+              setContextChatPanelOpen((v) => !v);
+            }}
             data-ocid="chapter.context_chat_toggle_button"
           >
             <MessageCircle className="h-3.5 w-3.5 mr-1" />
@@ -1338,12 +1374,14 @@ export function ChapterEditorPage() {
           <div className="shrink-0 w-80">
             <ContextChatPanel
               chapterId={chapter.id}
+              chapterTitle={chapter.title}
               apiKey={apiKey}
               provider={provider}
               editor={editorRef.current}
               chapters={chapters ?? []}
               bookAnalyses={bookAnalyses ?? []}
               onClose={() => setContextChatPanelOpen(false)}
+              triggerAnalysis={triggerContextAnalysis}
             />
           </div>
         )}
