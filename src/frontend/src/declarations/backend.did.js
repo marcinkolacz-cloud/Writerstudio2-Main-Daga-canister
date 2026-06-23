@@ -52,6 +52,7 @@ export const Chapter = IDL.Record({
   'createdAt' : IDL.Int,
   'bookId' : IDL.Nat,
   'updatedAt' : IDL.Int,
+  'sessionId' : IDL.Text,
   'orderIndex' : IDL.Nat,
 });
 export const ChatMessage = IDL.Record({
@@ -61,6 +62,7 @@ export const ChatMessage = IDL.Record({
   'createdAt' : IDL.Int,
   'role' : IDL.Text,
   'bookId' : IDL.Nat,
+  'sessionId' : IDL.Text,
 });
 export const ChatSessionMessage = IDL.Record({
   'id' : IDL.Nat,
@@ -258,7 +260,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'sendMessage' : IDL.Func(
-      [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
+      [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
       [IDL.Nat],
       [],
     ),
@@ -359,6 +361,7 @@ export const idlFactory = ({ IDL }) => {
     'createdAt' : IDL.Int,
     'bookId' : IDL.Nat,
     'updatedAt' : IDL.Int,
+    'sessionId' : IDL.Text,
     'orderIndex' : IDL.Nat,
   });
   const ChatMessage = IDL.Record({
@@ -368,6 +371,7 @@ export const idlFactory = ({ IDL }) => {
     'createdAt' : IDL.Int,
     'role' : IDL.Text,
     'bookId' : IDL.Nat,
+    'sessionId' : IDL.Text,
   });
   const ChatSessionMessage = IDL.Record({
     'id' : IDL.Nat,
@@ -569,7 +573,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'sendMessage' : IDL.Func(
-        [IDL.Nat, IDL.Text, IDL.Text, IDL.Text],
+        [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
         [IDL.Nat],
         [],
       ),

@@ -66,6 +66,7 @@ export interface ChatMessage {
     createdAt: bigint;
     role: string;
     bookId: bigint;
+    sessionId: string;
 }
 export interface Chapter {
     id: bigint;
@@ -79,6 +80,7 @@ export interface Chapter {
     createdAt: bigint;
     bookId: bigint;
     updatedAt: bigint;
+    sessionId: string;
     orderIndex: bigint;
 }
 export interface ChatSession {
@@ -154,7 +156,7 @@ export interface backendInterface {
         proposal: string;
     }>): Promise<Array<bigint>>;
     saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
-    sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
+    sendMessage(bookId: bigint, sessionId: string, role: string, content: string, provider: string): Promise<bigint>;
     setAdminPrincipal(p: Principal): Promise<void>;
     synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
     ttsTransform(raw: {

@@ -1,3 +1,4 @@
+import type { Book, ChatMessage } from "@/backend";
 import { Button } from "@/components/ui/button";
 import {
   useAnalysesByBook,
@@ -11,14 +12,15 @@ import {
 import { chatWithBook } from "@/lib/aiAnalysis";
 import type { ChatMessage as AiChatMessage } from "@/lib/aiAnalysis";
 import { useParams } from "@tanstack/react-router";
-import { MessageCircle, Send, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, MessageCircle, Plus, Send, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface ChatBotPanelProps {
   bookId: string;
+  book?: Book;
 }
 
-export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
+export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
   const [isOpen, setIsOpen] = useState(() => {
     const stored = localStorage.getItem("writerstudio-chat-open");
     return stored === "true";
@@ -28,7 +30,8 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
     localStorage.setItem("writerstudio-chat-open", String(isOpen));
   }, [isOpen]);
 
-  const { data: book } = useBook(bookId);
+  const { data: fetchedBook } = useBook(bookId);
+  const book = bookProp ?? fetchedBook ?? null;
   const { data: chapters } = useChapters(bookId);
   const { data: messages, isLoading } = useChatMessages(bookId);
   const { data: analyses } = useAnalysesByBook(bookId);
@@ -40,6 +43,11 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Session state
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
+    null,
+  );
 
   // Panel position and size
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -83,15 +91,54 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  const messageCountRef = useRef(messages?.length ?? 0);
+  const messageCountRef = useRef(0);
+
+  // Group messages by session
+  const sessions = useMemo(() => {
+    const allMessages = messages ?? [];
+    const groups = new Map<string, ChatMessage[]>();
+    for (const msg of allMessages) {
+      const sid = msg.sessionId ?? "legacy";
+      if (!groups.has(sid)) groups.set(sid, []);
+      groups.get(sid)!.push(msg);
+    }
+    return Array.from(groups.entries())
+      .map(([id, msgs]) => ({
+        id,
+        messages: msgs.sort((a, b) => Number(a.createdAt - b.createdAt)),
+        title: getSessionTitle(msgs),
+        date: formatDate(msgs[0].createdAt),
+      }))
+      .sort((a, b) => {
+        const aLatest = a.messages[a.messages.length - 1].createdAt;
+        const bLatest = b.messages[b.messages.length - 1].createdAt;
+        return Number(bLatest - aLatest);
+      });
+  }, [messages]);
+
+  const currentMessages = useMemo(() => {
+    if (!selectedSessionId) return [];
+    const allMessages = messages ?? [];
+    return allMessages
+      .filter((m) => (m.sessionId ?? "legacy") === selectedSessionId)
+      .sort((a, b) => Number(a.createdAt - b.createdAt));
+  }, [messages, selectedSessionId]);
 
   useEffect(() => {
-    const currentLength = messages?.length ?? 0;
-    if (isOpen && currentLength > messageCountRef.current) {
+    messageCountRef.current = currentMessages.length;
+  }, [currentMessages.length]);
+
+  useEffect(() => {
+    const currentLength = currentMessages.length;
+    if (
+      isOpen &&
+      selectedSessionId &&
+      currentLength > messageCountRef.current
+    ) {
       scrollToBottom();
     }
     messageCountRef.current = currentLength;
-  }, [isOpen, scrollToBottom, messages?.length]);
+  }, [isOpen, selectedSessionId, scrollToBottom, currentMessages.length]);
 
   // Drag handlers
   const onDragMouseDown = useCallback(
@@ -159,7 +206,6 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
       dragState.current.dragging = false;
       if (resizeState.current.resizing) {
         resizeState.current.resizing = false;
-        // Persist final size
         setSize((current) => {
           localStorage.setItem("ws_chatbot_width", String(current.w));
           localStorage.setItem("ws_chatbot_height", String(current.h));
@@ -175,9 +221,64 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
     };
   }, []);
 
+  const generateSessionId = useCallback((): string => {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }, []);
+
+  function getSessionTitle(msgs: ChatMessage[]): string {
+    const firstUser = msgs.find((m) => m.role === "user");
+    const text = firstUser?.content ?? "Rozmowa";
+    return text.length > 50 ? `${text.slice(0, 50)}…` : text;
+  }
+
+  function formatDate(ts: bigint): string {
+    const ms = Number(ts / 1000000n);
+    return new Date(ms).toLocaleDateString("pl-PL", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  const handleNewConversation = useCallback(() => {
+    const newId = generateSessionId();
+    setSelectedSessionId(newId);
+  }, [generateSessionId]);
+
+  const handleBackToList = useCallback(() => {
+    setSelectedSessionId(null);
+  }, []);
+
+  const handleDeleteSession = useCallback(
+    (sessionId: string) => {
+      const session = sessions.find((s) => s.id === sessionId);
+      if (!session) return;
+      if (window.confirm("Czy na pewno chcesz usunąć tę rozmowę?")) {
+        for (const msg of session.messages) {
+          deleteMessage.mutate({ id: msg.id });
+        }
+        if (selectedSessionId === sessionId) {
+          setSelectedSessionId(null);
+        }
+      }
+    },
+    [sessions, deleteMessage, selectedSessionId],
+  );
+
+  const handleClear = () => {
+    if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
+      clearChat.mutate({ bookId: BigInt(bookId) });
+      setSelectedSessionId(null);
+    }
+  };
+
   const handleSend = useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed || isSending || !book) return;
+    if (!trimmed || isSending || !book || !selectedSessionId) return;
 
     const apiKey =
       (localStorage.getItem("ws_api_provider") === "claude"
@@ -195,46 +296,66 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
     setInput("");
 
     try {
-      // Save user message
       await sendMessage.mutateAsync({
         bookId: BigInt(bookId),
+        sessionId: selectedSessionId,
         role: "user",
         content: trimmed,
         provider: "",
       });
 
-      // Build context
+      const bookContextParts: string[] = [];
+      if (book.title) bookContextParts.push(`Tytuł: ${book.title}`);
+      if (book.ageCategory)
+        bookContextParts.push(`Kategoria wiekowa: ${book.ageCategory}`);
+      if (book.authorSummary)
+        bookContextParts.push(`Streszczenie autorskie: ${book.authorSummary}`);
+      if (book.keyContext)
+        bookContextParts.push(`Kluczowe informacje: ${book.keyContext}`);
+      if (book.themes) bookContextParts.push(`Motywy: ${book.themes}`);
+      if ((book as unknown as Record<string, string>).writingStyle) {
+        bookContextParts.push(
+          `Styl pisarski: ${(book as unknown as Record<string, string>).writingStyle}`,
+        );
+      }
+      if (book.characters)
+        bookContextParts.push(`Postacie: ${book.characters}`);
+      const bookContextBlock =
+        bookContextParts.length > 0
+          ? `DANE KSIĄŻKI:\n${bookContextParts.join("\n")}`
+          : "";
+      console.log("[BOOK CONTEXT]", bookContextBlock);
+
       const chapterTitles = (chapters ?? [])
         .sort((a, b) => Number(a.orderIndex - b.orderIndex))
         .map((ch) => `- ${ch.title}`)
         .join("\n");
-      const bookContext = `Tytuł książki: ${book.title}\nKategoria: ${book.category}\nOpis: ${book.description}\n\nRozdziały:\n${chapterTitles}`;
+      const bookContext = `${bookContextBlock}\n\nTytuł książki: ${book.title}\nKategoria: ${book.category}\nOpis: ${book.description}\n\nRozdziały:\n${chapterTitles}`;
 
-      // Build message history for AI
-      const currentMessages: AiChatMessage[] = (messages ?? []).map((m) => ({
-        role: m.role === "user" ? "user" : "assistant",
-        content: m.content,
-      }));
-      currentMessages.push({ role: "user", content: trimmed });
+      const currentSessionMessages: AiChatMessage[] = currentMessages.map(
+        (m) => ({
+          role: m.role === "user" ? "user" : "assistant",
+          content: m.content,
+        }),
+      );
+      currentSessionMessages.push({ role: "user", content: trimmed });
 
-      // Build chapter summaries from saved analyses
       const chapterSummaries = (analyses ?? [])
         .filter((a) => a.analysisType === "summary")
         .sort((a, b) => Number(a.createdAt - b.createdAt))
         .map((a) => a.resultContent);
 
-      // Call AI
       const reply = await chatWithBook(
-        currentMessages,
+        currentSessionMessages,
         bookContext,
         apiKey.trim(),
         provider,
         chapterSummaries.length > 0 ? chapterSummaries : undefined,
       );
 
-      // Save assistant message
       await sendMessage.mutateAsync({
         bookId: BigInt(bookId),
+        sessionId: selectedSessionId,
         role: "assistant",
         content: reply,
         provider,
@@ -250,21 +371,16 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
     book,
     bookId,
     chapters,
-    messages,
+    currentMessages,
     analyses,
     sendMessage,
+    selectedSessionId,
   ]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
-    }
-  };
-
-  const handleClear = () => {
-    if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
-      clearChat.mutate({ bookId: BigInt(bookId) });
     }
   };
 
@@ -306,29 +422,47 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
         onMouseDown={onDragMouseDown}
         data-ocid="chat.header"
       >
-        <div className="flex items-center gap-2">
-          <MessageCircle className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">
-            Asystent AI
+        <div className="flex items-center gap-2 min-w-0">
+          {selectedSessionId ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground shrink-0"
+              onClick={handleBackToList}
+              title="Wróć do listy"
+              data-chat-action
+              data-ocid="chat.back_button"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+            </Button>
+          ) : (
+            <MessageCircle className="h-4 w-4 text-primary shrink-0" />
+          )}
+          <span className="text-sm font-semibold text-foreground truncate">
+            {selectedSessionId
+              ? getSessionTitle(currentMessages)
+              : "Asystent AI"}
           </span>
-          {book && (
+          {book && !selectedSessionId && (
             <span className="text-xs text-muted-foreground truncate max-w-[120px]">
               {book.title}
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-            onClick={handleClear}
-            title="Wyczyść historię"
-            data-chat-action
-            data-ocid="chat.clear_button"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+        <div className="flex items-center gap-1 shrink-0">
+          {!selectedSessionId && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+              onClick={handleClear}
+              title="Wyczyść wszystko"
+              data-chat-action
+              data-ocid="chat.clear_button"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"
@@ -343,64 +477,139 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
-        {isLoading && (
-          <div
-            className="text-xs text-muted-foreground text-center py-4"
-            data-ocid="chat.loading_state"
-          >
-            Ładowanie historii...
-          </div>
-        )}
-        {!isLoading && (!messages || messages.length === 0) && (
-          <div
-            className="text-xs text-muted-foreground text-center py-8"
-            data-ocid="chat.empty_state"
-          >
-            Zacznij rozmowę z asystentem AI.
-            <br />
-            Możesz pytać o fabułę, postacie, dialogi i styl.
-          </div>
-        )}
-        {messages?.map((msg, idx) => (
-          <ChatMessageItem
-            key={`${msg.id}-${idx}`}
-            msg={msg}
-            onDelete={() => deleteMessage.mutate({ id: msg.id })}
-          />
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input */}
-      <div className="border-t border-border p-3 bg-card">
-        <div className="flex items-end gap-2">
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)"
-            className="flex-1 min-h-[96px] max-h-[200px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            rows={4}
-            data-ocid="chat.input"
-          />
-          <Button
-            size="sm"
-            disabled={!input.trim() || isSending}
-            onClick={handleSend}
-            className="h-9 w-9 p-0 shrink-0"
-            data-ocid="chat.send_button"
-          >
-            {isSending ? (
-              <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
+      {/* Content */}
+      {selectedSessionId ? (
+        <>
+          {/* Chat view */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+            {isLoading && (
+              <div
+                className="text-xs text-muted-foreground text-center py-4"
+                data-ocid="chat.loading_state"
+              >
+                Ładowanie historii...
+              </div>
             )}
-          </Button>
-        </div>
-      </div>
+            {!isLoading && currentMessages.length === 0 && (
+              <div
+                className="text-xs text-muted-foreground text-center py-8"
+                data-ocid="chat.empty_state"
+              >
+                Zacznij rozmowę z asystentem AI.
+                <br />
+                Możesz pytać o fabułę, postacie, dialogi i styl.
+              </div>
+            )}
+            {currentMessages.map((msg, idx) => (
+              <ChatMessageItem
+                key={`${msg.id}-${idx}`}
+                msg={msg}
+                index={idx}
+                onDelete={() => deleteMessage.mutate({ id: msg.id })}
+              />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div className="border-t border-border p-3 bg-card">
+            <div className="flex items-end gap-2">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)"
+                className="flex-1 min-h-[96px] max-h-[200px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                rows={4}
+                data-ocid="chat.input"
+              />
+              <Button
+                size="sm"
+                disabled={!input.trim() || isSending}
+                onClick={handleSend}
+                className="h-9 w-9 p-0 shrink-0"
+                data-ocid="chat.send_button"
+              >
+                {isSending ? (
+                  <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Session list view */}
+          <div className="flex-1 overflow-y-auto p-3 min-h-0">
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full mb-3"
+              onClick={handleNewConversation}
+              data-ocid="chat.new_conversation_button"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nowa rozmowa
+            </Button>
+
+            {isLoading && (
+              <div
+                className="text-xs text-muted-foreground text-center py-4"
+                data-ocid="chat.loading_state"
+              >
+                Ładowanie historii...
+              </div>
+            )}
+            {!isLoading && sessions.length === 0 && (
+              <div
+                className="text-xs text-muted-foreground text-center py-8"
+                data-ocid="chat.empty_state"
+              >
+                Brak rozmów.
+                <br />
+                Kliknij „Nowa rozmowa”, aby rozpocząć.
+              </div>
+            )}
+            <div className="space-y-2">
+              {sessions.map((session, idx) => (
+                <div
+                  key={session.id}
+                  className="group flex items-center gap-2 p-3 rounded-lg border border-border bg-background hover:bg-muted/50 transition-colors"
+                  data-ocid={`chat.session.item.${idx + 1}`}
+                >
+                  <button
+                    type="button"
+                    className="flex-1 min-w-0 text-left cursor-pointer"
+                    onClick={() => setSelectedSessionId(session.id)}
+                    data-ocid={`chat.session.open_button.${idx + 1}`}
+                  >
+                    <div className="text-sm font-medium text-foreground truncate">
+                      {session.title}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {session.date}
+                    </div>
+                  </button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
+                    onClick={() => handleDeleteSession(session.id)}
+                    title="Usuń rozmowę"
+                    data-chat-action
+                    data-ocid={`chat.session.delete_button.${idx + 1}`}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Resize handle — top-left */}
       <div
@@ -429,9 +638,11 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
 
 function ChatMessageItem({
   msg,
+  index,
   onDelete,
 }: {
   msg: { id: bigint; role: string; content: string; createdAt: bigint };
+  index: number;
   onDelete: () => void;
 }) {
   const isUser = msg.role === "user";
@@ -458,7 +669,7 @@ function ChatMessageItem({
   return (
     <div
       className={`group flex ${isUser ? "justify-end" : "justify-start"}`}
-      data-ocid={`chat.message.${msg.id}`}
+      data-ocid={`chat.message.${index + 1}`}
     >
       <div
         className={`relative max-w-[85%] rounded-lg px-3 py-2 text-sm ${
@@ -479,7 +690,7 @@ function ChatMessageItem({
           title={
             confirmDelete ? "Kliknij ponownie, aby usunąć" : "Usuń wiadomość"
           }
-          data-ocid={`chat.delete_button.${msg.id}`}
+          data-ocid={`chat.delete_button.${index + 1}`}
         >
           <Trash2 className="h-3 w-3" />
         </button>

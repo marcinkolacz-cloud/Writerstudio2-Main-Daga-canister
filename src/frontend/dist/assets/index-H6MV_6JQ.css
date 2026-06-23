@@ -3092,6 +3092,13 @@ video {
   font-family: var(--font-serif-editor);
 }
 
+.font-serif-editor .ProseMirror {
+  width: 100%;
+  word-break: normal;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
 .font-serif-editor .ProseMirror p {
   margin-bottom: 0.75em;
   line-height: 1.7;

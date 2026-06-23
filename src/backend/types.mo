@@ -19,6 +19,7 @@ module {
   public type Chapter = {
     id : Nat;
     bookId : Nat;
+    sessionId : Text;
     title : Text;
     content : Text;
     orderIndex : Nat;
@@ -72,6 +73,7 @@ module {
   public type ChatMessage = {
     id : Nat;
     bookId : Nat;
+    sessionId : Text;
     role : Text;
     content : Text;
     provider : Text;

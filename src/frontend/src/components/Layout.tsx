@@ -1,7 +1,7 @@
 import { SettingsModal } from "@/components/SettingsModal";
 import { ChatBotPanel } from "@/components/chat/ChatBotPanel";
 import { Button } from "@/components/ui/button";
-import { useChapters, useReorderChapters } from "@/hooks/useBackend";
+import { useBook, useChapters, useReorderChapters } from "@/hooks/useBackend";
 import { useAppStore } from "@/store/useAppStore";
 import { useInternetIdentity } from "@caffeineai/core-infrastructure";
 import {
@@ -46,6 +46,7 @@ export function Layout() {
   const activeBookId = useActiveBookId();
   const activeChapterId = useActiveChapterId();
   const { data: chapters } = useChapters(activeBookId ?? "");
+  const { data: book } = useBook(activeBookId ?? "");
 
   const reorderChapters = useReorderChapters();
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -287,7 +288,7 @@ export function Layout() {
 
         {/* Floating chatbot — only on book/chapter routes */}
         {isAuthenticated && activeBookId && (
-          <ChatBotPanel bookId={activeBookId} />
+          <ChatBotPanel bookId={activeBookId} book={book ?? undefined} />
         )}
       </div>
     </div>

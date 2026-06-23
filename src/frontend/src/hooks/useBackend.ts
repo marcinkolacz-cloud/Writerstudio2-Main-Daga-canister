@@ -289,17 +289,19 @@ export function useSendMessage() {
   return useMutation({
     mutationFn: async ({
       bookId,
+      sessionId,
       role,
       content,
       provider,
     }: {
       bookId: bigint;
+      sessionId: string;
       role: string;
       content: string;
       provider: string;
     }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.sendMessage(bookId, role, content, provider);
+      return actor.sendMessage(bookId, sessionId, role, content, provider);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

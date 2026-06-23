@@ -44,6 +44,7 @@ export interface Chapter {
   'createdAt' : bigint,
   'bookId' : bigint,
   'updatedAt' : bigint,
+  'sessionId' : string,
   'orderIndex' : bigint,
 }
 export interface ChatMessage {
@@ -53,6 +54,7 @@ export interface ChatMessage {
   'createdAt' : bigint,
   'role' : string,
   'bookId' : bigint,
+  'sessionId' : string,
 }
 export interface ChatSession {
   'id' : bigint,
@@ -219,7 +221,7 @@ export interface _SERVICE {
     Array<bigint>
   >,
   'saveRecording' : ActorMethod<[bigint, bigint, string, Uint8Array], bigint>,
-  'sendMessage' : ActorMethod<[bigint, string, string, string], bigint>,
+  'sendMessage' : ActorMethod<[bigint, string, string, string, string], bigint>,
   'setAdminPrincipal' : ActorMethod<[Principal], undefined>,
   'synthesizeSpeech' : ActorMethod<[string, string, string], Uint8Array>,
   'ttsTransform' : ActorMethod<

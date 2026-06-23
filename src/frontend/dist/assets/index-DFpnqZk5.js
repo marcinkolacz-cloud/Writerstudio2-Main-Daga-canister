@@ -31868,6 +31868,7 @@ const Chapter = Record({
   "createdAt": Int,
   "bookId": Nat,
   "updatedAt": Int,
+  "sessionId": Text$4,
   "orderIndex": Nat
 });
 const ChatMessage = Record({
@@ -31876,7 +31877,8 @@ const ChatMessage = Record({
   "provider": Text$4,
   "createdAt": Int,
   "role": Text$4,
-  "bookId": Nat
+  "bookId": Nat,
+  "sessionId": Text$4
 });
 const ChatSessionMessage = Record({
   "id": Nat,
@@ -32073,7 +32075,7 @@ Service({
     []
   ),
   "sendMessage": Func(
-    [Nat, Text$4, Text$4, Text$4],
+    [Nat, Text$4, Text$4, Text$4, Text$4],
     [Nat],
     []
   ),
@@ -32171,6 +32173,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "createdAt": IDL2.Int,
     "bookId": IDL2.Nat,
     "updatedAt": IDL2.Int,
+    "sessionId": IDL2.Text,
     "orderIndex": IDL2.Nat
   });
   const ChatMessage2 = IDL2.Record({
@@ -32179,7 +32182,8 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "provider": IDL2.Text,
     "createdAt": IDL2.Int,
     "role": IDL2.Text,
-    "bookId": IDL2.Nat
+    "bookId": IDL2.Nat,
+    "sessionId": IDL2.Text
   });
   const ChatSessionMessage2 = IDL2.Record({
     "id": IDL2.Nat,
@@ -32380,7 +32384,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
       []
     ),
     "sendMessage": IDL2.Func(
-      [IDL2.Nat, IDL2.Text, IDL2.Text, IDL2.Text],
+      [IDL2.Nat, IDL2.Text, IDL2.Text, IDL2.Text, IDL2.Text],
       [IDL2.Nat],
       []
     ),
@@ -33278,17 +33282,17 @@ class Backend {
       return result;
     }
   }
-  async sendMessage(arg0, arg1, arg2, arg3) {
+  async sendMessage(arg0, arg1, arg2, arg3, arg4) {
     if (this.processError) {
       try {
-        const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3);
+        const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3, arg4);
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3);
+      const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3, arg4);
       return result;
     }
   }
@@ -33737,12 +33741,13 @@ function useSendMessage() {
   return useMutation({
     mutationFn: async ({
       bookId,
+      sessionId,
       role,
       content,
       provider
     }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.sendMessage(bookId, role, content, provider);
+      return actor.sendMessage(bookId, sessionId, role, content, provider);
     },
     onSuccess: (_2, variables) => {
       queryClient2.invalidateQueries({
@@ -42289,7 +42294,7 @@ async function chatWithBook(messages2, bookContext, apiKey, provider, chapterSum
   const prompt = buildChatPrompt(messages2, bookContext, chapterSummaries);
   return await callAi(prompt, apiKey, provider, false);
 }
-function ChatBotPanel({ bookId }) {
+function ChatBotPanel({ bookId, book: bookProp }) {
   const [isOpen, setIsOpen] = reactExports.useState(() => {
     const stored = localStorage.getItem("writerstudio-chat-open");
     return stored === "true";
@@ -42297,7 +42302,8 @@ function ChatBotPanel({ bookId }) {
   reactExports.useEffect(() => {
     localStorage.setItem("writerstudio-chat-open", String(isOpen));
   }, [isOpen]);
-  const { data: book } = useBook(bookId);
+  const { data: fetchedBook } = useBook(bookId);
+  const book = bookProp ?? fetchedBook ?? null;
   const { data: chapters } = useChapters(bookId);
   const { data: messages2, isLoading } = useChatMessages(bookId);
   const { data: analyses } = useAnalysesByBook(bookId);
@@ -42308,6 +42314,9 @@ function ChatBotPanel({ bookId }) {
   const [isSending, setIsSending] = reactExports.useState(false);
   const messagesEndRef = reactExports.useRef(null);
   const textareaRef = reactExports.useRef(null);
+  const [selectedSessionId, setSelectedSessionId] = reactExports.useState(
+    null
+  );
   const [pos, setPos] = reactExports.useState({ x: 0, y: 0 });
   const [size2, setSize] = reactExports.useState(() => {
     const storedW = localStorage.getItem("ws_chatbot_width");
@@ -42336,14 +42345,41 @@ function ChatBotPanel({ bookId }) {
     var _a3;
     (_a3 = messagesEndRef.current) == null ? void 0 : _a3.scrollIntoView({ behavior: "smooth" });
   }, []);
-  const messageCountRef = reactExports.useRef((messages2 == null ? void 0 : messages2.length) ?? 0);
+  const messageCountRef = reactExports.useRef(0);
+  const sessions = reactExports.useMemo(() => {
+    const allMessages = messages2 ?? [];
+    const groups = /* @__PURE__ */ new Map();
+    for (const msg of allMessages) {
+      const sid = msg.sessionId ?? "legacy";
+      if (!groups.has(sid)) groups.set(sid, []);
+      groups.get(sid).push(msg);
+    }
+    return Array.from(groups.entries()).map(([id, msgs]) => ({
+      id,
+      messages: msgs.sort((a2, b2) => Number(a2.createdAt - b2.createdAt)),
+      title: getSessionTitle(msgs),
+      date: formatDate2(msgs[0].createdAt)
+    })).sort((a2, b2) => {
+      const aLatest = a2.messages[a2.messages.length - 1].createdAt;
+      const bLatest = b2.messages[b2.messages.length - 1].createdAt;
+      return Number(bLatest - aLatest);
+    });
+  }, [messages2]);
+  const currentMessages = reactExports.useMemo(() => {
+    if (!selectedSessionId) return [];
+    const allMessages = messages2 ?? [];
+    return allMessages.filter((m2) => (m2.sessionId ?? "legacy") === selectedSessionId).sort((a2, b2) => Number(a2.createdAt - b2.createdAt));
+  }, [messages2, selectedSessionId]);
   reactExports.useEffect(() => {
-    const currentLength = (messages2 == null ? void 0 : messages2.length) ?? 0;
-    if (isOpen && currentLength > messageCountRef.current) {
+    messageCountRef.current = currentMessages.length;
+  }, [currentMessages.length]);
+  reactExports.useEffect(() => {
+    const currentLength = currentMessages.length;
+    if (isOpen && selectedSessionId && currentLength > messageCountRef.current) {
       scrollToBottom();
     }
     messageCountRef.current = currentLength;
-  }, [isOpen, scrollToBottom, messages2 == null ? void 0 : messages2.length]);
+  }, [isOpen, selectedSessionId, scrollToBottom, currentMessages.length]);
   const onDragMouseDown = reactExports.useCallback(
     (e3) => {
       if (e3.target.closest("[data-chat-action]")) return;
@@ -42421,9 +42457,57 @@ function ChatBotPanel({ bookId }) {
       window.removeEventListener("mouseup", onMouseUp);
     };
   }, []);
+  const generateSessionId = reactExports.useCallback(() => {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return `session-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  }, []);
+  function getSessionTitle(msgs) {
+    const firstUser = msgs.find((m2) => m2.role === "user");
+    const text = (firstUser == null ? void 0 : firstUser.content) ?? "Rozmowa";
+    return text.length > 50 ? `${text.slice(0, 50)}…` : text;
+  }
+  function formatDate2(ts2) {
+    const ms = Number(ts2 / 1000000n);
+    return new Date(ms).toLocaleDateString("pl-PL", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+  const handleNewConversation = reactExports.useCallback(() => {
+    const newId = generateSessionId();
+    setSelectedSessionId(newId);
+  }, [generateSessionId]);
+  const handleBackToList = reactExports.useCallback(() => {
+    setSelectedSessionId(null);
+  }, []);
+  const handleDeleteSession = reactExports.useCallback(
+    (sessionId) => {
+      const session = sessions.find((s2) => s2.id === sessionId);
+      if (!session) return;
+      if (window.confirm("Czy na pewno chcesz usunąć tę rozmowę?")) {
+        for (const msg of session.messages) {
+          deleteMessage.mutate({ id: msg.id });
+        }
+        if (selectedSessionId === sessionId) {
+          setSelectedSessionId(null);
+        }
+      }
+    },
+    [sessions, deleteMessage, selectedSessionId]
+  );
+  const handleClear = () => {
+    if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
+      clearChat.mutate({ bookId: BigInt(bookId) });
+      setSelectedSessionId(null);
+    }
+  };
   const handleSend = reactExports.useCallback(async () => {
     const trimmed = input.trim();
-    if (!trimmed || isSending || !book) return;
+    if (!trimmed || isSending || !book || !selectedSessionId) return;
     const apiKey = (localStorage.getItem("ws_api_provider") === "claude" ? localStorage.getItem("ws_api_key_claude") : localStorage.getItem("ws_api_key_openai")) ?? "";
     const provider = localStorage.getItem("ws_api_provider") || "openai";
     if (!apiKey.trim()) {
@@ -42435,25 +42519,49 @@ function ChatBotPanel({ bookId }) {
     try {
       await sendMessage.mutateAsync({
         bookId: BigInt(bookId),
+        sessionId: selectedSessionId,
         role: "user",
         content: trimmed,
         provider: ""
       });
+      const bookContextParts = [];
+      if (book.title) bookContextParts.push(`Tytuł: ${book.title}`);
+      if (book.ageCategory)
+        bookContextParts.push(`Kategoria wiekowa: ${book.ageCategory}`);
+      if (book.authorSummary)
+        bookContextParts.push(`Streszczenie autorskie: ${book.authorSummary}`);
+      if (book.keyContext)
+        bookContextParts.push(`Kluczowe informacje: ${book.keyContext}`);
+      if (book.themes) bookContextParts.push(`Motywy: ${book.themes}`);
+      if (book.writingStyle) {
+        bookContextParts.push(
+          `Styl pisarski: ${book.writingStyle}`
+        );
+      }
+      if (book.characters)
+        bookContextParts.push(`Postacie: ${book.characters}`);
+      const bookContextBlock = bookContextParts.length > 0 ? `DANE KSIĄŻKI:
+${bookContextParts.join("\n")}` : "";
+      console.log("[BOOK CONTEXT]", bookContextBlock);
       const chapterTitles = (chapters ?? []).sort((a2, b2) => Number(a2.orderIndex - b2.orderIndex)).map((ch) => `- ${ch.title}`).join("\n");
-      const bookContext = `Tytuł książki: ${book.title}
+      const bookContext = `${bookContextBlock}
+
+Tytuł książki: ${book.title}
 Kategoria: ${book.category}
 Opis: ${book.description}
 
 Rozdziały:
 ${chapterTitles}`;
-      const currentMessages = (messages2 ?? []).map((m2) => ({
-        role: m2.role === "user" ? "user" : "assistant",
-        content: m2.content
-      }));
-      currentMessages.push({ role: "user", content: trimmed });
+      const currentSessionMessages = currentMessages.map(
+        (m2) => ({
+          role: m2.role === "user" ? "user" : "assistant",
+          content: m2.content
+        })
+      );
+      currentSessionMessages.push({ role: "user", content: trimmed });
       const chapterSummaries = (analyses ?? []).filter((a2) => a2.analysisType === "summary").sort((a2, b2) => Number(a2.createdAt - b2.createdAt)).map((a2) => a2.resultContent);
       const reply = await chatWithBook(
-        currentMessages,
+        currentSessionMessages,
         bookContext,
         apiKey.trim(),
         provider,
@@ -42461,6 +42569,7 @@ ${chapterTitles}`;
       );
       await sendMessage.mutateAsync({
         bookId: BigInt(bookId),
+        sessionId: selectedSessionId,
         role: "assistant",
         content: reply,
         provider
@@ -42475,19 +42584,15 @@ ${chapterTitles}`;
     book,
     bookId,
     chapters,
-    messages2,
+    currentMessages,
     analyses,
-    sendMessage
+    sendMessage,
+    selectedSessionId
   ]);
   const handleKeyDown2 = (e3) => {
     if (e3.key === "Enter" && !e3.shiftKey) {
       e3.preventDefault();
       handleSend();
-    }
-  };
-  const handleClear = () => {
-    if (window.confirm("Czy na pewno chcesz wyczyścić całą historię czatu?")) {
-      clearChat.mutate({ bookId: BigInt(bookId) });
     }
   };
   if (!isOpen) {
@@ -42529,20 +42634,32 @@ ${chapterTitles}`;
             onMouseDown: onDragMouseDown,
             "data-ocid": "chat.header",
             children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-primary" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-foreground", children: "Asystent AI" }),
-                book && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate max-w-[120px]", children: book.title })
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 min-w-0", children: [
+                selectedSessionId ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Button,
+                  {
+                    variant: "ghost",
+                    size: "sm",
+                    className: "h-7 w-7 p-0 text-muted-foreground hover:text-foreground shrink-0",
+                    onClick: handleBackToList,
+                    title: "Wróć do listy",
+                    "data-chat-action": true,
+                    "data-ocid": "chat.back_button",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-3.5 w-3.5" })
+                  }
+                ) : /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-primary shrink-0" }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-foreground truncate", children: selectedSessionId ? getSessionTitle(currentMessages) : "Asystent AI" }),
+                book && !selectedSessionId && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate max-w-[120px]", children: book.title })
               ] }),
-              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
-                /* @__PURE__ */ jsxRuntimeExports.jsx(
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1 shrink-0", children: [
+                !selectedSessionId && /* @__PURE__ */ jsxRuntimeExports.jsx(
                   Button,
                   {
                     variant: "ghost",
                     size: "sm",
                     className: "h-7 w-7 p-0 text-muted-foreground hover:text-destructive",
                     onClick: handleClear,
-                    title: "Wyczyść historię",
+                    title: "Wyczyść wszystko",
                     "data-chat-action": true,
                     "data-ocid": "chat.clear_button",
                     children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3.5 w-3.5" })
@@ -42565,7 +42682,80 @@ ${chapterTitles}`;
             ]
           }
         ),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 space-y-3 min-h-0", children: [
+        selectedSessionId ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 space-y-3 min-h-0", children: [
+            isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "div",
+              {
+                className: "text-xs text-muted-foreground text-center py-4",
+                "data-ocid": "chat.loading_state",
+                children: "Ładowanie historii..."
+              }
+            ),
+            !isLoading && currentMessages.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "div",
+              {
+                className: "text-xs text-muted-foreground text-center py-8",
+                "data-ocid": "chat.empty_state",
+                children: [
+                  "Zacznij rozmowę z asystentem AI.",
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
+                  "Możesz pytać o fabułę, postacie, dialogi i styl."
+                ]
+              }
+            ),
+            currentMessages.map((msg, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+              ChatMessageItem,
+              {
+                msg,
+                index: idx,
+                onDelete: () => deleteMessage.mutate({ id: msg.id })
+              },
+              `${msg.id}-${idx}`
+            )),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: messagesEndRef })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-t border-border p-3 bg-card", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-end gap-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "textarea",
+              {
+                ref: textareaRef,
+                value: input,
+                onChange: (e3) => setInput(e3.target.value),
+                onKeyDown: handleKeyDown2,
+                placeholder: "Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)",
+                className: "flex-1 min-h-[96px] max-h-[200px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                rows: 4,
+                "data-ocid": "chat.input"
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Button,
+              {
+                size: "sm",
+                disabled: !input.trim() || isSending,
+                onClick: handleSend,
+                className: "h-9 w-9 p-0 shrink-0",
+                "data-ocid": "chat.send_button",
+                children: isSending ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Send, { className: "h-4 w-4" })
+              }
+            )
+          ] }) })
+        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 min-h-0", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              variant: "default",
+              size: "sm",
+              className: "w-full mb-3",
+              onClick: handleNewConversation,
+              "data-ocid": "chat.new_conversation_button",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(Plus, { className: "h-4 w-4 mr-2" }),
+                "Nowa rozmowa"
+              ]
+            }
+          ),
           isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx(
             "div",
             {
@@ -42574,53 +42764,54 @@ ${chapterTitles}`;
               children: "Ładowanie historii..."
             }
           ),
-          !isLoading && (!messages2 || messages2.length === 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          !isLoading && sessions.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
             "div",
             {
               className: "text-xs text-muted-foreground text-center py-8",
               "data-ocid": "chat.empty_state",
               children: [
-                "Zacznij rozmowę z asystentem AI.",
+                "Brak rozmów.",
                 /* @__PURE__ */ jsxRuntimeExports.jsx("br", {}),
-                "Możesz pytać o fabułę, postacie, dialogi i styl."
+                "Kliknij „Nowa rozmowa”, aby rozpocząć."
               ]
             }
           ),
-          messages2 == null ? void 0 : messages2.map((msg, idx) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-            ChatMessageItem,
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2", children: sessions.map((session, idx) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
             {
-              msg,
-              onDelete: () => deleteMessage.mutate({ id: msg.id })
+              className: "group flex items-center gap-2 p-3 rounded-lg border border-border bg-background hover:bg-muted/50 transition-colors",
+              "data-ocid": `chat.session.item.${idx + 1}`,
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                  "button",
+                  {
+                    type: "button",
+                    className: "flex-1 min-w-0 text-left cursor-pointer",
+                    onClick: () => setSelectedSessionId(session.id),
+                    "data-ocid": `chat.session.open_button.${idx + 1}`,
+                    children: [
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm font-medium text-foreground truncate", children: session.title }),
+                      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-muted-foreground", children: session.date })
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Button,
+                  {
+                    variant: "ghost",
+                    size: "sm",
+                    className: "h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0",
+                    onClick: () => handleDeleteSession(session.id),
+                    title: "Usuń rozmowę",
+                    "data-chat-action": true,
+                    "data-ocid": `chat.session.delete_button.${idx + 1}`,
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3.5 w-3.5" })
+                  }
+                )
+              ]
             },
-            `${msg.id}-${idx}`
-          )),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: messagesEndRef })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-t border-border p-3 bg-card", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-end gap-2", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "textarea",
-            {
-              ref: textareaRef,
-              value: input,
-              onChange: (e3) => setInput(e3.target.value),
-              onKeyDown: handleKeyDown2,
-              placeholder: "Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)",
-              className: "flex-1 min-h-[96px] max-h-[200px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-              rows: 4,
-              "data-ocid": "chat.input"
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            Button,
-            {
-              size: "sm",
-              disabled: !input.trim() || isSending,
-              onClick: handleSend,
-              className: "h-9 w-9 p-0 shrink-0",
-              "data-ocid": "chat.send_button",
-              children: isSending ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Send, { className: "h-4 w-4" })
-            }
-          )
+            session.id
+          )) })
         ] }) }),
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
@@ -42655,6 +42846,7 @@ ${chapterTitles}`;
 }
 function ChatMessageItem({
   msg,
+  index: index2,
   onDelete
 }) {
   const isUser = msg.role === "user";
@@ -42679,7 +42871,7 @@ function ChatMessageItem({
     "div",
     {
       className: `group flex ${isUser ? "justify-end" : "justify-start"}`,
-      "data-ocid": `chat.message.${msg.id}`,
+      "data-ocid": `chat.message.${index2 + 1}`,
       children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
         "div",
         {
@@ -42693,7 +42885,7 @@ function ChatMessageItem({
                 onClick: handleDeleteClick,
                 className: `absolute -top-2 ${isUser ? "-left-2" : "-right-2"} h-5 w-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${confirmDelete ? "bg-destructive text-destructive-foreground" : "bg-card border border-border text-muted-foreground hover:text-destructive"}`,
                 title: confirmDelete ? "Kliknij ponownie, aby usunąć" : "Usuń wiadomość",
-                "data-ocid": `chat.delete_button.${msg.id}`,
+                "data-ocid": `chat.delete_button.${index2 + 1}`,
                 children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3 w-3" })
               }
             )
@@ -42721,6 +42913,7 @@ function Layout() {
   const activeBookId = useActiveBookId();
   const activeChapterId = useActiveChapterId();
   const { data: chapters } = useChapters(activeBookId ?? "");
+  const { data: book } = useBook(activeBookId ?? "");
   const reorderChapters = useReorderChapters();
   const [dragOverIndex, setDragOverIndex] = reactExports.useState(null);
   const [theme, setTheme] = reactExports.useState(() => {
@@ -42941,7 +43134,7 @@ function Layout() {
             }
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "flex-1 overflow-auto p-6", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) }),
-          isAuthenticated && activeBookId && /* @__PURE__ */ jsxRuntimeExports.jsx(ChatBotPanel, { bookId: activeBookId })
+          isAuthenticated && activeBookId && /* @__PURE__ */ jsxRuntimeExports.jsx(ChatBotPanel, { bookId: activeBookId, book: book ?? void 0 })
         ]
       }
     )
@@ -76703,7 +76896,7 @@ function RichTextEditor({
     },
     editorProps: {
       attributes: {
-        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] px-4 py-3"
+        class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] px-4 py-3 w-full"
       }
     }
   });
@@ -105816,7 +106009,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DsynNTlY.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BYV9aTmd.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107369,6 +107562,7 @@ function ChapterEditorPage() {
     localStorage.setItem("writerstudio-chat-open", "true");
     sendMessage.mutate({
       bookId: book.id,
+      sessionId: "legacy",
       role: "user",
       content: text,
       provider

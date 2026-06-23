@@ -148,6 +148,7 @@ export interface ChatMessage {
     createdAt: bigint;
     role: string;
     bookId: bigint;
+    sessionId: string;
 }
 export interface Chapter {
     id: bigint;
@@ -161,6 +162,7 @@ export interface Chapter {
     createdAt: bigint;
     bookId: bigint;
     updatedAt: bigint;
+    sessionId: string;
     orderIndex: bigint;
 }
 export interface ChatSession {
@@ -256,7 +258,7 @@ export interface backendInterface {
         proposal: string;
     }>): Promise<Array<bigint>>;
     saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
-    sendMessage(bookId: bigint, role: string, content: string, provider: string): Promise<bigint>;
+    sendMessage(bookId: bigint, sessionId: string, role: string, content: string, provider: string): Promise<bigint>;
     setAdminPrincipal(p: Principal): Promise<void>;
     synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
     ttsTransform(raw: {
@@ -1132,17 +1134,17 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async sendMessage(arg0: bigint, arg1: string, arg2: string, arg3: string): Promise<bigint> {
+    async sendMessage(arg0: bigint, arg1: string, arg2: string, arg3: string, arg4: string): Promise<bigint> {
         if (this.processError) {
             try {
-                const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3);
+                const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3, arg4);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3);
+            const result = await this.actor.sendMessage(arg0, arg1, arg2, arg3, arg4);
             return result;
         }
     }

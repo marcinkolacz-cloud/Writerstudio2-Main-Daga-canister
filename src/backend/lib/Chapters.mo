@@ -32,6 +32,7 @@ module {
     {
       id;
       bookId;
+      sessionId = "";
       title;
       content = "";
       orderIndex;

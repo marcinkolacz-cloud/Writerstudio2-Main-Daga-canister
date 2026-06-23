@@ -16,6 +16,7 @@ module {
   public func createChatMessageRecord(
     id : Nat,
     bookId : Nat,
+    sessionId : Text,
     role : Text,
     content : Text,
     provider : Text,
@@ -23,6 +24,7 @@ module {
     {
       id;
       bookId;
+      sessionId;
       role;
       content;
       provider;

@@ -63,7 +63,7 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm max-w-none focus:outline-none min-h-[200px] px-4 py-3",
+          "prose prose-sm max-w-none focus:outline-none min-h-[200px] px-4 py-3 w-full",
       },
     },
   });

@@ -25,6 +25,7 @@ mixin (
 
   public shared ({ caller }) func sendMessage(
     bookId : Nat,
+    sessionId : Text,
     role : Text,
     content : Text,
     provider : Text,
@@ -33,7 +34,7 @@ mixin (
       case (?ownerId) {
         if (Principal.equal(ownerId, caller)) {
           let newId = ChatMessagesLib.getNextId(chatMessages);
-          let message = ChatMessagesLib.createChatMessageRecord(newId, bookId, role, content, provider);
+          let message = ChatMessagesLib.createChatMessageRecord(newId, bookId, sessionId, role, content, provider);
           chatMessages.add(newId, message);
           newId
         } else {

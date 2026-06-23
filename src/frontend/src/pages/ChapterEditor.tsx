@@ -453,6 +453,7 @@ export function ChapterEditorPage() {
     localStorage.setItem("writerstudio-chat-open", "true");
     sendMessage.mutate({
       bookId: book.id,
+      sessionId: "legacy",
       role: "user",
       content: text,
       provider,
