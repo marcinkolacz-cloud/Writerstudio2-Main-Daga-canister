@@ -111,7 +111,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       if (!groups.has(sid)) groups.set(sid, []);
       groups.get(sid)!.push(msg);
     }
-    return Array.from(groups.entries())
+    const result = Array.from(groups.entries())
       .map(([id, msgs]) => ({
         id,
         messages: msgs.sort((a, b) => Number(a.createdAt - b.createdAt)),
@@ -123,6 +123,12 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
         const bLatest = b.messages[b.messages.length - 1].createdAt;
         return Number(bLatest - aLatest);
       });
+    console.log("[SESSION DEBUG]", {
+      allMessages,
+      groups: Array.from(groups.entries()),
+      result,
+    });
+    return result;
   }, [messages]);
 
   const currentMessages = useMemo(() => {
@@ -488,7 +494,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
         data-ocid="chat.header"
       >
         <div className="flex items-center gap-2 min-w-0">
-          {selectedSessionId ? (
+          {selectedSessionId !== null && selectedSessionId !== undefined ? (
             <Button
               variant="ghost"
               size="sm"
@@ -504,11 +510,11 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
             <MessageCircle className="h-4 w-4 text-primary shrink-0" />
           )}
           <span className="text-sm font-semibold text-foreground truncate">
-            {selectedSessionId
+            {selectedSessionId !== null && selectedSessionId !== undefined
               ? getSessionTitle(currentMessages)
               : "Asystent AI"}
           </span>
-          {book && !selectedSessionId && (
+          {book && selectedSessionId === null && (
             <span className="text-xs text-muted-foreground truncate max-w-[120px]">
               {book.title}
             </span>
@@ -543,7 +549,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       </div>
 
       {/* Content */}
-      {selectedSessionId ? (
+      {selectedSessionId !== null && selectedSessionId !== undefined ? (
         <>
           {/* Chat view */}
           <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
@@ -648,7 +654,14 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
                   <button
                     type="button"
                     className="flex-1 min-w-0 text-left cursor-pointer"
-                    onClick={() => setSelectedSessionId(session.id)}
+                    onClick={() => {
+                      console.log(
+                        "[SESSION CLICK]",
+                        session.id,
+                        session.messages.length,
+                      );
+                      setSelectedSessionId(session.id);
+                    }}
                     data-ocid={`chat.session.open_button.${idx + 1}`}
                   >
                     <div className="text-sm font-medium text-foreground truncate">

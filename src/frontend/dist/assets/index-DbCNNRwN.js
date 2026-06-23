@@ -42372,7 +42372,7 @@ function ChatBotPanel({ bookId, book: bookProp }) {
       if (!groups.has(sid)) groups.set(sid, []);
       groups.get(sid).push(msg);
     }
-    return Array.from(groups.entries()).map(([id, msgs]) => ({
+    const result = Array.from(groups.entries()).map(([id, msgs]) => ({
       id,
       messages: msgs.sort((a2, b2) => Number(a2.createdAt - b2.createdAt)),
       title: getSessionTitle(msgs),
@@ -42382,6 +42382,12 @@ function ChatBotPanel({ bookId, book: bookProp }) {
       const bLatest = b2.messages[b2.messages.length - 1].createdAt;
       return Number(bLatest - aLatest);
     });
+    console.log("[SESSION DEBUG]", {
+      allMessages,
+      groups: Array.from(groups.entries()),
+      result
+    });
+    return result;
   }, [messages2]);
   const currentMessages = reactExports.useMemo(() => {
     if (!selectedSessionId) return [];
@@ -42703,7 +42709,7 @@ ${chapterTitles}`;
             "data-ocid": "chat.header",
             children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 min-w-0", children: [
-                selectedSessionId ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+                selectedSessionId !== null && selectedSessionId !== void 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(
                   Button,
                   {
                     variant: "ghost",
@@ -42716,8 +42722,8 @@ ${chapterTitles}`;
                     children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowLeft, { className: "h-3.5 w-3.5" })
                   }
                 ) : /* @__PURE__ */ jsxRuntimeExports.jsx(MessageCircle, { className: "h-4 w-4 text-primary shrink-0" }),
-                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-foreground truncate", children: selectedSessionId ? getSessionTitle(currentMessages) : "Asystent AI" }),
-                book && !selectedSessionId && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate max-w-[120px]", children: book.title })
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-semibold text-foreground truncate", children: selectedSessionId !== null && selectedSessionId !== void 0 ? getSessionTitle(currentMessages) : "Asystent AI" }),
+                book && selectedSessionId === null && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate max-w-[120px]", children: book.title })
               ] }),
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1 shrink-0", children: [
                 !selectedSessionId && /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -42750,7 +42756,7 @@ ${chapterTitles}`;
             ]
           }
         ),
-        selectedSessionId ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+        selectedSessionId !== null && selectedSessionId !== void 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 space-y-3 min-h-0", children: [
             isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx(
               "div",
@@ -42855,7 +42861,14 @@ ${chapterTitles}`;
                   {
                     type: "button",
                     className: "flex-1 min-w-0 text-left cursor-pointer",
-                    onClick: () => setSelectedSessionId(session.id),
+                    onClick: () => {
+                      console.log(
+                        "[SESSION CLICK]",
+                        session.id,
+                        session.messages.length
+                      );
+                      setSelectedSessionId(session.id);
+                    },
                     "data-ocid": `chat.session.open_button.${idx + 1}`,
                     children: [
                       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm font-medium text-foreground truncate", children: session.title }),
@@ -106093,7 +106106,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-9p0NRN9N.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DCmGbs2J.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
