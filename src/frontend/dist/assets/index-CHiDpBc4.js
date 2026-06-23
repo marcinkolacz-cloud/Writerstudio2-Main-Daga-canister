@@ -106093,7 +106093,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CjpbCJZY.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-D7k5x3C_.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107981,7 +107981,8 @@ ${getPlainText(ch.content)}`
                         bookContext
                       );
                     }
-                    setCurrentAnnotations(annotations);
+                    applyAnnotationsToEditor(editorRef.current, [], {});
+                    setCurrentAnnotations([]);
                     setCurrentAnnotations(annotations);
                     applyAnnotationsToEditor(editorRef.current, annotations, {
                       clearRange: selectionRange
@@ -108310,7 +108311,8 @@ ${getPlainText(ch.content)}`
           onLoadAnalysis: (annotations) => {
             setHistoryPanelOpen(false);
             if (editorRef.current) {
-              setCurrentAnnotations(annotations);
+              applyAnnotationsToEditor(editorRef.current, [], {});
+              setCurrentAnnotations([]);
               setCurrentAnnotations(annotations);
               applyAnnotationsToEditor(editorRef.current, annotations, {
                 skipApproved: true

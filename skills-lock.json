@@ -49,7 +49,7 @@
     "extension-http-outcalls": {
       "source": "caffeinelabs/skills",
       "sourceType": "github",
-      "computedHash": "80ae8890f42ed7833069ce16083dd81b68d738d94921cca78ddbf21e5cbae960"
+      "computedHash": "91d1bfb53b1c2c82dbce61ca641ed96bb272027287aa532c56b2ae736db4fbf7"
     },
     "extension-invite-links": {
       "source": "caffeinelabs/skills",
@@ -84,7 +84,7 @@
     "extension-stripe": {
       "source": "caffeinelabs/skills",
       "sourceType": "github",
-      "computedHash": "afdb77cea0d3a661d30f4dc8a67772022edc24e5d0aee2e1beedf6607de1f7c5"
+      "computedHash": "262d714b3c064bcd1920a058d1979534284a829b881dac2ab1788d07f472c63a"
     },
     "extension-user-approval": {
       "source": "caffeinelabs/skills",

@@ -825,7 +825,8 @@ export function ChapterEditorPage() {
                   );
                 }
 
-                setCurrentAnnotations(annotations);
+                applyAnnotationsToEditor(editorRef.current, [], {});
+                setCurrentAnnotations([]);
                 setCurrentAnnotations(annotations);
                 applyAnnotationsToEditor(editorRef.current, annotations, {
                   clearRange: selectionRange,
@@ -1161,7 +1162,8 @@ export function ChapterEditorPage() {
             onLoadAnalysis={(annotations) => {
               setHistoryPanelOpen(false);
               if (editorRef.current) {
-                setCurrentAnnotations(annotations);
+                applyAnnotationsToEditor(editorRef.current, [], {});
+                setCurrentAnnotations([]);
                 setCurrentAnnotations(annotations);
                 applyAnnotationsToEditor(editorRef.current, annotations, {
                   skipApproved: true,
