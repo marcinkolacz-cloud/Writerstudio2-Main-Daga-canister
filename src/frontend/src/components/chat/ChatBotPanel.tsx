@@ -135,18 +135,18 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
         });
       }
       if (resizeState.current.resizing) {
-        const dx = e.clientX - resizeState.current.startX;
-        const dy = e.clientY - resizeState.current.startY;
+        const dx = resizeState.current.startX - e.clientX;
+        const dy = resizeState.current.startY - e.clientY;
         setSize({
           w: Math.max(
-            320,
+            280,
             Math.min(
               Math.round(window.innerWidth * 0.9),
               resizeState.current.startW + dx,
             ),
           ),
           h: Math.max(
-            400,
+            350,
             Math.min(
               Math.round(window.innerHeight * 0.9),
               resizeState.current.startH + dy,
@@ -293,8 +293,8 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
         height: size.h,
         resize: "both",
         overflow: "auto",
-        minWidth: 320,
-        minHeight: 400,
+        minWidth: 280,
+        minHeight: 350,
         maxWidth: "90vw",
         maxHeight: "90vh",
       }}
@@ -402,9 +402,10 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
         </div>
       </div>
 
-      {/* Resize handle */}
+      {/* Resize handle — top-left */}
       <div
-        className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"
+        className="absolute left-0 top-0 cursor-nw-resize z-10"
+        style={{ width: 16, height: 16 }}
         onMouseDown={onResizeMouseDown}
         data-ocid="chat.resize_handle"
       >
@@ -414,10 +415,10 @@ export function ChatBotPanel({ bookId }: ChatBotPanelProps) {
           width="12"
           height="12"
           viewBox="0 0 12 12"
-          className="absolute bottom-1 right-1 text-muted-foreground/40"
+          className="absolute top-1 left-1 text-muted-foreground/40"
         >
           <path
-            d="M8 12L12 8V12H8ZM4 12L12 4V8L8 12H4ZM0 12L12 0V4L4 12H0Z"
+            d="M4 0L0 4V0H4ZM8 0L0 8V4L4 0H8ZM12 0L0 12V8L8 0H12Z"
             fill="currentColor"
           />
         </svg>

@@ -1320,14 +1320,14 @@ video {
 .bottom-0 {
   bottom: 0px;
 }
-.bottom-1 {
-  bottom: 0.25rem;
-}
 .bottom-6 {
   bottom: 1.5rem;
 }
 .left-0 {
   left: 0px;
+}
+.left-1 {
+  left: 0.25rem;
 }
 .left-1\/2 {
   left: 50%;
@@ -1364,6 +1364,9 @@ video {
 }
 .top-0 {
   top: 0px;
+}
+.top-1 {
+  top: 0.25rem;
 }
 .top-1\.5 {
   top: 0.375rem;
@@ -2022,11 +2025,11 @@ video {
 .cursor-move {
   cursor: move;
 }
+.cursor-nw-resize {
+  cursor: nw-resize;
+}
 .cursor-pointer {
   cursor: pointer;
-}
-.cursor-se-resize {
-  cursor: se-resize;
 }
 .touch-none {
   touch-action: none;

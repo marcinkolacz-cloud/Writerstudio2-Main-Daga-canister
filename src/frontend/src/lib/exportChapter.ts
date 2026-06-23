@@ -1,23 +1,329 @@
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { jsPDF } from "jspdf";
 
-function htmlToParagraphs(html: string): string[] {
+/* ------------------------------------------------------------------ */
+/*  DOCX helpers                                                      */
+/* ------------------------------------------------------------------ */
+
+function collectTextRuns(
+  node: Node,
+  inherited: { bold: boolean; italics: boolean; underline: boolean },
+): TextRun[] {
+  const runs: TextRun[] = [];
+
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.textContent ?? "";
+    if (text.length > 0) {
+      runs.push(
+        new TextRun({
+          text,
+          bold: inherited.bold,
+          italics: inherited.italics,
+          underline: inherited.underline ? {} : undefined,
+          font: "Georgia",
+          size: 24,
+        }),
+      );
+    }
+    return runs;
+  }
+
+  if (node.nodeType !== Node.ELEMENT_NODE) return runs;
+
+  const el = node as Element;
+  const tag = el.tagName.toLowerCase();
+
+  if (tag === "br") {
+    runs.push(
+      new TextRun({
+        text: "",
+        break: 1,
+        font: "Georgia",
+        size: 24,
+      }),
+    );
+    return runs;
+  }
+
+  const nextInherited = {
+    bold: inherited.bold || tag === "strong" || tag === "b",
+    italics: inherited.italics || tag === "em" || tag === "i",
+    underline: inherited.underline || tag === "u",
+  };
+
+  for (const child of el.childNodes) {
+    runs.push(...collectTextRuns(child, nextInherited));
+  }
+
+  return runs;
+}
+
+function htmlToDocxParagraphs(
+  html: string,
+  indentLeft: number,
+  indentRight: number,
+  indentFirstLine: number,
+): Paragraph[] {
   const tmp = document.createElement("div");
   tmp.innerHTML = html;
-  const paragraphs: string[] = [];
-  for (const el of tmp.querySelectorAll("p, div, h1, h2, h3, h4, h5, h6, li")) {
-    const text = el.textContent?.trim();
-    if (text) paragraphs.push(text);
+
+  const twips = (px: number) => Math.round(px * 15);
+  const indent = {
+    left: twips(indentLeft),
+    right: twips(indentRight),
+    firstLine: twips(indentFirstLine),
+  };
+
+  const paragraphs: Paragraph[] = [];
+
+  for (const el of tmp.children) {
+    const tag = el.tagName.toLowerCase();
+
+    if (tag === "p" || tag === "div") {
+      const runs = collectTextRuns(el, {
+        bold: false,
+        italics: false,
+        underline: false,
+      });
+      if (runs.length === 0) {
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: "", font: "Georgia", size: 24 })],
+            spacing: { after: 200 },
+            indent,
+          }),
+        );
+      } else {
+        paragraphs.push(
+          new Paragraph({
+            children: runs,
+            spacing: { after: 200 },
+            indent,
+          }),
+        );
+      }
+      continue;
+    }
+
+    if (/^h[1-6]$/.test(tag)) {
+      const level = Number.parseInt(tag[1], 10);
+      const headingSize = 32 - (level - 1) * 2;
+      const runs = collectTextRuns(el, {
+        bold: true,
+        italics: false,
+        underline: false,
+      });
+      paragraphs.push(
+        new Paragraph({
+          children: runs.map(
+            (r) =>
+              new TextRun({
+                text: (r as unknown as { text: string }).text,
+                bold: true,
+                font: "Georgia",
+                size: headingSize * 2,
+              }),
+          ),
+          spacing: { after: 200 },
+          indent,
+          heading: `Heading${level}` as
+            | "Heading1"
+            | "Heading2"
+            | "Heading3"
+            | "Heading4"
+            | "Heading5"
+            | "Heading6",
+        }),
+      );
+      continue;
+    }
+
+    if (tag === "ul" || tag === "ol") {
+      for (const li of el.querySelectorAll("li")) {
+        const runs = collectTextRuns(li, {
+          bold: false,
+          italics: false,
+          underline: false,
+        });
+        if (runs.length === 0) {
+          paragraphs.push(
+            new Paragraph({
+              children: [new TextRun({ text: "", font: "Georgia", size: 24 })],
+              spacing: { after: 100 },
+              indent,
+            }),
+          );
+        } else {
+          paragraphs.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: tag === "ul" ? "\u2022 " : "",
+                  font: "Georgia",
+                  size: 24,
+                }),
+                ...runs,
+              ],
+              spacing: { after: 100 },
+              indent,
+            }),
+          );
+        }
+      }
+      continue;
+    }
+
+    if (tag === "li") {
+      const runs = collectTextRuns(el, {
+        bold: false,
+        italics: false,
+        underline: false,
+      });
+      if (runs.length === 0) {
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: "", font: "Georgia", size: 24 })],
+            spacing: { after: 100 },
+            indent,
+          }),
+        );
+      } else {
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "\u2022 ", font: "Georgia", size: 24 }),
+              ...runs,
+            ],
+            spacing: { after: 100 },
+            indent,
+          }),
+        );
+      }
+      continue;
+    }
+
+    const runs = collectTextRuns(el, {
+      bold: false,
+      italics: false,
+      underline: false,
+    });
+    if (runs.length > 0) {
+      paragraphs.push(
+        new Paragraph({
+          children: runs,
+          spacing: { after: 200 },
+          indent,
+        }),
+      );
+    }
   }
+
   if (paragraphs.length === 0) {
-    const plain = tmp.textContent?.trim() ?? "";
-    if (plain) paragraphs.push(plain);
+    paragraphs.push(
+      new Paragraph({
+        children: [new TextRun({ text: "", font: "Georgia", size: 24 })],
+        spacing: { after: 200 },
+        indent,
+      }),
+    );
   }
+
   return paragraphs;
 }
 
+/* ------------------------------------------------------------------ */
+/*  PDF helpers                                                       */
+/* ------------------------------------------------------------------ */
+
+interface PdfBlock {
+  text: string;
+  bold: boolean;
+  fontSize: number;
+  spacingAfter: number;
+}
+
+function htmlToPdfBlocks(html: string): PdfBlock[] {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+
+  const blocks: PdfBlock[] = [];
+
+  for (const el of tmp.children) {
+    const tag = el.tagName.toLowerCase();
+
+    if (tag === "p" || tag === "div") {
+      const text = el.innerHTML
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<[^>]+>/g, "");
+      blocks.push({
+        text,
+        bold: false,
+        fontSize: 12,
+        spacingAfter: 4,
+      });
+      continue;
+    }
+
+    if (/^h[1-6]$/.test(tag)) {
+      const level = Number.parseInt(tag[1], 10);
+      const text = el.textContent ?? "";
+      blocks.push({
+        text,
+        bold: true,
+        fontSize: 16 - (level - 1) * 1.5,
+        spacingAfter: 6,
+      });
+      continue;
+    }
+
+    if (tag === "ul" || tag === "ol") {
+      for (const li of el.querySelectorAll("li")) {
+        const text = (tag === "ul" ? "\u2022 " : "") + (li.textContent ?? "");
+        blocks.push({
+          text,
+          bold: false,
+          fontSize: 12,
+          spacingAfter: 2,
+        });
+      }
+      continue;
+    }
+
+    if (tag === "li") {
+      const text = `\u2022 ${el.textContent ?? ""}`;
+      blocks.push({
+        text,
+        bold: false,
+        fontSize: 12,
+        spacingAfter: 2,
+      });
+      continue;
+    }
+
+    const text = el.textContent ?? "";
+    if (text.trim().length > 0) {
+      blocks.push({
+        text,
+        bold: false,
+        fontSize: 12,
+        spacingAfter: 4,
+      });
+    }
+  }
+
+  if (blocks.length === 0) {
+    blocks.push({ text: "", bold: false, fontSize: 12, spacingAfter: 4 });
+  }
+
+  return blocks;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Public exports                                                    */
+/* ------------------------------------------------------------------ */
+
 export function exportToPDF(title: string, contentHtml: string): void {
-  const paragraphs = htmlToParagraphs(contentHtml);
+  const blocks = htmlToPdfBlocks(contentHtml);
   const doc = new jsPDF({ unit: "mm", format: "a4" });
 
   const marginLeft = 20;
@@ -32,17 +338,21 @@ export function exportToPDF(title: string, contentHtml: string): void {
   doc.text(titleLines, marginLeft, y);
   y += titleLines.length * 7 + 4;
 
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "normal");
+  for (const block of blocks) {
+    doc.setFontSize(block.fontSize);
+    doc.setFont("helvetica", block.bold ? "bold" : "normal");
 
-  for (const para of paragraphs) {
-    const lines = doc.splitTextToSize(para, textWidth);
-    if (y + lines.length * 5 + 4 > 280) {
+    const lines = doc.splitTextToSize(block.text, textWidth);
+    const lineHeight = block.fontSize * 0.45;
+    const blockHeight = lines.length * lineHeight + block.spacingAfter;
+
+    if (y + blockHeight > 280) {
       doc.addPage();
       y = 20;
     }
+
     doc.text(lines, marginLeft, y);
-    y += lines.length * 5 + 4;
+    y += blockHeight;
   }
 
   doc.save(`${title.replace(/\s+/g, "_")}.pdf`);
@@ -55,21 +365,11 @@ export function exportToDOCX(
   indentRight: number,
   indentFirstLine: number,
 ): void {
-  const paragraphs = htmlToParagraphs(contentHtml);
-
-  const twips = (px: number) => Math.round(px * 15);
-
-  const children = paragraphs.map(
-    (text) =>
-      new Paragraph({
-        children: [new TextRun({ text, font: "Georgia", size: 24 })],
-        spacing: { after: 200 },
-        indent: {
-          left: twips(indentLeft),
-          right: twips(indentRight),
-          firstLine: twips(indentFirstLine),
-        },
-      }),
+  const paragraphs = htmlToDocxParagraphs(
+    contentHtml,
+    indentLeft,
+    indentRight,
+    indentFirstLine,
   );
 
   const doc = new Document({
@@ -88,7 +388,7 @@ export function exportToDOCX(
             ],
             spacing: { after: 400 },
           }),
-          ...children,
+          ...paragraphs,
         ],
       },
     ],

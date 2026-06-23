@@ -42383,18 +42383,18 @@ function ChatBotPanel({ bookId }) {
         });
       }
       if (resizeState.current.resizing) {
-        const dx = e3.clientX - resizeState.current.startX;
-        const dy = e3.clientY - resizeState.current.startY;
+        const dx = resizeState.current.startX - e3.clientX;
+        const dy = resizeState.current.startY - e3.clientY;
         setSize({
           w: Math.max(
-            320,
+            280,
             Math.min(
               Math.round(window.innerWidth * 0.9),
               resizeState.current.startW + dx
             )
           ),
           h: Math.max(
-            400,
+            350,
             Math.min(
               Math.round(window.innerHeight * 0.9),
               resizeState.current.startH + dy
@@ -42515,8 +42515,8 @@ ${chapterTitles}`;
         height: size2.h,
         resize: "both",
         overflow: "auto",
-        minWidth: 320,
-        minHeight: 400,
+        minWidth: 280,
+        minHeight: 350,
         maxWidth: "90vw",
         maxHeight: "90vh"
       },
@@ -42625,7 +42625,8 @@ ${chapterTitles}`;
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "div",
           {
-            className: "absolute bottom-0 right-0 w-4 h-4 cursor-se-resize",
+            className: "absolute left-0 top-0 cursor-nw-resize z-10",
+            style: { width: 16, height: 16 },
             onMouseDown: onResizeMouseDown,
             "data-ocid": "chat.resize_handle",
             children: /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -42636,11 +42637,11 @@ ${chapterTitles}`;
                 width: "12",
                 height: "12",
                 viewBox: "0 0 12 12",
-                className: "absolute bottom-1 right-1 text-muted-foreground/40",
+                className: "absolute top-1 left-1 text-muted-foreground/40",
                 children: /* @__PURE__ */ jsxRuntimeExports.jsx(
                   "path",
                   {
-                    d: "M8 12L12 8V12H8ZM4 12L12 4V8L8 12H4ZM0 12L12 0V4L4 12H0Z",
+                    d: "M4 0L0 4V0H4ZM8 0L0 8V4L4 0H8ZM12 0L0 12V8L8 0H12Z",
                     fill: "currentColor"
                   }
                 )
@@ -105815,7 +105816,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BlC35LZ4.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DsynNTlY.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -106522,23 +106523,264 @@ E.API.PDFObject = function() {
     return "" + r2;
   }, e3;
 }();
-function htmlToParagraphs(html) {
-  var _a3, _b3;
+function collectTextRuns(node, inherited) {
+  const runs = [];
+  if (node.nodeType === Node.TEXT_NODE) {
+    const text = node.textContent ?? "";
+    if (text.length > 0) {
+      runs.push(
+        new TextRun({
+          text,
+          bold: inherited.bold,
+          italics: inherited.italics,
+          underline: inherited.underline ? {} : void 0,
+          font: "Georgia",
+          size: 24
+        })
+      );
+    }
+    return runs;
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) return runs;
+  const el = node;
+  const tag = el.tagName.toLowerCase();
+  if (tag === "br") {
+    runs.push(
+      new TextRun({
+        text: "",
+        break: 1,
+        font: "Georgia",
+        size: 24
+      })
+    );
+    return runs;
+  }
+  const nextInherited = {
+    bold: inherited.bold || tag === "strong" || tag === "b",
+    italics: inherited.italics || tag === "em" || tag === "i",
+    underline: inherited.underline || tag === "u"
+  };
+  for (const child of el.childNodes) {
+    runs.push(...collectTextRuns(child, nextInherited));
+  }
+  return runs;
+}
+function htmlToDocxParagraphs(html, indentLeft, indentRight, indentFirstLine) {
   const tmp = document.createElement("div");
   tmp.innerHTML = html;
+  const twips = (px) => Math.round(px * 15);
+  const indent = {
+    left: twips(indentLeft),
+    right: twips(indentRight),
+    firstLine: twips(indentFirstLine)
+  };
   const paragraphs = [];
-  for (const el of tmp.querySelectorAll("p, div, h1, h2, h3, h4, h5, h6, li")) {
-    const text = (_a3 = el.textContent) == null ? void 0 : _a3.trim();
-    if (text) paragraphs.push(text);
+  for (const el of tmp.children) {
+    const tag = el.tagName.toLowerCase();
+    if (tag === "p" || tag === "div") {
+      const runs2 = collectTextRuns(el, {
+        bold: false,
+        italics: false,
+        underline: false
+      });
+      if (runs2.length === 0) {
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: "", font: "Georgia", size: 24 })],
+            spacing: { after: 200 },
+            indent
+          })
+        );
+      } else {
+        paragraphs.push(
+          new Paragraph({
+            children: runs2,
+            spacing: { after: 200 },
+            indent
+          })
+        );
+      }
+      continue;
+    }
+    if (/^h[1-6]$/.test(tag)) {
+      const level = Number.parseInt(tag[1], 10);
+      const headingSize = 32 - (level - 1) * 2;
+      const runs2 = collectTextRuns(el, {
+        bold: true,
+        italics: false,
+        underline: false
+      });
+      paragraphs.push(
+        new Paragraph({
+          children: runs2.map(
+            (r2) => new TextRun({
+              text: r2.text,
+              bold: true,
+              font: "Georgia",
+              size: headingSize * 2
+            })
+          ),
+          spacing: { after: 200 },
+          indent,
+          heading: `Heading${level}`
+        })
+      );
+      continue;
+    }
+    if (tag === "ul" || tag === "ol") {
+      for (const li of el.querySelectorAll("li")) {
+        const runs2 = collectTextRuns(li, {
+          bold: false,
+          italics: false,
+          underline: false
+        });
+        if (runs2.length === 0) {
+          paragraphs.push(
+            new Paragraph({
+              children: [new TextRun({ text: "", font: "Georgia", size: 24 })],
+              spacing: { after: 100 },
+              indent
+            })
+          );
+        } else {
+          paragraphs.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: tag === "ul" ? "• " : "",
+                  font: "Georgia",
+                  size: 24
+                }),
+                ...runs2
+              ],
+              spacing: { after: 100 },
+              indent
+            })
+          );
+        }
+      }
+      continue;
+    }
+    if (tag === "li") {
+      const runs2 = collectTextRuns(el, {
+        bold: false,
+        italics: false,
+        underline: false
+      });
+      if (runs2.length === 0) {
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: "", font: "Georgia", size: 24 })],
+            spacing: { after: 100 },
+            indent
+          })
+        );
+      } else {
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: "• ", font: "Georgia", size: 24 }),
+              ...runs2
+            ],
+            spacing: { after: 100 },
+            indent
+          })
+        );
+      }
+      continue;
+    }
+    const runs = collectTextRuns(el, {
+      bold: false,
+      italics: false,
+      underline: false
+    });
+    if (runs.length > 0) {
+      paragraphs.push(
+        new Paragraph({
+          children: runs,
+          spacing: { after: 200 },
+          indent
+        })
+      );
+    }
   }
   if (paragraphs.length === 0) {
-    const plain = ((_b3 = tmp.textContent) == null ? void 0 : _b3.trim()) ?? "";
-    if (plain) paragraphs.push(plain);
+    paragraphs.push(
+      new Paragraph({
+        children: [new TextRun({ text: "", font: "Georgia", size: 24 })],
+        spacing: { after: 200 },
+        indent
+      })
+    );
   }
   return paragraphs;
 }
+function htmlToPdfBlocks(html) {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  const blocks = [];
+  for (const el of tmp.children) {
+    const tag = el.tagName.toLowerCase();
+    if (tag === "p" || tag === "div") {
+      const text2 = el.innerHTML.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "");
+      blocks.push({
+        text: text2,
+        bold: false,
+        fontSize: 12,
+        spacingAfter: 4
+      });
+      continue;
+    }
+    if (/^h[1-6]$/.test(tag)) {
+      const level = Number.parseInt(tag[1], 10);
+      const text2 = el.textContent ?? "";
+      blocks.push({
+        text: text2,
+        bold: true,
+        fontSize: 16 - (level - 1) * 1.5,
+        spacingAfter: 6
+      });
+      continue;
+    }
+    if (tag === "ul" || tag === "ol") {
+      for (const li of el.querySelectorAll("li")) {
+        const text2 = (tag === "ul" ? "• " : "") + (li.textContent ?? "");
+        blocks.push({
+          text: text2,
+          bold: false,
+          fontSize: 12,
+          spacingAfter: 2
+        });
+      }
+      continue;
+    }
+    if (tag === "li") {
+      const text2 = `• ${el.textContent ?? ""}`;
+      blocks.push({
+        text: text2,
+        bold: false,
+        fontSize: 12,
+        spacingAfter: 2
+      });
+      continue;
+    }
+    const text = el.textContent ?? "";
+    if (text.trim().length > 0) {
+      blocks.push({
+        text,
+        bold: false,
+        fontSize: 12,
+        spacingAfter: 4
+      });
+    }
+  }
+  if (blocks.length === 0) {
+    blocks.push({ text: "", bold: false, fontSize: 12, spacingAfter: 4 });
+  }
+  return blocks;
+}
 function exportToPDF(title, contentHtml) {
-  const paragraphs = htmlToParagraphs(contentHtml);
+  const blocks = htmlToPdfBlocks(contentHtml);
   const doc2 = new E({ unit: "mm", format: "a4" });
   const marginLeft = 20;
   const marginRight = 20;
@@ -106550,32 +106792,27 @@ function exportToPDF(title, contentHtml) {
   const titleLines = doc2.splitTextToSize(title, textWidth);
   doc2.text(titleLines, marginLeft, y2);
   y2 += titleLines.length * 7 + 4;
-  doc2.setFontSize(12);
-  doc2.setFont("helvetica", "normal");
-  for (const para of paragraphs) {
-    const lines = doc2.splitTextToSize(para, textWidth);
-    if (y2 + lines.length * 5 + 4 > 280) {
+  for (const block of blocks) {
+    doc2.setFontSize(block.fontSize);
+    doc2.setFont("helvetica", block.bold ? "bold" : "normal");
+    const lines = doc2.splitTextToSize(block.text, textWidth);
+    const lineHeight = block.fontSize * 0.45;
+    const blockHeight = lines.length * lineHeight + block.spacingAfter;
+    if (y2 + blockHeight > 280) {
       doc2.addPage();
       y2 = 20;
     }
     doc2.text(lines, marginLeft, y2);
-    y2 += lines.length * 5 + 4;
+    y2 += blockHeight;
   }
   doc2.save(`${title.replace(/\s+/g, "_")}.pdf`);
 }
 function exportToDOCX(title, contentHtml, indentLeft, indentRight, indentFirstLine) {
-  const paragraphs = htmlToParagraphs(contentHtml);
-  const twips = (px) => Math.round(px * 15);
-  const children = paragraphs.map(
-    (text) => new Paragraph({
-      children: [new TextRun({ text, font: "Georgia", size: 24 })],
-      spacing: { after: 200 },
-      indent: {
-        left: twips(indentLeft),
-        right: twips(indentRight),
-        firstLine: twips(indentFirstLine)
-      }
-    })
+  const paragraphs = htmlToDocxParagraphs(
+    contentHtml,
+    indentLeft,
+    indentRight,
+    indentFirstLine
   );
   const doc2 = new File({
     sections: [
@@ -106593,7 +106830,7 @@ function exportToDOCX(title, contentHtml, indentLeft, indentRight, indentFirstLi
             ],
             spacing: { after: 400 }
           }),
-          ...children
+          ...paragraphs
         ]
       }
     ]
