@@ -789,7 +789,8 @@ export function ChapterEditorPage() {
                       authorSummary: book.authorSummary,
                       keyContext: book.keyContext,
                       themes: book.themes,
-                      writingStyle: book.writingStyle,
+                      writingStyle: (book as unknown as Record<string, string>)
+                        .writingStyle,
                     }
                   : undefined;
 
@@ -1372,7 +1373,7 @@ export function ChapterEditorPage() {
         </div>
 
         {contextChatPanelOpen && (
-          <div className="shrink-0" style={{ flex: "0 0 25%" }}>
+          <div className="shrink-0 min-w-0" style={{ flex: "0 0 25%" }}>
             <ContextChatPanel
               chapterId={chapter.id}
               chapterTitle={chapter.title}
@@ -1388,7 +1389,7 @@ export function ChapterEditorPage() {
         )}
 
         {commentsPanelOpen && (
-          <div className="shrink-0" style={{ flex: "0 0 25%" }}>
+          <div className="shrink-0 min-w-0" style={{ flex: "0 0 25%" }}>
             <CommentsPanel
               comments={comments ?? []}
               onDelete={(id) => {

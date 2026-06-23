@@ -28,8 +28,7 @@ module {
       authorSummary = "";
       keyContext = "";
       themes = "";
-      writingStyle = "";
-      createdAt = now;
+      characters = "";
       updatedAt = now;
     }
   };

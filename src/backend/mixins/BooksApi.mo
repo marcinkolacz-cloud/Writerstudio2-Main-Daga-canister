@@ -75,6 +75,25 @@ mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>)
     }
   };
 
+  public shared ({ caller }) func updateBookCharacters(id : Nat, characters : Text) : async Bool {
+    switch (books.get(id)) {
+      case (?book) {
+        if (BooksLib.isOwner(book, caller)) {
+          let updated = {
+            book with
+            characters;
+            updatedAt = Time.now();
+          };
+          books.add(id, updated);
+          true
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
   public shared ({ caller }) func deleteBook(id : Nat) : async Bool {
     switch (books.get(id)) {
       case (?book) {

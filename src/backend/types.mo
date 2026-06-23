@@ -12,8 +12,7 @@ module {
     authorSummary : Text;
     keyContext : Text;
     themes : Text;
-    writingStyle : Text;
-    createdAt : Int;
+    characters : Text;
     updatedAt : Int;
   };
 

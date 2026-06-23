@@ -120,11 +120,10 @@ export interface Analysis {
 }
 export interface Book {
     id: bigint;
-    writingStyle: string;
     title: string;
     ownerId: Principal;
     authorSummary: string;
-    createdAt: bigint;
+    characters: string;
     description: string;
     updatedAt: bigint;
     themes: string;
@@ -280,6 +279,7 @@ export interface backendInterface {
     }>;
     updateAnnotationApproved(id: bigint, approved: boolean): Promise<boolean>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
+    updateBookCharacters(id: bigint, characters: string): Promise<boolean>;
     updateBookMetadata(id: bigint, ageCategory: string, authorSummary: string, keyContext: string, themes: string, writingStyle: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
     updateChapterIndents(id: bigint, indentLeft: bigint, indentRight: bigint, indentFirstLine: bigint): Promise<boolean>;
@@ -1230,6 +1230,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updateBook(arg0, arg1, arg2, arg3);
+            return result;
+        }
+    }
+    async updateBookCharacters(arg0: bigint, arg1: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateBookCharacters(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateBookCharacters(arg0, arg1);
             return result;
         }
     }

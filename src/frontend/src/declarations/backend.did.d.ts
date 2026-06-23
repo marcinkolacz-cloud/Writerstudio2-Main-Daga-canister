@@ -21,11 +21,10 @@ export interface Analysis {
 }
 export interface Book {
   'id' : bigint,
-  'writingStyle' : string,
   'title' : string,
   'ownerId' : Principal,
   'authorSummary' : string,
-  'createdAt' : bigint,
+  'characters' : string,
   'description' : string,
   'updatedAt' : bigint,
   'themes' : string,
@@ -242,6 +241,7 @@ export interface _SERVICE {
   >,
   'updateAnnotationApproved' : ActorMethod<[bigint, boolean], boolean>,
   'updateBook' : ActorMethod<[bigint, string, string, string], boolean>,
+  'updateBookCharacters' : ActorMethod<[bigint, string], boolean>,
   'updateBookMetadata' : ActorMethod<
     [bigint, string, string, string, string, string],
     boolean

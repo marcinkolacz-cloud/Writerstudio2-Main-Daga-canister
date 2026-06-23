@@ -29,11 +29,10 @@ export const TextAnnotation = IDL.Record({
 });
 export const Book = IDL.Record({
   'id' : IDL.Nat,
-  'writingStyle' : IDL.Text,
   'title' : IDL.Text,
   'ownerId' : IDL.Principal,
   'authorSummary' : IDL.Text,
-  'createdAt' : IDL.Int,
+  'characters' : IDL.Text,
   'description' : IDL.Text,
   'updatedAt' : IDL.Int,
   'themes' : IDL.Text,
@@ -299,6 +298,7 @@ export const idlService = IDL.Service({
       [IDL.Bool],
       [],
     ),
+  'updateBookCharacters' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
   'updateBookMetadata' : IDL.Func(
       [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
       [IDL.Bool],
@@ -336,11 +336,10 @@ export const idlFactory = ({ IDL }) => {
   });
   const Book = IDL.Record({
     'id' : IDL.Nat,
-    'writingStyle' : IDL.Text,
     'title' : IDL.Text,
     'ownerId' : IDL.Principal,
     'authorSummary' : IDL.Text,
-    'createdAt' : IDL.Int,
+    'characters' : IDL.Text,
     'description' : IDL.Text,
     'updatedAt' : IDL.Int,
     'themes' : IDL.Text,
@@ -610,6 +609,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Bool],
         [],
       ),
+    'updateBookCharacters' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
     'updateBookMetadata' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
         [IDL.Bool],

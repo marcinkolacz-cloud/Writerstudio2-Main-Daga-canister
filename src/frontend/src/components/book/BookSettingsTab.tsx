@@ -18,7 +18,7 @@ interface BookSettingsTabProps {
   authorSummary: string;
   keyContext: string;
   themes: string;
-  writingStyle: string;
+  writingStyle?: string;
 }
 
 export function BookSettingsTab({
@@ -27,7 +27,7 @@ export function BookSettingsTab({
   authorSummary,
   keyContext,
   themes,
-  writingStyle,
+  writingStyle = "",
 }: BookSettingsTabProps) {
   const [ageCategoryValue, setAgeCategoryValue] = useState(
     ageCategory || "adult",

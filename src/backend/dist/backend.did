@@ -77,7 +77,7 @@ type Book =
    ageCategory: text;
    authorSummary: text;
    category: text;
-   createdAt: int;
+   characters: text;
    description: text;
    id: nat;
    keyContext: text;
@@ -85,7 +85,6 @@ type Book =
    themes: text;
    title: text;
    updatedAt: int;
-   writingStyle: text;
  };
 type Analysis = 
  record {
@@ -250,6 +249,7 @@ service : {
   updateAnnotationApproved: (id: nat, approved: bool) -> (bool);
   updateBook: (id: nat, title: text, description: text, category: text) ->
    (bool);
+  updateBookCharacters: (id: nat, characters: text) -> (bool);
   updateBookMetadata: (id: nat, ageCategory: text, authorSummary: text,
    keyContext: text, themes: text, writingStyle: text) -> (bool);
   updateChapter: (id: nat, title: text, content: text) -> (bool);

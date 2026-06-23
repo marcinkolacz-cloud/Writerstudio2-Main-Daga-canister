@@ -550,6 +550,29 @@ export function useDeleteAnalysis() {
   });
 }
 
+export function useUpdateBookCharacters() {
+  const { actor } = useActor(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      characters,
+    }: {
+      id: bigint;
+      characters: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.updateBookCharacters(id, characters);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["book", variables.id],
+      });
+    },
+  });
+}
+
 export function useUpdateBookMetadata() {
   const { actor } = useActor(createActor);
   const queryClient = useQueryClient();

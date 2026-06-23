@@ -1,3 +1,4 @@
+import { BookCharactersTab } from "@/components/book/BookCharactersTab";
 import { BookSettingsTab } from "@/components/book/BookSettingsTab";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,7 +10,14 @@ import {
   useCreateChapter,
 } from "@/hooks/useBackend";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { ArrowLeft, BookOpen, FileText, Plus, Settings } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  FileText,
+  Plus,
+  Settings,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 
 function ChapterListItem({
@@ -189,6 +197,10 @@ export function BookOverviewPage() {
           <TabsTrigger value="overview" data-ocid="book.tab.overview">
             Przegląd
           </TabsTrigger>
+          <TabsTrigger value="characters" data-ocid="book.tab.characters">
+            <Users className="h-3.5 w-3.5 mr-1.5" />
+            Bohaterowie
+          </TabsTrigger>
           <TabsTrigger value="settings" data-ocid="book.tab.settings">
             <Settings className="h-3.5 w-3.5 mr-1.5" />
             Ustawienia
@@ -239,6 +251,10 @@ export function BookOverviewPage() {
           </div>
         </TabsContent>
 
+        <TabsContent value="characters">
+          <BookCharactersTab bookId={book.id} characters={book.characters} />
+        </TabsContent>
+
         <TabsContent value="settings">
           <BookSettingsTab
             bookId={book.id}
@@ -246,7 +262,7 @@ export function BookOverviewPage() {
             authorSummary={book.authorSummary}
             keyContext={book.keyContext}
             themes={book.themes}
-            writingStyle={book.writingStyle}
+            writingStyle=""
           />
         </TabsContent>
       </Tabs>

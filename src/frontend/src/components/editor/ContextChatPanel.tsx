@@ -382,7 +382,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
   // Session list view
   if (selectedSessionId === null) {
     return (
-      <div className="w-72 border-l border-border bg-card flex flex-col h-full shrink-0">
+      <div className="flex-1 min-w-0 border-l border-border bg-card flex flex-col h-full">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <div className="flex items-center gap-2">
@@ -466,7 +466,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
 
   // Chat view
   return (
-    <div className="w-72 border-l border-border bg-card flex flex-col h-full shrink-0">
+    <div className="flex-1 min-w-0 border-l border-border bg-card flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">

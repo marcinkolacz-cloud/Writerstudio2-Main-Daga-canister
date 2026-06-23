@@ -38,11 +38,10 @@ export interface Analysis {
 }
 export interface Book {
     id: bigint;
-    writingStyle: string;
     title: string;
     ownerId: Principal;
     authorSummary: string;
-    createdAt: bigint;
+    characters: string;
     description: string;
     updatedAt: bigint;
     themes: string;
@@ -178,6 +177,7 @@ export interface backendInterface {
     }>;
     updateAnnotationApproved(id: bigint, approved: boolean): Promise<boolean>;
     updateBook(id: bigint, title: string, description: string, category: string): Promise<boolean>;
+    updateBookCharacters(id: bigint, characters: string): Promise<boolean>;
     updateBookMetadata(id: bigint, ageCategory: string, authorSummary: string, keyContext: string, themes: string, writingStyle: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
     updateChapterIndents(id: bigint, indentLeft: bigint, indentRight: bigint, indentFirstLine: bigint): Promise<boolean>;
