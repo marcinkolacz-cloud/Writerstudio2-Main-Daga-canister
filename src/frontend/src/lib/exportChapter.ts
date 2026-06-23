@@ -89,7 +89,7 @@ function htmlToDocxParagraphs(
         paragraphs.push(
           new Paragraph({
             children: [new TextRun({ text: "", font: "Georgia", size: 24 })],
-            spacing: { after: 200 },
+            spacing: { after: 240 },
             indent,
           }),
         );
@@ -97,7 +97,7 @@ function htmlToDocxParagraphs(
         paragraphs.push(
           new Paragraph({
             children: runs,
-            spacing: { after: 200 },
+            spacing: { after: 0, line: 276 },
             indent,
           }),
         );
@@ -211,7 +211,7 @@ function htmlToDocxParagraphs(
       paragraphs.push(
         new Paragraph({
           children: runs,
-          spacing: { after: 200 },
+          spacing: { after: 0, line: 276 },
           indent,
         }),
       );
@@ -342,17 +342,17 @@ export function exportToPDF(title: string, contentHtml: string): void {
     doc.setFontSize(block.fontSize);
     doc.setFont("helvetica", block.bold ? "bold" : "normal");
 
-    const lines = doc.splitTextToSize(block.text, textWidth);
     const lineHeight = block.fontSize * 0.45;
-    const blockHeight = lines.length * lineHeight + block.spacingAfter;
-
-    if (y + blockHeight > 280) {
-      doc.addPage();
-      y = 20;
+    const lines = block.text.split("\n");
+    for (const line of lines) {
+      if (y + lineHeight > 280) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(line, marginLeft, y);
+      y += lineHeight;
     }
-
-    doc.text(lines, marginLeft, y);
-    y += blockHeight;
+    y += block.spacingAfter;
   }
 
   doc.save(`${title.replace(/\s+/g, "_")}.pdf`);

@@ -106025,7 +106025,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-C0oEgDwz.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BzFG31mT.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -106796,7 +106796,7 @@ function htmlToDocxParagraphs(html, indentLeft, indentRight, indentFirstLine) {
         paragraphs.push(
           new Paragraph({
             children: [new TextRun({ text: "", font: "Georgia", size: 24 })],
-            spacing: { after: 200 },
+            spacing: { after: 240 },
             indent
           })
         );
@@ -106804,7 +106804,7 @@ function htmlToDocxParagraphs(html, indentLeft, indentRight, indentFirstLine) {
         paragraphs.push(
           new Paragraph({
             children: runs2,
-            spacing: { after: 200 },
+            spacing: { after: 0, line: 276 },
             indent
           })
         );
@@ -106907,7 +106907,7 @@ function htmlToDocxParagraphs(html, indentLeft, indentRight, indentFirstLine) {
       paragraphs.push(
         new Paragraph({
           children: runs,
-          spacing: { after: 200 },
+          spacing: { after: 0, line: 276 },
           indent
         })
       );
@@ -107004,15 +107004,17 @@ function exportToPDF(title, contentHtml) {
   for (const block of blocks) {
     doc2.setFontSize(block.fontSize);
     doc2.setFont("helvetica", block.bold ? "bold" : "normal");
-    const lines = doc2.splitTextToSize(block.text, textWidth);
     const lineHeight = block.fontSize * 0.45;
-    const blockHeight = lines.length * lineHeight + block.spacingAfter;
-    if (y2 + blockHeight > 280) {
-      doc2.addPage();
-      y2 = 20;
+    const lines = block.text.split("\n");
+    for (const line of lines) {
+      if (y2 + lineHeight > 280) {
+        doc2.addPage();
+        y2 = 20;
+      }
+      doc2.text(line, marginLeft, y2);
+      y2 += lineHeight;
     }
-    doc2.text(lines, marginLeft, y2);
-    y2 += blockHeight;
+    y2 += block.spacingAfter;
   }
   doc2.save(`${title.replace(/\s+/g, "_")}.pdf`);
 }
