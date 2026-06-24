@@ -187,12 +187,19 @@ function parsePipeAnnotations(responseText: string): Annotation[] {
       if (!color?.trim() || !text?.trim() || !explanation?.trim()) return null;
       const colorLower = color.trim().toLowerCase();
       if (!validColors.has(colorLower)) return null;
+      const rawProposal = (proposal || "").trim();
+      const proposalParts = rawProposal.split(" / ");
+      const parsedProposal = proposalParts[0].trim();
+      const parsedAlternative =
+        proposalParts.length > 1 ? proposalParts[1].trim() : undefined;
+
       return {
         id: 0n,
-        color: colorLower as Annotation["color"],
+        color: color.trim().toLowerCase() as Annotation["color"],
         text: text.trim(),
         explanation: explanation.trim(),
-        proposal: (proposal || "").trim(),
+        proposal: parsedProposal,
+        alternativeProposal: parsedAlternative,
         approved: false,
       };
     })

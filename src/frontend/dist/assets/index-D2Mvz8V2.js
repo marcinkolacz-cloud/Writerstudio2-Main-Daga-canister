@@ -42076,12 +42076,17 @@ function parsePipeAnnotations(responseText) {
     if (!(color2 == null ? void 0 : color2.trim()) || !(text == null ? void 0 : text.trim()) || !(explanation == null ? void 0 : explanation.trim())) return null;
     const colorLower = color2.trim().toLowerCase();
     if (!validColors.has(colorLower)) return null;
+    const rawProposal = (proposal || "").trim();
+    const proposalParts = rawProposal.split(" / ");
+    const parsedProposal = proposalParts[0].trim();
+    const parsedAlternative = proposalParts.length > 1 ? proposalParts[1].trim() : void 0;
     return {
       id: 0n,
-      color: colorLower,
+      color: color2.trim().toLowerCase(),
       text: text.trim(),
       explanation: explanation.trim(),
-      proposal: (proposal || "").trim(),
+      proposal: parsedProposal,
+      alternativeProposal: parsedAlternative,
       approved: false
     };
   }).filter(Boolean);
@@ -106059,7 +106064,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BmTP4l-B.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CH-mqyLf.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
