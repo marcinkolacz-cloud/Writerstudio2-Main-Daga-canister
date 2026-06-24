@@ -156,7 +156,7 @@ mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>)
           // Validate: same set of IDs
           let existingSet = Set.fromArray<Nat>(existingArr);
           let orderedSet = Set.fromArray<Nat>(orderedIds);
-          if (not existingSet.equal<Nat>(orderedSet)) {
+          if (not existingSet.equal(orderedSet)) {
             return false;
           };
 

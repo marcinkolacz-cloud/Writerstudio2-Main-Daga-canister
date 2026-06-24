@@ -163,6 +163,7 @@ function findFirstTextRangeInDoc(
 function applyAnnotationsToEditor(
   editor: Editor,
   annotations: Annotation[],
+  isApplyingAnnotationsRef: React.MutableRefObject<boolean>,
   options?: {
     skipApproved?: boolean;
     clearRange?: { from: number; to: number };
@@ -221,7 +222,9 @@ function applyAnnotationsToEditor(
 
   // Apply the clearing transaction once
   if (tr.steps.length > 0) {
+    isApplyingAnnotationsRef.current = true;
     editor.view.dispatch(tr);
+    isApplyingAnnotationsRef.current = false;
   }
 
   // 2. Compute ranges and resolve overlaps within this batch
@@ -284,7 +287,9 @@ function applyAnnotationsToEditor(
     }
   }
   if (markTr.steps.length > 0) {
+    isApplyingAnnotationsRef.current = true;
     editor.view.dispatch(markTr);
+    isApplyingAnnotationsRef.current = false;
   }
 }
 
@@ -375,6 +380,7 @@ export function ChapterEditorPage() {
 
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isApplyingAnnotationsRef = useRef(false);
 
   // Sync apiKey when provider changes or on mount
   useEffect(() => {
@@ -388,45 +394,19 @@ export function ChapterEditorPage() {
     setApiKey(key);
   }, []);
 
-  // Sync from query data — only when chapterId changes, not on every background refetch
-  const lastSyncedChapterIdRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (chapter && lastSyncedChapterIdRef.current !== chapterId) {
-      setTitle(chapter.title);
-      setContent(chapter.content);
-      setSaveStatus("saved");
-      lastSyncedChapterIdRef.current = chapterId;
-    }
-  }, [chapter, chapterId]);
-
-  // Apply persisted annotations (only non-approved ones) when editor is ready
-  const lastAppliedAnalysisIdRef = useRef<bigint | null>(null);
-  useEffect(() => {
-    if (
-      editorRef.current &&
-      persistedAnnotations &&
-      persistedAnnotations.length > 0 &&
-      latestAnalysisId !== null &&
-      latestAnalysisId !== lastAppliedAnalysisIdRef.current
-    ) {
-      const anns: Annotation[] = persistedAnnotations.map((pa) => ({
-        id: pa.id,
-        text: pa.text,
-        color: pa.color as Annotation["color"],
-        explanation: pa.explanation,
-        proposal: pa.proposal,
-        approved: pa.approved,
-      }));
-      applyAnnotationsToEditor(editorRef.current, anns, { skipApproved: true });
-      lastAppliedAnalysisIdRef.current = latestAnalysisId;
-    }
-  }, [persistedAnnotations, latestAnalysisId]);
-
   const doSave = useCallback(
     (newTitle: string, newContent: string) => {
       if (!chapter) return;
       setSaveStatus("saving");
       setSaveErrorBannerVisible(false);
+      if (
+        chapter.content &&
+        chapter.content.length > 100 &&
+        newContent.length < chapter.content.length * 0.3
+      ) {
+        setSaveStatus("unsaved");
+        return;
+      }
       updateChapter.mutate(
         {
           id: chapter.id,
@@ -447,6 +427,28 @@ export function ChapterEditorPage() {
     },
     [chapter, updateChapter],
   );
+
+  // Sync from query data — only when chapterId changes, not on every background refetch
+  const lastSyncedChapterIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (chapter && lastSyncedChapterIdRef.current !== chapterId) {
+      if (titleDebounceRef.current || contentDebounceRef.current) {
+        doSave(title, content);
+      }
+      if (titleDebounceRef.current) {
+        clearTimeout(titleDebounceRef.current);
+        titleDebounceRef.current = null;
+      }
+      if (contentDebounceRef.current) {
+        clearTimeout(contentDebounceRef.current);
+        contentDebounceRef.current = null;
+      }
+      setTitle(chapter.title);
+      setContent(chapter.content);
+      setSaveStatus("saved");
+      lastSyncedChapterIdRef.current = chapterId;
+    }
+  }, [chapter, chapterId, doSave, title, content]);
 
   const handleSendToChat = (text: string) => {
     if (!book) return;
@@ -473,6 +475,7 @@ export function ChapterEditorPage() {
 
   const handleContentChange = useCallback(
     (val: string) => {
+      if (isApplyingAnnotationsRef.current) return;
       setContent(val);
       setSaveStatus("unsaved");
       if (contentDebounceRef.current) clearTimeout(contentDebounceRef.current);
@@ -825,12 +828,22 @@ export function ChapterEditorPage() {
                   );
                 }
 
-                applyAnnotationsToEditor(editorRef.current, [], {});
+                applyAnnotationsToEditor(
+                  editorRef.current,
+                  [],
+                  isApplyingAnnotationsRef,
+                  {},
+                );
                 setCurrentAnnotations([]);
                 setCurrentAnnotations(annotations);
-                applyAnnotationsToEditor(editorRef.current, annotations, {
-                  clearRange: selectionRange,
-                });
+                applyAnnotationsToEditor(
+                  editorRef.current,
+                  annotations,
+                  isApplyingAnnotationsRef,
+                  {
+                    clearRange: selectionRange,
+                  },
+                );
                 // Save analysis + annotations to backend
                 const analysisId = await saveAnalysis.mutateAsync({
                   bookId: book.id,
@@ -850,9 +863,14 @@ export function ChapterEditorPage() {
                   }
                 }
                 setCurrentAnnotations(annotations);
-                applyAnnotationsToEditor(editorRef.current, annotations, {
-                  clearRange: selectionRange,
-                });
+                applyAnnotationsToEditor(
+                  editorRef.current,
+                  annotations,
+                  isApplyingAnnotationsRef,
+                  {
+                    clearRange: selectionRange,
+                  },
+                );
                 setAnalysisStatus("success");
                 setTimeout(() => setAnalysisStatus("idle"), 3000);
               } catch (err) {
@@ -914,7 +932,11 @@ export function ChapterEditorPage() {
                   }
                   return true;
                 });
-                if (tr.steps.length > 0) editor.view.dispatch(tr);
+                if (tr.steps.length > 0) {
+                  isApplyingAnnotationsRef.current = true;
+                  editor.view.dispatch(tr);
+                  isApplyingAnnotationsRef.current = false;
+                }
                 setCurrentAnnotations([]);
               }}
               data-ocid="chapter.approve_changes_button"
@@ -1130,12 +1152,22 @@ export function ChapterEditorPage() {
             onLoadAnalysis={(annotations) => {
               setHistoryPanelOpen(false);
               if (editorRef.current) {
-                applyAnnotationsToEditor(editorRef.current, [], {});
+                applyAnnotationsToEditor(
+                  editorRef.current,
+                  [],
+                  isApplyingAnnotationsRef,
+                  {},
+                );
                 setCurrentAnnotations([]);
                 setCurrentAnnotations(annotations);
-                applyAnnotationsToEditor(editorRef.current, annotations, {
-                  skipApproved: true,
-                });
+                applyAnnotationsToEditor(
+                  editorRef.current,
+                  annotations,
+                  isApplyingAnnotationsRef,
+                  {
+                    skipApproved: true,
+                  },
+                );
               }
             }}
             onOpenSummary={(content) => {

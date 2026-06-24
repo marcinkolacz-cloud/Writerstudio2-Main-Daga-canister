@@ -106093,7 +106093,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-7LfD6wC8.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-8Nf2TNoT.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107427,7 +107427,7 @@ function findFirstTextRangeInDoc(editor, searchText) {
   });
   return result;
 }
-function applyAnnotationsToEditor(editor, annotations, options) {
+function applyAnnotationsToEditor(editor, annotations, isApplyingAnnotationsRef, options) {
   const annotationMarkNames = [
     "annotationYellow",
     "annotationRed",
@@ -107475,7 +107475,9 @@ function applyAnnotationsToEditor(editor, annotations, options) {
     });
   }
   if (tr2.steps.length > 0) {
+    isApplyingAnnotationsRef.current = true;
     editor.view.dispatch(tr2);
+    isApplyingAnnotationsRef.current = false;
   }
   const rangedAnnotations = annotations.map((ann) => {
     if ((options == null ? void 0 : options.skipApproved) && ann.approved) return null;
@@ -107523,7 +107525,9 @@ function applyAnnotationsToEditor(editor, annotations, options) {
     }
   }
   if (markTr.steps.length > 0) {
+    isApplyingAnnotationsRef.current = true;
     editor.view.dispatch(markTr);
+    isApplyingAnnotationsRef.current = false;
   }
 }
 function ChapterEditorPage() {
@@ -107589,40 +107593,21 @@ function ChapterEditorPage() {
   const [editorDomEl, setEditorDomEl] = reactExports.useState(null);
   const titleDebounceRef = reactExports.useRef(null);
   const contentDebounceRef = reactExports.useRef(null);
+  const isApplyingAnnotationsRef = reactExports.useRef(false);
   reactExports.useEffect(() => {
     const prov = localStorage.getItem("ws_api_provider") || "openai";
     const key = prov === "claude" ? localStorage.getItem("ws_api_key_claude") ?? "" : localStorage.getItem("ws_api_key_openai") ?? "";
     setApiKey(key);
   }, []);
-  const lastSyncedChapterIdRef = reactExports.useRef(null);
-  reactExports.useEffect(() => {
-    if (chapter && lastSyncedChapterIdRef.current !== chapterId) {
-      setTitle(chapter.title);
-      setContent2(chapter.content);
-      setSaveStatus("saved");
-      lastSyncedChapterIdRef.current = chapterId;
-    }
-  }, [chapter, chapterId]);
-  const lastAppliedAnalysisIdRef = reactExports.useRef(null);
-  reactExports.useEffect(() => {
-    if (editorRef.current && persistedAnnotations && persistedAnnotations.length > 0 && latestAnalysisId !== null && latestAnalysisId !== lastAppliedAnalysisIdRef.current) {
-      const anns = persistedAnnotations.map((pa) => ({
-        id: pa.id,
-        text: pa.text,
-        color: pa.color,
-        explanation: pa.explanation,
-        proposal: pa.proposal,
-        approved: pa.approved
-      }));
-      applyAnnotationsToEditor(editorRef.current, anns, { skipApproved: true });
-      lastAppliedAnalysisIdRef.current = latestAnalysisId;
-    }
-  }, [persistedAnnotations, latestAnalysisId]);
   const doSave = reactExports.useCallback(
     (newTitle, newContent) => {
       if (!chapter) return;
       setSaveStatus("saving");
       setSaveErrorBannerVisible(false);
+      if (chapter.content && chapter.content.length > 100 && newContent.length < chapter.content.length * 0.3) {
+        setSaveStatus("unsaved");
+        return;
+      }
       updateChapter.mutate(
         {
           id: chapter.id,
@@ -107643,6 +107628,26 @@ function ChapterEditorPage() {
     },
     [chapter, updateChapter]
   );
+  const lastSyncedChapterIdRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    if (chapter && lastSyncedChapterIdRef.current !== chapterId) {
+      if (titleDebounceRef.current || contentDebounceRef.current) {
+        doSave(title, content);
+      }
+      if (titleDebounceRef.current) {
+        clearTimeout(titleDebounceRef.current);
+        titleDebounceRef.current = null;
+      }
+      if (contentDebounceRef.current) {
+        clearTimeout(contentDebounceRef.current);
+        contentDebounceRef.current = null;
+      }
+      setTitle(chapter.title);
+      setContent2(chapter.content);
+      setSaveStatus("saved");
+      lastSyncedChapterIdRef.current = chapterId;
+    }
+  }, [chapter, chapterId, doSave, title, content]);
   const handleSendToChat = (text) => {
     if (!book) return;
     localStorage.setItem("writerstudio-chat-open", "true");
@@ -107666,6 +107671,7 @@ function ChapterEditorPage() {
   );
   const handleContentChange = reactExports.useCallback(
     (val) => {
+      if (isApplyingAnnotationsRef.current) return;
       setContent2(val);
       setSaveStatus("unsaved");
       if (contentDebounceRef.current) clearTimeout(contentDebounceRef.current);
@@ -107981,12 +107987,22 @@ ${getPlainText(ch.content)}`
                         bookContext
                       );
                     }
-                    applyAnnotationsToEditor(editorRef.current, [], {});
+                    applyAnnotationsToEditor(
+                      editorRef.current,
+                      [],
+                      isApplyingAnnotationsRef,
+                      {}
+                    );
                     setCurrentAnnotations([]);
                     setCurrentAnnotations(annotations);
-                    applyAnnotationsToEditor(editorRef.current, annotations, {
-                      clearRange: selectionRange
-                    });
+                    applyAnnotationsToEditor(
+                      editorRef.current,
+                      annotations,
+                      isApplyingAnnotationsRef,
+                      {
+                        clearRange: selectionRange
+                      }
+                    );
                     const analysisId = await saveAnalysis.mutateAsync({
                       bookId: book.id,
                       chapterId: chapter.id,
@@ -108004,9 +108020,14 @@ ${getPlainText(ch.content)}`
                       }
                     }
                     setCurrentAnnotations(annotations);
-                    applyAnnotationsToEditor(editorRef.current, annotations, {
-                      clearRange: selectionRange
-                    });
+                    applyAnnotationsToEditor(
+                      editorRef.current,
+                      annotations,
+                      isApplyingAnnotationsRef,
+                      {
+                        clearRange: selectionRange
+                      }
+                    );
                     setAnalysisStatus("success");
                     setTimeout(() => setAnalysisStatus("idle"), 3e3);
                   } catch (err) {
@@ -108059,7 +108080,11 @@ ${getPlainText(ch.content)}`
                     }
                     return true;
                   });
-                  if (tr2.steps.length > 0) editor.view.dispatch(tr2);
+                  if (tr2.steps.length > 0) {
+                    isApplyingAnnotationsRef.current = true;
+                    editor.view.dispatch(tr2);
+                    isApplyingAnnotationsRef.current = false;
+                  }
                   setCurrentAnnotations([]);
                 },
                 "data-ocid": "chapter.approve_changes_button",
@@ -108289,12 +108314,22 @@ ${getPlainText(ch.content)}`
           onLoadAnalysis: (annotations) => {
             setHistoryPanelOpen(false);
             if (editorRef.current) {
-              applyAnnotationsToEditor(editorRef.current, [], {});
+              applyAnnotationsToEditor(
+                editorRef.current,
+                [],
+                isApplyingAnnotationsRef,
+                {}
+              );
               setCurrentAnnotations([]);
               setCurrentAnnotations(annotations);
-              applyAnnotationsToEditor(editorRef.current, annotations, {
-                skipApproved: true
-              });
+              applyAnnotationsToEditor(
+                editorRef.current,
+                annotations,
+                isApplyingAnnotationsRef,
+                {
+                  skipApproved: true
+                }
+              );
             }
           },
           onOpenSummary: (content2) => {
