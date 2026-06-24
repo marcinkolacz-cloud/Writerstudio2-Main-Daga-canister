@@ -106093,7 +106093,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-8Nf2TNoT.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-URSEIJVh.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107439,7 +107439,7 @@ function applyAnnotationsToEditor(editor, annotations, isApplyingAnnotationsRef,
   if (options == null ? void 0 : options.clearRange) {
     const { from: clearFrom, to: clearTo } = options.clearRange;
     editor.state.doc.nodesBetween(clearFrom, clearTo, (node, pos) => {
-      if (!node.isText) return false;
+      if (!node.isText) return true;
       const nodeStart = pos;
       const nodeEnd = pos + node.nodeSize;
       const overlapStart = Math.max(nodeStart, clearFrom);

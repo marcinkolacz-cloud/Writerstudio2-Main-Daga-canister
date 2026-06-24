@@ -184,7 +184,7 @@ function applyAnnotationsToEditor(
   if (options?.clearRange) {
     const { from: clearFrom, to: clearTo } = options.clearRange;
     editor.state.doc.nodesBetween(clearFrom, clearTo, (node, pos) => {
-      if (!node.isText) return false;
+      if (!node.isText) return true;
       const nodeStart = pos;
       const nodeEnd = pos + node.nodeSize;
       const overlapStart = Math.max(nodeStart, clearFrom);
