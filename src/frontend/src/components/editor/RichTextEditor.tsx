@@ -74,44 +74,12 @@ export function RichTextEditor({
 
   const updateAnnotationApproved = useUpdateAnnotationApproved();
 
-  const findTextRangeInDoc = useCallback(
-    (
-      editorInstance: Editor,
-      searchText: string,
-      nearPos: number,
-    ): { from: number; to: number } | null => {
-      let bestMatch: { from: number; to: number } | null = null;
-      let bestDist = Number.POSITIVE_INFINITY;
-      editorInstance.state.doc.descendants((node, pos) => {
-        if (!node.isText || !node.text) return true;
-        const nodeText = node.text;
-        let searchIdx = 0;
-        while (true) {
-          const idx = nodeText.indexOf(searchText, searchIdx);
-          if (idx === -1) break;
-          const from = pos + idx;
-          const to = from + searchText.length;
-          const dist = Math.abs(from - nearPos);
-          if (dist < bestDist) {
-            bestDist = dist;
-            bestMatch = { from, to };
-          }
-          searchIdx = idx + 1;
-        }
-        return true;
-      });
-      return bestMatch;
-    },
-    [],
-  );
-
   const handleApplyProposal = useCallback(
     ({
       id,
       from,
       to,
       proposal,
-      text,
     }: {
       id: bigint;
       from: number;
@@ -121,17 +89,11 @@ export function RichTextEditor({
     }) => {
       if (!editor) return;
 
-      let actualFrom = from;
-      let actualTo = to;
+      // Validate the range is valid
+      if (from < 0 || from >= to) return;
 
-      // Verify the exact range still contains the expected text
-      const currentText = editor.state.doc.textBetween(from, to, " ");
-      if (currentText !== text) {
-        const match = findTextRangeInDoc(editor, text, from);
-        if (!match) return; // avoid accidental damage to random location
-        actualFrom = match.from;
-        actualTo = match.to;
-      }
+      const actualFrom = from;
+      const actualTo = to;
 
       // Read the existing mark and its attributes before deleting
       let markTypeName = "";
@@ -186,7 +148,7 @@ export function RichTextEditor({
         );
       }
     },
-    [editor, updateAnnotationApproved, findTextRangeInDoc],
+    [editor, updateAnnotationApproved],
   );
 
   const handleKeepOriginalProposal = useCallback(
