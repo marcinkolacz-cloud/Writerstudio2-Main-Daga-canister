@@ -381,6 +381,11 @@ export function ChapterEditorPage() {
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isApplyingAnnotationsRef = useRef(false);
+  const previousChapterRef = useRef<{
+    id: bigint;
+    title: string;
+    content: string;
+  } | null>(null);
 
   // Sync apiKey when provider changes or on mount
   useEffect(() => {
@@ -433,7 +438,16 @@ export function ChapterEditorPage() {
   useEffect(() => {
     if (chapter && lastSyncedChapterIdRef.current !== chapterId) {
       if (titleDebounceRef.current || contentDebounceRef.current) {
-        doSave(title, content);
+        if (
+          previousChapterRef.current &&
+          (titleDebounceRef.current || contentDebounceRef.current)
+        ) {
+          updateChapter.mutate({
+            id: previousChapterRef.current.id,
+            title: previousChapterRef.current.title,
+            content: previousChapterRef.current.content,
+          });
+        }
       }
       if (titleDebounceRef.current) {
         clearTimeout(titleDebounceRef.current);
@@ -445,10 +459,15 @@ export function ChapterEditorPage() {
       }
       setTitle(chapter.title);
       setContent(chapter.content);
+      previousChapterRef.current = {
+        id: chapter.id,
+        title: chapter.title,
+        content: chapter.content,
+      };
       setSaveStatus("saved");
       lastSyncedChapterIdRef.current = chapterId;
     }
-  }, [chapter, chapterId, doSave, title, content]);
+  }, [chapter, chapterId, updateChapter.mutate]);
 
   const handleSendToChat = (text: string) => {
     if (!book) return;
@@ -465,12 +484,15 @@ export function ChapterEditorPage() {
     (val: string) => {
       setTitle(val);
       setSaveStatus("unsaved");
+      if (chapter) {
+        previousChapterRef.current = { id: chapter.id, title: val, content };
+      }
       if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
       titleDebounceRef.current = setTimeout(() => {
         doSave(val, content);
       }, 3000);
     },
-    [content, doSave],
+    [content, doSave, chapter, chapter?.id],
   );
 
   const handleContentChange = useCallback(
@@ -478,12 +500,15 @@ export function ChapterEditorPage() {
       if (isApplyingAnnotationsRef.current) return;
       setContent(val);
       setSaveStatus("unsaved");
+      if (chapter) {
+        previousChapterRef.current = { id: chapter.id, title, content: val };
+      }
       if (contentDebounceRef.current) clearTimeout(contentDebounceRef.current);
       contentDebounceRef.current = setTimeout(() => {
         doSave(title, val);
       }, 3000);
     },
-    [title, doSave],
+    [title, doSave, chapter, chapter?.id],
   );
 
   const isLoading = bookLoading || chapterLoading;

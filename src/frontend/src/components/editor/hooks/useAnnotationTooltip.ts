@@ -114,9 +114,8 @@ export function useAnnotationTooltip(
             m.attrs["data-annotation-id"] === annotationIdAttr,
         );
         if (mark) {
-          foundFrom = p;
+          if (foundFrom === null) foundFrom = p;
           foundTo = p + n.nodeSize;
-          return false;
         }
         return true;
       });

@@ -68462,9 +68462,8 @@ function useAnnotationTooltip(editor, onApplyProposal, onKeepOriginal, onRevertP
           (m2) => m2.type.name === color2 && m2.attrs["data-annotation-id"] === annotationIdAttr
         );
         if (mark) {
-          foundFrom = p2;
+          if (foundFrom === null) foundFrom = p2;
           foundTo = p2 + n2.nodeSize;
-          return false;
         }
         return true;
       });
@@ -106060,7 +106059,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DudLXEFV.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BmTP4l-B.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107561,6 +107560,7 @@ function ChapterEditorPage() {
   const titleDebounceRef = reactExports.useRef(null);
   const contentDebounceRef = reactExports.useRef(null);
   const isApplyingAnnotationsRef = reactExports.useRef(false);
+  const previousChapterRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
     const prov = localStorage.getItem("ws_api_provider") || "openai";
     const key = prov === "claude" ? localStorage.getItem("ws_api_key_claude") ?? "" : localStorage.getItem("ws_api_key_openai") ?? "";
@@ -107599,7 +107599,13 @@ function ChapterEditorPage() {
   reactExports.useEffect(() => {
     if (chapter && lastSyncedChapterIdRef.current !== chapterId) {
       if (titleDebounceRef.current || contentDebounceRef.current) {
-        doSave(title, content);
+        if (previousChapterRef.current && (titleDebounceRef.current || contentDebounceRef.current)) {
+          updateChapter.mutate({
+            id: previousChapterRef.current.id,
+            title: previousChapterRef.current.title,
+            content: previousChapterRef.current.content
+          });
+        }
       }
       if (titleDebounceRef.current) {
         clearTimeout(titleDebounceRef.current);
@@ -107611,10 +107617,15 @@ function ChapterEditorPage() {
       }
       setTitle(chapter.title);
       setContent2(chapter.content);
+      previousChapterRef.current = {
+        id: chapter.id,
+        title: chapter.title,
+        content: chapter.content
+      };
       setSaveStatus("saved");
       lastSyncedChapterIdRef.current = chapterId;
     }
-  }, [chapter, chapterId, doSave, title, content]);
+  }, [chapter, chapterId, updateChapter.mutate]);
   const handleSendToChat = (text) => {
     if (!book) return;
     localStorage.setItem("writerstudio-chat-open", "true");
@@ -107629,24 +107640,30 @@ function ChapterEditorPage() {
     (val) => {
       setTitle(val);
       setSaveStatus("unsaved");
+      if (chapter) {
+        previousChapterRef.current = { id: chapter.id, title: val, content };
+      }
       if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
       titleDebounceRef.current = setTimeout(() => {
         doSave(val, content);
       }, 3e3);
     },
-    [content, doSave]
+    [content, doSave, chapter, chapter == null ? void 0 : chapter.id]
   );
   const handleContentChange = reactExports.useCallback(
     (val) => {
       if (isApplyingAnnotationsRef.current) return;
       setContent2(val);
       setSaveStatus("unsaved");
+      if (chapter) {
+        previousChapterRef.current = { id: chapter.id, title, content: val };
+      }
       if (contentDebounceRef.current) clearTimeout(contentDebounceRef.current);
       contentDebounceRef.current = setTimeout(() => {
         doSave(title, val);
       }, 3e3);
     },
-    [title, doSave]
+    [title, doSave, chapter, chapter == null ? void 0 : chapter.id]
   );
   const isLoading = bookLoading || chapterLoading;
   if (isLoading) {
