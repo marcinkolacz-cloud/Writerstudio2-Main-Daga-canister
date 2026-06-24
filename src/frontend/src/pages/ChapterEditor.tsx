@@ -900,53 +900,21 @@ export function ChapterEditorPage() {
                   "annotationPurple",
                 ];
 
-                const annotationsToApprove: Annotation[] =
-                  currentAnnotations.length > 0
-                    ? currentAnnotations
-                    : (persistedAnnotations ?? []).map((pa) => ({
-                        id: pa.id,
-                        text: pa.text,
-                        color: pa.color as Annotation["color"],
-                        explanation: pa.explanation,
-                        proposal: pa.proposal,
-                        approved: pa.approved,
-                      }));
-
-                // Build a single atomic transaction to remove all annotation marks
-                // by finding each annotation via its unique data-annotation-id
                 const tr = editor.state.tr;
-                for (const ann of annotationsToApprove) {
-                  let foundFrom: number | null = null;
-                  let foundTo: number | null = null;
-                  editor.state.doc.descendants((node, pos) => {
-                    if (foundFrom !== null) return false;
-                    if (!node.isText) return true;
-                    const mark = node.marks.find(
-                      (m) =>
-                        annotationMarkNames.includes(m.type.name) &&
-                        m.attrs["data-annotation-id"] === String(ann.id),
-                    );
-                    if (mark) {
-                      foundFrom = pos;
-                      foundTo = pos + node.nodeSize;
-                      return false;
-                    }
-                    return true;
-                  });
-                  if (foundFrom !== null && foundTo !== null) {
-                    for (const markName of annotationMarkNames) {
-                      const markType = editor.schema.marks[markName];
-                      if (markType) {
-                        tr.removeMark(foundFrom, foundTo, markType);
-                      }
+                editor.state.doc.descendants((node, pos) => {
+                  if (!node.isText) return true;
+                  for (const markName of annotationMarkNames) {
+                    if (node.marks.find((m) => m.type.name === markName)) {
+                      tr.removeMark(
+                        pos,
+                        pos + node.nodeSize,
+                        editor.schema.marks[markName],
+                      );
                     }
                   }
-                }
-                if (tr.steps.length > 0) {
-                  editor.view.dispatch(tr);
-                }
-
-                // Clear current annotations state
+                  return true;
+                });
+                if (tr.steps.length > 0) editor.view.dispatch(tr);
                 setCurrentAnnotations([]);
               }}
               data-ocid="chapter.approve_changes_button"
