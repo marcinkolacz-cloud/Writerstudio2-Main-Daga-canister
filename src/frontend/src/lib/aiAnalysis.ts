@@ -44,7 +44,8 @@ Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -70,7 +71,8 @@ Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -85,7 +87,8 @@ Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -103,7 +106,8 @@ Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -117,7 +121,8 @@ COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
 Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 purple|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }

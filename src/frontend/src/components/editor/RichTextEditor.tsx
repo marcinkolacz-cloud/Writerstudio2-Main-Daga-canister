@@ -69,6 +69,33 @@ export function RichTextEditor({
         class:
           "prose prose-sm max-w-none focus:outline-none min-h-[200px] px-4 py-3 w-full",
       },
+      handlePaste: (view, event, _slice) => {
+        const normalize = (text: string) =>
+          text
+            .replace(/\u00A0/g, " ")
+            .replace(/\u200B|\u200C|\u200D|\uFEFF/g, "");
+
+        const html = event.clipboardData?.getData("text/html");
+        if (html) {
+          const normalized = normalize(html);
+          view.pasteHTML(normalized);
+          view.dispatch(
+            view.state.tr.replaceSelectionWith(
+              view.state.schema.text(normalized),
+            ),
+          );
+          return true;
+        }
+
+        const text = event.clipboardData?.getData("text/plain");
+        if (text) {
+          const normalized = normalize(text);
+          view.dispatch(view.state.tr.insertText(normalized));
+          return true;
+        }
+
+        return false;
+      },
     },
   });
 
@@ -275,10 +302,16 @@ export function RichTextEditor({
 
   useEffect(() => {
     if (editor && value !== lastEmittedValue.current) {
-      editor.commands.setContent(value, { emitUpdate: false });
-      lastEmittedValue.current = value;
+      const normalize = (text: string) =>
+        text
+          .replace(/\u00A0/g, " ")
+          .replace(/\u200B|\u200C|\u200D|\uFEFF/g, "");
+      const normalized = normalize(value);
+      editor.commands.setContent(normalized, { emitUpdate: false });
+      lastEmittedValue.current = normalized;
+      onChange(editor.getHTML());
     }
-  }, [value, editor]);
+  }, [value, editor, onChange]);
 
   if (!editor) {
     return null;

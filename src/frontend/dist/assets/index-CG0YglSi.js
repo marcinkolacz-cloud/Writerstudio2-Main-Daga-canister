@@ -41918,7 +41918,8 @@ Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
   if (customPrompt) {
     system += `
 
@@ -41942,7 +41943,8 @@ Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
   if (customPrompt) {
     system += `
 
@@ -41967,7 +41969,8 @@ Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
   if (customPrompt) {
     system += `
 
@@ -41989,7 +41992,8 @@ Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
   if (customPrompt) {
     system += `
 
@@ -42010,7 +42014,8 @@ COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
 Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 purple|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
-Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.`;
+Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
   if (customPrompt) {
     system += `
 
@@ -76987,6 +76992,28 @@ function RichTextEditor({
     editorProps: {
       attributes: {
         class: "prose prose-sm max-w-none focus:outline-none min-h-[200px] px-4 py-3 w-full"
+      },
+      handlePaste: (view, event, _slice) => {
+        var _a3, _b3;
+        const normalize2 = (text2) => text2.replace(/\u00A0/g, " ").replace(/\u200B|\u200C|\u200D|\uFEFF/g, "");
+        const html = (_a3 = event.clipboardData) == null ? void 0 : _a3.getData("text/html");
+        if (html) {
+          const normalized = normalize2(html);
+          view.pasteHTML(normalized);
+          view.dispatch(
+            view.state.tr.replaceSelectionWith(
+              view.state.schema.text(normalized)
+            )
+          );
+          return true;
+        }
+        const text = (_b3 = event.clipboardData) == null ? void 0 : _b3.getData("text/plain");
+        if (text) {
+          const normalized = normalize2(text);
+          view.dispatch(view.state.tr.insertText(normalized));
+          return true;
+        }
+        return false;
       }
     }
   });
@@ -77139,10 +77166,13 @@ function RichTextEditor({
   );
   reactExports.useEffect(() => {
     if (editor && value !== lastEmittedValue.current) {
-      editor.commands.setContent(value, { emitUpdate: false });
-      lastEmittedValue.current = value;
+      const normalize2 = (text) => text.replace(/\u00A0/g, " ").replace(/\u200B|\u200C|\u200D|\uFEFF/g, "");
+      const normalized = normalize2(value);
+      editor.commands.setContent(normalized, { emitUpdate: false });
+      lastEmittedValue.current = normalized;
+      onChange(editor.getHTML());
     }
-  }, [value, editor]);
+  }, [value, editor, onChange]);
   if (!editor) {
     return null;
   }
@@ -106066,7 +106096,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-EbArNp33.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Begqvo0Y.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
