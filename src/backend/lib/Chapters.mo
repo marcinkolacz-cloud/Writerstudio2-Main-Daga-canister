@@ -11,6 +11,17 @@ module {
     maxId
   };
 
+  public func stripHtml(html : Text) : Text {
+    var result = "";
+    var inTag = false;
+    for (c in html.chars()) {
+      if (c == '<') { inTag := true; }
+      else if (c == '>') { inTag := false; }
+      else if (not inTag) { result := result # Text.fromChar(c); };
+    };
+    result
+  };
+
   public func countWords(text : Text) : Nat {
     var count = 0;
     var inWord = false;
@@ -47,13 +58,14 @@ module {
   };
 
   public func updateChapterRecord(chapter : Types.Chapter, title : Text, content : Text) : Types.Chapter {
-    let words = countWords(content);
+    let plainContent = stripHtml(content);
+    let words = countWords(plainContent);
     {
       chapter with
       title;
       content;
       wordCount = words;
-      charCount = content.size();
+      charCount = plainContent.size();
       updatedAt = Time.now();
     }
   };
