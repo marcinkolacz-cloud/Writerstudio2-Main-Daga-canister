@@ -67,6 +67,7 @@ export function ContextChatPanel({
   const [isAutoStarting, setIsAutoStarting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const autoStartedRef = useRef(false);
   const queryClient = useQueryClient();
 
   // Helper: split first assistant message into observation points
@@ -101,6 +102,7 @@ export function ContextChatPanel({
 
   // Auto-start new session when panel opens and no sessions exist
   useEffect(() => {
+    if (autoStartedRef.current) return;
     if (
       !triggerAnalysis ||
       sessionsLoading ||
@@ -112,29 +114,23 @@ export function ContextChatPanel({
       return;
 
     const autoStart = async () => {
+      autoStartedRef.current = true;
       setIsAutoStarting(true);
       try {
-        const currentText = editor.getText();
+        const div = document.createElement("div");
+        div.innerHTML = editor.getHTML();
+        const currentText = div.textContent || div.innerText || "";
         if (!currentText.trim()) {
           setIsAutoStarting(false);
           return;
         }
 
-        // Build context from previous chapters
-        const currentChapter = chapters.find((c) => c.id === chapterId);
-        const prevChapters = currentChapter
-          ? chapters.filter(
-              (c) =>
-                c.orderIndex < currentChapter.orderIndex && c.id !== chapterId,
-            )
-          : [];
-        const prevSummaries = prevChapters.map((c) => {
-          const plain = c.content
-            .replace(/<[^>]+>/g, " ")
-            .replace(/\s+/g, " ")
-            .trim();
-          return `${c.title}:\n${plain.slice(0, 500)}`;
-        });
+        const prevSummaries = bookAnalyses
+          .filter(
+            (a) => a.analysisType === "summary" && a.chapterId !== chapterId,
+          )
+          .sort((a, b) => Number(a.createdAt - b.createdAt))
+          .map((a) => a.resultContent);
 
         const annotations = await analyzeWithContext(
           currentText,
@@ -182,13 +178,17 @@ export function ContextChatPanel({
     editor,
     apiKey,
     provider,
-    chapters,
     chapterId,
     isAutoStarting,
     createSession,
     bookContext,
     addMessage,
+    bookAnalyses,
   ]);
+
+  useEffect(() => {
+    if (!triggerAnalysis) autoStartedRef.current = false;
+  }, [triggerAnalysis]);
 
   // Scroll to bottom when messages change
   useEffect(() => {

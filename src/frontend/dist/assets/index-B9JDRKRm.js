@@ -48959,6 +48959,7 @@ function ContextChatPanel({
   const [isAutoStarting, setIsAutoStarting] = reactExports.useState(false);
   const scrollRef = reactExports.useRef(null);
   const inputRef = reactExports.useRef(null);
+  const autoStartedRef = reactExports.useRef(false);
   const queryClient2 = useQueryClient();
   const splitObservations = reactExports.useCallback((text) => {
     if (!text.trim()) return [];
@@ -48984,25 +48985,23 @@ function ContextChatPanel({
   const addMessage = useAddChatMessage();
   const deleteSession = useDeleteChatSession();
   reactExports.useEffect(() => {
+    if (autoStartedRef.current) return;
     if (!triggerAnalysis || sessionsLoading || isAutoStarting || sessions.length > 0 || !editor || !apiKey)
       return;
     const autoStart = async () => {
+      autoStartedRef.current = true;
       setIsAutoStarting(true);
       try {
-        const currentText = editor.getText();
+        const div = document.createElement("div");
+        div.innerHTML = editor.getHTML();
+        const currentText = div.textContent || div.innerText || "";
         if (!currentText.trim()) {
           setIsAutoStarting(false);
           return;
         }
-        const currentChapter = chapters.find((c2) => c2.id === chapterId);
-        const prevChapters = currentChapter ? chapters.filter(
-          (c2) => c2.orderIndex < currentChapter.orderIndex && c2.id !== chapterId
-        ) : [];
-        const prevSummaries = prevChapters.map((c2) => {
-          const plain = c2.content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-          return `${c2.title}:
-${plain.slice(0, 500)}`;
-        });
+        const prevSummaries = bookAnalyses.filter(
+          (a2) => a2.analysisType === "summary" && a2.chapterId !== chapterId
+        ).sort((a2, b2) => Number(a2.createdAt - b2.createdAt)).map((a2) => a2.resultContent);
         const annotations = await analyzeWithContext(
           currentText,
           prevSummaries,
@@ -49041,13 +49040,16 @@ ${summaryLines.join("\n")}` : "Analiza kontekstowa nie wykryła żadnych problem
     editor,
     apiKey,
     provider,
-    chapters,
     chapterId,
     isAutoStarting,
     createSession,
     bookContext,
-    addMessage
+    addMessage,
+    bookAnalyses
   ]);
+  reactExports.useEffect(() => {
+    if (!triggerAnalysis) autoStartedRef.current = false;
+  }, [triggerAnalysis]);
   reactExports.useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -106064,7 +106066,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-CH-mqyLf.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-EbArNp33.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
