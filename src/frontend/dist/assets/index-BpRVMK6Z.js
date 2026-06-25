@@ -77173,11 +77173,15 @@ function RichTextEditor({
     if (editor && value !== lastEmittedValue.current) {
       const normalize2 = (text) => text.replace(/\u00A0/g, " ").replace(/\u200B|\u200C|\u200D|\uFEFF/g, "");
       const normalized = normalize2(value);
-      editor.commands.setContent(normalized, { emitUpdate: false });
-      lastEmittedValue.current = normalized;
-      onChange(editor.getHTML());
+      if (normalized !== value) {
+        editor.commands.setContent(normalized, { emitUpdate: false });
+        lastEmittedValue.current = normalized;
+      } else {
+        editor.commands.setContent(value, { emitUpdate: false });
+        lastEmittedValue.current = value;
+      }
     }
-  }, [value, editor, onChange]);
+  }, [value, editor]);
   if (!editor) {
     return null;
   }
@@ -106101,7 +106105,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-H0AIEMka.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DAQvPKdC.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

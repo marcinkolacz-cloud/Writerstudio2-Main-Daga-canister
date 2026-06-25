@@ -307,11 +307,15 @@ export function RichTextEditor({
           .replace(/\u00A0/g, " ")
           .replace(/\u200B|\u200C|\u200D|\uFEFF/g, "");
       const normalized = normalize(value);
-      editor.commands.setContent(normalized, { emitUpdate: false });
-      lastEmittedValue.current = normalized;
-      onChange(editor.getHTML());
+      if (normalized !== value) {
+        editor.commands.setContent(normalized, { emitUpdate: false });
+        lastEmittedValue.current = normalized;
+      } else {
+        editor.commands.setContent(value, { emitUpdate: false });
+        lastEmittedValue.current = value;
+      }
     }
-  }, [value, editor, onChange]);
+  }, [value, editor]);
 
   if (!editor) {
     return null;
