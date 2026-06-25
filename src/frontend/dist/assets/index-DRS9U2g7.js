@@ -41919,8 +41919,11 @@ Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.
-WAŻNE: W polu TEKST ORYGINALNY zawsze podawaj PEŁNE zdanie w którym występuje błąd — od kropki do kropki (lub od myślnika dialogowego do końca wypowiedzi). Nigdy nie podawaj tylko fragmentu zdania. W polu PROPOZYCJA podawaj przepisane PEŁNE zdanie — tej samej długości co oryginał, zachowując wszystkie słowa których nie zmieniasz.`;
+ZASADY TWORZENIA PROPOZYCJI:
+1. Przed napisaniem propozycji przeczytaj CAŁE zdanie od kropki do kropki — propozycja musi pasować do reszty zdania i mieć sens po wstawieniu w miejsce oryginału
+2. W polu PROPOZYCJA używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki, dwukropki. Absolutnie nie używaj myślnika narracyjnego (—) ani pauzy w propozycjach
+3. Zmieniaj tylko to co jest błędem lub wymaga poprawy — nie przepisuj całego zdania jeśli to nie jest konieczne
+4. Propozycja po wstawieniu w tekst musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
   if (customPrompt) {
     system += `
 
@@ -41945,8 +41948,11 @@ Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.
-WAŻNE: W polu TEKST ORYGINALNY zawsze podawaj PEŁNE zdanie w którym występuje błąd — od kropki do kropki (lub od myślnika dialogowego do końca wypowiedzi). Nigdy nie podawaj tylko fragmentu zdania. W polu PROPOZYCJA podawaj przepisane PEŁNE zdanie — tej samej długości co oryginał, zachowując wszystkie słowa których nie zmieniasz.`;
+ZASADY TWORZENIA PROPOZYCJI:
+1. Przed napisaniem propozycji przeczytaj CAŁE zdanie od kropki do kropki — propozycja musi pasować do reszty zdania i mieć sens po wstawieniu w miejsce oryginału
+2. W polu PROPOZYCJA używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki, dwukropki. Absolutnie nie używaj myślnika narracyjnego (—) ani pauzy w propozycjach
+3. Zmieniaj tylko to co jest błędem lub wymaga poprawy — nie przepisuj całego zdania jeśli to nie jest konieczne
+4. Propozycja po wstawieniu w tekst musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
   if (customPrompt) {
     system += `
 
@@ -41972,8 +41978,11 @@ Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.
-WAŻNE: W polu TEKST ORYGINALNY zawsze podawaj PEŁNE zdanie w którym występuje błąd — od kropki do kropki (lub od myślnika dialogowego do końca wypowiedzi). Nigdy nie podawaj tylko fragmentu zdania. W polu PROPOZYCJA podawaj przepisane PEŁNE zdanie — tej samej długości co oryginał, zachowując wszystkie słowa których nie zmieniasz.`;
+ZASADY TWORZENIA PROPOZYCJI:
+1. Przed napisaniem propozycji przeczytaj CAŁE zdanie od kropki do kropki — propozycja musi pasować do reszty zdania i mieć sens po wstawieniu w miejsce oryginału
+2. W polu PROPOZYCJA używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki, dwukropki. Absolutnie nie używaj myślnika narracyjnego (—) ani pauzy w propozycjach
+3. Zmieniaj tylko to co jest błędem lub wymaga poprawy — nie przepisuj całego zdania jeśli to nie jest konieczne
+4. Propozycja po wstawieniu w tekst musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
   if (customPrompt) {
     system += `
 
@@ -41996,8 +42005,11 @@ Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.
-WAŻNE: W polu TEKST ORYGINALNY zawsze podawaj PEŁNE zdanie w którym występuje błąd — od kropki do kropki (lub od myślnika dialogowego do końca wypowiedzi). Nigdy nie podawaj tylko fragmentu zdania. W polu PROPOZYCJA podawaj przepisane PEŁNE zdanie — tej samej długości co oryginał, zachowując wszystkie słowa których nie zmieniasz.`;
+ZASADY TWORZENIA PROPOZYCJI:
+1. Przed napisaniem propozycji przeczytaj CAŁE zdanie od kropki do kropki — propozycja musi pasować do reszty zdania i mieć sens po wstawieniu w miejsce oryginału
+2. W polu PROPOZYCJA używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki, dwukropki. Absolutnie nie używaj myślnika narracyjnego (—) ani pauzy w propozycjach
+3. Zmieniaj tylko to co jest błędem lub wymaga poprawy — nie przepisuj całego zdania jeśli to nie jest konieczne
+4. Propozycja po wstawieniu w tekst musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
   if (customPrompt) {
     system += `
 
@@ -42019,8 +42031,11 @@ Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 purple|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.
-WAŻNE: W polu TEKST ORYGINALNY zawsze podawaj PEŁNE zdanie w którym występuje błąd — od kropki do kropki (lub od myślnika dialogowego do końca wypowiedzi). Nigdy nie podawaj tylko fragmentu zdania. W polu PROPOZYCJA podawaj przepisane PEŁNE zdanie — tej samej długości co oryginał, zachowując wszystkie słowa których nie zmieniasz.`;
+ZASADY TWORZENIA PROPOZYCJI:
+1. Przed napisaniem propozycji przeczytaj CAŁE zdanie od kropki do kropki — propozycja musi pasować do reszty zdania i mieć sens po wstawieniu w miejsce oryginału
+2. W polu PROPOZYCJA używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki, dwukropki. Absolutnie nie używaj myślnika narracyjnego (—) ani pauzy w propozycjach
+3. Zmieniaj tylko to co jest błędem lub wymaga poprawy — nie przepisuj całego zdania jeśli to nie jest konieczne
+4. Propozycja po wstawieniu w tekst musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
   if (customPrompt) {
     system += `
 
@@ -106105,7 +106120,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DAQvPKdC.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BFZTvjSM.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
