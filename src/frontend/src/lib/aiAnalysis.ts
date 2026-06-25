@@ -45,7 +45,8 @@ Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.
+WAŻNE: W polu TEKST ORYGINALNY zawsze podawaj PEŁNE zdanie w którym występuje błąd — od kropki do kropki (lub od myślnika dialogowego do końca wypowiedzi). Nigdy nie podawaj tylko fragmentu zdania. W polu PROPOZYCJA podawaj przepisane PEŁNE zdanie — tej samej długości co oryginał, zachowując wszystkie słowa których nie zmieniasz.`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -72,7 +73,8 @@ Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.
+WAŻNE: W polu TEKST ORYGINALNY zawsze podawaj PEŁNE zdanie w którym występuje błąd — od kropki do kropki (lub od myślnika dialogowego do końca wypowiedzi). Nigdy nie podawaj tylko fragmentu zdania. W polu PROPOZYCJA podawaj przepisane PEŁNE zdanie — tej samej długości co oryginał, zachowując wszystkie słowa których nie zmieniasz.`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -88,7 +90,8 @@ Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.
+WAŻNE: W polu TEKST ORYGINALNY zawsze podawaj PEŁNE zdanie w którym występuje błąd — od kropki do kropki (lub od myślnika dialogowego do końca wypowiedzi). Nigdy nie podawaj tylko fragmentu zdania. W polu PROPOZYCJA podawaj przepisane PEŁNE zdanie — tej samej długości co oryginał, zachowując wszystkie słowa których nie zmieniasz.`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -107,7 +110,8 @@ Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.
+WAŻNE: W polu TEKST ORYGINALNY zawsze podawaj PEŁNE zdanie w którym występuje błąd — od kropki do kropki (lub od myślnika dialogowego do końca wypowiedzi). Nigdy nie podawaj tylko fragmentu zdania. W polu PROPOZYCJA podawaj przepisane PEŁNE zdanie — tej samej długości co oryginał, zachowując wszystkie słowa których nie zmieniasz.`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -122,7 +126,8 @@ Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 purple|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.`;
+W propozycjach używaj klasycznej interpunkcji — przecinki, kropki, średniki. Nie używaj myślników narracyjnych (—) ani pauz w propozycjach zamiany, chyba że oryginalny tekst ich używa.
+WAŻNE: W polu TEKST ORYGINALNY zawsze podawaj PEŁNE zdanie w którym występuje błąd — od kropki do kropki (lub od myślnika dialogowego do końca wypowiedzi). Nigdy nie podawaj tylko fragmentu zdania. W polu PROPOZYCJA podawaj przepisane PEŁNE zdanie — tej samej długości co oryginał, zachowując wszystkie słowa których nie zmieniasz.`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
