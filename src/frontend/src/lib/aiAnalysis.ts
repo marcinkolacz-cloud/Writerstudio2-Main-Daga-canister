@@ -43,13 +43,12 @@ COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
 Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
-yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
 ZASADY TWORZENIA PROPOZYCJI:
-1. Przed napisaniem propozycji przeczytaj CAŁE zdanie od kropki do kropki — propozycja musi pasować do reszty zdania i mieć sens po wstawieniu w miejsce oryginału
-2. W polu PROPOZYCJA używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki, dwukropki. Absolutnie nie używaj myślnika narracyjnego (—) ani pauzy w propozycjach
-3. Zmieniaj tylko to co jest błędem lub wymaga poprawy — nie przepisuj całego zdania jeśli to nie jest konieczne
-4. Propozycja po wstawieniu w tekst musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
+1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
+2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
+3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
+4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -74,13 +73,12 @@ COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
 Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
-yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
 ZASADY TWORZENIA PROPOZYCJI:
-1. Przed napisaniem propozycji przeczytaj CAŁE zdanie od kropki do kropki — propozycja musi pasować do reszty zdania i mieć sens po wstawieniu w miejsce oryginału
-2. W polu PROPOZYCJA używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki, dwukropki. Absolutnie nie używaj myślnika narracyjnego (—) ani pauzy w propozycjach
-3. Zmieniaj tylko to co jest błędem lub wymaga poprawy — nie przepisuj całego zdania jeśli to nie jest konieczne
-4. Propozycja po wstawieniu w tekst musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
+1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
+2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
+3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
+4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -94,13 +92,12 @@ COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
 Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
-yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
 ZASADY TWORZENIA PROPOZYCJI:
-1. Przed napisaniem propozycji przeczytaj CAŁE zdanie od kropki do kropki — propozycja musi pasować do reszty zdania i mieć sens po wstawieniu w miejsce oryginału
-2. W polu PROPOZYCJA używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki, dwukropki. Absolutnie nie używaj myślnika narracyjnego (—) ani pauzy w propozycjach
-3. Zmieniaj tylko to co jest błędem lub wymaga poprawy — nie przepisuj całego zdania jeśli to nie jest konieczne
-4. Propozycja po wstawieniu w tekst musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
+1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
+2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
+3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
+4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -117,13 +114,12 @@ COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
 Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
-yellow|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
 ZASADY TWORZENIA PROPOZYCJI:
-1. Przed napisaniem propozycji przeczytaj CAŁE zdanie od kropki do kropki — propozycja musi pasować do reszty zdania i mieć sens po wstawieniu w miejsce oryginału
-2. W polu PROPOZYCJA używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki, dwukropki. Absolutnie nie używaj myślnika narracyjnego (—) ani pauzy w propozycjach
-3. Zmieniaj tylko to co jest błędem lub wymaga poprawy — nie przepisuj całego zdania jeśli to nie jest konieczne
-4. Propozycja po wstawieniu w tekst musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
+1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
+2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
+3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
+4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -139,10 +135,10 @@ Przykład:
 purple|||był bardzo zły|||Emocja nazwana wprost|||Zacisnął pięści tak mocno, że zbielały mu knykcie
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
 ZASADY TWORZENIA PROPOZYCJI:
-1. Przed napisaniem propozycji przeczytaj CAŁE zdanie od kropki do kropki — propozycja musi pasować do reszty zdania i mieć sens po wstawieniu w miejsce oryginału
-2. W polu PROPOZYCJA używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki, dwukropki. Absolutnie nie używaj myślnika narracyjnego (—) ani pauzy w propozycjach
-3. Zmieniaj tylko to co jest błędem lub wymaga poprawy — nie przepisuj całego zdania jeśli to nie jest konieczne
-4. Propozycja po wstawieniu w tekst musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
+1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
+2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
+3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
+4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
