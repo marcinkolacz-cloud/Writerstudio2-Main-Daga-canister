@@ -50097,18 +50097,30 @@ async function generateSpeechChunk(text, voice, apiKey) {
   }
   return response.blob();
 }
-async function generateSpeech(text, voice, apiKey) {
+async function generateSpeech(text, voice, apiKey, onProgress) {
   if (!text.trim()) {
     throw new Error("Brak tekstu do odczytania");
   }
   const chunks = splitTextIntoChunks(text);
   if (chunks.length === 1) {
+    onProgress == null ? void 0 : onProgress(1, 1);
     return generateSpeechChunk(chunks[0], voice, apiKey);
   }
-  const blobs = [];
-  for (let i2 = 0; i2 < chunks.length; i2++) {
-    const blob = await generateSpeechChunk(chunks[i2], voice, apiKey);
-    blobs.push(blob);
+  const blobs = new Array(chunks.length);
+  const CONCURRENCY = 3;
+  for (let batchStart = 0; batchStart < chunks.length; batchStart += CONCURRENCY) {
+    const batchEnd = Math.min(batchStart + CONCURRENCY, chunks.length);
+    const batchIndices = Array.from(
+      { length: batchEnd - batchStart },
+      (_2, i2) => batchStart + i2
+    );
+    await Promise.all(
+      batchIndices.map(async (index2) => {
+        const blob = await generateSpeechChunk(chunks[index2], voice, apiKey);
+        blobs[index2] = blob;
+        onProgress == null ? void 0 : onProgress(index2 + 1, chunks.length);
+      })
+    );
   }
   return new Blob(blobs, { type: "audio/mpeg" });
 }
@@ -50126,6 +50138,8 @@ function LektorPanel({ editor, chapterId, bookId }) {
   const [speed, setSpeed] = reactExports.useState([1]);
   const [playbackState, setPlaybackState] = reactExports.useState("idle");
   const [progress, setProgress] = reactExports.useState(0);
+  const [totalChunks, setTotalChunks] = reactExports.useState(0);
+  const [currentChunk, setCurrentChunk] = reactExports.useState(0);
   const [duration, setDuration] = reactExports.useState(0);
   const [error, setError] = reactExports.useState(null);
   const [success, setSuccess] = reactExports.useState(null);
@@ -50146,6 +50160,8 @@ function LektorPanel({ editor, chapterId, bookId }) {
     }
     setPlaybackState("idle");
     setProgress(0);
+    setTotalChunks(0);
+    setCurrentChunk(0);
     setDuration(0);
   }, []);
   const handleSaveRecording = reactExports.useCallback(async () => {
@@ -50192,8 +50208,19 @@ function LektorPanel({ editor, chapterId, bookId }) {
     }
     setError(null);
     setPlaybackState("loading");
+    setTotalChunks(0);
+    setCurrentChunk(0);
     try {
-      const blob = await generateSpeech(text, voice, apiKey.trim());
+      const blob = await generateSpeech(
+        text,
+        voice,
+        apiKey.trim(),
+        (current, total) => {
+          setTotalChunks(total);
+          setCurrentChunk(current);
+          setProgress(current / total * 100);
+        }
+      );
       setGeneratedBlob(blob);
       cleanupAudio();
       const url = URL.createObjectURL(blob);
@@ -50294,7 +50321,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
               "data-ocid": "lektor.play_pause_button",
               children: [
                 playbackState === "loading" ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-3.5 w-3.5 mr-1.5 animate-spin rounded-full border-2 border-current border-t-transparent" }) : playbackState === "playing" ? /* @__PURE__ */ jsxRuntimeExports.jsx(Pause, { className: "h-3.5 w-3.5 mr-1.5" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Play, { className: "h-3.5 w-3.5 mr-1.5" }),
-                playbackState === "loading" ? "Generowanie..." : playbackState === "playing" ? "Pauza" : "Odtwórz"
+                playbackState === "loading" ? totalChunks > 0 ? `Generowanie ${currentChunk}/${totalChunks}...` : "Generowanie..." : playbackState === "playing" ? "Pauza" : "Odtwórz"
               ]
             }
           ),
@@ -106116,7 +106143,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Drcs6vfU.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-xnGeYmAa.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;

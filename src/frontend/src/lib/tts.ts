@@ -85,6 +85,7 @@ export async function generateSpeech(
   text: string,
   voice: string,
   apiKey: string,
+  onProgress?: (current: number, total: number) => void,
 ): Promise<Blob> {
   if (!text.trim()) {
     throw new Error("Brak tekstu do odczytania");
@@ -93,13 +94,31 @@ export async function generateSpeech(
   const chunks = splitTextIntoChunks(text);
 
   if (chunks.length === 1) {
+    onProgress?.(1, 1);
     return generateSpeechChunk(chunks[0], voice, apiKey);
   }
 
-  const blobs: Blob[] = [];
-  for (let i = 0; i < chunks.length; i++) {
-    const blob = await generateSpeechChunk(chunks[i], voice, apiKey);
-    blobs.push(blob);
+  const blobs: Blob[] = new Array(chunks.length);
+  const CONCURRENCY = 3;
+
+  for (
+    let batchStart = 0;
+    batchStart < chunks.length;
+    batchStart += CONCURRENCY
+  ) {
+    const batchEnd = Math.min(batchStart + CONCURRENCY, chunks.length);
+    const batchIndices = Array.from(
+      { length: batchEnd - batchStart },
+      (_, i) => batchStart + i,
+    );
+
+    await Promise.all(
+      batchIndices.map(async (index) => {
+        const blob = await generateSpeechChunk(chunks[index], voice, apiKey);
+        blobs[index] = blob;
+        onProgress?.(index + 1, chunks.length);
+      }),
+    );
   }
 
   // Concatenate all blobs into one

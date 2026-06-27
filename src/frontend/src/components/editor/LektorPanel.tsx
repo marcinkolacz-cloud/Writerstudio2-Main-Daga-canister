@@ -44,6 +44,8 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
   const [speed, setSpeed] = useState([1.0]);
   const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");
   const [progress, setProgress] = useState(0);
+  const [totalChunks, setTotalChunks] = useState(0);
+  const [currentChunk, setCurrentChunk] = useState(0);
   const [duration, setDuration] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -67,6 +69,8 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
     }
     setPlaybackState("idle");
     setProgress(0);
+    setTotalChunks(0);
+    setCurrentChunk(0);
     setDuration(0);
   }, []);
 
@@ -119,9 +123,20 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
 
     setError(null);
     setPlaybackState("loading");
+    setTotalChunks(0);
+    setCurrentChunk(0);
 
     try {
-      const blob = await generateSpeech(text, voice, apiKey.trim());
+      const blob = await generateSpeech(
+        text,
+        voice,
+        apiKey.trim(),
+        (current, total) => {
+          setTotalChunks(total);
+          setCurrentChunk(current);
+          setProgress((current / total) * 100);
+        },
+      );
       setGeneratedBlob(blob);
 
       // Clean up previous audio if any
@@ -252,7 +267,9 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
             <Play className="h-3.5 w-3.5 mr-1.5" />
           )}
           {playbackState === "loading"
-            ? "Generowanie..."
+            ? totalChunks > 0
+              ? `Generowanie ${currentChunk}/${totalChunks}...`
+              : "Generowanie..."
             : playbackState === "playing"
               ? "Pauza"
               : "Odtwórz"}
