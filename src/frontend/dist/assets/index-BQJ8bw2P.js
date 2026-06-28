@@ -77043,11 +77043,6 @@ function RichTextEditor({
         if (html) {
           const normalized = normalize2(html);
           view.pasteHTML(normalized);
-          view.dispatch(
-            view.state.tr.replaceSelectionWith(
-              view.state.schema.text(normalized)
-            )
-          );
           return true;
         }
         const text = (_b3 = event.clipboardData) == null ? void 0 : _b3.getData("text/plain");
@@ -106143,7 +106138,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-DMT3c3Sd.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-1OFBm-5h.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107526,8 +107521,11 @@ function applyAnnotationsToEditor(editor, annotations, isApplyingAnnotationsRef,
   }
   if (tr2.steps.length > 0) {
     isApplyingAnnotationsRef.current = true;
-    editor.view.dispatch(tr2);
-    isApplyingAnnotationsRef.current = false;
+    try {
+      editor.view.dispatch(tr2);
+    } finally {
+      isApplyingAnnotationsRef.current = false;
+    }
   }
   const rangedAnnotations = annotations.map((ann) => {
     if ((options == null ? void 0 : options.skipApproved) && ann.approved) return null;
@@ -107576,8 +107574,11 @@ function applyAnnotationsToEditor(editor, annotations, isApplyingAnnotationsRef,
   }
   if (markTr.steps.length > 0) {
     isApplyingAnnotationsRef.current = true;
-    editor.view.dispatch(markTr);
-    isApplyingAnnotationsRef.current = false;
+    try {
+      editor.view.dispatch(markTr);
+    } finally {
+      isApplyingAnnotationsRef.current = false;
+    }
   }
 }
 function ChapterEditorPage() {
@@ -107645,6 +107646,7 @@ function ChapterEditorPage() {
   const contentDebounceRef = reactExports.useRef(null);
   const isApplyingAnnotationsRef = reactExports.useRef(false);
   const previousChapterRef = reactExports.useRef(null);
+  const lastSavedContentRef = reactExports.useRef("");
   reactExports.useEffect(() => {
     const prov = localStorage.getItem("ws_api_provider") || "openai";
     const key = prov === "claude" ? localStorage.getItem("ws_api_key_claude") ?? "" : localStorage.getItem("ws_api_key_openai") ?? "";
@@ -107655,7 +107657,8 @@ function ChapterEditorPage() {
       if (!chapter) return;
       setSaveStatus("saving");
       setSaveErrorBannerVisible(false);
-      if (chapter.content && chapter.content.length > 100 && newContent.length < chapter.content.length * 0.3) {
+      const referenceContent = lastSavedContentRef.current || chapter.content;
+      if (referenceContent.length > 100 && newContent.length < referenceContent.length * 0.3) {
         setSaveStatus("unsaved");
         return;
       }
@@ -107669,6 +107672,7 @@ function ChapterEditorPage() {
           onSuccess: () => {
             setSaveStatus("saved");
             setSaveErrorBannerVisible(false);
+            lastSavedContentRef.current = newContent;
           },
           onError: () => {
             setSaveStatus("unsaved");
@@ -107701,6 +107705,7 @@ function ChapterEditorPage() {
       }
       setTitle(chapter.title);
       setContent2(chapter.content);
+      lastSavedContentRef.current = chapter.content;
       previousChapterRef.current = {
         id: chapter.id,
         title: chapter.title,
@@ -108150,8 +108155,11 @@ ${getPlainText(ch.content)}`
                   });
                   if (tr2.steps.length > 0) {
                     isApplyingAnnotationsRef.current = true;
-                    editor.view.dispatch(tr2);
-                    isApplyingAnnotationsRef.current = false;
+                    try {
+                      editor.view.dispatch(tr2);
+                    } finally {
+                      isApplyingAnnotationsRef.current = false;
+                    }
                   }
                   setCurrentAnnotations([]);
                 },

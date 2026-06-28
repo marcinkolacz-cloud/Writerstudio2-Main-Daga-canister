@@ -79,11 +79,6 @@ export function RichTextEditor({
         if (html) {
           const normalized = normalize(html);
           view.pasteHTML(normalized);
-          view.dispatch(
-            view.state.tr.replaceSelectionWith(
-              view.state.schema.text(normalized),
-            ),
-          );
           return true;
         }
 

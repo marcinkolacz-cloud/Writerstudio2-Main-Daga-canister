@@ -223,8 +223,11 @@ function applyAnnotationsToEditor(
   // Apply the clearing transaction once
   if (tr.steps.length > 0) {
     isApplyingAnnotationsRef.current = true;
-    editor.view.dispatch(tr);
-    isApplyingAnnotationsRef.current = false;
+    try {
+      editor.view.dispatch(tr);
+    } finally {
+      isApplyingAnnotationsRef.current = false;
+    }
   }
 
   // 2. Compute ranges and resolve overlaps within this batch
@@ -288,8 +291,11 @@ function applyAnnotationsToEditor(
   }
   if (markTr.steps.length > 0) {
     isApplyingAnnotationsRef.current = true;
-    editor.view.dispatch(markTr);
-    isApplyingAnnotationsRef.current = false;
+    try {
+      editor.view.dispatch(markTr);
+    } finally {
+      isApplyingAnnotationsRef.current = false;
+    }
   }
 }
 
@@ -386,6 +392,7 @@ export function ChapterEditorPage() {
     title: string;
     content: string;
   } | null>(null);
+  const lastSavedContentRef = useRef<string>("");
 
   // Sync apiKey when provider changes or on mount
   useEffect(() => {
@@ -404,10 +411,10 @@ export function ChapterEditorPage() {
       if (!chapter) return;
       setSaveStatus("saving");
       setSaveErrorBannerVisible(false);
+      const referenceContent = lastSavedContentRef.current || chapter.content;
       if (
-        chapter.content &&
-        chapter.content.length > 100 &&
-        newContent.length < chapter.content.length * 0.3
+        referenceContent.length > 100 &&
+        newContent.length < referenceContent.length * 0.3
       ) {
         setSaveStatus("unsaved");
         return;
@@ -422,6 +429,7 @@ export function ChapterEditorPage() {
           onSuccess: () => {
             setSaveStatus("saved");
             setSaveErrorBannerVisible(false);
+            lastSavedContentRef.current = newContent;
           },
           onError: () => {
             setSaveStatus("unsaved");
@@ -459,6 +467,7 @@ export function ChapterEditorPage() {
       }
       setTitle(chapter.title);
       setContent(chapter.content);
+      lastSavedContentRef.current = chapter.content;
       previousChapterRef.current = {
         id: chapter.id,
         title: chapter.title,
@@ -959,8 +968,11 @@ export function ChapterEditorPage() {
                 });
                 if (tr.steps.length > 0) {
                   isApplyingAnnotationsRef.current = true;
-                  editor.view.dispatch(tr);
-                  isApplyingAnnotationsRef.current = false;
+                  try {
+                    editor.view.dispatch(tr);
+                  } finally {
+                    isApplyingAnnotationsRef.current = false;
+                  }
                 }
                 setCurrentAnnotations([]);
               }}
