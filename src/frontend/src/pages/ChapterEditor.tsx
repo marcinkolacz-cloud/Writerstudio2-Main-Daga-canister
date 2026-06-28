@@ -387,12 +387,12 @@ export function ChapterEditorPage() {
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isApplyingAnnotationsRef = useRef(false);
+  const lastSavedContentRef = useRef<string>("");
   const previousChapterRef = useRef<{
     id: bigint;
     title: string;
     content: string;
   } | null>(null);
-  const lastSavedContentRef = useRef<string>("");
 
   // Sync apiKey when provider changes or on mount
   useEffect(() => {

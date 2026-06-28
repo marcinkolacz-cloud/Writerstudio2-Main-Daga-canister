@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 
+const isApplyingAnnotationsRef = { current: false };
+
 interface RichTextEditorProps {
   value: string;
   onChange: (html: string) => void;
@@ -149,7 +151,12 @@ export function RichTextEditor({
       // Replace range with the marked text node in a single transaction
       const tr = editor.state.tr;
       tr.replaceWith(actualFrom, actualTo, textNode);
-      editor.view.dispatch(tr);
+      isApplyingAnnotationsRef.current = true;
+      try {
+        editor.view.dispatch(tr);
+      } finally {
+        isApplyingAnnotationsRef.current = false;
+      }
       editor.view.focus();
 
       // Update backend approval status and DOM attribute immediately
@@ -256,7 +263,12 @@ export function RichTextEditor({
       // Replace range with the marked text node in a single transaction
       const tr = editor.state.tr;
       tr.replaceWith(actualFrom, actualTo, textNode);
-      editor.view.dispatch(tr);
+      isApplyingAnnotationsRef.current = true;
+      try {
+        editor.view.dispatch(tr);
+      } finally {
+        isApplyingAnnotationsRef.current = false;
+      }
       editor.view.focus();
 
       // Update backend approval status and DOM attribute immediately

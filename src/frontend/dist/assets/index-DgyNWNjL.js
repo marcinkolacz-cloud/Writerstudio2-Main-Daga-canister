@@ -77091,7 +77091,10 @@ function RichTextEditor({
       const textNode = schema.text(proposal, marksToApply);
       const tr2 = editor.state.tr;
       tr2.replaceWith(actualFrom, actualTo, textNode);
-      editor.view.dispatch(tr2);
+      try {
+        editor.view.dispatch(tr2);
+      } finally {
+      }
       editor.view.focus();
       if (id !== 0n) {
         updateAnnotationApproved.mutate(
@@ -77167,7 +77170,10 @@ function RichTextEditor({
       const textNode = schema.text(originalText, marksToApply);
       const tr2 = editor.state.tr;
       tr2.replaceWith(actualFrom, actualTo, textNode);
-      editor.view.dispatch(tr2);
+      try {
+        editor.view.dispatch(tr2);
+      } finally {
+      }
       editor.view.focus();
       if (id !== 0n) {
         updateAnnotationApproved.mutate(
@@ -106138,7 +106144,7 @@ function(t3) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-1OFBm-5h.js"), true ? [] : void 0)).catch(function(t4) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-B_4MCAHf.js"), true ? [] : void 0)).catch(function(t4) {
     return Promise.reject(new Error("Could not load canvg: " + t4));
   }).then(function(t4) {
     return t4.default ? t4.default : t4;
@@ -107645,8 +107651,8 @@ function ChapterEditorPage() {
   const titleDebounceRef = reactExports.useRef(null);
   const contentDebounceRef = reactExports.useRef(null);
   const isApplyingAnnotationsRef = reactExports.useRef(false);
-  const previousChapterRef = reactExports.useRef(null);
   const lastSavedContentRef = reactExports.useRef("");
+  const previousChapterRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
     const prov = localStorage.getItem("ws_api_provider") || "openai";
     const key = prov === "claude" ? localStorage.getItem("ws_api_key_claude") ?? "" : localStorage.getItem("ws_api_key_openai") ?? "";
