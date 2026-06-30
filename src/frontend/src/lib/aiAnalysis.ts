@@ -318,7 +318,7 @@ async function callAi(
       "anthropic-dangerous-direct-browser-access": "true",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-6",
+      model: "claude-sonnet-5",
       max_tokens: 8000,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.3,

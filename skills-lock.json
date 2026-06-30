@@ -46,6 +46,11 @@
       "sourceType": "github",
       "computedHash": "a61ac2006ed45cc22354dbec743729ef2a459775d88dd3bf988d4f53b4cbd123"
     },
+    "extension-gmail-send": {
+      "source": "caffeinelabs/skills",
+      "sourceType": "github",
+      "computedHash": "3f2d2a075953c8ca5d0796d1bd9268a9c12f16d43055992354ce81f505d16c57"
+    },
     "extension-http-outcalls": {
       "source": "caffeinelabs/skills",
       "sourceType": "github",
