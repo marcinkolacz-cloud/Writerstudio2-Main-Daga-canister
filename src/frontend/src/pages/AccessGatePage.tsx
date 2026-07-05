@@ -32,19 +32,19 @@ export function AccessGatePage() {
     }
   };
 
-  const handleSwitchIdentity = async () => {
+  const handleSwitchIdentity = () => {
     if (loginStatus === "logging-in") return;
     setIsSwitching(true);
-    try {
-      // clear() now performs full II session teardown (signOut + fresh
-      // AuthClient), so no manual indexedDB/localStorage cleanup is needed.
-      await clear();
-      // Open the real Internet Identity login window so the user can
-      // choose/confirm a different identity via passkey. No page reload.
-      await login();
-    } catch {
-      setIsSwitching(false);
-    }
+    // Fire-and-forget: invoke clear() and login() WITHOUT await so window.open()
+    // runs in the same tick as the user's click, preserving the user-gesture
+    // context that Brave/Chrome require for the II popup. Awaiting either call
+    // breaks the gesture chain and the popup is silently blocked.
+    // clear() performs full II session teardown (signOut + fresh AuthClient),
+    // so no manual indexedDB/localStorage cleanup is needed.
+    clear().catch(() => setIsSwitching(false));
+    // login() opens the real Internet Identity window so the user can
+    // choose/confirm a different identity via passkey. No page reload.
+    login().catch(() => setIsSwitching(false));
   };
 
   return (

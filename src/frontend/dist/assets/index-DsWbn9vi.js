@@ -34903,15 +34903,11 @@ function AccessGatePage() {
       setError("Wystąpił błąd podczas weryfikacji kodu");
     }
   };
-  const handleSwitchIdentity = async () => {
+  const handleSwitchIdentity = () => {
     if (loginStatus === "logging-in") return;
     setIsSwitching(true);
-    try {
-      await clear();
-      await login();
-    } catch {
-      setIsSwitching(false);
-    }
+    clear().catch(() => setIsSwitching(false));
+    login().catch(() => setIsSwitching(false));
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
@@ -78889,7 +78885,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-x5rsofCH.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CqFnd3uP.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
