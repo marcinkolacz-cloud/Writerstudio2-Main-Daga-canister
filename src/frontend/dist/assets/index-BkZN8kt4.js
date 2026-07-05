@@ -33332,14 +33332,15 @@ const WINDOW_OPENER_FEATURES = "toolbar=0,location=0,menubar=0,width=500,height=
 function getIdentityProvider() {
   const hostname = typeof window !== "undefined" && window.location ? window.location.hostname : "";
   const isLocal = hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".localhost");
-  return isLocal ? "http://id.ai.localhost:8000/authorize" : "https://id.ai";
+  return isLocal ? "http://id.ai.localhost:8000/authorize" : "https://id.ai#authorize";
 }
 function useAuthClient() {
   const authClientRef = reactExports.useRef(null);
   if (authClientRef.current === null) {
     authClientRef.current = new AuthClient({
       identityProvider: getIdentityProvider(),
-      windowOpenerFeatures: WINDOW_OPENER_FEATURES
+      windowOpenerFeatures: WINDOW_OPENER_FEATURES,
+      derivationOrigin: window.location.origin
     });
   }
   const authClient = authClientRef.current;
@@ -33403,7 +33404,8 @@ function useAuthClient() {
     setLoginError(void 0);
     const freshClient = new AuthClient({
       identityProvider: getIdentityProvider(),
-      windowOpenerFeatures: WINDOW_OPENER_FEATURES
+      windowOpenerFeatures: WINDOW_OPENER_FEATURES,
+      derivationOrigin: window.location.origin
     });
     authClientRef.current = freshClient;
     try {
@@ -78885,7 +78887,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CqFnd3uP.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-B0Gd2hDE.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

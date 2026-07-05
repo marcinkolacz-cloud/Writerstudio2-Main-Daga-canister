@@ -16,8 +16,9 @@ const WINDOW_OPENER_FEATURES =
  * Local development (localhost / 127.0.0.1 / *.localhost) uses the local II
  * canister exposed by `dfx start` at `http://id.ai.localhost:8000/authorize`.
  * Any other host (staging, production, deployed canisters) uses the public
- * `https://id.ai` endpoint. The II frontend canister does not recognize the
- * `/authorize` path; it expects the base origin.
+ * `https://id.ai#authorize` endpoint. The II frontend canister does not
+ * recognize the `/authorize` path; it expects the base origin with a
+ * `#authorize` hash fragment that triggers the authorize flow.
  */
 function getIdentityProvider(): string {
   const hostname =
@@ -28,7 +29,9 @@ function getIdentityProvider(): string {
     hostname === "localhost" ||
     hostname === "127.0.0.1" ||
     hostname.endsWith(".localhost");
-  return isLocal ? "http://id.ai.localhost:8000/authorize" : "https://id.ai";
+  return isLocal
+    ? "http://id.ai.localhost:8000/authorize"
+    : "https://id.ai#authorize";
 }
 
 /**
@@ -92,6 +95,7 @@ export function useAuthClient(): UseAuthClientResult {
     authClientRef.current = new AuthClient({
       identityProvider: getIdentityProvider(),
       windowOpenerFeatures: WINDOW_OPENER_FEATURES,
+      derivationOrigin: window.location.origin,
     });
   }
   const authClient = authClientRef.current;
@@ -177,6 +181,7 @@ export function useAuthClient(): UseAuthClientResult {
     const freshClient = new AuthClient({
       identityProvider: getIdentityProvider(),
       windowOpenerFeatures: WINDOW_OPENER_FEATURES,
+      derivationOrigin: window.location.origin,
     });
     authClientRef.current = freshClient;
     // Restore the session from the fresh client so the hook state reflects
