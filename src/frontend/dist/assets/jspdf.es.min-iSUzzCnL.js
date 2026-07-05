@@ -1,8 +1,8 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index.es-Igfykn-P.js","assets/index-WPhWKBmB.js","assets/index-H6MV_6JQ.css"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/index.es-BnwfgnAc.js","assets/index-CaEqvKYz.js","assets/index-DAMaQoxO.css"])))=>i.map(i=>d[i]);
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { _ as __vitePreload } from "./index-WPhWKBmB.js";
+import { _ as __vitePreload } from "./index-CaEqvKYz.js";
 function _typeof(o2) {
   "@babel/helpers - typeof";
   return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(o3) {
@@ -1336,7 +1336,7 @@ const _utf8len = new Uint8Array(256);
 for (let q2 = 0; q2 < 256; q2++) {
   _utf8len[q2] = q2 >= 252 ? 6 : q2 >= 248 ? 5 : q2 >= 240 ? 4 : q2 >= 224 ? 3 : q2 >= 192 ? 2 : 1;
 }
-_utf8len[254] = _utf8len[254] = 1;
+_utf8len[254] = _utf8len[255] = 1;
 var string2buf = (str) => {
   if (typeof TextEncoder === "function" && TextEncoder.prototype.encode) {
     return new TextEncoder().encode(str);
@@ -1760,8 +1760,8 @@ const lext = new Uint8Array([
   21,
   21,
   16,
-  72,
-  78
+  199,
+  75
 ]);
 const dbase = new Uint16Array([
   /* Distance codes 0..29 base */
@@ -2007,7 +2007,7 @@ const {
   Z_STREAM_ERROR: Z_STREAM_ERROR$1,
   Z_DATA_ERROR: Z_DATA_ERROR$1,
   Z_MEM_ERROR: Z_MEM_ERROR$1,
-  Z_BUF_ERROR,
+  Z_BUF_ERROR: Z_BUF_ERROR$1,
   Z_DEFLATED
 } = constants$2;
 const HEAD = 16180;
@@ -2210,10 +2210,12 @@ const updatewindow = (strm, src, end, copy) => {
   let dist;
   const state = strm.state;
   if (state.window === null) {
+    state.window = new Uint8Array(1 << state.wbits);
+  }
+  if (state.wsize === 0) {
     state.wsize = 1 << state.wbits;
     state.wnext = 0;
     state.whave = 0;
-    state.window = new Uint8Array(state.wsize);
   }
   if (copy >= state.wsize) {
     state.window.set(src.subarray(end - state.wsize, end), 0);
@@ -3143,7 +3145,7 @@ const inflate$2 = (strm, flush) => {
   }
   strm.data_type = state.bits + (state.last ? 64 : 0) + (state.mode === TYPE ? 128 : 0) + (state.mode === LEN_ || state.mode === COPY_ ? 256 : 0);
   if ((_in === 0 && _out === 0 || flush === Z_FINISH$1) && ret === Z_OK$1) {
-    ret = Z_BUF_ERROR;
+    ret = Z_BUF_ERROR$1;
   }
   return ret;
 };
@@ -3241,14 +3243,16 @@ const {
   Z_NEED_DICT,
   Z_STREAM_ERROR,
   Z_DATA_ERROR,
-  Z_MEM_ERROR
+  Z_MEM_ERROR,
+  Z_BUF_ERROR
 } = constants$2;
+const defaultOptions = {
+  chunkSize: 1024 * 64,
+  windowBits: 15,
+  to: ""
+};
 function Inflate$1(options) {
-  this.options = common.assign({
-    chunkSize: 1024 * 64,
-    windowBits: 15,
-    to: ""
-  }, options || {});
+  this.options = common.assign({}, defaultOptions, options || {});
   const opt = this.options;
   if (opt.raw && opt.windowBits >= 0 && opt.windowBits < 16) {
     opt.windowBits = -opt.windowBits;
@@ -3323,7 +3327,7 @@ Inflate$1.prototype.push = function(data, flush_mode) {
         status = Z_NEED_DICT;
       }
     }
-    while (strm.avail_in > 0 && status === Z_STREAM_END && strm.state.wrap > 0 && data[strm.next_in] !== 0) {
+    while (strm.avail_in > 0 && status === Z_STREAM_END && strm.state.wrap & 2 && strm.state.flags !== 0 && strm.input[strm.next_in] !== 0) {
       inflate_1$2.inflateReset(strm);
       status = inflate_1$2.inflate(strm, _flush_mode);
     }
@@ -3338,7 +3342,7 @@ Inflate$1.prototype.push = function(data, flush_mode) {
     }
     last_avail_out = strm.avail_out;
     if (strm.next_out) {
-      if (strm.avail_out === 0 || status === Z_STREAM_END) {
+      if (strm.avail_out === 0 || status === Z_STREAM_END || _flush_mode > 0) {
         if (this.options.to === "string") {
           let next_out_utf8 = strings.utf8border(strm.output, strm.next_out);
           let tail = strm.next_out - next_out_utf8;
@@ -3349,17 +3353,27 @@ Inflate$1.prototype.push = function(data, flush_mode) {
           this.onData(utf8str);
         } else {
           this.onData(strm.output.length === strm.next_out ? strm.output : strm.output.subarray(0, strm.next_out));
+          strm.avail_out = 0;
+          strm.next_out = 0;
         }
       }
     }
-    if (status === Z_OK && last_avail_out === 0) continue;
+    if ((status === Z_OK || status === Z_BUF_ERROR) && last_avail_out === 0) continue;
     if (status === Z_STREAM_END) {
       status = inflate_1$2.inflateEnd(this.strm);
       this.onEnd(status);
       this.ended = true;
       return true;
     }
-    if (strm.avail_in === 0) break;
+    if (strm.avail_in === 0) {
+      if (_flush_mode === Z_FINISH) {
+        status = inflate_1$2.inflateEnd(this.strm);
+        this.onEnd(status === Z_OK ? Z_BUF_ERROR : status);
+        this.ended = true;
+        return false;
+      }
+      break;
+    }
   }
   return true;
 };
@@ -3380,7 +3394,7 @@ Inflate$1.prototype.onEnd = function(status) {
 };
 function inflate$1(input, options) {
   const inflator = new Inflate$1(options);
-  inflator.push(input);
+  inflator.push(input, true);
   if (inflator.err) throw inflator.msg || messages[inflator.err];
   return inflator.result;
 }
@@ -10762,7 +10776,7 @@ function(t2) {
   var h2 = l2.getContext("2d");
   h2.fillStyle = "#fff", h2.fillRect(0, 0, l2.width, l2.height);
   var f2 = { ignoreMouse: true, ignoreAnimation: true, ignoreDimensions: true }, d2 = this;
-  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-Igfykn-P.js"), true ? __vite__mapDeps([0,1,2]) : void 0)).catch(function(t3) {
+  return (i.canvg ? Promise.resolve(i.canvg) : __vitePreload(() => import("./index.es-BnwfgnAc.js"), true ? __vite__mapDeps([0,1,2]) : void 0)).catch(function(t3) {
     return Promise.reject(new Error("Could not load canvg: " + t3));
   }).then(function(t3) {
     return t3.default ? t3.default : t3;
