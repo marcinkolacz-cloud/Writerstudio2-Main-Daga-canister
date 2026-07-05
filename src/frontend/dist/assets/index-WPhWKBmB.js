@@ -78752,7 +78752,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DtIxJQtS.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DXLxIriq.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -80630,11 +80630,19 @@ function CreateBookDialog({
     e3.preventDefault();
     if (!title.trim() || !category) return;
     try {
-      await createBook.mutateAsync({
+      const newBookId = await createBook.mutateAsync({
         title: title.trim(),
         description: description.trim(),
         category
       });
+      if (newBookId === 0n) {
+        ue.error(
+          "Brak dostępu — potrzebujesz kodu zaproszenia, aby utworzyć książkę"
+        );
+        localStorage.removeItem("ws_access_granted");
+        window.location.reload();
+        return;
+      }
       ue.success("Książka została utworzona");
       setTitle("");
       setDescription("");

@@ -52,11 +52,21 @@ export function CreateBookDialog({
     if (!title.trim() || !category) return;
 
     try {
-      await createBook.mutateAsync({
+      const newBookId = await createBook.mutateAsync({
         title: title.trim(),
         description: description.trim(),
         category,
       });
+
+      if (newBookId === 0n) {
+        toast.error(
+          "Brak dostępu — potrzebujesz kodu zaproszenia, aby utworzyć książkę",
+        );
+        localStorage.removeItem("ws_access_granted");
+        window.location.reload();
+        return;
+      }
+
       toast.success("Książka została utworzona");
       setTitle("");
       setDescription("");
