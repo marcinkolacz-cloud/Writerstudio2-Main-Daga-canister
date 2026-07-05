@@ -38,7 +38,7 @@ actor {
   var nextRecordingId : Nat;
 
   include MixinViews();
-  include BooksApi(books, chapters);
+  include BooksApi(books, chapters, inviteCodes);
   include ChaptersApi(books, chapters);
   include AnalysesApi(books, chapters, analyses);
   include TextAnnotationsApi(books, analyses, annotations);

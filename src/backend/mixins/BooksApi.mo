@@ -2,12 +2,21 @@ import Map "mo:core/Map";
 import List "mo:core/List";
 import Types "../types";
 import BooksLib "../lib/Books";
+import InvitesLib "../lib/invites";
 import Principal "mo:core/Principal";
 import Time "mo:core/Time";
 
-mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>) {
+mixin (
+  books : Map.Map<Nat, Types.Book>,
+  chapters : Map.Map<Nat, Types.Chapter>,
+  inviteCodes : Map.Map<Text, Types.InviteCode>,
+) {
 
   public shared ({ caller }) func createBook(title : Text, description : Text, category : Text) : async Nat {
+    let known = BooksLib.hasBook(books, caller) or InvitesLib.hasRedeemed(inviteCodes, caller);
+    if (not known) {
+      return 0;
+    };
     let newId = BooksLib.getNextId(books);
     let book = BooksLib.createBookRecord(newId, caller, title, description, category);
     books.add(newId, book);

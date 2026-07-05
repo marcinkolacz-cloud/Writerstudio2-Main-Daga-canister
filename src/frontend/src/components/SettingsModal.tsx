@@ -8,6 +8,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { getApiKey, setApiKey } from "@/lib/apiKeyStorage";
+import { useAppStore } from "@/store/useAppStore";
 import { Key, LogOut, Save, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -17,6 +19,7 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
+  const principal = useAppStore((s) => s.principal);
   const [apiKeyOpenAI, setApiKeyOpenAI] = useState("");
   const [apiKeyClaude, setApiKeyClaude] = useState("");
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -31,15 +34,15 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         localStorage.removeItem("ws_api_key");
       }
 
-      setApiKeyOpenAI(localStorage.getItem("ws_api_key_openai") ?? "");
-      setApiKeyClaude(localStorage.getItem("ws_api_key_claude") ?? "");
+      setApiKeyOpenAI(getApiKey("openai", principal));
+      setApiKeyClaude(getApiKey("claude", principal));
       setSystemPrompt(localStorage.getItem("ws_system_prompt") ?? "");
     }
-  }, [open]);
+  }, [open, principal]);
 
   const handleSave = () => {
-    localStorage.setItem("ws_api_key_openai", apiKeyOpenAI);
-    localStorage.setItem("ws_api_key_claude", apiKeyClaude);
+    setApiKey("openai", principal, apiKeyOpenAI);
+    setApiKey("claude", principal, apiKeyClaude);
     localStorage.setItem("ws_system_prompt", systemPrompt);
     onOpenChange(false);
   };

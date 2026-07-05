@@ -11,6 +11,8 @@ import {
 } from "@/hooks/useBackend";
 import { chatWithBook } from "@/lib/aiAnalysis";
 import type { ChatMessage as AiChatMessage } from "@/lib/aiAnalysis";
+import { getApiKey } from "@/lib/apiKeyStorage";
+import { useAppStore } from "@/store/useAppStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { Clock, MessageCircle, Send, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -47,6 +49,7 @@ function saveArchives(bookId: string, archives: ArchiveEntry[]) {
 }
 
 export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
+  const principal = useAppStore((s) => s.principal);
   const [isOpen, setIsOpen] = useState(() => {
     const stored = localStorage.getItem("writerstudio-chat-open");
     return stored === "true";
@@ -285,13 +288,10 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     const trimmed = input.trim();
     if (!trimmed || isSending || !book) return;
 
-    const apiKey =
-      (localStorage.getItem("ws_api_provider") === "claude"
-        ? localStorage.getItem("ws_api_key_claude")
-        : localStorage.getItem("ws_api_key_openai")) ?? "";
     const provider =
       (localStorage.getItem("ws_api_provider") as "openai" | "claude") ||
       "openai";
+    const apiKey = getApiKey(provider, principal);
     if (!apiKey.trim()) {
       setInput("");
       return;
@@ -408,6 +408,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     analyses,
     sendMessage,
     queryClient,
+    principal,
   ]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

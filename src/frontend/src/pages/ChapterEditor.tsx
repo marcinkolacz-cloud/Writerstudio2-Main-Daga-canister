@@ -62,7 +62,9 @@ import {
   getSynonyms,
 } from "@/lib/aiAnalysis";
 import type { Annotation } from "@/lib/aiAnalysis";
+import { getApiKey, setApiKey } from "@/lib/apiKeyStorage";
 import { exportToDOCX, exportToPDF } from "@/lib/exportChapter";
+import { useAppStore } from "@/store/useAppStore";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { Editor } from "@tiptap/core";
 import {
@@ -304,6 +306,7 @@ export function ChapterEditorPage() {
     from: "/layout/books/$bookId/chapters/$chapterId",
   });
   const navigate = useNavigate();
+  const principal = useAppStore((s) => s.principal);
 
   const { data: book, isLoading: bookLoading } = useBook(bookId);
   const { data: chapter, isLoading: chapterLoading } = useChapter(chapterId);
@@ -372,9 +375,7 @@ export function ChapterEditorPage() {
     const prov =
       (localStorage.getItem("ws_api_provider") as "openai" | "claude") ||
       "openai";
-    return prov === "claude"
-      ? (localStorage.getItem("ws_api_key_claude") ?? "")
-      : (localStorage.getItem("ws_api_key_openai") ?? "");
+    return getApiKey(prov, principal);
   });
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [provider, setProvider] = useState<"openai" | "claude">(() => {
@@ -399,12 +400,9 @@ export function ChapterEditorPage() {
     const prov =
       (localStorage.getItem("ws_api_provider") as "openai" | "claude") ||
       "openai";
-    const key =
-      prov === "claude"
-        ? (localStorage.getItem("ws_api_key_claude") ?? "")
-        : (localStorage.getItem("ws_api_key_openai") ?? "");
-    setApiKey(key);
-  }, []);
+    setApiKey(getApiKey(prov, principal));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [principal]);
 
   const doSave = useCallback(
     (newTitle: string, newContent: string) => {
@@ -618,7 +616,7 @@ export function ChapterEditorPage() {
               onClick={() => {
                 setProvider("openai");
                 localStorage.setItem("ws_api_provider", "openai");
-                const key = localStorage.getItem("ws_api_key_openai") ?? "";
+                const key = getApiKey("openai", principal);
                 setApiKey(key);
               }}
               data-ocid="chapter.provider_gpt_button"
@@ -631,7 +629,7 @@ export function ChapterEditorPage() {
               onClick={() => {
                 setProvider("claude");
                 localStorage.setItem("ws_api_provider", "claude");
-                const key = localStorage.getItem("ws_api_key_claude") ?? "";
+                const key = getApiKey("claude", principal);
                 setApiKey(key);
               }}
               data-ocid="chapter.provider_claude_button"
@@ -1130,9 +1128,13 @@ export function ChapterEditorPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={() => {
+                onClick={async () => {
                   if (editorRef.current) {
-                    exportToPDF(title, editorRef.current.getHTML());
+                    try {
+                      await exportToPDF(title, editorRef.current.getHTML());
+                    } catch (err) {
+                      console.error("PDF export failed", err);
+                    }
                   }
                 }}
                 data-ocid="chapter.export_pdf_item"
@@ -1141,16 +1143,20 @@ export function ChapterEditorPage() {
                 Eksportuj do PDF
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => {
+                onClick={async () => {
                   if (editorRef.current) {
-                    const indents = getGlobalIndents();
-                    exportToDOCX(
-                      title,
-                      editorRef.current.getHTML(),
-                      indents.left,
-                      indents.right,
-                      indents.firstLine,
-                    );
+                    try {
+                      const indents = getGlobalIndents();
+                      await exportToDOCX(
+                        title,
+                        editorRef.current.getHTML(),
+                        indents.left,
+                        indents.right,
+                        indents.firstLine,
+                      );
+                    } catch (err) {
+                      console.error("DOCX export failed", err);
+                    }
                   }
                 }}
                 data-ocid="chapter.export_docx_item"

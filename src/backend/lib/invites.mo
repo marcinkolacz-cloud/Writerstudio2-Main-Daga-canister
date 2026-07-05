@@ -66,4 +66,18 @@ module {
   public func revokeCode(codes : Map.Map<Text, InviteCode>, code : Text) : () {
     let _ = codes.remove(code);
   };
+
+  public func hasRedeemed(codes : Map.Map<Text, InviteCode>, caller : Principal) : Bool {
+    for ((_, inviteCode) in codes.entries()) {
+      switch (inviteCode.usedBy) {
+        case (?usedBy) {
+          if (Principal.equal(usedBy, caller)) {
+            return true;
+          };
+        };
+        case null {};
+      };
+    };
+    false
+  };
 }

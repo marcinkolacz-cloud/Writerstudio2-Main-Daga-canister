@@ -9,7 +9,9 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useSaveRecording } from "@/hooks/useBackend";
+import { getApiKey } from "@/lib/apiKeyStorage";
 import { generateSpeech } from "@/lib/tts";
+import { useAppStore } from "@/store/useAppStore";
 import type { Editor } from "@tiptap/core";
 import {
   AlertTriangle,
@@ -39,7 +41,8 @@ interface LektorPanelProps {
 type PlaybackState = "idle" | "loading" | "playing" | "paused";
 
 export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
-  const apiKey = localStorage.getItem("ws_api_key_openai") ?? "";
+  const principal = useAppStore((s) => s.principal);
+  const apiKey = getApiKey("openai", principal);
   const [voice, setVoice] = useState("alloy");
   const [speed, setSpeed] = useState([1.0]);
   const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");

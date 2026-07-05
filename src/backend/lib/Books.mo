@@ -16,6 +16,15 @@ module {
     Principal.equal(book.ownerId, caller)
   };
 
+  public func hasBook(books : Map.Map<Nat, Types.Book>, caller : Principal) : Bool {
+    for ((_, book) in books.entries()) {
+      if (Principal.equal(book.ownerId, caller)) {
+        return true;
+      };
+    };
+    false
+  };
+
   public func createBookRecord(id : Nat, caller : Principal, title : Text, description : Text, category : Text) : Types.Book {
     let now = Time.now();
     {
