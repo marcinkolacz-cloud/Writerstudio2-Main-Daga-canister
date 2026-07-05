@@ -6,16 +6,16 @@ import {
   useDeleteRecording,
   useRecordings,
 } from "@/hooks/useBackend";
-import { useActor } from "@caffeineai/core-infrastructure";
 import { Headphones, Mic, Play, Trash2, X } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
+import { useActorLocal } from "../../hooks/useActorLocal";
 
 interface RecordingsPanelProps {
   chapterId: bigint;
 }
 
 export function RecordingsPanel({ chapterId }: RecordingsPanelProps) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const { data: recordings, isLoading } = useRecordings(Number(chapterId));
   const deleteRecording = useDeleteRecording();
   const [playingId, setPlayingId] = useState<bigint | null>(null);

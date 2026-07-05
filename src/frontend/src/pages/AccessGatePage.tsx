@@ -2,16 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useClaimInviteCode } from "@/hooks/useBackend";
 import { useAppStore } from "@/store/useAppStore";
-import { useInternetIdentity } from "@caffeineai/core-infrastructure";
 import { BookOpen, KeyRound, Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { useAuthClient } from "../hooks/useAuthClient";
 
 export function AccessGatePage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSwitching, setIsSwitching] = useState(false);
   const claimMutation = useClaimInviteCode();
-  const { clear, login, loginStatus } = useInternetIdentity();
+  const { clear, login, loginStatus } = useAuthClient();
   const { clearAuth } = useAppStore();
 
   const handleSubmit = async (e: React.FormEvent) => {

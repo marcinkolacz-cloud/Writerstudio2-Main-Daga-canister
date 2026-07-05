@@ -3,7 +3,6 @@ import { ChatBotPanel } from "@/components/chat/ChatBotPanel";
 import { Button } from "@/components/ui/button";
 import { useBook, useChapters, useReorderChapters } from "@/hooks/useBackend";
 import { useAppStore } from "@/store/useAppStore";
-import { useInternetIdentity } from "@caffeineai/core-infrastructure";
 import {
   Outlet,
   useNavigate,
@@ -23,6 +22,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useAuthClient } from "../hooks/useAuthClient";
 
 function useActiveBookId(): string | null {
   const routerState = useRouterState();
@@ -42,7 +42,7 @@ function useActiveChapterId(): string | null {
 export function Layout() {
   const navigate = useNavigate();
   const { isAuthenticated, clearAuth } = useAppStore();
-  const { clear } = useInternetIdentity();
+  const { clear } = useAuthClient();
   const activeBookId = useActiveBookId();
   const activeChapterId = useActiveChapterId();
   const { data: chapters } = useChapters(activeBookId ?? "");

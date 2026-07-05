@@ -10,13 +10,13 @@ import type {
   InviteCode,
   TextAnnotation,
 } from "@/backend";
-import { useActor } from "@caffeineai/core-infrastructure";
 import type { Principal } from "@icp-sdk/core/principal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { useActorLocal } from "./useActorLocal";
 
 export function useBooks() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   return useQuery<Book[]>({
     queryKey: ["books"],
     queryFn: async () => {
@@ -28,7 +28,7 @@ export function useBooks() {
 }
 
 export function useBook(bookId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(bookId);
   return useQuery<Book | null>({
     queryKey: ["book", id],
@@ -41,7 +41,7 @@ export function useBook(bookId: string | number) {
 }
 
 export function useChapters(bookId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(bookId);
   return useQuery<Chapter[]>({
     queryKey: ["chapters", id],
@@ -55,7 +55,7 @@ export function useChapters(bookId: string | number) {
 }
 
 export function useCreateChapter() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -78,7 +78,7 @@ export function useCreateChapter() {
 }
 
 export function useChapter(chapterId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(chapterId);
   return useQuery<Chapter | null>({
     queryKey: ["chapter", id],
@@ -91,7 +91,7 @@ export function useChapter(chapterId: string | number) {
 }
 
 export function useUpdateChapter() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -119,7 +119,7 @@ export function useUpdateChapter() {
 }
 
 export function useUpdateChapterIndents() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -151,7 +151,7 @@ export function useUpdateChapterIndents() {
 }
 
 export function useSaveAnalysis() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -191,7 +191,7 @@ export function useSaveAnalysis() {
 }
 
 export function useSaveAnnotations() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -220,7 +220,7 @@ export function useSaveAnnotations() {
 }
 
 export function useAnalysesByChapter(chapterId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(chapterId);
   return useQuery<Analysis[]>({
     queryKey: ["analyses", "chapter", id],
@@ -233,7 +233,7 @@ export function useAnalysesByChapter(chapterId: string | number) {
 }
 
 export function useAnalysesByBook(bookId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(bookId);
   return useQuery<Analysis[]>({
     queryKey: ["analyses", "book", id],
@@ -246,7 +246,7 @@ export function useAnalysesByBook(bookId: string | number) {
 }
 
 export function useCreateBook() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -269,7 +269,7 @@ export function useCreateBook() {
 }
 
 export function useChatMessages(bookId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(bookId);
   return useQuery<ChatMessage[]>({
     queryKey: ["chat", id],
@@ -283,7 +283,7 @@ export function useChatMessages(bookId: string | number) {
 }
 
 export function useSendMessage() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -310,7 +310,7 @@ export function useSendMessage() {
 }
 
 export function useDeleteMessage() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -325,7 +325,7 @@ export function useDeleteMessage() {
 }
 
 export function useComments(chapterId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(chapterId);
   return useQuery<Comment[]>({
     queryKey: ["comments", id],
@@ -339,7 +339,7 @@ export function useComments(chapterId: string | number) {
 }
 
 export function useCreateComment() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -364,7 +364,7 @@ export function useCreateComment() {
 }
 
 export function useDeleteComment() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -392,7 +392,7 @@ interface BookStats {
 }
 
 export function useOverallStats() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   return useQuery<OverallStats>({
     queryKey: ["overallStats"],
     queryFn: async () => {
@@ -404,7 +404,7 @@ export function useOverallStats() {
 }
 
 export function useBookStats(bookId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(bookId);
   return useQuery<BookStats>({
     queryKey: ["bookStats", id],
@@ -423,7 +423,7 @@ export function useBookStats(bookId: string | number) {
 }
 
 export function useRecordings(chapterId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(chapterId);
   return useQuery<
     Array<{
@@ -442,7 +442,7 @@ export function useRecordings(chapterId: string | number) {
 }
 
 export function useSaveRecording() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -469,7 +469,7 @@ export function useSaveRecording() {
 }
 
 export function useDeleteRecording() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -494,7 +494,7 @@ export async function fetchRecordingAudio(
 }
 
 export function useAnnotationsByAnalysis(analysisId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(analysisId);
   return useQuery<TextAnnotation[]>({
     queryKey: ["annotations", "analysis", id],
@@ -507,7 +507,7 @@ export function useAnnotationsByAnalysis(analysisId: string | number) {
 }
 
 export function useUpdateAnnotationApproved() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -536,7 +536,7 @@ export async function getAnnotation(
 }
 
 export function useDeleteAnalysis() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -551,7 +551,7 @@ export function useDeleteAnalysis() {
 }
 
 export function useUpdateBookCharacters() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -574,7 +574,7 @@ export function useUpdateBookCharacters() {
 }
 
 export function useUpdateBookMetadata() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -612,7 +612,7 @@ export function useUpdateBookMetadata() {
 }
 
 export function useReorderChapters() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -635,7 +635,7 @@ export function useReorderChapters() {
 }
 
 export function useClearChat() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -652,7 +652,7 @@ export function useClearChat() {
 }
 
 export function useChatSessions(chapterId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(chapterId);
   return useQuery<ChatSession[]>({
     queryKey: ["chatSessions", id],
@@ -666,7 +666,7 @@ export function useChatSessions(chapterId: string | number) {
 }
 
 export function useCreateChatSession() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -689,7 +689,7 @@ export function useCreateChatSession() {
 }
 
 export function useChatSessionMessages(sessionId: string | number) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const id = BigInt(sessionId);
   return useQuery<ChatSessionMessage[]>({
     queryKey: ["chatMessages", id],
@@ -703,7 +703,7 @@ export function useChatSessionMessages(sessionId: string | number) {
 }
 
 export function useAddChatMessage() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -728,7 +728,7 @@ export function useAddChatMessage() {
 }
 
 export function useCheckAccess(code?: string) {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   return useQuery<boolean>({
     queryKey: ["checkAccess", code ?? "local"],
     queryFn: async () => {
@@ -743,7 +743,7 @@ export function useCheckAccess(code?: string) {
 }
 
 export function useClaimInviteCode() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -758,7 +758,7 @@ export function useClaimInviteCode() {
 }
 
 export function useGenerateInviteCode() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -773,7 +773,7 @@ export function useGenerateInviteCode() {
 }
 
 export function useListInviteCodes() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   return useQuery<InviteCode[]>({
     queryKey: ["inviteCodes"],
     queryFn: async () => {
@@ -785,7 +785,7 @@ export function useListInviteCodes() {
 }
 
 export function useRevokeInviteCode() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -800,7 +800,7 @@ export function useRevokeInviteCode() {
 }
 
 export function useSetAdminPrincipal() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
 
   return useMutation({
     mutationFn: async (principal: Principal) => {
@@ -811,7 +811,7 @@ export function useSetAdminPrincipal() {
 }
 
 export function useIsAdmin() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   return useQuery<boolean>({
     queryKey: ["isAdmin"],
     queryFn: async () => {
@@ -828,7 +828,7 @@ export function useIsAdmin() {
 }
 
 export function useSynthesizeSpeech() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
 
   return useMutation({
     mutationFn: async ({
@@ -847,7 +847,7 @@ export function useSynthesizeSpeech() {
 }
 
 export function useDeleteChatSession() {
-  const { actor } = useActor(createActor);
+  const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
 
   return useMutation({

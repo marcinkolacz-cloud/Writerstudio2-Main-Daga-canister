@@ -7,14 +7,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAppStore } from "@/store/useAppStore";
-import { useInternetIdentity } from "@caffeineai/core-infrastructure";
 import { useNavigate } from "@tanstack/react-router";
 import { BookOpen, LogIn } from "lucide-react";
 import { useEffect } from "react";
+import { useAuthClient } from "../hooks/useAuthClient";
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login, loginStatus, identity } = useInternetIdentity();
+  const { login, loginStatus, identity } = useAuthClient();
   const { setPrincipal, isAuthenticated } = useAppStore();
 
   useEffect(() => {
