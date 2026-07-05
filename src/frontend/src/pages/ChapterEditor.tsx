@@ -1,3 +1,4 @@
+import { RedactionModal } from "@/components/RedactionModal";
 import { SettingsModal } from "@/components/SettingsModal";
 import { AnalysisHistoryPanel } from "@/components/editor/AnalysisHistoryPanel";
 import { CommentDialog } from "@/components/editor/CommentDialog";
@@ -63,7 +64,11 @@ import {
 } from "@/lib/aiAnalysis";
 import type { Annotation } from "@/lib/aiAnalysis";
 import { getApiKey, setApiKey } from "@/lib/apiKeyStorage";
-import { exportToDOCX, exportToPDF } from "@/lib/exportChapter";
+import {
+  exportToDOCX,
+  exportToDOCXWithRedaction,
+  exportToPDF,
+} from "@/lib/exportChapter";
 import { useAppStore } from "@/store/useAppStore";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import type { Editor } from "@tiptap/core";
@@ -74,6 +79,7 @@ import {
   BookText,
   Check,
   Download,
+  FileEdit,
   FileText,
   Headphones,
   Heart,
@@ -378,6 +384,7 @@ export function ChapterEditorPage() {
     return getApiKey(prov, principal);
   });
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [redactionModalOpen, setRedactionModalOpen] = useState(false);
   const [provider, setProvider] = useState<"openai" | "claude">(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
@@ -394,6 +401,10 @@ export function ChapterEditorPage() {
     title: string;
     content: string;
   } | null>(null);
+
+  // Cursor-position persistence refs (independent from save/autosave logic)
+  const cursorDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastCursorRestoredChapterIdRef = useRef<string | null>(null);
 
   // Sync apiKey when provider changes or on mount
   useEffect(() => {
@@ -475,6 +486,34 @@ export function ChapterEditorPage() {
       lastSyncedChapterIdRef.current = chapterId;
     }
   }, [chapter, chapterId, updateChapter.mutate]);
+
+  // Restore saved cursor position once per chapter load, after editor is ready.
+  // Only moves the cursor — does not touch content or save logic.
+  // `content` is intentionally a dep so this runs after content is applied to the editor.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: content is a trigger, not read inside
+  useEffect(() => {
+    if (!editorRef.current) return;
+    if (lastCursorRestoredChapterIdRef.current === chapterId) return;
+    const editor = editorRef.current;
+    const docSize = editor.state.doc.content.size;
+    try {
+      const saved = localStorage.getItem(`ws_cursor_position_${chapterId}`);
+      if (saved === null) {
+        lastCursorRestoredChapterIdRef.current = chapterId;
+        return;
+      }
+      const pos = Number.parseInt(saved, 10);
+      if (Number.isNaN(pos) || pos < 0 || pos > docSize) {
+        // Out of range (e.g. text was shortened) — ignore silently, leave cursor at start.
+        lastCursorRestoredChapterIdRef.current = chapterId;
+        return;
+      }
+      editor.commands.setTextSelection(pos);
+    } catch {
+      // Swallow any unexpected error — never throw during cursor restore.
+    }
+    lastCursorRestoredChapterIdRef.current = chapterId;
+  }, [chapterId, content]);
 
   const handleSendToChat = (text: string) => {
     if (!book) return;
@@ -1113,6 +1152,18 @@ export function ChapterEditorPage() {
             Synonimy
           </Button>
 
+          {/* Redakcja button */}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-xs text-muted-foreground hover:text-foreground"
+            data-ocid="chapter.redaction_button"
+            onClick={() => setRedactionModalOpen(true)}
+          >
+            <FileEdit className="h-4 w-4 mr-1" />
+            Redakcja
+          </Button>
+
           {/* Export dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -1413,6 +1464,37 @@ export function ChapterEditorPage() {
               };
 
               dom.addEventListener("mouseup", handleMouseUp);
+
+              // Cursor-position persistence: debounce-save selection.from to localStorage.
+              // Independent from content-save debounce. Only writes the cursor offset.
+              const handleSelectionUpdate = () => {
+                const from = editor.state.selection.from;
+                if (cursorDebounceRef.current) {
+                  clearTimeout(cursorDebounceRef.current);
+                }
+                cursorDebounceRef.current = setTimeout(() => {
+                  try {
+                    localStorage.setItem(
+                      `ws_cursor_position_${chapterId}`,
+                      String(from),
+                    );
+                  } catch {
+                    // Ignore storage write failures (e.g. quota / private mode).
+                  }
+                  cursorDebounceRef.current = null;
+                }, 2000);
+              };
+              editor.on("selectionUpdate", handleSelectionUpdate);
+
+              // Cleanup both listeners when the editor is destroyed to avoid leaks.
+              editor.on("destroy", () => {
+                dom.removeEventListener("mouseup", handleMouseUp);
+                editor.off("selectionUpdate", handleSelectionUpdate);
+                if (cursorDebounceRef.current) {
+                  clearTimeout(cursorDebounceRef.current);
+                  cursorDebounceRef.current = null;
+                }
+              });
             }}
           />
         </div>
@@ -1488,6 +1570,16 @@ export function ChapterEditorPage() {
       <SettingsModal
         open={settingsModalOpen}
         onOpenChange={setSettingsModalOpen}
+      />
+
+      <RedactionModal
+        open={redactionModalOpen}
+        onOpenChange={setRedactionModalOpen}
+        onGenerate={(settings) => {
+          const html = editorRef.current?.getHTML() ?? "";
+          exportToDOCXWithRedaction(title, html, settings);
+          setRedactionModalOpen(false);
+        }}
       />
     </div>
   );

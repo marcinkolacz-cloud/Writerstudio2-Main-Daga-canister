@@ -147,7 +147,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
 
   useEffect(() => {
     const currentLength = currentMessages.length;
-    if (isOpen && view === "chat" && currentLength > messageCountRef.current) {
+    if (isOpen && view === "chat") {
       scrollToBottom();
     }
     messageCountRef.current = currentLength;

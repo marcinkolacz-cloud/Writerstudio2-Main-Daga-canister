@@ -18298,7 +18298,7 @@ function concatBytes(...arrays) {
   }
   return res;
 }
-let Hash$2 = class Hash {
+let Hash$3 = class Hash {
 };
 function createHasher$1(hashCons) {
   const hashC = (msg) => hashCons().update(toBytes(msg)).digest();
@@ -18335,7 +18335,7 @@ function Chi(a2, b2, c2) {
 function Maj(a2, b2, c2) {
   return a2 & b2 ^ a2 & c2 ^ b2 & c2;
 }
-class HashMD extends Hash$2 {
+class HashMD extends Hash$3 {
   constructor(blockLen, outputLen, padOffset, isLE) {
     super();
     this.finished = false;
@@ -20160,7 +20160,7 @@ var IdlTypeName;
   IdlTypeName2["FuncClass"] = "__IDL_FuncClass__";
   IdlTypeName2["ServiceClass"] = "__IDL_ServiceClass__";
 })(IdlTypeName || (IdlTypeName = {}));
-class Type {
+let Type$1 = class Type {
   /* Display type name */
   display() {
     return this.name;
@@ -20174,8 +20174,8 @@ class Type {
       this._buildTypeTableImpl(typeTable);
     }
   }
-}
-class PrimitiveType extends Type {
+};
+class PrimitiveType extends Type$1 {
   checkType(t2) {
     if (this.name !== t2.name) {
       throw new Error(`type mismatch: type on the wire ${t2.name}, expect type ${this.name}`);
@@ -20185,7 +20185,7 @@ class PrimitiveType extends Type {
   _buildTypeTableImpl(_typeTable) {
   }
 }
-class ConstructType extends Type {
+class ConstructType extends Type$1 {
   checkType(t2) {
     if (t2 instanceof RecClass) {
       const ty = t2.getType();
@@ -20229,7 +20229,7 @@ class EmptyClass extends PrimitiveType {
     return "empty";
   }
 }
-class UnknownClass extends Type {
+class UnknownClass extends Type$1 {
   get typeName() {
     return IdlTypeName.UnknownClass;
   }
@@ -21984,7 +21984,7 @@ const IDL = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty(
   TextClass,
   Tuple,
   TupleClass,
-  Type,
+  Type: Type$1,
   Unknown,
   UnknownClass,
   Variant,
@@ -34172,43 +34172,43 @@ const createLucideIcon = (iconName, iconNode) => {
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$R = [
+const __iconNode$W = [
   ["path", { d: "M15 12H3", key: "6jk70r" }],
   ["path", { d: "M17 18H3", key: "1amg6g" }],
   ["path", { d: "M21 6H3", key: "1jwq7v" }]
 ];
-const AlignLeft = createLucideIcon("align-left", __iconNode$R);
+const AlignLeft = createLucideIcon("align-left", __iconNode$W);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$Q = [
+const __iconNode$V = [
   ["path", { d: "m12 19-7-7 7-7", key: "1l729n" }],
   ["path", { d: "M19 12H5", key: "x3x0zl" }]
 ];
-const ArrowLeft = createLucideIcon("arrow-left", __iconNode$Q);
+const ArrowLeft = createLucideIcon("arrow-left", __iconNode$V);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$P = [
+const __iconNode$U = [
   [
     "path",
     { d: "M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8", key: "mg9rjx" }
   ]
 ];
-const Bold$1 = createLucideIcon("bold", __iconNode$P);
+const Bold$1 = createLucideIcon("bold", __iconNode$U);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$O = [
+const __iconNode$T = [
   ["path", { d: "M12 7v14", key: "1akyts" }],
   [
     "path",
@@ -34218,14 +34218,14 @@ const __iconNode$O = [
     }
   ]
 ];
-const BookOpen = createLucideIcon("book-open", __iconNode$O);
+const BookOpen = createLucideIcon("book-open", __iconNode$T);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$N = [
+const __iconNode$S = [
   [
     "path",
     {
@@ -34236,7 +34236,56 @@ const __iconNode$N = [
   ["path", { d: "M8 11h8", key: "vwpz6n" }],
   ["path", { d: "M8 7h6", key: "1f0q6e" }]
 ];
-const BookText = createLucideIcon("book-text", __iconNode$N);
+const BookText = createLucideIcon("book-text", __iconNode$S);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$R = [
+  ["path", { d: "M3 3v16a2 2 0 0 0 2 2h16", key: "c24i48" }],
+  ["path", { d: "M18 17V9", key: "2bz60n" }],
+  ["path", { d: "M13 17V5", key: "1frdt8" }],
+  ["path", { d: "M8 17v-3", key: "17ska0" }]
+];
+const ChartColumn = createLucideIcon("chart-column", __iconNode$R);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$Q = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$Q);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$P = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
+const ChevronDown = createLucideIcon("chevron-down", __iconNode$P);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$O = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
+const ChevronUp = createLucideIcon("chevron-up", __iconNode$O);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$N = [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["line", { x1: "12", x2: "12", y1: "8", y2: "12", key: "1pkeuh" }],
+  ["line", { x1: "12", x2: "12.01", y1: "16", y2: "16", key: "4dfq90" }]
+];
+const CircleAlert = createLucideIcon("circle-alert", __iconNode$N);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34244,36 +34293,43 @@ const BookText = createLucideIcon("book-text", __iconNode$N);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$M = [
-  ["path", { d: "M3 3v16a2 2 0 0 0 2 2h16", key: "c24i48" }],
-  ["path", { d: "M18 17V9", key: "2bz60n" }],
-  ["path", { d: "M13 17V5", key: "1frdt8" }],
-  ["path", { d: "M8 17v-3", key: "17ska0" }]
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
 ];
-const ChartColumn = createLucideIcon("chart-column", __iconNode$M);
+const CircleCheck = createLucideIcon("circle-check", __iconNode$M);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$L = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$L);
+const __iconNode$L = [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
+  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
+];
+const Clock = createLucideIcon("clock", __iconNode$L);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$K = [["path", { d: "m6 9 6 6 6-6", key: "qrunsl" }]];
-const ChevronDown = createLucideIcon("chevron-down", __iconNode$K);
+const __iconNode$K = [
+  ["rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2", key: "17jyea" }],
+  ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
+];
+const Copy = createLucideIcon("copy", __iconNode$K);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$J = [["path", { d: "m18 15-6-6-6 6", key: "153udz" }]];
-const ChevronUp = createLucideIcon("chevron-up", __iconNode$J);
+const __iconNode$J = [
+  ["path", { d: "M20 4v7a4 4 0 0 1-4 4H4", key: "6o5b7l" }],
+  ["path", { d: "m9 10-5 5 5 5", key: "1kshq7" }]
+];
+const CornerDownLeft = createLucideIcon("corner-down-left", __iconNode$J);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34281,11 +34337,11 @@ const ChevronUp = createLucideIcon("chevron-up", __iconNode$J);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$I = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["line", { x1: "12", x2: "12", y1: "8", y2: "12", key: "1pkeuh" }],
-  ["line", { x1: "12", x2: "12.01", y1: "16", y2: "16", key: "4dfq90" }]
+  ["path", { d: "M12 15V3", key: "m9g1x1" }],
+  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
+  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
 ];
-const CircleAlert = createLucideIcon("circle-alert", __iconNode$I);
+const Download = createLucideIcon("download", __iconNode$I);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34293,10 +34349,17 @@ const CircleAlert = createLucideIcon("circle-alert", __iconNode$I);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$H = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
+  ["path", { d: "M12.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v9.5", key: "1couwa" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
+  [
+    "path",
+    {
+      d: "M13.378 15.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z",
+      key: "1y4qbx"
+    }
+  ]
 ];
-const CircleCheck = createLucideIcon("circle-check", __iconNode$H);
+const FilePen = createLucideIcon("file-pen", __iconNode$H);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34304,10 +34367,13 @@ const CircleCheck = createLucideIcon("circle-check", __iconNode$H);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$G = [
-  ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
-  ["polyline", { points: "12 6 12 12 16 14", key: "68esgv" }]
+  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
+  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
+  ["path", { d: "M10 9H8", key: "b1mrlr" }],
+  ["path", { d: "M16 13H8", key: "t4e002" }],
+  ["path", { d: "M16 17H8", key: "z1uh3a" }]
 ];
-const Clock = createLucideIcon("clock", __iconNode$G);
+const FileText = createLucideIcon("file-text", __iconNode$G);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34315,54 +34381,6 @@ const Clock = createLucideIcon("clock", __iconNode$G);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$F = [
-  ["rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2", key: "17jyea" }],
-  ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
-];
-const Copy = createLucideIcon("copy", __iconNode$F);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$E = [
-  ["path", { d: "M20 4v7a4 4 0 0 1-4 4H4", key: "6o5b7l" }],
-  ["path", { d: "m9 10-5 5 5 5", key: "1kshq7" }]
-];
-const CornerDownLeft = createLucideIcon("corner-down-left", __iconNode$E);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$D = [
-  ["path", { d: "M12 15V3", key: "m9g1x1" }],
-  ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
-  ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
-];
-const Download = createLucideIcon("download", __iconNode$D);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$C = [
-  ["path", { d: "M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z", key: "1rqfz7" }],
-  ["path", { d: "M14 2v4a2 2 0 0 0 2 2h4", key: "tnqrlb" }],
-  ["path", { d: "M10 9H8", key: "b1mrlr" }],
-  ["path", { d: "M16 13H8", key: "t4e002" }],
-  ["path", { d: "M16 17H8", key: "z1uh3a" }]
-];
-const FileText = createLucideIcon("file-text", __iconNode$C);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$B = [
   ["circle", { cx: "9", cy: "12", r: "1", key: "1vctgf" }],
   ["circle", { cx: "9", cy: "5", r: "1", key: "hp0tcf" }],
   ["circle", { cx: "9", cy: "19", r: "1", key: "fkjjf6" }],
@@ -34370,14 +34388,27 @@ const __iconNode$B = [
   ["circle", { cx: "15", cy: "5", r: "1", key: "19l28e" }],
   ["circle", { cx: "15", cy: "19", r: "1", key: "f4zoj3" }]
 ];
-const GripVertical = createLucideIcon("grip-vertical", __iconNode$B);
+const GripVertical = createLucideIcon("grip-vertical", __iconNode$F);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$A = [
+const __iconNode$E = [
+  ["line", { x1: "4", x2: "20", y1: "9", y2: "9", key: "4lhtct" }],
+  ["line", { x1: "4", x2: "20", y1: "15", y2: "15", key: "vyu0kd" }],
+  ["line", { x1: "10", x2: "8", y1: "3", y2: "21", key: "1ggp8o" }],
+  ["line", { x1: "16", x2: "14", y1: "3", y2: "21", key: "weycgp" }]
+];
+const Hash$2 = createLucideIcon("hash", __iconNode$E);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$D = [
   [
     "path",
     {
@@ -34386,14 +34417,14 @@ const __iconNode$A = [
     }
   ]
 ];
-const Headphones = createLucideIcon("headphones", __iconNode$A);
+const Headphones = createLucideIcon("headphones", __iconNode$D);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$z = [
+const __iconNode$C = [
   [
     "path",
     {
@@ -34402,7 +34433,44 @@ const __iconNode$z = [
     }
   ]
 ];
-const Heart = createLucideIcon("heart", __iconNode$z);
+const Heart = createLucideIcon("heart", __iconNode$C);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$B = [
+  ["path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "1357e3" }],
+  ["path", { d: "M3 3v5h5", key: "1xhq8a" }],
+  ["path", { d: "M12 7v5l4 2", key: "1fdv2h" }]
+];
+const History = createLucideIcon("history", __iconNode$B);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$A = [
+  ["path", { d: "M21 12H11", key: "wd7e0v" }],
+  ["path", { d: "M21 18H11", key: "4wu86t" }],
+  ["path", { d: "M21 6H11", key: "6dy1d6" }],
+  ["path", { d: "m3 8 4 4-4 4", key: "1a3j6y" }]
+];
+const IndentIncrease = createLucideIcon("indent-increase", __iconNode$A);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$z = [
+  ["line", { x1: "19", x2: "10", y1: "4", y2: "4", key: "15jd3p" }],
+  ["line", { x1: "14", x2: "5", y1: "20", y2: "20", key: "bu0au3" }],
+  ["line", { x1: "15", x2: "9", y1: "4", y2: "20", key: "uljnxc" }]
+];
+const Italic$1 = createLucideIcon("italic", __iconNode$z);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34410,30 +34478,6 @@ const Heart = createLucideIcon("heart", __iconNode$z);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$y = [
-  ["path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "1357e3" }],
-  ["path", { d: "M3 3v5h5", key: "1xhq8a" }],
-  ["path", { d: "M12 7v5l4 2", key: "1fdv2h" }]
-];
-const History = createLucideIcon("history", __iconNode$y);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$x = [
-  ["line", { x1: "19", x2: "10", y1: "4", y2: "4", key: "15jd3p" }],
-  ["line", { x1: "14", x2: "5", y1: "20", y2: "20", key: "bu0au3" }],
-  ["line", { x1: "15", x2: "9", y1: "4", y2: "20", key: "uljnxc" }]
-];
-const Italic$1 = createLucideIcon("italic", __iconNode$x);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$w = [
   [
     "path",
     {
@@ -34443,26 +34487,26 @@ const __iconNode$w = [
   ],
   ["circle", { cx: "16.5", cy: "7.5", r: ".5", fill: "currentColor", key: "w0ekpg" }]
 ];
-const KeyRound = createLucideIcon("key-round", __iconNode$w);
+const KeyRound = createLucideIcon("key-round", __iconNode$y);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$v = [
+const __iconNode$x = [
   ["path", { d: "m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4", key: "g0fldk" }],
   ["path", { d: "m21 2-9.6 9.6", key: "1j0ho8" }],
   ["circle", { cx: "7.5", cy: "15.5", r: "5.5", key: "yqb3hr" }]
 ];
-const Key = createLucideIcon("key", __iconNode$v);
+const Key = createLucideIcon("key", __iconNode$x);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$u = [
+const __iconNode$w = [
   [
     "path",
     {
@@ -34485,15 +34529,39 @@ const __iconNode$u = [
     }
   ]
 ];
-const Layers = createLucideIcon("layers", __iconNode$u);
+const Layers = createLucideIcon("layers", __iconNode$w);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$t = [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]];
-const LoaderCircle = createLucideIcon("loader-circle", __iconNode$t);
+const __iconNode$v = [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]];
+const LoaderCircle = createLucideIcon("loader-circle", __iconNode$v);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$u = [
+  ["path", { d: "m10 17 5-5-5-5", key: "1bsop3" }],
+  ["path", { d: "M15 12H3", key: "6jk70r" }],
+  ["path", { d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4", key: "u53s6r" }]
+];
+const LogIn = createLucideIcon("log-in", __iconNode$u);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$t = [
+  ["path", { d: "m16 17 5-5-5-5", key: "1bji2h" }],
+  ["path", { d: "M21 12H9", key: "dn1m92" }],
+  ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
+];
+const LogOut = createLucideIcon("log-out", __iconNode$t);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34501,11 +34569,9 @@ const LoaderCircle = createLucideIcon("loader-circle", __iconNode$t);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$s = [
-  ["path", { d: "m10 17 5-5-5-5", key: "1bsop3" }],
-  ["path", { d: "M15 12H3", key: "6jk70r" }],
-  ["path", { d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4", key: "u53s6r" }]
+  ["path", { d: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z", key: "vv11sd" }]
 ];
-const LogIn = createLucideIcon("log-in", __iconNode$s);
+const MessageCircle = createLucideIcon("message-circle", __iconNode$s);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34513,11 +34579,9 @@ const LogIn = createLucideIcon("log-in", __iconNode$s);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$r = [
-  ["path", { d: "m16 17 5-5-5-5", key: "1bji2h" }],
-  ["path", { d: "M21 12H9", key: "dn1m92" }],
-  ["path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", key: "1uf3rs" }]
+  ["path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", key: "1lielz" }]
 ];
-const LogOut = createLucideIcon("log-out", __iconNode$r);
+const MessageSquare = createLucideIcon("message-square", __iconNode$r);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34525,9 +34589,11 @@ const LogOut = createLucideIcon("log-out", __iconNode$r);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$q = [
-  ["path", { d: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z", key: "vv11sd" }]
+  ["path", { d: "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z", key: "131961" }],
+  ["path", { d: "M19 10v2a7 7 0 0 1-14 0v-2", key: "1vc78b" }],
+  ["line", { x1: "12", x2: "12", y1: "19", y2: "22", key: "x3vr5v" }]
 ];
-const MessageCircle = createLucideIcon("message-circle", __iconNode$q);
+const Mic = createLucideIcon("mic", __iconNode$q);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34535,9 +34601,9 @@ const MessageCircle = createLucideIcon("message-circle", __iconNode$q);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$p = [
-  ["path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z", key: "1lielz" }]
+  ["path", { d: "M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z", key: "a7tn18" }]
 ];
-const MessageSquare = createLucideIcon("message-square", __iconNode$p);
+const Moon = createLucideIcon("moon", __iconNode$p);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34545,21 +34611,18 @@ const MessageSquare = createLucideIcon("message-square", __iconNode$p);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$o = [
-  ["path", { d: "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z", key: "131961" }],
-  ["path", { d: "M19 10v2a7 7 0 0 1-14 0v-2", key: "1vc78b" }],
-  ["line", { x1: "12", x2: "12", y1: "19", y2: "22", key: "x3vr5v" }]
+  ["rect", { x: "14", y: "4", width: "4", height: "16", rx: "1", key: "zuxfzm" }],
+  ["rect", { x: "6", y: "4", width: "4", height: "16", rx: "1", key: "1okwgv" }]
 ];
-const Mic = createLucideIcon("mic", __iconNode$o);
+const Pause = createLucideIcon("pause", __iconNode$o);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$n = [
-  ["path", { d: "M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z", key: "a7tn18" }]
-];
-const Moon = createLucideIcon("moon", __iconNode$n);
+const __iconNode$n = [["polygon", { points: "6 3 20 12 6 21 6 3", key: "1oa8hb" }]];
+const Play = createLucideIcon("play", __iconNode$n);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34567,18 +34630,21 @@ const Moon = createLucideIcon("moon", __iconNode$n);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$m = [
-  ["rect", { x: "14", y: "4", width: "4", height: "16", rx: "1", key: "zuxfzm" }],
-  ["rect", { x: "6", y: "4", width: "4", height: "16", rx: "1", key: "1okwgv" }]
+  ["path", { d: "M5 12h14", key: "1ays0h" }],
+  ["path", { d: "M12 5v14", key: "s699le" }]
 ];
-const Pause = createLucideIcon("pause", __iconNode$m);
+const Plus = createLucideIcon("plus", __iconNode$m);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
  * This source code is licensed under the ISC license.
  * See the LICENSE file in the root directory of this source tree.
  */
-const __iconNode$l = [["polygon", { points: "6 3 20 12 6 21 6 3", key: "1oa8hb" }]];
-const Play = createLucideIcon("play", __iconNode$l);
+const __iconNode$l = [
+  ["path", { d: "M21 7v6h-6", key: "3ptur4" }],
+  ["path", { d: "M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7", key: "1kgawr" }]
+];
+const Redo = createLucideIcon("redo", __iconNode$l);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34586,10 +34652,12 @@ const Play = createLucideIcon("play", __iconNode$l);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$k = [
-  ["path", { d: "M5 12h14", key: "1ays0h" }],
-  ["path", { d: "M12 5v14", key: "s699le" }]
+  ["path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8", key: "v9h5vc" }],
+  ["path", { d: "M21 3v5h-5", key: "1q7to0" }],
+  ["path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16", key: "3uifl3" }],
+  ["path", { d: "M8 16H3v5", key: "1cv678" }]
 ];
-const Plus = createLucideIcon("plus", __iconNode$k);
+const RefreshCw = createLucideIcon("refresh-cw", __iconNode$k);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34597,10 +34665,10 @@ const Plus = createLucideIcon("plus", __iconNode$k);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$j = [
-  ["path", { d: "M21 7v6h-6", key: "3ptur4" }],
-  ["path", { d: "M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7", key: "1kgawr" }]
+  ["path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "1357e3" }],
+  ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
 ];
-const Redo = createLucideIcon("redo", __iconNode$j);
+const RotateCcw = createLucideIcon("rotate-ccw", __iconNode$j);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34608,12 +34676,19 @@ const Redo = createLucideIcon("redo", __iconNode$j);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$i = [
-  ["path", { d: "M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8", key: "v9h5vc" }],
-  ["path", { d: "M21 3v5h-5", key: "1q7to0" }],
-  ["path", { d: "M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16", key: "3uifl3" }],
-  ["path", { d: "M8 16H3v5", key: "1cv678" }]
+  [
+    "path",
+    {
+      d: "M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z",
+      key: "icamh8"
+    }
+  ],
+  ["path", { d: "m14.5 12.5 2-2", key: "inckbg" }],
+  ["path", { d: "m11.5 9.5 2-2", key: "fmmyf7" }],
+  ["path", { d: "m8.5 6.5 2-2", key: "vc6u1g" }],
+  ["path", { d: "m17.5 15.5 2-2", key: "wo5hmg" }]
 ];
-const RefreshCw = createLucideIcon("refresh-cw", __iconNode$i);
+const Ruler = createLucideIcon("ruler", __iconNode$i);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34621,17 +34696,6 @@ const RefreshCw = createLucideIcon("refresh-cw", __iconNode$i);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$h = [
-  ["path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "1357e3" }],
-  ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
-];
-const RotateCcw = createLucideIcon("rotate-ccw", __iconNode$h);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$g = [
   [
     "path",
     {
@@ -34642,7 +34706,24 @@ const __iconNode$g = [
   ["path", { d: "M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7", key: "1ydtos" }],
   ["path", { d: "M7 3v4a1 1 0 0 0 1 1h7", key: "t51u73" }]
 ];
-const Save = createLucideIcon("save", __iconNode$g);
+const Save = createLucideIcon("save", __iconNode$h);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$g = [
+  [
+    "path",
+    {
+      d: "M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z",
+      key: "1ffxy3"
+    }
+  ],
+  ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
+];
+const Send = createLucideIcon("send", __iconNode$g);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34653,13 +34734,13 @@ const __iconNode$f = [
   [
     "path",
     {
-      d: "M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z",
-      key: "1ffxy3"
+      d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
+      key: "1qme2f"
     }
   ],
-  ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
+  ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
 ];
-const Send = createLucideIcon("send", __iconNode$f);
+const Settings = createLucideIcon("settings", __iconNode$f);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34670,13 +34751,12 @@ const __iconNode$e = [
   [
     "path",
     {
-      d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z",
-      key: "1qme2f"
+      d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
+      key: "oel41y"
     }
-  ],
-  ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
+  ]
 ];
-const Settings = createLucideIcon("settings", __iconNode$e);
+const Shield = createLucideIcon("shield", __iconNode$e);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34684,22 +34764,6 @@ const Settings = createLucideIcon("settings", __iconNode$e);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$d = [
-  [
-    "path",
-    {
-      d: "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z",
-      key: "oel41y"
-    }
-  ]
-];
-const Shield = createLucideIcon("shield", __iconNode$d);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$c = [
   [
     "path",
     {
@@ -34712,7 +34776,17 @@ const __iconNode$c = [
   ["path", { d: "M4 17v2", key: "vumght" }],
   ["path", { d: "M5 18H3", key: "zchphs" }]
 ];
-const Sparkles = createLucideIcon("sparkles", __iconNode$c);
+const Sparkles = createLucideIcon("sparkles", __iconNode$d);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$c = [
+  ["rect", { width: "18", height: "18", x: "3", y: "3", rx: "2", key: "afitv7" }]
+];
+const Square = createLucideIcon("square", __iconNode$c);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34720,16 +34794,6 @@ const Sparkles = createLucideIcon("sparkles", __iconNode$c);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$b = [
-  ["rect", { width: "18", height: "18", x: "3", y: "3", rx: "2", key: "afitv7" }]
-];
-const Square = createLucideIcon("square", __iconNode$b);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$a = [
   ["circle", { cx: "12", cy: "12", r: "4", key: "4exip2" }],
   ["path", { d: "M12 2v2", key: "tus03m" }],
   ["path", { d: "M12 20v2", key: "1lh1kg" }],
@@ -34740,7 +34804,21 @@ const __iconNode$a = [
   ["path", { d: "m6.34 17.66-1.41 1.41", key: "1m8zz5" }],
   ["path", { d: "m19.07 4.93-1.41 1.41", key: "1shlcs" }]
 ];
-const Sun = createLucideIcon("sun", __iconNode$a);
+const Sun = createLucideIcon("sun", __iconNode$b);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$a = [
+  ["path", { d: "M3 6h18", key: "d0wm0j" }],
+  ["path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6", key: "4alrt4" }],
+  ["path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2", key: "v07s0e" }],
+  ["line", { x1: "10", x2: "10", y1: "11", y2: "17", key: "1uufr5" }],
+  ["line", { x1: "14", x2: "14", y1: "11", y2: "17", key: "xtxkd" }]
+];
+const Trash2 = createLucideIcon("trash-2", __iconNode$a);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34748,20 +34826,6 @@ const Sun = createLucideIcon("sun", __iconNode$a);
  * See the LICENSE file in the root directory of this source tree.
  */
 const __iconNode$9 = [
-  ["path", { d: "M3 6h18", key: "d0wm0j" }],
-  ["path", { d: "M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6", key: "4alrt4" }],
-  ["path", { d: "M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2", key: "v07s0e" }],
-  ["line", { x1: "10", x2: "10", y1: "11", y2: "17", key: "1uufr5" }],
-  ["line", { x1: "14", x2: "14", y1: "11", y2: "17", key: "xtxkd" }]
-];
-const Trash2 = createLucideIcon("trash-2", __iconNode$9);
-/**
- * @license lucide-react v0.511.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */
-const __iconNode$8 = [
   [
     "path",
     {
@@ -34772,7 +34836,19 @@ const __iconNode$8 = [
   ["path", { d: "M12 9v4", key: "juzpu7" }],
   ["path", { d: "M12 17h.01", key: "p32p05" }]
 ];
-const TriangleAlert = createLucideIcon("triangle-alert", __iconNode$8);
+const TriangleAlert = createLucideIcon("triangle-alert", __iconNode$9);
+/**
+ * @license lucide-react v0.511.0 - ISC
+ *
+ * This source code is licensed under the ISC license.
+ * See the LICENSE file in the root directory of this source tree.
+ */
+const __iconNode$8 = [
+  ["path", { d: "M12 4v16", key: "1654pz" }],
+  ["path", { d: "M4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2", key: "e0r10z" }],
+  ["path", { d: "M9 20h6", key: "s66wpe" }]
+];
+const Type2 = createLucideIcon("type", __iconNode$8);
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -35693,11 +35769,11 @@ function createRandomKey() {
 function last$2(arr) {
   return arr[arr.length - 1];
 }
-function isFunction$9(d2) {
+function isFunction$a(d2) {
   return typeof d2 === "function";
 }
 function functionalUpdate(updater, previous) {
-  if (isFunction$9(updater)) {
+  if (isFunction$a(updater)) {
     return updater(previous);
   }
   return updater;
@@ -38718,7 +38794,7 @@ const isNumber$5 = (value) => {
 const isBigInt = (value) => {
   return typeof value == "bigint";
 };
-const isFunction$8 = (value) => {
+const isFunction$9 = (value) => {
   return typeof value == "function";
 };
 const isMap = (value) => {
@@ -38787,7 +38863,7 @@ const jsesc = (argument, options) => {
   const useOctNumbers = options.numbers == "octal";
   const useDecNumbers = options.numbers == "decimal";
   const useHexNumbers = options.numbers == "hexadecimal";
-  if (json && argument && isFunction$8(argument.toJSON)) {
+  if (json && argument && isFunction$9(argument.toJSON)) {
     argument = argument.toJSON();
   }
   if (!isString$2(argument)) {
@@ -39489,7 +39565,7 @@ function useControllableState({
     (nextValue) => {
       var _a2;
       if (isControlled) {
-        const value2 = isFunction$7(nextValue) ? nextValue(prop) : nextValue;
+        const value2 = isFunction$8(nextValue) ? nextValue(prop) : nextValue;
         if (value2 !== prop) {
           (_a2 = onChangeRef.current) == null ? void 0 : _a2.call(onChangeRef, value2);
         }
@@ -39520,7 +39596,7 @@ function useUncontrolledState({
   }, [value, prevValueRef]);
   return [value, setValue, onChangeRef];
 }
-function isFunction$7(value) {
+function isFunction$8(value) {
   return typeof value === "function";
 }
 var NODES = [
@@ -41107,11 +41183,11 @@ var Dialog$1 = (props) => {
   );
 };
 Dialog$1.displayName = DIALOG_NAME;
-var TRIGGER_NAME$3 = "DialogTrigger";
+var TRIGGER_NAME$4 = "DialogTrigger";
 var DialogTrigger$1 = reactExports.forwardRef(
   (props, forwardedRef) => {
     const { __scopeDialog, ...triggerProps } = props;
-    const context = useDialogContext(TRIGGER_NAME$3, __scopeDialog);
+    const context = useDialogContext(TRIGGER_NAME$4, __scopeDialog);
     const composedTriggerRef = useComposedRefs(forwardedRef, context.triggerRef);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(
       Primitive.button,
@@ -41120,7 +41196,7 @@ var DialogTrigger$1 = reactExports.forwardRef(
         "aria-haspopup": "dialog",
         "aria-expanded": context.open,
         "aria-controls": context.open ? context.contentId : void 0,
-        "data-state": getState(context.open),
+        "data-state": getState$1(context.open),
         ...triggerProps,
         ref: composedTriggerRef,
         onClick: composeEventHandlers(props.onClick, context.onOpenToggle)
@@ -41128,7 +41204,7 @@ var DialogTrigger$1 = reactExports.forwardRef(
     );
   }
 );
-DialogTrigger$1.displayName = TRIGGER_NAME$3;
+DialogTrigger$1.displayName = TRIGGER_NAME$4;
 var PORTAL_NAME$3 = "DialogPortal";
 var [PortalProvider$2, usePortalContext$2] = createDialogContext(PORTAL_NAME$3, {
   forceMount: void 0
@@ -41162,7 +41238,7 @@ var DialogOverlayImpl = reactExports.forwardRef(
       /* @__PURE__ */ jsxRuntimeExports.jsx(ReactRemoveScroll, { as: Slot$2, allowPinchZoom: true, shards: [context.contentRef], children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         Primitive.div,
         {
-          "data-state": getState(context.open),
+          "data-state": getState$1(context.open),
           ...overlayProps,
           ref: composedRefs,
           style: { pointerEvents: "auto", ...overlayProps.style }
@@ -41278,7 +41354,7 @@ var DialogContentImpl = reactExports.forwardRef(
             id: context.contentId,
             "aria-describedby": context.descriptionId,
             "aria-labelledby": context.titleId,
-            "data-state": getState(context.open),
+            "data-state": getState$1(context.open),
             ...contentProps,
             ref: forwardedRef,
             deferPointerDownOutside: true,
@@ -41324,7 +41400,7 @@ var DialogClose = reactExports.forwardRef(
   }
 );
 DialogClose.displayName = CLOSE_NAME;
-function getState(open) {
+function getState$1(open) {
   return open ? "open" : "closed";
 }
 function Dialog({
@@ -42428,7 +42504,7 @@ function ChatBotPanel({ bookId, book: bookProp }) {
   }, [currentMessages.length]);
   reactExports.useEffect(() => {
     const currentLength = currentMessages.length;
-    if (isOpen && view === "chat" && currentLength > messageCountRef.current) {
+    if (isOpen && view === "chat") {
       scrollToBottom();
     }
     messageCountRef.current = currentLength;
@@ -45954,7 +46030,7 @@ function SelectProvider(props) {
       scope: __scopeSelect,
       onNativeOptionAdd: handleNativeOptionAdd,
       onNativeOptionRemove: handleNativeOptionRemove,
-      children: isFunction$6(internal_do_not_use_render) ? internal_do_not_use_render(context) : children
+      children: isFunction$7(internal_do_not_use_render) ? internal_do_not_use_render(context) : children
     }
   ) }) }) });
 }
@@ -45979,12 +46055,12 @@ var Select$1 = (props) => {
   );
 };
 Select$1.displayName = SELECT_NAME;
-var TRIGGER_NAME$2 = "SelectTrigger";
+var TRIGGER_NAME$3 = "SelectTrigger";
 var SelectTrigger$1 = reactExports.forwardRef(
   (props, forwardedRef) => {
     const { __scopeSelect, disabled = false, ...triggerProps } = props;
     const popperScope = usePopperScope$1(__scopeSelect);
-    const context = useSelectContext(TRIGGER_NAME$2, __scopeSelect);
+    const context = useSelectContext(TRIGGER_NAME$3, __scopeSelect);
     const isDisabled = context.disabled || disabled;
     const composedRefs = useComposedRefs(forwardedRef, context.onTriggerChange);
     const getItems = useCollection$3(__scopeSelect);
@@ -46056,7 +46132,7 @@ var SelectTrigger$1 = reactExports.forwardRef(
     ) });
   }
 );
-SelectTrigger$1.displayName = TRIGGER_NAME$2;
+SelectTrigger$1.displayName = TRIGGER_NAME$3;
 var VALUE_NAME = "SelectValue";
 var SelectValue$1 = reactExports.forwardRef(
   (props, forwardedRef) => {
@@ -46930,10 +47006,10 @@ var SelectArrow = reactExports.forwardRef(
   }
 );
 SelectArrow.displayName = ARROW_NAME$2;
-var BUBBLE_INPUT_NAME$1 = "SelectBubbleInput";
+var BUBBLE_INPUT_NAME$2 = "SelectBubbleInput";
 var SelectBubbleInput = reactExports.forwardRef(
   ({ __scopeSelect, ...props }, forwardedRef) => {
-    const context = useSelectContext(BUBBLE_INPUT_NAME$1, __scopeSelect);
+    const context = useSelectContext(BUBBLE_INPUT_NAME$2, __scopeSelect);
     const { value, onValueChange, required, disabled, name, autoComplete, form } = context;
     const { nativeOptions, nativeSelectKey } = context;
     const ref = reactExports.useRef(null);
@@ -46982,8 +47058,8 @@ var SelectBubbleInput = reactExports.forwardRef(
     );
   }
 );
-SelectBubbleInput.displayName = BUBBLE_INPUT_NAME$1;
-function isFunction$6(value) {
+SelectBubbleInput.displayName = BUBBLE_INPUT_NAME$2;
+function isFunction$7(value) {
   return typeof value === "function";
 }
 function shouldShowPlaceholder(value) {
@@ -47567,11 +47643,11 @@ var TabsList$1 = reactExports.forwardRef(
   }
 );
 TabsList$1.displayName = TAB_LIST_NAME;
-var TRIGGER_NAME$1 = "TabsTrigger";
+var TRIGGER_NAME$2 = "TabsTrigger";
 var TabsTrigger$1 = reactExports.forwardRef(
   (props, forwardedRef) => {
     const { __scopeTabs, value, disabled = false, ...triggerProps } = props;
-    const context = useTabsContext(TRIGGER_NAME$1, __scopeTabs);
+    const context = useTabsContext(TRIGGER_NAME$2, __scopeTabs);
     const rovingFocusGroupScope = useRovingFocusGroupScope$1(__scopeTabs);
     const triggerId = makeTriggerId(context.baseId, value);
     const contentId = makeContentId(context.baseId, value);
@@ -47618,7 +47694,7 @@ var TabsTrigger$1 = reactExports.forwardRef(
     );
   }
 );
-TabsTrigger$1.displayName = TRIGGER_NAME$1;
+TabsTrigger$1.displayName = TRIGGER_NAME$2;
 var CONTENT_NAME$2 = "TabsContent";
 var TabsContent$1 = reactExports.forwardRef(
   (props, forwardedRef) => {
@@ -47938,6 +48014,1207 @@ const bookRoute = createRoute({
   },
   component: BookOverviewPage
 });
+var CHECKBOX_NAME = "Checkbox";
+var [createCheckboxContext] = createContextScope(CHECKBOX_NAME);
+var [CheckboxProviderImpl, useCheckboxContext] = createCheckboxContext(CHECKBOX_NAME);
+function CheckboxProvider(props) {
+  const {
+    __scopeCheckbox,
+    checked: checkedProp,
+    children,
+    defaultChecked,
+    disabled,
+    form,
+    name,
+    onCheckedChange,
+    required,
+    value = "on",
+    // @ts-expect-error
+    internal_do_not_use_render
+  } = props;
+  const [checked, setChecked] = useControllableState({
+    prop: checkedProp,
+    defaultProp: defaultChecked ?? false,
+    onChange: onCheckedChange,
+    caller: CHECKBOX_NAME
+  });
+  const [control, setControl] = reactExports.useState(null);
+  const [bubbleInput, setBubbleInput] = reactExports.useState(null);
+  const hasConsumerStoppedPropagationRef = reactExports.useRef(false);
+  const isFormControl = control ? !!form || !!control.closest("form") : (
+    // We set this to true by default so that events bubble to forms without JS (SSR)
+    true
+  );
+  const context = {
+    checked,
+    disabled,
+    setChecked,
+    control,
+    setControl,
+    name,
+    form,
+    value,
+    hasConsumerStoppedPropagationRef,
+    required,
+    defaultChecked: isIndeterminate$1(defaultChecked) ? false : defaultChecked,
+    isFormControl,
+    bubbleInput,
+    setBubbleInput
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    CheckboxProviderImpl,
+    {
+      scope: __scopeCheckbox,
+      ...context,
+      children: isFunction$6(internal_do_not_use_render) ? internal_do_not_use_render(context) : children
+    }
+  );
+}
+var TRIGGER_NAME$1 = "CheckboxTrigger";
+var CheckboxTrigger = reactExports.forwardRef(
+  ({ __scopeCheckbox, onKeyDown, onClick, ...checkboxProps }, forwardedRef) => {
+    const {
+      control,
+      value,
+      disabled,
+      checked,
+      required,
+      setControl,
+      setChecked,
+      hasConsumerStoppedPropagationRef,
+      isFormControl,
+      bubbleInput
+    } = useCheckboxContext(TRIGGER_NAME$1, __scopeCheckbox);
+    const composedRefs = useComposedRefs(forwardedRef, setControl);
+    const initialCheckedStateRef = reactExports.useRef(checked);
+    reactExports.useEffect(() => {
+      const form = control == null ? void 0 : control.form;
+      if (form) {
+        const reset2 = () => setChecked(initialCheckedStateRef.current);
+        form.addEventListener("reset", reset2);
+        return () => form.removeEventListener("reset", reset2);
+      }
+    }, [control, setChecked]);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Primitive.button,
+      {
+        type: "button",
+        role: "checkbox",
+        "aria-checked": isIndeterminate$1(checked) ? "mixed" : checked,
+        "aria-required": required,
+        "data-state": getState(checked),
+        "data-disabled": disabled ? "" : void 0,
+        disabled,
+        value,
+        ...checkboxProps,
+        ref: composedRefs,
+        onKeyDown: composeEventHandlers(onKeyDown, (event) => {
+          if (event.key === "Enter") event.preventDefault();
+        }),
+        onClick: composeEventHandlers(onClick, (event) => {
+          setChecked((prevChecked) => isIndeterminate$1(prevChecked) ? true : !prevChecked);
+          if (bubbleInput && isFormControl) {
+            hasConsumerStoppedPropagationRef.current = event.isPropagationStopped();
+            if (!hasConsumerStoppedPropagationRef.current) event.stopPropagation();
+          }
+        })
+      }
+    );
+  }
+);
+CheckboxTrigger.displayName = TRIGGER_NAME$1;
+var Checkbox$1 = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const {
+      __scopeCheckbox,
+      name,
+      checked,
+      defaultChecked,
+      required,
+      disabled,
+      value,
+      onCheckedChange,
+      form,
+      ...checkboxProps
+    } = props;
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      CheckboxProvider,
+      {
+        __scopeCheckbox,
+        checked,
+        defaultChecked,
+        disabled,
+        required,
+        onCheckedChange,
+        name,
+        form,
+        value,
+        internal_do_not_use_render: ({ isFormControl }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            CheckboxTrigger,
+            {
+              ...checkboxProps,
+              ref: forwardedRef,
+              __scopeCheckbox
+            }
+          ),
+          isFormControl && /* @__PURE__ */ jsxRuntimeExports.jsx(
+            CheckboxBubbleInput,
+            {
+              __scopeCheckbox
+            }
+          )
+        ] })
+      }
+    );
+  }
+);
+Checkbox$1.displayName = CHECKBOX_NAME;
+var INDICATOR_NAME$1 = "CheckboxIndicator";
+var CheckboxIndicator = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeCheckbox, forceMount, ...indicatorProps } = props;
+    const context = useCheckboxContext(INDICATOR_NAME$1, __scopeCheckbox);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Presence,
+      {
+        present: forceMount || isIndeterminate$1(context.checked) || context.checked === true,
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Primitive.span,
+          {
+            "data-state": getState(context.checked),
+            "data-disabled": context.disabled ? "" : void 0,
+            ...indicatorProps,
+            ref: forwardedRef,
+            style: { pointerEvents: "none", ...props.style }
+          }
+        )
+      }
+    );
+  }
+);
+CheckboxIndicator.displayName = INDICATOR_NAME$1;
+var BUBBLE_INPUT_NAME$1 = "CheckboxBubbleInput";
+var CheckboxBubbleInput = reactExports.forwardRef(
+  ({ __scopeCheckbox, ...props }, forwardedRef) => {
+    const {
+      control,
+      hasConsumerStoppedPropagationRef,
+      checked,
+      defaultChecked,
+      required,
+      disabled,
+      name,
+      value,
+      form,
+      bubbleInput,
+      setBubbleInput
+    } = useCheckboxContext(BUBBLE_INPUT_NAME$1, __scopeCheckbox);
+    const composedRefs = useComposedRefs(forwardedRef, setBubbleInput);
+    const prevChecked = usePrevious(checked);
+    const controlSize = useSize(control);
+    reactExports.useEffect(() => {
+      const input = bubbleInput;
+      if (!input) return;
+      const inputProto = window.HTMLInputElement.prototype;
+      const descriptor = Object.getOwnPropertyDescriptor(
+        inputProto,
+        "checked"
+      );
+      const setChecked = descriptor.set;
+      const bubbles = !hasConsumerStoppedPropagationRef.current;
+      if (prevChecked !== checked && setChecked) {
+        const event = new Event("click", { bubbles });
+        input.indeterminate = isIndeterminate$1(checked);
+        setChecked.call(input, isIndeterminate$1(checked) ? false : checked);
+        input.dispatchEvent(event);
+      }
+    }, [bubbleInput, prevChecked, checked, hasConsumerStoppedPropagationRef]);
+    const defaultCheckedRef = reactExports.useRef(isIndeterminate$1(checked) ? false : checked);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Primitive.input,
+      {
+        type: "checkbox",
+        "aria-hidden": true,
+        defaultChecked: defaultChecked ?? defaultCheckedRef.current,
+        required,
+        disabled,
+        name,
+        value,
+        form,
+        ...props,
+        tabIndex: -1,
+        ref: composedRefs,
+        style: {
+          ...props.style,
+          ...controlSize,
+          position: "absolute",
+          pointerEvents: "none",
+          opacity: 0,
+          margin: 0,
+          // We transform because the input is absolutely positioned but we have
+          // rendered it **after** the button. This pulls it back to sit on top
+          // of the button.
+          transform: "translateX(-100%)"
+        }
+      }
+    );
+  }
+);
+CheckboxBubbleInput.displayName = BUBBLE_INPUT_NAME$1;
+function isFunction$6(value) {
+  return typeof value === "function";
+}
+function isIndeterminate$1(checked) {
+  return checked === "indeterminate";
+}
+function getState(checked) {
+  return isIndeterminate$1(checked) ? "indeterminate" : checked ? "checked" : "unchecked";
+}
+function Checkbox({
+  className,
+  ...props
+}) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    Checkbox$1,
+    {
+      "data-slot": "checkbox",
+      className: cn(
+        "peer border-input dark:bg-input/30 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:data-[state=checked]:bg-primary data-[state=checked]:border-primary focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive size-4 shrink-0 rounded-[4px] border shadow-xs transition-shadow outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      ),
+      ...props,
+      children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+        CheckboxIndicator,
+        {
+          "data-slot": "checkbox-indicator",
+          className: "flex items-center justify-center text-current transition-none",
+          children: /* @__PURE__ */ jsxRuntimeExports.jsx(Check, { className: "size-3.5" })
+        }
+      )
+    }
+  );
+}
+var PAGE_KEYS = ["PageUp", "PageDown"];
+var ARROW_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+var BACK_KEYS = {
+  "from-left": ["Home", "PageDown", "ArrowDown", "ArrowLeft"],
+  "from-right": ["Home", "PageDown", "ArrowDown", "ArrowRight"],
+  "from-bottom": ["Home", "PageDown", "ArrowDown", "ArrowLeft"],
+  "from-top": ["Home", "PageDown", "ArrowUp", "ArrowLeft"]
+};
+var SLIDER_NAME = "Slider";
+var [Collection$1, useCollection$1, createCollectionScope$1] = createCollection(SLIDER_NAME);
+var [createSliderContext] = createContextScope(SLIDER_NAME, [
+  createCollectionScope$1
+]);
+var [SliderProvider, useSliderContext] = createSliderContext(SLIDER_NAME);
+var Slider$1 = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const {
+      name,
+      min: min2 = 0,
+      max: max2 = 100,
+      step = 1,
+      orientation = "horizontal",
+      disabled = false,
+      minStepsBetweenThumbs = 0,
+      defaultValue = [min2],
+      value,
+      onValueChange = () => {
+      },
+      onValueCommit = () => {
+      },
+      inverted = false,
+      form,
+      ...sliderProps
+    } = props;
+    const thumbRefs = reactExports.useRef(/* @__PURE__ */ new Set());
+    const valueIndexToChangeRef = reactExports.useRef(0);
+    const isKeyboardInteractionRef = reactExports.useRef(false);
+    const isHorizontal = orientation === "horizontal";
+    const SliderOrientation = isHorizontal ? SliderHorizontal : SliderVertical;
+    const [values = [], setValues] = useControllableState({
+      prop: value,
+      defaultProp: defaultValue,
+      onChange: (value2) => {
+        var _a2;
+        const thumbs = [...thumbRefs.current];
+        (_a2 = thumbs[valueIndexToChangeRef.current]) == null ? void 0 : _a2.focus({
+          preventScroll: true,
+          focusVisible: isKeyboardInteractionRef.current
+        });
+        isKeyboardInteractionRef.current = false;
+        onValueChange(value2);
+      }
+    });
+    const valuesBeforeSlideStartRef = reactExports.useRef(values);
+    function handleSlideStart(value2) {
+      const closestIndex = getClosestValueIndex(values, value2);
+      updateValues(value2, closestIndex);
+    }
+    function handleSlideMove(value2) {
+      updateValues(value2, valueIndexToChangeRef.current);
+    }
+    function handleSlideEnd() {
+      const prevValue = valuesBeforeSlideStartRef.current[valueIndexToChangeRef.current];
+      const nextValue = values[valueIndexToChangeRef.current];
+      const hasChanged = nextValue !== prevValue;
+      if (hasChanged) onValueCommit(values);
+    }
+    function updateValues(value2, atIndex, { commit } = { commit: false }) {
+      const decimalCount = getDecimalCount(step);
+      const snapToStep = roundValue(Math.round((value2 - min2) / step) * step + min2, decimalCount);
+      const nextValue = clamp$1(snapToStep, [min2, max2]);
+      setValues((prevValues = []) => {
+        const nextValues = getNextSortedValues(prevValues, nextValue, atIndex);
+        if (hasMinStepsBetweenValues(nextValues, minStepsBetweenThumbs * step)) {
+          valueIndexToChangeRef.current = nextValues.indexOf(nextValue);
+          const hasChanged = String(nextValues) !== String(prevValues);
+          if (hasChanged && commit) onValueCommit(nextValues);
+          return hasChanged ? nextValues : prevValues;
+        } else {
+          return prevValues;
+        }
+      });
+    }
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      SliderProvider,
+      {
+        scope: props.__scopeSlider,
+        name,
+        disabled,
+        min: min2,
+        max: max2,
+        valueIndexToChangeRef,
+        thumbs: thumbRefs.current,
+        values,
+        orientation,
+        form,
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$1.Provider, { scope: props.__scopeSlider, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$1.Slot, { scope: props.__scopeSlider, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          SliderOrientation,
+          {
+            "aria-disabled": disabled,
+            "data-disabled": disabled ? "" : void 0,
+            ...sliderProps,
+            ref: forwardedRef,
+            onPointerDown: composeEventHandlers(sliderProps.onPointerDown, () => {
+              if (!disabled) {
+                valuesBeforeSlideStartRef.current = values;
+                isKeyboardInteractionRef.current = false;
+              }
+            }),
+            min: min2,
+            max: max2,
+            inverted,
+            onSlideStart: disabled ? void 0 : handleSlideStart,
+            onSlideMove: disabled ? void 0 : handleSlideMove,
+            onSlideEnd: disabled ? void 0 : handleSlideEnd,
+            onHomeKeyDown: () => {
+              if (!disabled) {
+                isKeyboardInteractionRef.current = true;
+                updateValues(min2, 0, { commit: true });
+              }
+            },
+            onEndKeyDown: () => {
+              if (!disabled) {
+                isKeyboardInteractionRef.current = true;
+                updateValues(max2, values.length - 1, { commit: true });
+              }
+            },
+            onStepKeyDown: ({ event, direction: stepDirection }) => {
+              if (!disabled) {
+                isKeyboardInteractionRef.current = true;
+                const isPageKey = PAGE_KEYS.includes(event.key);
+                const isSkipKey = isPageKey || event.shiftKey && ARROW_KEYS.includes(event.key);
+                const multiplier = isSkipKey ? 10 : 1;
+                const atIndex = valueIndexToChangeRef.current;
+                const value2 = values[atIndex];
+                const stepInDirection = step * multiplier * stepDirection;
+                updateValues(value2 + stepInDirection, atIndex, { commit: true });
+              }
+            }
+          }
+        ) }) })
+      }
+    );
+  }
+);
+Slider$1.displayName = SLIDER_NAME;
+var [SliderOrientationProvider, useSliderOrientationContext] = createSliderContext(SLIDER_NAME, {
+  startEdge: "left",
+  endEdge: "right",
+  size: "width",
+  direction: 1
+});
+var SliderHorizontal = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const {
+      min: min2,
+      max: max2,
+      dir,
+      inverted,
+      onSlideStart,
+      onSlideMove,
+      onSlideEnd,
+      onStepKeyDown,
+      ...sliderProps
+    } = props;
+    const [slider, setSlider] = reactExports.useState(null);
+    const composedRefs = useComposedRefs(forwardedRef, setSlider);
+    const rectRef = reactExports.useRef(void 0);
+    const direction = useDirection(dir);
+    const isDirectionLTR = direction === "ltr";
+    const isSlidingFromLeft = isDirectionLTR && !inverted || !isDirectionLTR && inverted;
+    function getValueFromPointer(pointerPosition) {
+      const rect = rectRef.current || slider.getBoundingClientRect();
+      const input = [0, rect.width];
+      const output = isSlidingFromLeft ? [min2, max2] : [max2, min2];
+      const value = linearScale$1(input, output);
+      rectRef.current = rect;
+      return value(pointerPosition - rect.left);
+    }
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      SliderOrientationProvider,
+      {
+        scope: props.__scopeSlider,
+        startEdge: isSlidingFromLeft ? "left" : "right",
+        endEdge: isSlidingFromLeft ? "right" : "left",
+        direction: isSlidingFromLeft ? 1 : -1,
+        size: "width",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          SliderImpl,
+          {
+            dir: direction,
+            "data-orientation": "horizontal",
+            ...sliderProps,
+            ref: composedRefs,
+            style: {
+              ...sliderProps.style,
+              "--radix-slider-thumb-transform": "translateX(-50%)"
+            },
+            onSlideStart: (event) => {
+              const value = getValueFromPointer(event.clientX);
+              onSlideStart == null ? void 0 : onSlideStart(value);
+            },
+            onSlideMove: (event) => {
+              const value = getValueFromPointer(event.clientX);
+              onSlideMove == null ? void 0 : onSlideMove(value);
+            },
+            onSlideEnd: () => {
+              rectRef.current = void 0;
+              onSlideEnd == null ? void 0 : onSlideEnd();
+            },
+            onStepKeyDown: (event) => {
+              const slideDirection = isSlidingFromLeft ? "from-left" : "from-right";
+              const isBackKey = BACK_KEYS[slideDirection].includes(event.key);
+              onStepKeyDown == null ? void 0 : onStepKeyDown({ event, direction: isBackKey ? -1 : 1 });
+            }
+          }
+        )
+      }
+    );
+  }
+);
+var SliderVertical = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const {
+      min: min2,
+      max: max2,
+      inverted,
+      onSlideStart,
+      onSlideMove,
+      onSlideEnd,
+      onStepKeyDown,
+      ...sliderProps
+    } = props;
+    const sliderRef = reactExports.useRef(null);
+    const ref = useComposedRefs(forwardedRef, sliderRef);
+    const rectRef = reactExports.useRef(void 0);
+    const isSlidingFromBottom = !inverted;
+    function getValueFromPointer(pointerPosition) {
+      const rect = rectRef.current || sliderRef.current.getBoundingClientRect();
+      const input = [0, rect.height];
+      const output = isSlidingFromBottom ? [max2, min2] : [min2, max2];
+      const value = linearScale$1(input, output);
+      rectRef.current = rect;
+      return value(pointerPosition - rect.top);
+    }
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      SliderOrientationProvider,
+      {
+        scope: props.__scopeSlider,
+        startEdge: isSlidingFromBottom ? "bottom" : "top",
+        endEdge: isSlidingFromBottom ? "top" : "bottom",
+        size: "height",
+        direction: isSlidingFromBottom ? 1 : -1,
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          SliderImpl,
+          {
+            "data-orientation": "vertical",
+            ...sliderProps,
+            ref,
+            style: {
+              ...sliderProps.style,
+              "--radix-slider-thumb-transform": "translateY(50%)"
+            },
+            onSlideStart: (event) => {
+              const value = getValueFromPointer(event.clientY);
+              onSlideStart == null ? void 0 : onSlideStart(value);
+            },
+            onSlideMove: (event) => {
+              const value = getValueFromPointer(event.clientY);
+              onSlideMove == null ? void 0 : onSlideMove(value);
+            },
+            onSlideEnd: () => {
+              rectRef.current = void 0;
+              onSlideEnd == null ? void 0 : onSlideEnd();
+            },
+            onStepKeyDown: (event) => {
+              const slideDirection = isSlidingFromBottom ? "from-bottom" : "from-top";
+              const isBackKey = BACK_KEYS[slideDirection].includes(event.key);
+              onStepKeyDown == null ? void 0 : onStepKeyDown({ event, direction: isBackKey ? -1 : 1 });
+            }
+          }
+        )
+      }
+    );
+  }
+);
+var SliderImpl = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const {
+      __scopeSlider,
+      onSlideStart,
+      onSlideMove,
+      onSlideEnd,
+      onHomeKeyDown,
+      onEndKeyDown,
+      onStepKeyDown,
+      ...sliderProps
+    } = props;
+    const context = useSliderContext(SLIDER_NAME, __scopeSlider);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Primitive.span,
+      {
+        ...sliderProps,
+        ref: forwardedRef,
+        onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
+          if (event.key === "Home") {
+            onHomeKeyDown(event);
+            event.preventDefault();
+          } else if (event.key === "End") {
+            onEndKeyDown(event);
+            event.preventDefault();
+          } else if (PAGE_KEYS.concat(ARROW_KEYS).includes(event.key)) {
+            onStepKeyDown(event);
+            event.preventDefault();
+          }
+        }),
+        onPointerDown: composeEventHandlers(props.onPointerDown, (event) => {
+          const target = event.target;
+          target.setPointerCapture(event.pointerId);
+          event.preventDefault();
+          if (context.thumbs.has(target)) {
+            target.focus({ preventScroll: true, focusVisible: false });
+          } else {
+            onSlideStart(event);
+          }
+        }),
+        onPointerMove: composeEventHandlers(props.onPointerMove, (event) => {
+          const target = event.target;
+          if (target.hasPointerCapture(event.pointerId)) onSlideMove(event);
+        }),
+        onPointerUp: composeEventHandlers(props.onPointerUp, (event) => {
+          const target = event.target;
+          if (target.hasPointerCapture(event.pointerId)) {
+            target.releasePointerCapture(event.pointerId);
+            onSlideEnd(event);
+          }
+        })
+      }
+    );
+  }
+);
+var TRACK_NAME = "SliderTrack";
+var SliderTrack = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeSlider, ...trackProps } = props;
+    const context = useSliderContext(TRACK_NAME, __scopeSlider);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Primitive.span,
+      {
+        "data-disabled": context.disabled ? "" : void 0,
+        "data-orientation": context.orientation,
+        ...trackProps,
+        ref: forwardedRef
+      }
+    );
+  }
+);
+SliderTrack.displayName = TRACK_NAME;
+var RANGE_NAME = "SliderRange";
+var SliderRange = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeSlider, ...rangeProps } = props;
+    const context = useSliderContext(RANGE_NAME, __scopeSlider);
+    const orientation = useSliderOrientationContext(RANGE_NAME, __scopeSlider);
+    const ref = reactExports.useRef(null);
+    const composedRefs = useComposedRefs(forwardedRef, ref);
+    const valuesCount = context.values.length;
+    const percentages = context.values.map(
+      (value) => convertValueToPercentage(value, context.min, context.max)
+    );
+    const offsetStart = valuesCount > 1 ? Math.min(...percentages) : 0;
+    const offsetEnd = 100 - Math.max(...percentages);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Primitive.span,
+      {
+        "data-orientation": context.orientation,
+        "data-disabled": context.disabled ? "" : void 0,
+        ...rangeProps,
+        ref: composedRefs,
+        style: {
+          ...props.style,
+          [orientation.startEdge]: offsetStart + "%",
+          [orientation.endEdge]: offsetEnd + "%"
+        }
+      }
+    );
+  }
+);
+SliderRange.displayName = RANGE_NAME;
+var THUMB_NAME$1 = "SliderThumb";
+var [SliderThumbContextProvider, useSliderThumbContext] = createSliderContext(THUMB_NAME$1);
+var THUMB_PROVIDER_NAME = "SliderThumbProvider";
+function SliderThumbProvider(props) {
+  const {
+    __scopeSlider,
+    name,
+    children,
+    // @ts-expect-error internal render prop
+    internal_do_not_use_render
+  } = props;
+  const context = useSliderContext(THUMB_PROVIDER_NAME, __scopeSlider);
+  const getItems = useCollection$1(__scopeSlider);
+  const [thumb, setThumb] = reactExports.useState(null);
+  const index2 = reactExports.useMemo(
+    () => thumb ? getItems().findIndex((item) => item.ref.current === thumb) : -1,
+    [getItems, thumb]
+  );
+  const size2 = useSize(thumb);
+  const isFormControl = thumb ? !!context.form || !!thumb.closest("form") : true;
+  const value = context.values[index2];
+  const resolvedName = name ?? (context.name ? context.name + (context.values.length > 1 ? "[]" : "") : void 0);
+  const percent = value === void 0 ? 0 : convertValueToPercentage(value, context.min, context.max);
+  reactExports.useEffect(() => {
+    if (thumb) {
+      context.thumbs.add(thumb);
+      return () => {
+        context.thumbs.delete(thumb);
+      };
+    }
+  }, [thumb, context.thumbs]);
+  const thumbContext = {
+    value,
+    name: resolvedName,
+    form: context.form,
+    isFormControl,
+    index: index2,
+    thumb,
+    onThumbChange: setThumb,
+    percent,
+    size: size2
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(SliderThumbContextProvider, { scope: __scopeSlider, ...thumbContext, children: isFunction$5(internal_do_not_use_render) ? internal_do_not_use_render(thumbContext) : children });
+}
+SliderThumbProvider.displayName = THUMB_PROVIDER_NAME;
+var THUMB_TRIGGER_NAME = "SliderThumbTrigger";
+var SliderThumbTrigger = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeSlider, ...thumbProps } = props;
+    const context = useSliderContext(THUMB_TRIGGER_NAME, __scopeSlider);
+    const orientation = useSliderOrientationContext(THUMB_TRIGGER_NAME, __scopeSlider);
+    const { index: index2, value, percent, size: size2, onThumbChange } = useSliderThumbContext(
+      THUMB_TRIGGER_NAME,
+      __scopeSlider
+    );
+    const composedRefs = useComposedRefs(forwardedRef, onThumbChange);
+    const label = getLabel$1(index2, context.values.length);
+    const orientationSize = size2 == null ? void 0 : size2[orientation.size];
+    const thumbInBoundsOffset = orientationSize ? getThumbInBoundsOffset(orientationSize, percent, orientation.direction) : 0;
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "span",
+      {
+        style: {
+          transform: "var(--radix-slider-thumb-transform)",
+          position: "absolute",
+          [orientation.startEdge]: `calc(${percent}% + ${thumbInBoundsOffset}px)`
+        },
+        children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$1.ItemSlot, { scope: __scopeSlider, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+          Primitive.span,
+          {
+            role: "slider",
+            "aria-label": props["aria-label"] || label,
+            "aria-valuemin": context.min,
+            "aria-valuenow": value,
+            "aria-valuemax": context.max,
+            "aria-orientation": context.orientation,
+            "data-orientation": context.orientation,
+            "data-disabled": context.disabled ? "" : void 0,
+            tabIndex: context.disabled ? void 0 : 0,
+            ...thumbProps,
+            ref: composedRefs,
+            style: value === void 0 ? { display: "none" } : props.style,
+            onFocus: composeEventHandlers(props.onFocus, () => {
+              context.valueIndexToChangeRef.current = index2;
+            })
+          }
+        ) })
+      }
+    );
+  }
+);
+SliderThumbTrigger.displayName = THUMB_TRIGGER_NAME;
+var SliderThumb = reactExports.forwardRef(
+  (props, forwardedRef) => {
+    const { __scopeSlider, name, ...thumbProps } = props;
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      SliderThumbProvider,
+      {
+        __scopeSlider,
+        name,
+        internal_do_not_use_render: ({ index: index2, isFormControl }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            SliderThumbTrigger,
+            {
+              ...thumbProps,
+              ref: forwardedRef,
+              __scopeSlider
+            }
+          ),
+          isFormControl ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+            SliderBubbleInput,
+            {
+              __scopeSlider
+            },
+            index2
+          ) : null
+        ] })
+      }
+    );
+  }
+);
+SliderThumb.displayName = THUMB_NAME$1;
+var BUBBLE_INPUT_NAME = "SliderBubbleInput";
+var SliderBubbleInput = reactExports.forwardRef(
+  ({ __scopeSlider, ...props }, forwardedRef) => {
+    const { value, name, form } = useSliderThumbContext(BUBBLE_INPUT_NAME, __scopeSlider);
+    const ref = reactExports.useRef(null);
+    const composedRefs = useComposedRefs(ref, forwardedRef);
+    const prevValue = usePrevious(value);
+    reactExports.useEffect(() => {
+      const input = ref.current;
+      if (!input) return;
+      const inputProto = window.HTMLInputElement.prototype;
+      const descriptor = Object.getOwnPropertyDescriptor(inputProto, "value");
+      const setValue = descriptor.set;
+      if (prevValue !== value && setValue) {
+        const event = new Event("input", { bubbles: true });
+        setValue.call(input, value);
+        input.dispatchEvent(event);
+      }
+    }, [prevValue, value]);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      Primitive.input,
+      {
+        style: { display: "none" },
+        name,
+        form,
+        ...props,
+        ref: composedRefs,
+        defaultValue: value
+      }
+    );
+  }
+);
+SliderBubbleInput.displayName = BUBBLE_INPUT_NAME;
+function getNextSortedValues(prevValues = [], nextValue, atIndex) {
+  const nextValues = [...prevValues];
+  nextValues[atIndex] = nextValue;
+  return nextValues.sort((a2, b2) => a2 - b2);
+}
+function convertValueToPercentage(value, min2, max2) {
+  const maxSteps = max2 - min2;
+  const percentPerStep = 100 / maxSteps;
+  const percentage = percentPerStep * (value - min2);
+  return clamp$1(percentage, [0, 100]);
+}
+function getLabel$1(index2, totalValues) {
+  if (totalValues > 2) {
+    return `Value ${index2 + 1} of ${totalValues}`;
+  } else if (totalValues === 2) {
+    return ["Minimum", "Maximum"][index2];
+  } else {
+    return void 0;
+  }
+}
+function getClosestValueIndex(values, nextValue) {
+  if (values.length === 1) return 0;
+  const distances = values.map((value) => Math.abs(value - nextValue));
+  const closestDistance = Math.min(...distances);
+  return distances.indexOf(closestDistance);
+}
+function getThumbInBoundsOffset(width, left, direction) {
+  const halfWidth = width / 2;
+  const halfPercent = 50;
+  const offset2 = linearScale$1([0, halfPercent], [0, halfWidth]);
+  return (halfWidth - offset2(left) * direction) * direction;
+}
+function getStepsBetweenValues(values) {
+  return values.slice(0, -1).map((value, index2) => values[index2 + 1] - value);
+}
+function hasMinStepsBetweenValues(values, minStepsBetweenValues) {
+  if (minStepsBetweenValues > 0) {
+    const stepsBetweenValues = getStepsBetweenValues(values);
+    const actualMinStepsBetweenValues = Math.min(...stepsBetweenValues);
+    return actualMinStepsBetweenValues >= minStepsBetweenValues;
+  }
+  return true;
+}
+function linearScale$1(input, output) {
+  return (value) => {
+    if (input[0] === input[1] || output[0] === output[1]) return output[0];
+    const ratio = (output[1] - output[0]) / (input[1] - input[0]);
+    return output[0] + ratio * (value - input[0]);
+  };
+}
+function getDecimalCount(value) {
+  if (!Number.isFinite(value)) return 0;
+  const str = value.toString();
+  if (str.includes("e")) {
+    const [coefficient, exponent2] = str.split("e");
+    const decimalPart2 = coefficient.split(".")[1] || "";
+    const exponentNum = Number(exponent2);
+    return Math.max(0, decimalPart2.length - exponentNum);
+  }
+  const decimalPart = str.split(".")[1];
+  return decimalPart ? decimalPart.length : 0;
+}
+function roundValue(value, decimalCount) {
+  const rounder = Math.pow(10, decimalCount);
+  return Math.round(value * rounder) / rounder;
+}
+function isFunction$5(value) {
+  return typeof value === "function";
+}
+function Slider({
+  className,
+  defaultValue,
+  value,
+  min: min2 = 0,
+  max: max2 = 100,
+  ...props
+}) {
+  const _values = reactExports.useMemo(
+    () => Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min2, max2],
+    [value, defaultValue, min2, max2]
+  );
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    Slider$1,
+    {
+      "data-slot": "slider",
+      defaultValue,
+      value,
+      min: min2,
+      max: max2,
+      className: cn(
+        "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
+        className
+      ),
+      ...props,
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          SliderTrack,
+          {
+            "data-slot": "slider-track",
+            className: cn(
+              "bg-muted relative grow overflow-hidden rounded-full data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5"
+            ),
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+              SliderRange,
+              {
+                "data-slot": "slider-range",
+                className: cn(
+                  "bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
+                )
+              }
+            )
+          }
+        ),
+        Array.from({ length: _values.length }, (value2, _2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          SliderThumb,
+          {
+            "data-slot": "slider-thumb",
+            className: "border-primary bg-background ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+          },
+          `${value2}`
+        ))
+      ]
+    }
+  );
+}
+const DEFAULT_SETTINGS = {
+  justify: true,
+  lineSpacing: 1.5,
+  marginTop: 2.5,
+  marginBottom: 2.5,
+  marginLeft: 2.5,
+  marginRight: 2.5,
+  fontSize: 12,
+  firstLineIndent: 1.25,
+  pageNumbers: true
+};
+function RedactionModal({
+  open,
+  onOpenChange,
+  onGenerate
+}) {
+  const [settings, setSettings] = reactExports.useState(DEFAULT_SETTINGS);
+  reactExports.useEffect(() => {
+    if (open) {
+      setSettings(DEFAULT_SETTINGS);
+    }
+  }, [open]);
+  const update = (key, value) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+  const handleGenerate = () => {
+    onGenerate(settings);
+    onOpenChange(false);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open, onOpenChange, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "max-w-lg max-h-[85vh] overflow-y-auto", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogTitle, { className: "flex items-center gap-2", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(FilePen, { className: "h-5 w-5" }),
+      "Ustawienia redakcji"
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6 py-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(AlignLeft, { className: "h-4 w-4 text-primary" }),
+          "Układ tekstu"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Checkbox,
+            {
+              id: "redaction-justify",
+              checked: settings.justify,
+              onCheckedChange: (checked) => update("justify", checked === true),
+              "data-ocid": "redaction.justify_checkbox"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Label$2,
+            {
+              htmlFor: "redaction-justify",
+              className: "text-sm cursor-pointer",
+              children: "Justowanie tekstu"
+            }
+          )
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-border" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(FileText, { className: "h-4 w-4 text-primary" }),
+          "Interlinia"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Slider,
+            {
+              value: [settings.lineSpacing],
+              onValueChange: (value) => update("lineSpacing", value[0] ?? 1.5),
+              min: 1,
+              max: 2,
+              step: 0.1,
+              className: "flex-1",
+              "data-ocid": "redaction.line_spacing_slider"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium text-foreground tabular-nums w-10 text-right", children: settings.lineSpacing.toFixed(1) })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-border" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Ruler, { className: "h-4 w-4 text-primary" }),
+          "Marginesy (cm)"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "redaction-margin-top", children: "Górny" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Input,
+              {
+                id: "redaction-margin-top",
+                type: "number",
+                step: "0.1",
+                min: "0",
+                value: settings.marginTop,
+                onChange: (e3) => update("marginTop", Number(e3.target.value) || 0),
+                "data-ocid": "redaction.margin_top_input"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "redaction-margin-bottom", children: "Dolny" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Input,
+              {
+                id: "redaction-margin-bottom",
+                type: "number",
+                step: "0.1",
+                min: "0",
+                value: settings.marginBottom,
+                onChange: (e3) => update("marginBottom", Number(e3.target.value) || 0),
+                "data-ocid": "redaction.margin_bottom_input"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "redaction-margin-left", children: "Lewy" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Input,
+              {
+                id: "redaction-margin-left",
+                type: "number",
+                step: "0.1",
+                min: "0",
+                value: settings.marginLeft,
+                onChange: (e3) => update("marginLeft", Number(e3.target.value) || 0),
+                "data-ocid": "redaction.margin_left_input"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "redaction-margin-right", children: "Prawy" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Input,
+              {
+                id: "redaction-margin-right",
+                type: "number",
+                step: "0.1",
+                min: "0",
+                value: settings.marginRight,
+                onChange: (e3) => update("marginRight", Number(e3.target.value) || 0),
+                "data-ocid": "redaction.margin_right_input"
+              }
+            )
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-border" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Type2, { className: "h-4 w-4 text-primary" }),
+          "Typografia"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { htmlFor: "redaction-font-size", children: "Rozmiar czcionki (pt)" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Input,
+              {
+                id: "redaction-font-size",
+                type: "number",
+                step: "0.5",
+                min: "1",
+                value: settings.fontSize,
+                onChange: (e3) => update("fontSize", Number(e3.target.value) || 0),
+                "data-ocid": "redaction.font_size_input"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Label$2,
+              {
+                htmlFor: "redaction-first-line-indent",
+                className: "flex items-center gap-1",
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(IndentIncrease, { className: "h-3.5 w-3.5" }),
+                  "Wcięcie pierwszej linii (cm)"
+                ]
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Input,
+              {
+                id: "redaction-first-line-indent",
+                type: "number",
+                step: "0.05",
+                min: "0",
+                value: settings.firstLineIndent,
+                onChange: (e3) => update("firstLineIndent", Number(e3.target.value) || 0),
+                "data-ocid": "redaction.first_line_indent_input"
+              }
+            )
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-border" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Hash$2, { className: "h-4 w-4 text-primary" }),
+          "Strony"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Checkbox,
+            {
+              id: "redaction-page-numbers",
+              checked: settings.pageNumbers,
+              onCheckedChange: (checked) => update("pageNumbers", checked === true),
+              "data-ocid": "redaction.page_numbers_checkbox"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Label$2,
+            {
+              htmlFor: "redaction-page-numbers",
+              className: "text-sm cursor-pointer",
+              children: "Numeracja stron"
+            }
+          )
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-end gap-2 pt-2 border-t border-border", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        Button,
+        {
+          variant: "outline",
+          onClick: () => onOpenChange(false),
+          "data-ocid": "redaction.cancel_button",
+          children: "Anuluj"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        Button,
+        {
+          onClick: handleGenerate,
+          "data-ocid": "redaction.generate_button",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(FilePen, { className: "h-4 w-4 mr-2" }),
+            "Generuj plik DOCX"
+          ]
+        }
+      )
+    ] })
+  ] }) });
+}
 const analysisTypeLabels = {
   grammar: "Gramatyka i styl",
   context: "Analizuj z kontekstem",
@@ -48731,19 +50008,19 @@ var ScrollAreaScrollbarImpl = reactExports.forwardRef((props, forwardedRef) => {
     }
   );
 });
-var THUMB_NAME$1 = "ScrollAreaThumb";
+var THUMB_NAME = "ScrollAreaThumb";
 var ScrollAreaThumb = reactExports.forwardRef(
   (props, forwardedRef) => {
     const { forceMount, ...thumbProps } = props;
-    const scrollbarContext = useScrollbarContext(THUMB_NAME$1, props.__scopeScrollArea);
+    const scrollbarContext = useScrollbarContext(THUMB_NAME, props.__scopeScrollArea);
     return /* @__PURE__ */ jsxRuntimeExports.jsx(Presence, { present: forceMount || scrollbarContext.hasThumb, children: /* @__PURE__ */ jsxRuntimeExports.jsx(ScrollAreaThumbImpl, { ref: forwardedRef, ...thumbProps }) });
   }
 );
 var ScrollAreaThumbImpl = reactExports.forwardRef(
   (props, forwardedRef) => {
     const { __scopeScrollArea, style: style2, ...thumbProps } = props;
-    const scrollAreaContext = useScrollAreaContext(THUMB_NAME$1, __scopeScrollArea);
-    const scrollbarContext = useScrollbarContext(THUMB_NAME$1, __scopeScrollArea);
+    const scrollAreaContext = useScrollAreaContext(THUMB_NAME, __scopeScrollArea);
+    const scrollbarContext = useScrollbarContext(THUMB_NAME, __scopeScrollArea);
     const { onThumbPositionChange } = scrollbarContext;
     const composedRef = useComposedRefs(forwardedRef, scrollbarContext.onThumbChange);
     const removeUnlinkedScrollListenerRef = reactExports.useRef(void 0);
@@ -48792,7 +50069,7 @@ var ScrollAreaThumbImpl = reactExports.forwardRef(
     );
   }
 );
-ScrollAreaThumb.displayName = THUMB_NAME$1;
+ScrollAreaThumb.displayName = THUMB_NAME;
 var CORNER_NAME = "ScrollAreaCorner";
 var ScrollAreaCorner = reactExports.forwardRef(
   (props, forwardedRef) => {
@@ -48860,7 +50137,7 @@ function getScrollPositionFromPointer(pointerPos, pointerOffset, sizes, dir = "l
   const maxPointerPos = sizes.scrollbar.size - sizes.scrollbar.paddingEnd - thumbOffsetFromEnd;
   const maxScrollPos = sizes.content - sizes.viewport;
   const scrollRange = dir === "ltr" ? [0, maxScrollPos] : [maxScrollPos * -1, 0];
-  const interpolate2 = linearScale$1([minPointerPos, maxPointerPos], scrollRange);
+  const interpolate2 = linearScale([minPointerPos, maxPointerPos], scrollRange);
   return interpolate2(pointerPos);
 }
 function getThumbOffsetFromScroll(scrollPos, sizes, dir = "ltr") {
@@ -48871,10 +50148,10 @@ function getThumbOffsetFromScroll(scrollPos, sizes, dir = "ltr") {
   const maxThumbPos = scrollbar - thumbSizePx;
   const scrollClampRange = dir === "ltr" ? [0, maxScrollPos] : [maxScrollPos * -1, 0];
   const scrollWithoutMomentum = clamp$1(scrollPos, scrollClampRange);
-  const interpolate2 = linearScale$1([0, maxScrollPos], [0, maxThumbPos]);
+  const interpolate2 = linearScale([0, maxScrollPos], [0, maxThumbPos]);
   return interpolate2(scrollWithoutMomentum);
 }
-function linearScale$1(input, output) {
+function linearScale(input, output) {
   return (value) => {
     if (input[0] === input[1] || output[0] === output[1]) return output[0];
     const ratio = (output[1] - output[0]) / (input[1] - input[0]);
@@ -49535,675 +50812,6 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
       )
     ] }) })
   ] });
-}
-var PAGE_KEYS = ["PageUp", "PageDown"];
-var ARROW_KEYS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-var BACK_KEYS = {
-  "from-left": ["Home", "PageDown", "ArrowDown", "ArrowLeft"],
-  "from-right": ["Home", "PageDown", "ArrowDown", "ArrowRight"],
-  "from-bottom": ["Home", "PageDown", "ArrowDown", "ArrowLeft"],
-  "from-top": ["Home", "PageDown", "ArrowUp", "ArrowLeft"]
-};
-var SLIDER_NAME = "Slider";
-var [Collection$1, useCollection$1, createCollectionScope$1] = createCollection(SLIDER_NAME);
-var [createSliderContext] = createContextScope(SLIDER_NAME, [
-  createCollectionScope$1
-]);
-var [SliderProvider, useSliderContext] = createSliderContext(SLIDER_NAME);
-var Slider$1 = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const {
-      name,
-      min: min2 = 0,
-      max: max2 = 100,
-      step = 1,
-      orientation = "horizontal",
-      disabled = false,
-      minStepsBetweenThumbs = 0,
-      defaultValue = [min2],
-      value,
-      onValueChange = () => {
-      },
-      onValueCommit = () => {
-      },
-      inverted = false,
-      form,
-      ...sliderProps
-    } = props;
-    const thumbRefs = reactExports.useRef(/* @__PURE__ */ new Set());
-    const valueIndexToChangeRef = reactExports.useRef(0);
-    const isKeyboardInteractionRef = reactExports.useRef(false);
-    const isHorizontal = orientation === "horizontal";
-    const SliderOrientation = isHorizontal ? SliderHorizontal : SliderVertical;
-    const [values = [], setValues] = useControllableState({
-      prop: value,
-      defaultProp: defaultValue,
-      onChange: (value2) => {
-        var _a2;
-        const thumbs = [...thumbRefs.current];
-        (_a2 = thumbs[valueIndexToChangeRef.current]) == null ? void 0 : _a2.focus({
-          preventScroll: true,
-          focusVisible: isKeyboardInteractionRef.current
-        });
-        isKeyboardInteractionRef.current = false;
-        onValueChange(value2);
-      }
-    });
-    const valuesBeforeSlideStartRef = reactExports.useRef(values);
-    function handleSlideStart(value2) {
-      const closestIndex = getClosestValueIndex(values, value2);
-      updateValues(value2, closestIndex);
-    }
-    function handleSlideMove(value2) {
-      updateValues(value2, valueIndexToChangeRef.current);
-    }
-    function handleSlideEnd() {
-      const prevValue = valuesBeforeSlideStartRef.current[valueIndexToChangeRef.current];
-      const nextValue = values[valueIndexToChangeRef.current];
-      const hasChanged = nextValue !== prevValue;
-      if (hasChanged) onValueCommit(values);
-    }
-    function updateValues(value2, atIndex, { commit } = { commit: false }) {
-      const decimalCount = getDecimalCount(step);
-      const snapToStep = roundValue(Math.round((value2 - min2) / step) * step + min2, decimalCount);
-      const nextValue = clamp$1(snapToStep, [min2, max2]);
-      setValues((prevValues = []) => {
-        const nextValues = getNextSortedValues(prevValues, nextValue, atIndex);
-        if (hasMinStepsBetweenValues(nextValues, minStepsBetweenThumbs * step)) {
-          valueIndexToChangeRef.current = nextValues.indexOf(nextValue);
-          const hasChanged = String(nextValues) !== String(prevValues);
-          if (hasChanged && commit) onValueCommit(nextValues);
-          return hasChanged ? nextValues : prevValues;
-        } else {
-          return prevValues;
-        }
-      });
-    }
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      SliderProvider,
-      {
-        scope: props.__scopeSlider,
-        name,
-        disabled,
-        min: min2,
-        max: max2,
-        valueIndexToChangeRef,
-        thumbs: thumbRefs.current,
-        values,
-        orientation,
-        form,
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$1.Provider, { scope: props.__scopeSlider, children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$1.Slot, { scope: props.__scopeSlider, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          SliderOrientation,
-          {
-            "aria-disabled": disabled,
-            "data-disabled": disabled ? "" : void 0,
-            ...sliderProps,
-            ref: forwardedRef,
-            onPointerDown: composeEventHandlers(sliderProps.onPointerDown, () => {
-              if (!disabled) {
-                valuesBeforeSlideStartRef.current = values;
-                isKeyboardInteractionRef.current = false;
-              }
-            }),
-            min: min2,
-            max: max2,
-            inverted,
-            onSlideStart: disabled ? void 0 : handleSlideStart,
-            onSlideMove: disabled ? void 0 : handleSlideMove,
-            onSlideEnd: disabled ? void 0 : handleSlideEnd,
-            onHomeKeyDown: () => {
-              if (!disabled) {
-                isKeyboardInteractionRef.current = true;
-                updateValues(min2, 0, { commit: true });
-              }
-            },
-            onEndKeyDown: () => {
-              if (!disabled) {
-                isKeyboardInteractionRef.current = true;
-                updateValues(max2, values.length - 1, { commit: true });
-              }
-            },
-            onStepKeyDown: ({ event, direction: stepDirection }) => {
-              if (!disabled) {
-                isKeyboardInteractionRef.current = true;
-                const isPageKey = PAGE_KEYS.includes(event.key);
-                const isSkipKey = isPageKey || event.shiftKey && ARROW_KEYS.includes(event.key);
-                const multiplier = isSkipKey ? 10 : 1;
-                const atIndex = valueIndexToChangeRef.current;
-                const value2 = values[atIndex];
-                const stepInDirection = step * multiplier * stepDirection;
-                updateValues(value2 + stepInDirection, atIndex, { commit: true });
-              }
-            }
-          }
-        ) }) })
-      }
-    );
-  }
-);
-Slider$1.displayName = SLIDER_NAME;
-var [SliderOrientationProvider, useSliderOrientationContext] = createSliderContext(SLIDER_NAME, {
-  startEdge: "left",
-  endEdge: "right",
-  size: "width",
-  direction: 1
-});
-var SliderHorizontal = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const {
-      min: min2,
-      max: max2,
-      dir,
-      inverted,
-      onSlideStart,
-      onSlideMove,
-      onSlideEnd,
-      onStepKeyDown,
-      ...sliderProps
-    } = props;
-    const [slider, setSlider] = reactExports.useState(null);
-    const composedRefs = useComposedRefs(forwardedRef, setSlider);
-    const rectRef = reactExports.useRef(void 0);
-    const direction = useDirection(dir);
-    const isDirectionLTR = direction === "ltr";
-    const isSlidingFromLeft = isDirectionLTR && !inverted || !isDirectionLTR && inverted;
-    function getValueFromPointer(pointerPosition) {
-      const rect = rectRef.current || slider.getBoundingClientRect();
-      const input = [0, rect.width];
-      const output = isSlidingFromLeft ? [min2, max2] : [max2, min2];
-      const value = linearScale(input, output);
-      rectRef.current = rect;
-      return value(pointerPosition - rect.left);
-    }
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      SliderOrientationProvider,
-      {
-        scope: props.__scopeSlider,
-        startEdge: isSlidingFromLeft ? "left" : "right",
-        endEdge: isSlidingFromLeft ? "right" : "left",
-        direction: isSlidingFromLeft ? 1 : -1,
-        size: "width",
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          SliderImpl,
-          {
-            dir: direction,
-            "data-orientation": "horizontal",
-            ...sliderProps,
-            ref: composedRefs,
-            style: {
-              ...sliderProps.style,
-              "--radix-slider-thumb-transform": "translateX(-50%)"
-            },
-            onSlideStart: (event) => {
-              const value = getValueFromPointer(event.clientX);
-              onSlideStart == null ? void 0 : onSlideStart(value);
-            },
-            onSlideMove: (event) => {
-              const value = getValueFromPointer(event.clientX);
-              onSlideMove == null ? void 0 : onSlideMove(value);
-            },
-            onSlideEnd: () => {
-              rectRef.current = void 0;
-              onSlideEnd == null ? void 0 : onSlideEnd();
-            },
-            onStepKeyDown: (event) => {
-              const slideDirection = isSlidingFromLeft ? "from-left" : "from-right";
-              const isBackKey = BACK_KEYS[slideDirection].includes(event.key);
-              onStepKeyDown == null ? void 0 : onStepKeyDown({ event, direction: isBackKey ? -1 : 1 });
-            }
-          }
-        )
-      }
-    );
-  }
-);
-var SliderVertical = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const {
-      min: min2,
-      max: max2,
-      inverted,
-      onSlideStart,
-      onSlideMove,
-      onSlideEnd,
-      onStepKeyDown,
-      ...sliderProps
-    } = props;
-    const sliderRef = reactExports.useRef(null);
-    const ref = useComposedRefs(forwardedRef, sliderRef);
-    const rectRef = reactExports.useRef(void 0);
-    const isSlidingFromBottom = !inverted;
-    function getValueFromPointer(pointerPosition) {
-      const rect = rectRef.current || sliderRef.current.getBoundingClientRect();
-      const input = [0, rect.height];
-      const output = isSlidingFromBottom ? [max2, min2] : [min2, max2];
-      const value = linearScale(input, output);
-      rectRef.current = rect;
-      return value(pointerPosition - rect.top);
-    }
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      SliderOrientationProvider,
-      {
-        scope: props.__scopeSlider,
-        startEdge: isSlidingFromBottom ? "bottom" : "top",
-        endEdge: isSlidingFromBottom ? "top" : "bottom",
-        size: "height",
-        direction: isSlidingFromBottom ? 1 : -1,
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          SliderImpl,
-          {
-            "data-orientation": "vertical",
-            ...sliderProps,
-            ref,
-            style: {
-              ...sliderProps.style,
-              "--radix-slider-thumb-transform": "translateY(50%)"
-            },
-            onSlideStart: (event) => {
-              const value = getValueFromPointer(event.clientY);
-              onSlideStart == null ? void 0 : onSlideStart(value);
-            },
-            onSlideMove: (event) => {
-              const value = getValueFromPointer(event.clientY);
-              onSlideMove == null ? void 0 : onSlideMove(value);
-            },
-            onSlideEnd: () => {
-              rectRef.current = void 0;
-              onSlideEnd == null ? void 0 : onSlideEnd();
-            },
-            onStepKeyDown: (event) => {
-              const slideDirection = isSlidingFromBottom ? "from-bottom" : "from-top";
-              const isBackKey = BACK_KEYS[slideDirection].includes(event.key);
-              onStepKeyDown == null ? void 0 : onStepKeyDown({ event, direction: isBackKey ? -1 : 1 });
-            }
-          }
-        )
-      }
-    );
-  }
-);
-var SliderImpl = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const {
-      __scopeSlider,
-      onSlideStart,
-      onSlideMove,
-      onSlideEnd,
-      onHomeKeyDown,
-      onEndKeyDown,
-      onStepKeyDown,
-      ...sliderProps
-    } = props;
-    const context = useSliderContext(SLIDER_NAME, __scopeSlider);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Primitive.span,
-      {
-        ...sliderProps,
-        ref: forwardedRef,
-        onKeyDown: composeEventHandlers(props.onKeyDown, (event) => {
-          if (event.key === "Home") {
-            onHomeKeyDown(event);
-            event.preventDefault();
-          } else if (event.key === "End") {
-            onEndKeyDown(event);
-            event.preventDefault();
-          } else if (PAGE_KEYS.concat(ARROW_KEYS).includes(event.key)) {
-            onStepKeyDown(event);
-            event.preventDefault();
-          }
-        }),
-        onPointerDown: composeEventHandlers(props.onPointerDown, (event) => {
-          const target = event.target;
-          target.setPointerCapture(event.pointerId);
-          event.preventDefault();
-          if (context.thumbs.has(target)) {
-            target.focus({ preventScroll: true, focusVisible: false });
-          } else {
-            onSlideStart(event);
-          }
-        }),
-        onPointerMove: composeEventHandlers(props.onPointerMove, (event) => {
-          const target = event.target;
-          if (target.hasPointerCapture(event.pointerId)) onSlideMove(event);
-        }),
-        onPointerUp: composeEventHandlers(props.onPointerUp, (event) => {
-          const target = event.target;
-          if (target.hasPointerCapture(event.pointerId)) {
-            target.releasePointerCapture(event.pointerId);
-            onSlideEnd(event);
-          }
-        })
-      }
-    );
-  }
-);
-var TRACK_NAME = "SliderTrack";
-var SliderTrack = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeSlider, ...trackProps } = props;
-    const context = useSliderContext(TRACK_NAME, __scopeSlider);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Primitive.span,
-      {
-        "data-disabled": context.disabled ? "" : void 0,
-        "data-orientation": context.orientation,
-        ...trackProps,
-        ref: forwardedRef
-      }
-    );
-  }
-);
-SliderTrack.displayName = TRACK_NAME;
-var RANGE_NAME = "SliderRange";
-var SliderRange = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeSlider, ...rangeProps } = props;
-    const context = useSliderContext(RANGE_NAME, __scopeSlider);
-    const orientation = useSliderOrientationContext(RANGE_NAME, __scopeSlider);
-    const ref = reactExports.useRef(null);
-    const composedRefs = useComposedRefs(forwardedRef, ref);
-    const valuesCount = context.values.length;
-    const percentages = context.values.map(
-      (value) => convertValueToPercentage(value, context.min, context.max)
-    );
-    const offsetStart = valuesCount > 1 ? Math.min(...percentages) : 0;
-    const offsetEnd = 100 - Math.max(...percentages);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Primitive.span,
-      {
-        "data-orientation": context.orientation,
-        "data-disabled": context.disabled ? "" : void 0,
-        ...rangeProps,
-        ref: composedRefs,
-        style: {
-          ...props.style,
-          [orientation.startEdge]: offsetStart + "%",
-          [orientation.endEdge]: offsetEnd + "%"
-        }
-      }
-    );
-  }
-);
-SliderRange.displayName = RANGE_NAME;
-var THUMB_NAME = "SliderThumb";
-var [SliderThumbContextProvider, useSliderThumbContext] = createSliderContext(THUMB_NAME);
-var THUMB_PROVIDER_NAME = "SliderThumbProvider";
-function SliderThumbProvider(props) {
-  const {
-    __scopeSlider,
-    name,
-    children,
-    // @ts-expect-error internal render prop
-    internal_do_not_use_render
-  } = props;
-  const context = useSliderContext(THUMB_PROVIDER_NAME, __scopeSlider);
-  const getItems = useCollection$1(__scopeSlider);
-  const [thumb, setThumb] = reactExports.useState(null);
-  const index2 = reactExports.useMemo(
-    () => thumb ? getItems().findIndex((item) => item.ref.current === thumb) : -1,
-    [getItems, thumb]
-  );
-  const size2 = useSize(thumb);
-  const isFormControl = thumb ? !!context.form || !!thumb.closest("form") : true;
-  const value = context.values[index2];
-  const resolvedName = name ?? (context.name ? context.name + (context.values.length > 1 ? "[]" : "") : void 0);
-  const percent = value === void 0 ? 0 : convertValueToPercentage(value, context.min, context.max);
-  reactExports.useEffect(() => {
-    if (thumb) {
-      context.thumbs.add(thumb);
-      return () => {
-        context.thumbs.delete(thumb);
-      };
-    }
-  }, [thumb, context.thumbs]);
-  const thumbContext = {
-    value,
-    name: resolvedName,
-    form: context.form,
-    isFormControl,
-    index: index2,
-    thumb,
-    onThumbChange: setThumb,
-    percent,
-    size: size2
-  };
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(SliderThumbContextProvider, { scope: __scopeSlider, ...thumbContext, children: isFunction$5(internal_do_not_use_render) ? internal_do_not_use_render(thumbContext) : children });
-}
-SliderThumbProvider.displayName = THUMB_PROVIDER_NAME;
-var THUMB_TRIGGER_NAME = "SliderThumbTrigger";
-var SliderThumbTrigger = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeSlider, ...thumbProps } = props;
-    const context = useSliderContext(THUMB_TRIGGER_NAME, __scopeSlider);
-    const orientation = useSliderOrientationContext(THUMB_TRIGGER_NAME, __scopeSlider);
-    const { index: index2, value, percent, size: size2, onThumbChange } = useSliderThumbContext(
-      THUMB_TRIGGER_NAME,
-      __scopeSlider
-    );
-    const composedRefs = useComposedRefs(forwardedRef, onThumbChange);
-    const label = getLabel$1(index2, context.values.length);
-    const orientationSize = size2 == null ? void 0 : size2[orientation.size];
-    const thumbInBoundsOffset = orientationSize ? getThumbInBoundsOffset(orientationSize, percent, orientation.direction) : 0;
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "span",
-      {
-        style: {
-          transform: "var(--radix-slider-thumb-transform)",
-          position: "absolute",
-          [orientation.startEdge]: `calc(${percent}% + ${thumbInBoundsOffset}px)`
-        },
-        children: /* @__PURE__ */ jsxRuntimeExports.jsx(Collection$1.ItemSlot, { scope: __scopeSlider, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-          Primitive.span,
-          {
-            role: "slider",
-            "aria-label": props["aria-label"] || label,
-            "aria-valuemin": context.min,
-            "aria-valuenow": value,
-            "aria-valuemax": context.max,
-            "aria-orientation": context.orientation,
-            "data-orientation": context.orientation,
-            "data-disabled": context.disabled ? "" : void 0,
-            tabIndex: context.disabled ? void 0 : 0,
-            ...thumbProps,
-            ref: composedRefs,
-            style: value === void 0 ? { display: "none" } : props.style,
-            onFocus: composeEventHandlers(props.onFocus, () => {
-              context.valueIndexToChangeRef.current = index2;
-            })
-          }
-        ) })
-      }
-    );
-  }
-);
-SliderThumbTrigger.displayName = THUMB_TRIGGER_NAME;
-var SliderThumb = reactExports.forwardRef(
-  (props, forwardedRef) => {
-    const { __scopeSlider, name, ...thumbProps } = props;
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      SliderThumbProvider,
-      {
-        __scopeSlider,
-        name,
-        internal_do_not_use_render: ({ index: index2, isFormControl }) => /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            SliderThumbTrigger,
-            {
-              ...thumbProps,
-              ref: forwardedRef,
-              __scopeSlider
-            }
-          ),
-          isFormControl ? /* @__PURE__ */ jsxRuntimeExports.jsx(
-            SliderBubbleInput,
-            {
-              __scopeSlider
-            },
-            index2
-          ) : null
-        ] })
-      }
-    );
-  }
-);
-SliderThumb.displayName = THUMB_NAME;
-var BUBBLE_INPUT_NAME = "SliderBubbleInput";
-var SliderBubbleInput = reactExports.forwardRef(
-  ({ __scopeSlider, ...props }, forwardedRef) => {
-    const { value, name, form } = useSliderThumbContext(BUBBLE_INPUT_NAME, __scopeSlider);
-    const ref = reactExports.useRef(null);
-    const composedRefs = useComposedRefs(ref, forwardedRef);
-    const prevValue = usePrevious(value);
-    reactExports.useEffect(() => {
-      const input = ref.current;
-      if (!input) return;
-      const inputProto = window.HTMLInputElement.prototype;
-      const descriptor = Object.getOwnPropertyDescriptor(inputProto, "value");
-      const setValue = descriptor.set;
-      if (prevValue !== value && setValue) {
-        const event = new Event("input", { bubbles: true });
-        setValue.call(input, value);
-        input.dispatchEvent(event);
-      }
-    }, [prevValue, value]);
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(
-      Primitive.input,
-      {
-        style: { display: "none" },
-        name,
-        form,
-        ...props,
-        ref: composedRefs,
-        defaultValue: value
-      }
-    );
-  }
-);
-SliderBubbleInput.displayName = BUBBLE_INPUT_NAME;
-function getNextSortedValues(prevValues = [], nextValue, atIndex) {
-  const nextValues = [...prevValues];
-  nextValues[atIndex] = nextValue;
-  return nextValues.sort((a2, b2) => a2 - b2);
-}
-function convertValueToPercentage(value, min2, max2) {
-  const maxSteps = max2 - min2;
-  const percentPerStep = 100 / maxSteps;
-  const percentage = percentPerStep * (value - min2);
-  return clamp$1(percentage, [0, 100]);
-}
-function getLabel$1(index2, totalValues) {
-  if (totalValues > 2) {
-    return `Value ${index2 + 1} of ${totalValues}`;
-  } else if (totalValues === 2) {
-    return ["Minimum", "Maximum"][index2];
-  } else {
-    return void 0;
-  }
-}
-function getClosestValueIndex(values, nextValue) {
-  if (values.length === 1) return 0;
-  const distances = values.map((value) => Math.abs(value - nextValue));
-  const closestDistance = Math.min(...distances);
-  return distances.indexOf(closestDistance);
-}
-function getThumbInBoundsOffset(width, left, direction) {
-  const halfWidth = width / 2;
-  const halfPercent = 50;
-  const offset2 = linearScale([0, halfPercent], [0, halfWidth]);
-  return (halfWidth - offset2(left) * direction) * direction;
-}
-function getStepsBetweenValues(values) {
-  return values.slice(0, -1).map((value, index2) => values[index2 + 1] - value);
-}
-function hasMinStepsBetweenValues(values, minStepsBetweenValues) {
-  if (minStepsBetweenValues > 0) {
-    const stepsBetweenValues = getStepsBetweenValues(values);
-    const actualMinStepsBetweenValues = Math.min(...stepsBetweenValues);
-    return actualMinStepsBetweenValues >= minStepsBetweenValues;
-  }
-  return true;
-}
-function linearScale(input, output) {
-  return (value) => {
-    if (input[0] === input[1] || output[0] === output[1]) return output[0];
-    const ratio = (output[1] - output[0]) / (input[1] - input[0]);
-    return output[0] + ratio * (value - input[0]);
-  };
-}
-function getDecimalCount(value) {
-  if (!Number.isFinite(value)) return 0;
-  const str = value.toString();
-  if (str.includes("e")) {
-    const [coefficient, exponent2] = str.split("e");
-    const decimalPart2 = coefficient.split(".")[1] || "";
-    const exponentNum = Number(exponent2);
-    return Math.max(0, decimalPart2.length - exponentNum);
-  }
-  const decimalPart = str.split(".")[1];
-  return decimalPart ? decimalPart.length : 0;
-}
-function roundValue(value, decimalCount) {
-  const rounder = Math.pow(10, decimalCount);
-  return Math.round(value * rounder) / rounder;
-}
-function isFunction$5(value) {
-  return typeof value === "function";
-}
-function Slider({
-  className,
-  defaultValue,
-  value,
-  min: min2 = 0,
-  max: max2 = 100,
-  ...props
-}) {
-  const _values = reactExports.useMemo(
-    () => Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min2, max2],
-    [value, defaultValue, min2, max2]
-  );
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
-    Slider$1,
-    {
-      "data-slot": "slider",
-      defaultValue,
-      value,
-      min: min2,
-      max: max2,
-      className: cn(
-        "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
-        className
-      ),
-      ...props,
-      children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          SliderTrack,
-          {
-            "data-slot": "slider-track",
-            className: cn(
-              "bg-muted relative grow overflow-hidden rounded-full data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5"
-            ),
-            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-              SliderRange,
-              {
-                "data-slot": "slider-range",
-                className: cn(
-                  "bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
-                )
-              }
-            )
-          }
-        ),
-        Array.from({ length: _values.length }, (value2, _2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
-          SliderThumb,
-          {
-            "data-slot": "slider-thumb",
-            className: "border-primary bg-background ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
-          },
-          `${value2}`
-        ))
-      ]
-    }
-  );
 }
 const MAX_CHUNK_LENGTH = 4e3;
 function splitTextIntoChunks(text) {
@@ -78924,7 +79532,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Cg_V2dUQ.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BOK-K55f.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -78958,7 +79566,7 @@ async function exportToPDF(title, contentHtml) {
 }
 async function exportToDOCX(title, contentHtml, indentLeft, indentRight, indentFirstLine) {
   const { Document: Document2, Packer, Paragraph: Paragraph2, TextRun } = await __vitePreload(async () => {
-    const { Document: Document3, Packer: Packer2, Paragraph: Paragraph3, TextRun: TextRun2 } = await import("./index-CY9QhyUa.js");
+    const { Document: Document3, Packer: Packer2, Paragraph: Paragraph3, TextRun: TextRun2 } = await import("./index-BqVhswAj.js");
     return { Document: Document3, Packer: Packer2, Paragraph: Paragraph3, TextRun: TextRun2 };
   }, true ? [] : void 0);
   const collectTextRuns = (node, inherited) => {
@@ -79182,6 +79790,290 @@ async function exportToDOCX(title, contentHtml, indentLeft, indentRight, indentF
       }
     ]
   });
+  const blob = await Packer.toBlob(doc2);
+  const url = URL.createObjectURL(blob);
+  const a2 = document.createElement("a");
+  a2.href = url;
+  a2.download = `${title.replace(/\s+/g, "_")}.docx`;
+  document.body.appendChild(a2);
+  a2.click();
+  document.body.removeChild(a2);
+  URL.revokeObjectURL(url);
+}
+async function exportToDOCXWithRedaction(title, contentHtml, settings) {
+  const {
+    Document: Document2,
+    Packer,
+    Paragraph: Paragraph2,
+    TextRun,
+    AlignmentType,
+    PageNumber,
+    Footer
+  } = await __vitePreload(async () => {
+    const {
+      Document: Document3,
+      Packer: Packer2,
+      Paragraph: Paragraph3,
+      TextRun: TextRun2,
+      AlignmentType: AlignmentType2,
+      PageNumber: PageNumber2,
+      Footer: Footer2
+    } = await import("./index-BqVhswAj.js");
+    return {
+      Document: Document3,
+      Packer: Packer2,
+      Paragraph: Paragraph3,
+      TextRun: TextRun2,
+      AlignmentType: AlignmentType2,
+      PageNumber: PageNumber2,
+      Footer: Footer2
+    };
+  }, true ? [] : void 0);
+  const halfPoints = settings.fontSize * 2;
+  const lineSpacingTwips = Math.round(settings.lineSpacing * 240);
+  const firstLineIndentTwips = Math.round(settings.firstLineIndent * 567);
+  const collectTextRuns = (node, inherited) => {
+    const runs = [];
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent ?? "";
+      if (text.length > 0) {
+        runs.push(
+          new TextRun({
+            text,
+            bold: inherited.bold,
+            italics: inherited.italics,
+            underline: inherited.underline ? {} : void 0,
+            font: "Georgia",
+            size: halfPoints
+          })
+        );
+      }
+      return runs;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return runs;
+    const el = node;
+    const tag = el.tagName.toLowerCase();
+    if (tag === "br") {
+      runs.push(
+        new TextRun({
+          text: "",
+          break: 1,
+          font: "Georgia",
+          size: halfPoints
+        })
+      );
+      return runs;
+    }
+    const nextInherited = {
+      bold: inherited.bold || tag === "strong" || tag === "b",
+      italics: inherited.italics || tag === "em" || tag === "i",
+      underline: inherited.underline || tag === "u"
+    };
+    for (const child of el.childNodes) {
+      runs.push(...collectTextRuns(child, nextInherited));
+    }
+    return runs;
+  };
+  const htmlToDocxParagraphs = (html) => {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = html;
+    const paragraphs2 = [];
+    const alignment = settings.justify ? AlignmentType.JUSTIFIED : void 0;
+    const baseParagraphOpts = () => ({
+      alignment,
+      spacing: { after: 0, line: lineSpacingTwips },
+      indent: { firstLine: firstLineIndentTwips }
+    });
+    for (const el of tmp.children) {
+      const tag = el.tagName.toLowerCase();
+      if (tag === "p" || tag === "div") {
+        const runs2 = collectTextRuns(el, {
+          bold: false,
+          italics: false,
+          underline: false
+        });
+        if (runs2.length === 0) {
+          paragraphs2.push(
+            new Paragraph2({
+              children: [
+                new TextRun({ text: "", font: "Georgia", size: halfPoints })
+              ],
+              ...baseParagraphOpts()
+            })
+          );
+        } else {
+          paragraphs2.push(
+            new Paragraph2({
+              children: runs2,
+              ...baseParagraphOpts()
+            })
+          );
+        }
+        continue;
+      }
+      if (/^h[1-6]$/.test(tag)) {
+        const level = Number.parseInt(tag[1], 10);
+        const headingSize = (32 - (level - 1) * 2) * 2;
+        const runs2 = collectTextRuns(el, {
+          bold: true,
+          italics: false,
+          underline: false
+        });
+        paragraphs2.push(
+          new Paragraph2({
+            children: runs2.map(
+              (r2) => new TextRun({
+                text: r2.text,
+                bold: true,
+                font: "Georgia",
+                size: headingSize
+              })
+            ),
+            spacing: { after: 200, line: lineSpacingTwips },
+            indent: { firstLine: firstLineIndentTwips },
+            heading: `Heading${level}`
+          })
+        );
+        continue;
+      }
+      if (tag === "ul" || tag === "ol") {
+        for (const li of el.querySelectorAll("li")) {
+          const runs2 = collectTextRuns(li, {
+            bold: false,
+            italics: false,
+            underline: false
+          });
+          if (runs2.length === 0) {
+            paragraphs2.push(
+              new Paragraph2({
+                children: [
+                  new TextRun({ text: "", font: "Georgia", size: halfPoints })
+                ],
+                spacing: { after: 100, line: lineSpacingTwips },
+                indent: { firstLine: firstLineIndentTwips }
+              })
+            );
+          } else {
+            paragraphs2.push(
+              new Paragraph2({
+                children: [
+                  new TextRun({
+                    text: tag === "ul" ? "• " : "",
+                    font: "Georgia",
+                    size: halfPoints
+                  }),
+                  ...runs2
+                ],
+                spacing: { after: 100, line: lineSpacingTwips },
+                indent: { firstLine: firstLineIndentTwips }
+              })
+            );
+          }
+        }
+        continue;
+      }
+      if (tag === "li") {
+        const runs2 = collectTextRuns(el, {
+          bold: false,
+          italics: false,
+          underline: false
+        });
+        if (runs2.length === 0) {
+          paragraphs2.push(
+            new Paragraph2({
+              children: [
+                new TextRun({ text: "", font: "Georgia", size: halfPoints })
+              ],
+              spacing: { after: 100, line: lineSpacingTwips },
+              indent: { firstLine: firstLineIndentTwips }
+            })
+          );
+        } else {
+          paragraphs2.push(
+            new Paragraph2({
+              children: [
+                new TextRun({
+                  text: "• ",
+                  font: "Georgia",
+                  size: halfPoints
+                }),
+                ...runs2
+              ],
+              spacing: { after: 100, line: lineSpacingTwips },
+              indent: { firstLine: firstLineIndentTwips }
+            })
+          );
+        }
+        continue;
+      }
+      const runs = collectTextRuns(el, {
+        bold: false,
+        italics: false,
+        underline: false
+      });
+      if (runs.length > 0) {
+        paragraphs2.push(
+          new Paragraph2({
+            children: runs,
+            ...baseParagraphOpts()
+          })
+        );
+      }
+    }
+    if (paragraphs2.length === 0) {
+      paragraphs2.push(
+        new Paragraph2({
+          children: [
+            new TextRun({ text: "", font: "Georgia", size: halfPoints })
+          ],
+          ...baseParagraphOpts()
+        })
+      );
+    }
+    return paragraphs2;
+  };
+  const paragraphs = htmlToDocxParagraphs(contentHtml);
+  const sectionProperties = {
+    page: {
+      size: { width: 11906, height: 16838 },
+      margin: {
+        top: Math.round(settings.marginTop * 567),
+        bottom: Math.round(settings.marginBottom * 567),
+        left: Math.round(settings.marginLeft * 567),
+        right: Math.round(settings.marginRight * 567)
+      }
+    }
+  };
+  const section = {
+    properties: sectionProperties,
+    children: [
+      new Paragraph2({
+        children: [
+          new TextRun({
+            text: title,
+            bold: true,
+            font: "Georgia",
+            size: 32
+          })
+        ],
+        spacing: { after: 400 }
+      }),
+      ...paragraphs
+    ]
+  };
+  if (settings.pageNumbers) {
+    section.footers = {
+      default: new Footer({
+        children: [
+          new Paragraph2({
+            alignment: AlignmentType.CENTER,
+            children: [new TextRun({ children: [PageNumber.CURRENT] })]
+          })
+        ]
+      })
+    };
+  }
+  const doc2 = new Document2({ sections: [section] });
   const blob = await Packer.toBlob(doc2);
   const url = URL.createObjectURL(blob);
   const a2 = document.createElement("a");
@@ -79659,6 +80551,7 @@ function ChapterEditorPage() {
     return getApiKey(prov, principal);
   });
   const [settingsModalOpen, setSettingsModalOpen] = reactExports.useState(false);
+  const [redactionModalOpen, setRedactionModalOpen] = reactExports.useState(false);
   const [provider, setProvider] = reactExports.useState(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
@@ -79670,6 +80563,8 @@ function ChapterEditorPage() {
   const isApplyingAnnotationsRef = reactExports.useRef(false);
   const lastSavedContentRef = reactExports.useRef("");
   const previousChapterRef = reactExports.useRef(null);
+  const cursorDebounceRef = reactExports.useRef(null);
+  const lastCursorRestoredChapterIdRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
     const prov = localStorage.getItem("ws_api_provider") || "openai";
     setApiKey2(getApiKey(prov, principal));
@@ -79737,6 +80632,27 @@ function ChapterEditorPage() {
       lastSyncedChapterIdRef.current = chapterId;
     }
   }, [chapter, chapterId, updateChapter.mutate]);
+  reactExports.useEffect(() => {
+    if (!editorRef.current) return;
+    if (lastCursorRestoredChapterIdRef.current === chapterId) return;
+    const editor = editorRef.current;
+    const docSize = editor.state.doc.content.size;
+    try {
+      const saved = localStorage.getItem(`ws_cursor_position_${chapterId}`);
+      if (saved === null) {
+        lastCursorRestoredChapterIdRef.current = chapterId;
+        return;
+      }
+      const pos = Number.parseInt(saved, 10);
+      if (Number.isNaN(pos) || pos < 0 || pos > docSize) {
+        lastCursorRestoredChapterIdRef.current = chapterId;
+        return;
+      }
+      editor.commands.setTextSelection(pos);
+    } catch {
+    }
+    lastCursorRestoredChapterIdRef.current = chapterId;
+  }, [chapterId, content]);
   const handleSendToChat = (text) => {
     if (!book) return;
     localStorage.setItem("writerstudio-chat-open", "true");
@@ -80333,6 +81249,20 @@ ${getPlainText(ch.content)}`
                 ]
               }
             ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              Button,
+              {
+                size: "sm",
+                variant: "ghost",
+                className: "text-xs text-muted-foreground hover:text-foreground",
+                "data-ocid": "chapter.redaction_button",
+                onClick: () => setRedactionModalOpen(true),
+                children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(FilePen, { className: "h-4 w-4 mr-1" }),
+                  "Redakcja"
+                ]
+              }
+            ),
             /* @__PURE__ */ jsxRuntimeExports.jsxs(DropdownMenu, { children: [
               /* @__PURE__ */ jsxRuntimeExports.jsx(DropdownMenuTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
                 Button,
@@ -80594,6 +81524,31 @@ ${getPlainText(ch.content)}`
                     }
                   };
                   dom.addEventListener("mouseup", handleMouseUp);
+                  const handleSelectionUpdate = () => {
+                    const from2 = editor.state.selection.from;
+                    if (cursorDebounceRef.current) {
+                      clearTimeout(cursorDebounceRef.current);
+                    }
+                    cursorDebounceRef.current = setTimeout(() => {
+                      try {
+                        localStorage.setItem(
+                          `ws_cursor_position_${chapterId}`,
+                          String(from2)
+                        );
+                      } catch {
+                      }
+                      cursorDebounceRef.current = null;
+                    }, 2e3);
+                  };
+                  editor.on("selectionUpdate", handleSelectionUpdate);
+                  editor.on("destroy", () => {
+                    dom.removeEventListener("mouseup", handleMouseUp);
+                    editor.off("selectionUpdate", handleSelectionUpdate);
+                    if (cursorDebounceRef.current) {
+                      clearTimeout(cursorDebounceRef.current);
+                      cursorDebounceRef.current = null;
+                    }
+                  });
                 }
               }
             )
@@ -80656,6 +81611,19 @@ ${getPlainText(ch.content)}`
       {
         open: settingsModalOpen,
         onOpenChange: setSettingsModalOpen
+      }
+    ),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(
+      RedactionModal,
+      {
+        open: redactionModalOpen,
+        onOpenChange: setRedactionModalOpen,
+        onGenerate: (settings) => {
+          var _a3;
+          const html = ((_a3 = editorRef.current) == null ? void 0 : _a3.getHTML()) ?? "";
+          exportToDOCXWithRedaction(title, html, settings);
+          setRedactionModalOpen(false);
+        }
       }
     )
   ] });
@@ -80969,26 +81937,46 @@ function LoginPage() {
   const handleLogin = async () => {
     await login();
   };
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen flex items-center justify-center bg-background p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "w-full max-w-md shadow-elevated", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs(CardHeader, { className: "text-center space-y-2", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center mb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-8 w-8 text-primary" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(CardTitle, { className: "font-display text-2xl", children: "WriterStudio TipTap" }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { children: "Zaloguj się, aby kontynuować" })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(CardContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      Button,
-      {
-        onClick: handleLogin,
-        className: "w-full",
-        disabled: loginStatus === "logging-in",
-        "data-ocid": "login.submit_button",
-        children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(LogIn, { className: "h-4 w-4 mr-2" }),
-          loginStatus === "logging-in" ? "Logowanie..." : "Zaloguj się przez Internet Identity"
-        ]
-      }
-    ) })
-  ] }) });
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      className: "relative flex min-h-screen w-full items-center justify-center p-4",
+      style: {
+        backgroundImage: "url('/assets/images/typewriter.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      },
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            className: "absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/70",
+            "aria-hidden": "true"
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "relative z-10 w-full max-w-md", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "w-full max-w-md bg-white/95 backdrop-blur-sm shadow-elevated", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(CardHeader, { className: "text-center space-y-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-center mb-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-8 w-8 text-primary" }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(CardTitle, { className: "font-display text-2xl", children: "WriterStudio TipTap" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(CardDescription, { children: "Zaloguj się, aby kontynuować" })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(CardContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            Button,
+            {
+              onClick: handleLogin,
+              className: "w-full",
+              disabled: loginStatus === "logging-in",
+              "data-ocid": "login.submit_button",
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(LogIn, { className: "h-4 w-4 mr-2" }),
+                loginStatus === "logging-in" ? "Logowanie..." : "Zaloguj się przez Internet Identity"
+              ]
+            }
+          ) })
+        ] }) })
+      ]
+    }
+  );
 }
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
