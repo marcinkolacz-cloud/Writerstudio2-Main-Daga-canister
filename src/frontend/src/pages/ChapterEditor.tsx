@@ -59,6 +59,7 @@ import {
   analyzeGrammarStyle,
   analyzeSceneExpansion,
   analyzeWithContext,
+  formatParagraphsWithAI,
   generateSummary,
   getSynonyms,
 } from "@/lib/aiAnalysis";
@@ -385,6 +386,7 @@ export function ChapterEditorPage() {
   });
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [redactionModalOpen, setRedactionModalOpen] = useState(false);
+  const [aiFormatting, setAiFormatting] = useState(false);
   const [provider, setProvider] = useState<"openai" | "claude">(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
@@ -1572,13 +1574,58 @@ export function ChapterEditorPage() {
         onOpenChange={setSettingsModalOpen}
       />
 
+      {aiFormatting && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+          data-ocid="chapter.ai_formatting.loading_state"
+        >
+          <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-6 shadow-lg">
+            <Wand2 className="h-6 w-6 animate-spin text-primary" />
+            <p className="text-sm text-foreground">
+              Formatowanie AI... (może potrwać do minuty dla długich rozdziałów)
+            </p>
+          </div>
+        </div>
+      )}
+
       <RedactionModal
         open={redactionModalOpen}
         onOpenChange={setRedactionModalOpen}
-        onGenerate={(settings) => {
-          const html = editorRef.current?.getHTML() ?? "";
-          exportToDOCXWithRedaction(title, html, settings);
-          setRedactionModalOpen(false);
+        onGenerate={async (settings, aiParagraphs) => {
+          if (!aiParagraphs) {
+            const html = editorRef.current?.getHTML() ?? "";
+            await exportToDOCXWithRedaction(title, html, settings);
+            setRedactionModalOpen(false);
+            return;
+          }
+          setAiFormatting(true);
+          try {
+            const plainText = getPlainText(editorRef.current?.getHTML() ?? "");
+            const formatted = await formatParagraphsWithAI(
+              plainText,
+              apiKey,
+              provider,
+            );
+            const formattedHtml = formatted
+              .split("\n\n")
+              .map((chunk) => chunk.trim())
+              .filter((chunk) => chunk.length > 0)
+              .map((chunk) => `<p>${chunk}</p>`)
+              .join("");
+            await exportToDOCXWithRedaction(title, formattedHtml, settings);
+          } catch {
+            window.alert(
+              "Formatowanie AI nie powiodło się. Eksportuję z oryginalnym tekstem.",
+            );
+            await exportToDOCXWithRedaction(
+              title,
+              editorRef.current?.getHTML() ?? "",
+              settings,
+            );
+          } finally {
+            setAiFormatting(false);
+            setRedactionModalOpen(false);
+          }
         }}
       />
     </div>

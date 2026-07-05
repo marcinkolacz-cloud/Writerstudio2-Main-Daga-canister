@@ -279,6 +279,7 @@ async function callAi(
   apiKey: string,
   provider: "openai" | "claude",
   expectJson: boolean,
+  maxTokens = 8000,
 ): Promise<string> {
   // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional ISO-8859-1 range filter
   const safeApiKey = apiKey.replace(/[^\x00-\xFF]/g, "").trim();
@@ -286,7 +287,7 @@ async function callAi(
     const body: Record<string, unknown> = {
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 8000,
+      max_tokens: maxTokens,
       temperature: 0.3,
     };
     if (expectJson) {
@@ -319,7 +320,7 @@ async function callAi(
     },
     body: JSON.stringify({
       model: "claude-sonnet-5",
-      max_tokens: 8000,
+      max_tokens: maxTokens,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -384,6 +385,33 @@ export async function analyzeDialogue(
   const responseText = await callAi(prompt, apiKey, provider, false);
   const annotations = parsePipeAnnotations(responseText);
   return validateAnnotations(annotations);
+}
+
+export async function formatParagraphsWithAI(
+  text: string,
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<string> {
+  if (text.length > 100000) {
+    throw new Error(
+      "Tekst za długi do automatycznego formatowania (max 100000 znaków)",
+    );
+  }
+  const prompt = `Poniżej znajduje się tekst literacki, który może nie mieć poprawnych podziałów na akapity. Twoim zadaniem jest WYŁĄCZNIE dodanie podziałów akapitów w odpowiednich miejscach — absolutnie NIE zmieniaj, nie dodawaj i nie usuwaj żadnych słów z oryginalnego tekstu.
+
+Zasady:
+1. Rozpoznaj naturalne granice akapitów narracyjnych (zmiana myśli, sceny, czasu, miejsca) i wstaw tam podział akapitu (podwójny znak nowej linii).
+2. Każda linia dialogowa zaczynająca się od myślnika (— lub -) MUSI być osobnym akapitem — wstaw podział akapitu przed każdym myślnikiem rozpoczynającym wypowiedź postaci.
+3. NIE dodawaj żadnych nowych myślników, słów, zdań ani interpunkcji które nie istniały w oryginalnym tekście.
+4. Zachowaj oryginalną kolejność i treść tekstu w 100% — jedyna zmiana to wstawienie znaków podziału akapitu w odpowiednich miejscach.
+5. Zwróć wyłącznie przeformatowany tekst, bez żadnego dodatkowego komentarza.
+
+Tekst do sformatowania:
+"""
+${text}
+"""`;
+
+  return await callAi(prompt, apiKey, provider, false, 20000);
 }
 
 export async function analyzeSceneExpansion(

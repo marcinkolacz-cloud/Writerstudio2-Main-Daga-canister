@@ -16,6 +16,7 @@ import {
   Hash,
   IndentIncrease,
   Ruler,
+  Sparkles,
   Type,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -35,7 +36,7 @@ export interface RedactionSettings {
 interface RedactionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onGenerate: (settings: RedactionSettings) => void;
+  onGenerate: (settings: RedactionSettings, aiParagraphs: boolean) => void;
 }
 
 const DEFAULT_SETTINGS: RedactionSettings = {
@@ -56,11 +57,13 @@ export function RedactionModal({
   onGenerate,
 }: RedactionModalProps) {
   const [settings, setSettings] = useState<RedactionSettings>(DEFAULT_SETTINGS);
+  const [aiParagraphs, setAiParagraphs] = useState(false);
 
   // Reset to defaults whenever the modal opens
   useEffect(() => {
     if (open) {
       setSettings(DEFAULT_SETTINGS);
+      setAiParagraphs(false);
     }
   }, [open]);
 
@@ -72,8 +75,7 @@ export function RedactionModal({
   };
 
   const handleGenerate = () => {
-    onGenerate(settings);
-    onOpenChange(false);
+    onGenerate(settings, aiParagraphs);
   };
 
   return (
@@ -87,6 +89,34 @@ export function RedactionModal({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Section 0 — AI paragraph recognition */}
+          <div className="space-y-3 rounded-md border border-primary/30 bg-primary/5 px-3 py-3">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Formatowanie AI
+            </h3>
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="redaction-ai-paragraphs"
+                checked={aiParagraphs}
+                onCheckedChange={(checked) => setAiParagraphs(checked === true)}
+                data-ocid="redaction.ai_paragraphs_checkbox"
+              />
+              <Label
+                htmlFor="redaction-ai-paragraphs"
+                className="text-sm cursor-pointer leading-snug"
+              >
+                Automatycznie rozpoznaj akapity i dialogi (AI)
+              </Label>
+            </div>
+            <p className="text-xs text-muted-foreground leading-snug">
+              AI wstawi podziały akapitów i wydzieli linie dialogowe w kopii
+              pliku DOCX. Tekst w edytorze pozostaje niezmieniony.
+            </p>
+          </div>
+
+          <div className="h-px bg-border" />
+
           {/* Section 1 — Układ tekstu */}
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">

@@ -42242,14 +42242,14 @@ function validateAnnotations(annotations) {
     };
   }).filter((item) => item !== null);
 }
-async function callAi(prompt, apiKey, provider, expectJson) {
+async function callAi(prompt, apiKey, provider, expectJson, maxTokens = 8e3) {
   var _a2, _b2, _c2, _d2, _e2;
   const safeApiKey = apiKey.replace(/[^\x00-\xFF]/g, "").trim();
   if (provider === "openai") {
     const body = {
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 8e3,
+      max_tokens: maxTokens,
       temperature: 0.3
     };
     if (expectJson) {
@@ -42280,7 +42280,7 @@ async function callAi(prompt, apiKey, provider, expectJson) {
     },
     body: JSON.stringify({
       model: "claude-sonnet-5",
-      max_tokens: 8e3,
+      max_tokens: maxTokens,
       messages: [{ role: "user", content: prompt }]
     })
   });
@@ -42324,6 +42324,27 @@ async function analyzeDialogue(text, apiKey, provider, bookContext) {
   const responseText = await callAi(prompt, apiKey, provider, false);
   const annotations = parsePipeAnnotations(responseText);
   return validateAnnotations(annotations);
+}
+async function formatParagraphsWithAI(text, apiKey, provider) {
+  if (text.length > 1e5) {
+    throw new Error(
+      "Tekst za długi do automatycznego formatowania (max 100000 znaków)"
+    );
+  }
+  const prompt = `Poniżej znajduje się tekst literacki, który może nie mieć poprawnych podziałów na akapity. Twoim zadaniem jest WYŁĄCZNIE dodanie podziałów akapitów w odpowiednich miejscach — absolutnie NIE zmieniaj, nie dodawaj i nie usuwaj żadnych słów z oryginalnego tekstu.
+
+Zasady:
+1. Rozpoznaj naturalne granice akapitów narracyjnych (zmiana myśli, sceny, czasu, miejsca) i wstaw tam podział akapitu (podwójny znak nowej linii).
+2. Każda linia dialogowa zaczynająca się od myślnika (— lub -) MUSI być osobnym akapitem — wstaw podział akapitu przed każdym myślnikiem rozpoczynającym wypowiedź postaci.
+3. NIE dodawaj żadnych nowych myślników, słów, zdań ani interpunkcji które nie istniały w oryginalnym tekście.
+4. Zachowaj oryginalną kolejność i treść tekstu w 100% — jedyna zmiana to wstawienie znaków podziału akapitu w odpowiednich miejscach.
+5. Zwróć wyłącznie przeformatowany tekst, bez żadnego dodatkowego komentarza.
+
+Tekst do sformatowania:
+"""
+${text}
+"""`;
+  return await callAi(prompt, apiKey, provider, false, 2e4);
 }
 async function analyzeSceneExpansion(text, apiKey, provider, bookContext) {
   if (text.length > 8e3) {
@@ -48981,17 +49002,18 @@ function RedactionModal({
   onGenerate
 }) {
   const [settings, setSettings] = reactExports.useState(DEFAULT_SETTINGS);
+  const [aiParagraphs, setAiParagraphs] = reactExports.useState(false);
   reactExports.useEffect(() => {
     if (open) {
       setSettings(DEFAULT_SETTINGS);
+      setAiParagraphs(false);
     }
   }, [open]);
   const update = (key, value) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
   };
   const handleGenerate = () => {
-    onGenerate(settings);
-    onOpenChange(false);
+    onGenerate(settings, aiParagraphs);
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsx(Dialog, { open, onOpenChange, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogContent, { className: "max-w-lg max-h-[85vh] overflow-y-auto", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(DialogHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs(DialogTitle, { className: "flex items-center gap-2", children: [
@@ -48999,6 +49021,33 @@ function RedactionModal({
       "Ustawienia redakcji"
     ] }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-6 py-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3 rounded-md border border-primary/30 bg-primary/5 px-3 py-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "h-4 w-4 text-primary" }),
+          "Formatowanie AI"
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start gap-3", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Checkbox,
+            {
+              id: "redaction-ai-paragraphs",
+              checked: aiParagraphs,
+              onCheckedChange: (checked) => setAiParagraphs(checked === true),
+              "data-ocid": "redaction.ai_paragraphs_checkbox"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Label$2,
+            {
+              htmlFor: "redaction-ai-paragraphs",
+              className: "text-sm cursor-pointer leading-snug",
+              children: "Automatycznie rozpoznaj akapity i dialogi (AI)"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-muted-foreground leading-snug", children: "AI wstawi podziały akapitów i wydzieli linie dialogowe w kopii pliku DOCX. Tekst w edytorze pozostaje niezmieniony." })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-px bg-border" }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-3", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsxs("h3", { className: "text-sm font-semibold text-foreground flex items-center gap-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(AlignLeft, { className: "h-4 w-4 text-primary" }),
@@ -79532,7 +79581,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BOK-K55f.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Bo1t4II5.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -80552,6 +80601,7 @@ function ChapterEditorPage() {
   });
   const [settingsModalOpen, setSettingsModalOpen] = reactExports.useState(false);
   const [redactionModalOpen, setRedactionModalOpen] = reactExports.useState(false);
+  const [aiFormatting, setAiFormatting] = reactExports.useState(false);
   const [provider, setProvider] = reactExports.useState(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
@@ -81613,16 +81663,53 @@ ${getPlainText(ch.content)}`
         onOpenChange: setSettingsModalOpen
       }
     ),
+    aiFormatting && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "div",
+      {
+        className: "fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm",
+        "data-ocid": "chapter.ai_formatting.loading_state",
+        children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-6 shadow-lg", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(WandSparkles, { className: "h-6 w-6 animate-spin text-primary" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-foreground", children: "Formatowanie AI... (może potrwać do minuty dla długich rozdziałów)" })
+        ] })
+      }
+    ),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       RedactionModal,
       {
         open: redactionModalOpen,
         onOpenChange: setRedactionModalOpen,
-        onGenerate: (settings) => {
-          var _a3;
-          const html = ((_a3 = editorRef.current) == null ? void 0 : _a3.getHTML()) ?? "";
-          exportToDOCXWithRedaction(title, html, settings);
-          setRedactionModalOpen(false);
+        onGenerate: async (settings, aiParagraphs) => {
+          var _a3, _b2, _c2;
+          if (!aiParagraphs) {
+            const html = ((_a3 = editorRef.current) == null ? void 0 : _a3.getHTML()) ?? "";
+            await exportToDOCXWithRedaction(title, html, settings);
+            setRedactionModalOpen(false);
+            return;
+          }
+          setAiFormatting(true);
+          try {
+            const plainText = getPlainText(((_b2 = editorRef.current) == null ? void 0 : _b2.getHTML()) ?? "");
+            const formatted = await formatParagraphsWithAI(
+              plainText,
+              apiKey,
+              provider
+            );
+            const formattedHtml = formatted.split("\n\n").map((chunk) => chunk.trim()).filter((chunk) => chunk.length > 0).map((chunk) => `<p>${chunk}</p>`).join("");
+            await exportToDOCXWithRedaction(title, formattedHtml, settings);
+          } catch {
+            window.alert(
+              "Formatowanie AI nie powiodło się. Eksportuję z oryginalnym tekstem."
+            );
+            await exportToDOCXWithRedaction(
+              title,
+              ((_c2 = editorRef.current) == null ? void 0 : _c2.getHTML()) ?? "",
+              settings
+            );
+          } finally {
+            setAiFormatting(false);
+            setRedactionModalOpen(false);
+          }
         }
       }
     )
