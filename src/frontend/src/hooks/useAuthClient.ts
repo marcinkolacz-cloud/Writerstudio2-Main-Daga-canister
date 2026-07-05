@@ -3,6 +3,36 @@ import type { Identity } from "@icp-sdk/core/agent";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
+ * Window features passed to the II popup window opened by `AuthClient.signIn`.
+ * Keeps the popup small, chromeless, and anchored to the top-left so it does
+ * not obscure the parent app's content.
+ */
+const WINDOW_OPENER_FEATURES =
+  "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100";
+
+/**
+ * Resolve the Internet Identity provider URL based on the current environment.
+ *
+ * Local development (localhost / 127.0.0.1 / *.localhost) uses the local II
+ * canister exposed by `dfx start` at `http://id.ai.localhost:8000/authorize`.
+ * Any other host (staging, production, deployed canisters) uses the public
+ * `https://id.ai/authorize` endpoint.
+ */
+function getIdentityProvider(): string {
+  const hostname =
+    typeof window !== "undefined" && window.location
+      ? window.location.hostname
+      : "";
+  const isLocal =
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname.endsWith(".localhost");
+  return isLocal
+    ? "http://id.ai.localhost:8000/authorize"
+    : "https://id.ai/authorize";
+}
+
+/**
  * Login status for the {@link useAuthClient} hook.
  *
  * Mirrors the `Status` type exported by `@caffeineai/core-infrastructure`'s
@@ -57,9 +87,13 @@ export function useAuthClient(): UseAuthClientResult {
   const authClientRef = useRef<AuthClient | null>(null);
   if (authClientRef.current === null) {
     // The constructor (not a static `.create()`) is the canonical API in
-    // @icp-sdk/auth@7.1.0. Passing an empty options object yields plain II
-    // sign-in with no attributes flow.
-    authClientRef.current = new AuthClient({});
+    // @icp-sdk/auth@7.1.0. Passing identityProvider + windowOpenerFeatures
+    // yields plain II sign-in (no attributes flow) against the environment-
+    // appropriate II endpoint with a small chromeless popup window.
+    authClientRef.current = new AuthClient({
+      identityProvider: getIdentityProvider(),
+      windowOpenerFeatures: WINDOW_OPENER_FEATURES,
+    });
   }
   const authClient = authClientRef.current;
 
@@ -139,8 +173,12 @@ export function useAuthClient(): UseAuthClientResult {
     // Create a FRESH AuthClient instance so the stale II IndexedDB session
     // attached to the previous client is dropped before the next signIn.
     // The constructor (not a static `.create()`) is the canonical API in
-    // @icp-sdk/auth@7.1.0.
-    const freshClient = new AuthClient({});
+    // @icp-sdk/auth@7.1.0. Re-pass identityProvider + windowOpenerFeatures so
+    // the next signIn uses the same II endpoint and popup window config.
+    const freshClient = new AuthClient({
+      identityProvider: getIdentityProvider(),
+      windowOpenerFeatures: WINDOW_OPENER_FEATURES,
+    });
     authClientRef.current = freshClient;
     // Restore the session from the fresh client so the hook state reflects
     // the now-anonymous identity. isAuthenticated() is synchronous in
