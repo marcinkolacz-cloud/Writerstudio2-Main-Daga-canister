@@ -3,15 +3,15 @@ import { Input } from "@/components/ui/input";
 import { useClaimInviteCode } from "@/hooks/useBackend";
 import { useAppStore } from "@/store/useAppStore";
 import { useInternetIdentity } from "@caffeineai/core-infrastructure";
-import { BookOpen, KeyRound, Loader2, LogOut } from "lucide-react";
+import { BookOpen, KeyRound, Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 export function AccessGatePage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
   const claimMutation = useClaimInviteCode();
-  const { clear } = useInternetIdentity();
+  const { clear, login, loginStatus } = useInternetIdentity();
   const { clearAuth } = useAppStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,13 +34,15 @@ export function AccessGatePage() {
     }
   };
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
+  const handleSwitchIdentity = async () => {
+    if (loginStatus === "logging-in") return;
+    setIsSwitching(true);
     try {
+      // Clear the current Internet Identity session.
       clear();
       clearAuth();
       // Force clear Internet Identity's IndexedDB session so the next
-      // visit shows the real II login screen (re-auth via passkey).
+      // login shows the real II login screen (re-auth via passkey).
       try {
         const dbs = await (indexedDB as any).databases();
         for (const db of dbs) {
@@ -52,9 +54,11 @@ export function AccessGatePage() {
         // indexedDB.databases() is unsupported in Firefox — ignore.
       }
       localStorage.clear();
-      window.location.reload();
+      // Open the real Internet Identity login window so the user can
+      // choose/confirm a different identity via passkey. No page reload.
+      await login();
     } catch {
-      setIsLoggingOut(false);
+      setIsSwitching(false);
     }
   };
 
@@ -140,19 +144,19 @@ export function AccessGatePage() {
           type="button"
           variant="outline"
           className="w-full border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white backdrop-blur-sm"
-          disabled={isLoggingOut}
-          onClick={handleLogout}
-          data-ocid="access_gate.logout_button"
+          disabled={isSwitching || loginStatus === "logging-in"}
+          onClick={handleSwitchIdentity}
+          data-ocid="access_gate.switch_identity_button"
         >
-          {isLoggingOut ? (
+          {isSwitching || loginStatus === "logging-in" ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Wylogowywanie...
+              Otwieranie Internet Identity...
             </>
           ) : (
             <>
-              <LogOut className="mr-2 h-4 w-4" />
-              Wyloguj i zaloguj się inną tożsamością
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Przełącz tożsamość
             </>
           )}
         </Button>
