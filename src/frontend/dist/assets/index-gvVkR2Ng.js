@@ -33365,30 +33365,46 @@ function useAuthClient() {
       cancelled = true;
     };
   }, [authClient]);
-  const login = reactExports.useCallback(() => {
+  const login = reactExports.useCallback(async () => {
     setLoginStatus("logging-in");
     setLoginError(void 0);
-    void authClient.signIn({}).then((id) => {
+    try {
+      const id = await authClient.signIn({});
       setIdentity(id);
       setLoginStatus("success");
-    }).catch((unknownError) => {
+    } catch (unknownError) {
       setLoginError(
         unknownError instanceof Error ? unknownError : new Error("Login failed")
       );
       setLoginStatus("loginError");
-    });
+    }
   }, [authClient]);
-  const clear = reactExports.useCallback(() => {
-    void authClient.signOut({}).then(() => {
-      setIdentity(void 0);
-      setLoginStatus("idle");
-      setLoginError(void 0);
-    }).catch((unknownError) => {
+  const clear = reactExports.useCallback(async () => {
+    try {
+      await authClient.signOut({});
+    } catch (unknownError) {
       setLoginError(
         unknownError instanceof Error ? unknownError : new Error("Logout failed")
       );
       setLoginStatus("loginError");
-    });
+      return;
+    }
+    setIdentity(void 0);
+    setLoginStatus("idle");
+    setLoginError(void 0);
+    const freshClient = new AuthClient({});
+    authClientRef.current = freshClient;
+    try {
+      const authed = freshClient.isAuthenticated();
+      if (authed) {
+        const id = await freshClient.getIdentity();
+        setIdentity(id);
+      } else {
+        setIdentity(void 0);
+      }
+    } catch {
+      setIdentity(void 0);
+    }
   }, [authClient]);
   const isAuthenticated = !!identity3 && !identity3.getPrincipal().isAnonymous();
   return {
@@ -34028,51 +34044,6 @@ function useDeleteChatSession() {
     }
   });
 }
-const createStoreImpl = (createState) => {
-  let state;
-  const listeners = /* @__PURE__ */ new Set();
-  const setState = (partial, replace2) => {
-    const nextState = typeof partial === "function" ? partial(state) : partial;
-    if (!Object.is(nextState, state)) {
-      const previousState = state;
-      state = (replace2 != null ? replace2 : typeof nextState !== "object" || nextState === null) ? nextState : Object.assign({}, state, nextState);
-      listeners.forEach((listener) => listener(state, previousState));
-    }
-  };
-  const getState2 = () => state;
-  const getInitialState = () => initialState;
-  const subscribe = (listener) => {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-  };
-  const api = { setState, getState: getState2, getInitialState, subscribe };
-  const initialState = state = createState(setState, getState2, api);
-  return api;
-};
-const createStore = (createState) => createState ? createStoreImpl(createState) : createStoreImpl;
-const identity$c = (arg) => arg;
-function useStore$1(api, selector = identity$c) {
-  const slice2 = React$4.useSyncExternalStore(
-    api.subscribe,
-    React$4.useCallback(() => selector(api.getState()), [api, selector]),
-    React$4.useCallback(() => selector(api.getInitialState()), [api, selector])
-  );
-  React$4.useDebugValue(slice2);
-  return slice2;
-}
-const createImpl = (createState) => {
-  const api = createStore(createState);
-  const useBoundStore = (selector) => useStore$1(api, selector);
-  Object.assign(useBoundStore, api);
-  return useBoundStore;
-};
-const create = (createState) => createState ? createImpl(createState) : createImpl;
-const useAppStore = create((set) => ({
-  principal: null,
-  isAuthenticated: false,
-  setPrincipal: (principal) => set({ principal, isAuthenticated: principal !== null }),
-  clearAuth: () => set({ principal: null, isAuthenticated: false })
-}));
 /**
  * @license lucide-react v0.511.0 - ISC
  *
@@ -34901,7 +34872,6 @@ function AccessGatePage() {
   const [isSwitching, setIsSwitching] = reactExports.useState(false);
   const claimMutation = useClaimInviteCode();
   const { clear, login, loginStatus } = useAuthClient();
-  const { clearAuth } = useAppStore();
   const handleSubmit = async (e3) => {
     e3.preventDefault();
     setError(null);
@@ -34925,18 +34895,7 @@ function AccessGatePage() {
     if (loginStatus === "logging-in") return;
     setIsSwitching(true);
     try {
-      clear();
-      clearAuth();
-      try {
-        const dbs = await indexedDB.databases();
-        for (const db of dbs) {
-          if (db.name) {
-            indexedDB.deleteDatabase(db.name);
-          }
-        }
-      } catch {
-      }
-      localStorage.clear();
+      await clear();
       await login();
     } catch {
       setIsSwitching(false);
@@ -38352,7 +38311,7 @@ withSelector_production.useSyncExternalStoreWithSelector = function(subscribe, g
   withSelector.exports = withSelector_production;
 }
 var withSelectorExports = withSelector.exports;
-function useStore(store, selector = (d2) => d2) {
+function useStore$1(store, selector = (d2) => d2) {
   const slice2 = withSelectorExports.useSyncExternalStoreWithSelector(
     store.subscribe,
     () => store.state,
@@ -38427,7 +38386,7 @@ function useRouterState(opts) {
   });
   const router2 = (opts == null ? void 0 : opts.router) || contextRouter;
   const previousResult = reactExports.useRef(void 0);
-  return useStore(router2.__store, (state) => {
+  return useStore$1(router2.__store, (state) => {
     if (opts == null ? void 0 : opts.select) {
       if (opts.structuralSharing ?? router2.options.defaultStructuralSharing) {
         const newSlice = replaceEqualDeep(
@@ -41512,6 +41471,51 @@ function TableCell({ className, ...props }) {
     }
   );
 }
+const createStoreImpl = (createState) => {
+  let state;
+  const listeners = /* @__PURE__ */ new Set();
+  const setState = (partial, replace2) => {
+    const nextState = typeof partial === "function" ? partial(state) : partial;
+    if (!Object.is(nextState, state)) {
+      const previousState = state;
+      state = (replace2 != null ? replace2 : typeof nextState !== "object" || nextState === null) ? nextState : Object.assign({}, state, nextState);
+      listeners.forEach((listener) => listener(state, previousState));
+    }
+  };
+  const getState2 = () => state;
+  const getInitialState = () => initialState;
+  const subscribe = (listener) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  };
+  const api = { setState, getState: getState2, getInitialState, subscribe };
+  const initialState = state = createState(setState, getState2, api);
+  return api;
+};
+const createStore = (createState) => createState ? createStoreImpl(createState) : createStoreImpl;
+const identity$c = (arg) => arg;
+function useStore(api, selector = identity$c) {
+  const slice2 = React$4.useSyncExternalStore(
+    api.subscribe,
+    React$4.useCallback(() => selector(api.getState()), [api, selector]),
+    React$4.useCallback(() => selector(api.getInitialState()), [api, selector])
+  );
+  React$4.useDebugValue(slice2);
+  return slice2;
+}
+const createImpl = (createState) => {
+  const api = createStore(createState);
+  const useBoundStore = (selector) => useStore(api, selector);
+  Object.assign(useBoundStore, api);
+  return useBoundStore;
+};
+const create = (createState) => createState ? createImpl(createState) : createImpl;
+const useAppStore = create((set) => ({
+  principal: null,
+  isAuthenticated: false,
+  setPrincipal: (principal) => set({ principal, isAuthenticated: principal !== null }),
+  clearAuth: () => set({ principal: null, isAuthenticated: false })
+}));
 function AdminPage() {
   const principal = useAppStore((s2) => s2.principal);
   const setAdminMutation = useSetAdminPrincipal();
@@ -78873,7 +78877,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CGSvUJjS.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-lH1U_ll4.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

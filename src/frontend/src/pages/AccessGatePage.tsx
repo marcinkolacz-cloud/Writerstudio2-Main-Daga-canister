@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useClaimInviteCode } from "@/hooks/useBackend";
-import { useAppStore } from "@/store/useAppStore";
 import { BookOpen, KeyRound, Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useAuthClient } from "../hooks/useAuthClient";
@@ -12,7 +11,6 @@ export function AccessGatePage() {
   const [isSwitching, setIsSwitching] = useState(false);
   const claimMutation = useClaimInviteCode();
   const { clear, login, loginStatus } = useAuthClient();
-  const { clearAuth } = useAppStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,22 +36,9 @@ export function AccessGatePage() {
     if (loginStatus === "logging-in") return;
     setIsSwitching(true);
     try {
-      // Clear the current Internet Identity session.
-      clear();
-      clearAuth();
-      // Force clear Internet Identity's IndexedDB session so the next
-      // login shows the real II login screen (re-auth via passkey).
-      try {
-        const dbs = await (indexedDB as any).databases();
-        for (const db of dbs) {
-          if (db.name) {
-            indexedDB.deleteDatabase(db.name);
-          }
-        }
-      } catch {
-        // indexedDB.databases() is unsupported in Firefox — ignore.
-      }
-      localStorage.clear();
+      // clear() now performs full II session teardown (signOut + fresh
+      // AuthClient), so no manual indexedDB/localStorage cleanup is needed.
+      await clear();
       // Open the real Internet Identity login window so the user can
       // choose/confirm a different identity via passkey. No page reload.
       await login();
