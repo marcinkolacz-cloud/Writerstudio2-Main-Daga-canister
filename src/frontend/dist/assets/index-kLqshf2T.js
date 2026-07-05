@@ -33334,15 +33334,26 @@ function getIdentityProvider() {
   const isLocal = hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".localhost");
   return isLocal ? "http://id.ai.localhost:8000/authorize" : "https://id.ai#authorize";
 }
-function useAuthClient() {
-  const authClientRef = reactExports.useRef(null);
-  if (authClientRef.current === null) {
-    authClientRef.current = new AuthClient({
-      identityProvider: getIdentityProvider(),
-      windowOpenerFeatures: WINDOW_OPENER_FEATURES,
-      derivationOrigin: window.location.origin
-    });
+function createAuthClient() {
+  return new AuthClient({
+    identityProvider: getIdentityProvider(),
+    windowOpenerFeatures: WINDOW_OPENER_FEATURES,
+    derivationOrigin: window.location.origin
+  });
+}
+const AuthContext = reactExports.createContext(null);
+function useAuthContext() {
+  const value = reactExports.useContext(AuthContext);
+  if (value === null) {
+    throw new Error(
+      "useAuthContext must be used within an AuthProvider. Wrap your app with <AuthProvider>."
+    );
   }
+  return value;
+}
+function AuthProvider({ children }) {
+  const authClientRef = reactExports.useRef(createAuthClient());
+  const [authClientVersion, setAuthClientVersion] = reactExports.useState(0);
   const authClient = authClientRef.current;
   const [identity3, setIdentity] = reactExports.useState(void 0);
   const [loginStatus, setLoginStatus] = reactExports.useState("initializing");
@@ -33374,7 +33385,7 @@ function useAuthClient() {
     return () => {
       cancelled = true;
     };
-  }, [authClient]);
+  }, [authClient, authClientVersion]);
   const login = reactExports.useCallback(async () => {
     setLoginStatus("logging-in");
     setLoginError(void 0);
@@ -33402,41 +33413,39 @@ function useAuthClient() {
     setIdentity(void 0);
     setLoginStatus("idle");
     setLoginError(void 0);
-    const freshClient = new AuthClient({
-      identityProvider: getIdentityProvider(),
-      windowOpenerFeatures: WINDOW_OPENER_FEATURES,
-      derivationOrigin: window.location.origin
-    });
-    authClientRef.current = freshClient;
-    try {
-      const authed = freshClient.isAuthenticated();
-      if (authed) {
-        const id = await freshClient.getIdentity();
-        setIdentity(id);
-      } else {
-        setIdentity(void 0);
-      }
-    } catch {
-      setIdentity(void 0);
-    }
+    authClientRef.current = createAuthClient();
+    setAuthClientVersion((v2) => v2 + 1);
   }, [authClient]);
   const isAuthenticated = !!identity3 && !identity3.getPrincipal().isAnonymous();
-  return {
-    identity: identity3,
-    login,
-    clear,
-    isAuthenticated,
-    isInitializing: loginStatus === "initializing",
-    isLoggingIn: loginStatus === "logging-in",
-    isLoginIdle: loginStatus === "idle",
-    isLoginSuccess: loginStatus === "success",
-    isLoginError: loginStatus === "loginError",
-    loginStatus,
-    loginError
-  };
+  const value = reactExports.useMemo(
+    () => ({
+      authClient,
+      identity: identity3,
+      login,
+      clear,
+      isAuthenticated,
+      isInitializing: loginStatus === "initializing",
+      isLoggingIn: loginStatus === "logging-in",
+      isLoginIdle: loginStatus === "idle",
+      isLoginSuccess: loginStatus === "success",
+      isLoginError: loginStatus === "loginError",
+      loginStatus,
+      loginError
+    }),
+    [
+      authClient,
+      identity3,
+      login,
+      clear,
+      isAuthenticated,
+      loginStatus,
+      loginError
+    ]
+  );
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AuthContext.Provider, { value, children });
 }
 function useActorLocal(createActor2) {
-  const { identity: identity3 } = useAuthClient();
+  const { identity: identity3 } = useAuthContext();
   const [actor, setActor] = reactExports.useState(void 0);
   const [isFetching, setIsFetching] = reactExports.useState(true);
   reactExports.useEffect(() => {
@@ -34880,6 +34889,34 @@ const __iconNode = [
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
 ];
 const X = createLucideIcon("x", __iconNode);
+function useAuthClient() {
+  const {
+    identity: identity3,
+    login,
+    clear,
+    isAuthenticated,
+    isInitializing,
+    isLoggingIn,
+    isLoginIdle,
+    isLoginSuccess,
+    isLoginError,
+    loginStatus,
+    loginError
+  } = useAuthContext();
+  return {
+    identity: identity3,
+    login,
+    clear,
+    isAuthenticated,
+    isInitializing,
+    isLoggingIn,
+    isLoginIdle,
+    isLoginSuccess,
+    isLoginError,
+    loginStatus,
+    loginError
+  };
+}
 function AccessGatePage() {
   const [code, setCode] = reactExports.useState("");
   const [error, setError] = reactExports.useState(null);
@@ -78887,7 +78924,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-B0Gd2hDE.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Cg_V2dUQ.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -101825,10 +101862,10 @@ if (storedTheme === "dark") {
   document.documentElement.classList.add("dark");
 }
 ReactDOM.createRoot(document.getElementById("root")).render(
-  /* @__PURE__ */ jsxRuntimeExports.jsxs(QueryClientProvider, { client: queryClient, children: [
+  /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(AuthProvider, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(App, {}),
     /* @__PURE__ */ jsxRuntimeExports.jsx($e, { position: "top-right", richColors: true })
-  ] })
+  ] }) })
 );
 export {
   __vitePreload as _,

@@ -1,5 +1,5 @@
-import { c as commonjsGlobal, g as getDefaultExportFromCjs } from "./index-BkZN8kt4.js";
-import { _ as _typeof$1 } from "./jspdf.es.min-B0Gd2hDE.js";
+import { c as commonjsGlobal, g as getDefaultExportFromCjs } from "./index-kLqshf2T.js";
+import { _ as _typeof$1 } from "./jspdf.es.min-Cg_V2dUQ.js";
 var check = function(it) {
   return it && it.Math === Math && it;
 };

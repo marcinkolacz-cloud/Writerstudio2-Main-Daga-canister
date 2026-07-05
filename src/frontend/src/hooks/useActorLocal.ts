@@ -1,7 +1,7 @@
 import { createActorWithConfig } from "@caffeineai/core-infrastructure";
 import type { createActorFunction } from "@caffeineai/core-infrastructure";
 import { useEffect, useState } from "react";
-import { useAuthClient } from "./useAuthClient";
+import { useAuthContext } from "../providers/AuthProvider";
 
 export interface UseActorLocalResult<T> {
   /** The created actor, or undefined until the async creation resolves. */
@@ -12,19 +12,20 @@ export interface UseActorLocalResult<T> {
 
 /**
  * Local replacement for `@caffeineai/core-infrastructure`'s `useActor` that
- * pairs with {@link useAuthClient} instead of `useInternetIdentity`.
+ * pairs with the shared {@link AuthProvider} context instead of creating a
+ * per-component `AuthClient`.
  *
- * The actor is (re)created via `createActorWithConfig` whenever the principal
- * changes. If the identity is anonymous or undefined, the actor is still
- * created (matching the original `useActor` behaviour, which does not skip
- * creation for anonymous identities).
+ * The actor is (re)created via `createActorWithConfig` whenever the shared
+ * identity changes. If the identity is anonymous or undefined, the actor is
+ * still created (matching the original `useActor` behaviour, which does not
+ * skip creation for anonymous identities).
  *
  * Call sites use `const { actor } = useActorLocal(createActor)`.
  */
 export function useActorLocal<T>(
   createActor: createActorFunction<T>,
 ): UseActorLocalResult<T> {
-  const { identity } = useAuthClient();
+  const { identity } = useAuthContext();
 
   const [actor, setActor] = useState<T | undefined>(undefined);
   const [isFetching, setIsFetching] = useState<boolean>(true);
