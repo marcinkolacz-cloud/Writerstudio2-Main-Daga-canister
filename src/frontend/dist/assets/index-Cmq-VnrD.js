@@ -35083,7 +35083,7 @@ function AccessGatePage() {
     try {
       clear();
       clearAuth();
-      window.location.href = "/login";
+      window.location.reload();
     } catch {
       setIsLoggingOut(false);
     }
@@ -35106,11 +35106,11 @@ function AccessGatePage() {
           }
         ),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative z-10 w-full max-w-md space-y-6", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl border border-border bg-card/95 p-8 shadow-elevated backdrop-blur-sm", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "rounded-2xl border border-slate-200 bg-white/95 p-8 shadow-elevated backdrop-blur-sm", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center space-y-3", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10", children: /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-7 w-7 text-primary" }) }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-center text-2xl font-display font-semibold text-foreground", children: "WriterStudio TipTap" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm text-muted-foreground", children: "Wprowadź kod zaproszenia, aby uzyskać dostęp do aplikacji" })
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100", children: /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { className: "h-7 w-7 text-slate-700" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-center text-2xl font-display font-semibold text-slate-900", children: "WriterStudio TipTap" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-center text-sm text-slate-600", children: "Wprowadź kod zaproszenia, aby uzyskać dostęp do aplikacji" })
             ] }),
             /* @__PURE__ */ jsxRuntimeExports.jsxs("form", { onSubmit: handleSubmit, className: "mt-6 space-y-4", children: [
               /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
@@ -35118,12 +35118,12 @@ function AccessGatePage() {
                   "label",
                   {
                     htmlFor: "invite-code",
-                    className: "text-sm font-medium text-foreground",
+                    className: "text-sm font-medium text-slate-800",
                     children: "Kod zaproszenia"
                   }
                 ),
                 /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(KeyRound, { className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(KeyRound, { className: "absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" }),
                   /* @__PURE__ */ jsxRuntimeExports.jsx(
                     Input,
                     {
@@ -35166,8 +35166,8 @@ function AccessGatePage() {
             Button,
             {
               type: "button",
-              variant: "ghost",
-              className: "w-full text-muted-foreground hover:text-foreground hover:bg-white/10",
+              variant: "outline",
+              className: "w-full border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white backdrop-blur-sm",
               disabled: isLoggingOut,
               onClick: handleLogout,
               "data-ocid": "access_gate.logout_button",
@@ -79019,7 +79019,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-iSUzzCnL.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BZKa0nDP.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

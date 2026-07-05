@@ -39,7 +39,7 @@ export function AccessGatePage() {
     try {
       clear();
       clearAuth();
-      window.location.href = "/login";
+      window.location.reload();
     } catch {
       setIsLoggingOut(false);
     }
@@ -60,15 +60,15 @@ export function AccessGatePage() {
       />
 
       <div className="relative z-10 w-full max-w-md space-y-6">
-        <div className="rounded-2xl border border-border bg-card/95 p-8 shadow-elevated backdrop-blur-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white/95 p-8 shadow-elevated backdrop-blur-sm">
           <div className="flex flex-col items-center space-y-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
-              <BookOpen className="h-7 w-7 text-primary" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100">
+              <BookOpen className="h-7 w-7 text-slate-700" />
             </div>
-            <h1 className="text-center text-2xl font-display font-semibold text-foreground">
+            <h1 className="text-center text-2xl font-display font-semibold text-slate-900">
               WriterStudio TipTap
             </h1>
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-sm text-slate-600">
               Wprowadź kod zaproszenia, aby uzyskać dostęp do aplikacji
             </p>
           </div>
@@ -77,12 +77,12 @@ export function AccessGatePage() {
             <div className="space-y-2">
               <label
                 htmlFor="invite-code"
-                className="text-sm font-medium text-foreground"
+                className="text-sm font-medium text-slate-800"
               >
                 Kod zaproszenia
               </label>
               <div className="relative">
-                <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   id="invite-code"
                   type="text"
@@ -125,8 +125,8 @@ export function AccessGatePage() {
 
         <Button
           type="button"
-          variant="ghost"
-          className="w-full text-muted-foreground hover:text-foreground hover:bg-white/10"
+          variant="outline"
+          className="w-full border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white backdrop-blur-sm"
           disabled={isLoggingOut}
           onClick={handleLogout}
           data-ocid="access_gate.logout_button"
