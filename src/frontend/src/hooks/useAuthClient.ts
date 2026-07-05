@@ -16,7 +16,8 @@ const WINDOW_OPENER_FEATURES =
  * Local development (localhost / 127.0.0.1 / *.localhost) uses the local II
  * canister exposed by `dfx start` at `http://id.ai.localhost:8000/authorize`.
  * Any other host (staging, production, deployed canisters) uses the public
- * `https://id.ai/authorize` endpoint.
+ * `https://id.ai` endpoint. The II frontend canister does not recognize the
+ * `/authorize` path; it expects the base origin.
  */
 function getIdentityProvider(): string {
   const hostname =
@@ -27,9 +28,7 @@ function getIdentityProvider(): string {
     hostname === "localhost" ||
     hostname === "127.0.0.1" ||
     hostname.endsWith(".localhost");
-  return isLocal
-    ? "http://id.ai.localhost:8000/authorize"
-    : "https://id.ai/authorize";
+  return isLocal ? "http://id.ai.localhost:8000/authorize" : "https://id.ai";
 }
 
 /**

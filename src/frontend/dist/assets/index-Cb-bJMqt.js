@@ -33332,7 +33332,7 @@ const WINDOW_OPENER_FEATURES = "toolbar=0,location=0,menubar=0,width=500,height=
 function getIdentityProvider() {
   const hostname = typeof window !== "undefined" && window.location ? window.location.hostname : "";
   const isLocal = hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".localhost");
-  return isLocal ? "http://id.ai.localhost:8000/authorize" : "https://id.ai/authorize";
+  return isLocal ? "http://id.ai.localhost:8000/authorize" : "https://id.ai";
 }
 function useAuthClient() {
   const authClientRef = reactExports.useRef(null);
@@ -78889,7 +78889,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DqGVFWz5.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-x5rsofCH.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
