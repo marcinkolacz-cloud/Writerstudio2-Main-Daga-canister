@@ -39,6 +39,19 @@ export function AccessGatePage() {
     try {
       clear();
       clearAuth();
+      // Force clear Internet Identity's IndexedDB session so the next
+      // visit shows the real II login screen (re-auth via passkey).
+      try {
+        const dbs = await (indexedDB as any).databases();
+        for (const db of dbs) {
+          if (db.name) {
+            indexedDB.deleteDatabase(db.name);
+          }
+        }
+      } catch {
+        // indexedDB.databases() is unsupported in Firefox — ignore.
+      }
+      localStorage.clear();
       window.location.reload();
     } catch {
       setIsLoggingOut(false);
