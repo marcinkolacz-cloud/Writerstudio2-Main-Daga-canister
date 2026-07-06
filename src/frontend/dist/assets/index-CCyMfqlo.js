@@ -42242,18 +42242,18 @@ function validateAnnotations(annotations) {
     };
   }).filter((item) => item !== null);
 }
-async function callAi(prompt, apiKey, provider, expectJson, maxTokens = 8e3) {
+async function callAi(prompt, apiKey, provider, expectJson, model, maxTokens = 8e3, temperature) {
   var _a2, _b2, _c2, _d2, _e2;
   const safeApiKey = apiKey.replace(/[^\x00-\xFF]/g, "").trim();
   if (provider === "openai") {
-    const body = {
+    const body2 = {
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       max_tokens: maxTokens,
       temperature: 0.3
     };
     if (expectJson) {
-      body.response_format = { type: "json_object" };
+      body2.response_format = { type: "json_object" };
     }
     const res2 = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -42261,7 +42261,7 @@ async function callAi(prompt, apiKey, provider, expectJson, maxTokens = 8e3) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${safeApiKey}`
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body2)
     });
     if (!res2.ok) {
       const err = await res2.text();
@@ -42269,6 +42269,14 @@ async function callAi(prompt, apiKey, provider, expectJson, maxTokens = 8e3) {
     }
     const data2 = await res2.json();
     return ((_c2 = (_b2 = (_a2 = data2.choices) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.message) == null ? void 0 : _c2.content) ?? "";
+  }
+  const body = {
+    model,
+    max_tokens: maxTokens,
+    messages: [{ role: "user", content: prompt }]
+  };
+  if (temperature !== void 0 && model !== "claude-sonnet-5") {
+    body.temperature = temperature;
   }
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -42278,11 +42286,7 @@ async function callAi(prompt, apiKey, provider, expectJson, maxTokens = 8e3) {
       "anthropic-version": "2023-06-01",
       "anthropic-dangerous-direct-browser-access": "true"
     },
-    body: JSON.stringify({
-      model: "claude-sonnet-5",
-      max_tokens: maxTokens,
-      messages: [{ role: "user", content: prompt }]
-    })
+    body: JSON.stringify(body)
   });
   if (!res.ok) {
     const err = await res.text();
@@ -42298,7 +42302,15 @@ async function analyzeGrammarStyle(text, apiKey, provider, bookContext) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildGrammarPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8e3,
+    0.3
+  );
   const annotations = parsePipeAnnotations(responseText);
   console.log("[PARSED]", annotations.length, annotations);
   return validateAnnotations(annotations);
@@ -42312,7 +42324,15 @@ async function analyzeWithContext(currentChapterText, previousChaptersSummaries,
     previousChaptersSummaries,
     bookContext
   );
-  const responseText = await callAi(prompt, apiKey, provider, false);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8e3,
+    0.3
+  );
   const annotations = parsePipeAnnotations(responseText);
   return validateAnnotations(annotations);
 }
@@ -42321,7 +42341,15 @@ async function analyzeDialogue(text, apiKey, provider, bookContext) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildDialoguePrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8e3,
+    0.3
+  );
   const annotations = parsePipeAnnotations(responseText);
   return validateAnnotations(annotations);
 }
@@ -42344,14 +42372,30 @@ Tekst do sformatowania:
 """
 ${text}
 """`;
-  return await callAi(prompt, apiKey, provider, false, 2e4);
+  return await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    2e4,
+    0.3
+  );
 }
 async function analyzeSceneExpansion(text, apiKey, provider, bookContext) {
   if (text.length > 8e3) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildSceneExpansionPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8e3,
+    0.3
+  );
   const annotations = parsePipeAnnotations(responseText);
   return validateAnnotations(annotations);
 }
@@ -42360,7 +42404,15 @@ async function analyzeEmotion(text, apiKey, provider, bookContext) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildEmotionPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8e3,
+    0.3
+  );
   const annotations = parsePipeAnnotations(responseText);
   const validated = validateAnnotations(annotations);
   return validated.map((a2) => ({ ...a2, color: "purple" }));
@@ -42370,14 +42422,22 @@ async function analyzeConsistency(allChaptersText, apiKey, provider) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildConsistencyPrompt(allChaptersText);
-  return await callAi(prompt, apiKey, provider, false);
+  return await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8e3,
+    0.3
+  );
 }
 async function generateSummary(allChaptersText, summaryType, apiKey, provider) {
   if (allChaptersText.length > 5e4) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildSummaryPrompt(allChaptersText, summaryType);
-  return await callAi(prompt, apiKey, provider, false);
+  return await callAi(prompt, apiKey, provider, false, "claude-sonnet-5");
 }
 function buildChatPrompt(messages, bookContext, chapterSummaries) {
   const history2 = messages.map(
@@ -42415,7 +42475,15 @@ async function getSynonyms(word, apiKey, provider) {
   }
   const cleanWord = word.trim();
   const prompt = `Podaj 5-8 synonimów polskiego słowa "${cleanWord}" w kontekście języka literackiego. Zwróć wynik jako JSON array zawierający tylko synonimy jako stringi. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
-  const responseText = await callAi(prompt, apiKey, provider, true);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    true,
+    "claude-sonnet-4-6",
+    8e3,
+    0.3
+  );
   try {
     const parsed = JSON.parse(responseText);
     if (!Array.isArray(parsed)) {
@@ -42435,7 +42503,7 @@ async function getSynonyms(word, apiKey, provider) {
 }
 async function chatWithBook(messages, bookContext, apiKey, provider, chapterSummaries) {
   const prompt = buildChatPrompt(messages, bookContext, chapterSummaries);
-  return await callAi(prompt, apiKey, provider, false);
+  return await callAi(prompt, apiKey, provider, false, "claude-sonnet-5");
 }
 function getArchiveKey(bookId) {
   return `ws_chat_archives_${bookId}`;
@@ -51495,7 +51563,7 @@ function findDiffStart$1(a2, b2, pos) {
       let tA = childA.text, tB = childB.text, j2 = 0;
       for (; tA[j2] == tB[j2]; j2++)
         pos++;
-      if (j2 && j2 < tA.length && j2 < tB.length && surrogateHigh(tA.charCodeAt(j2 - 1)) && surrogateLow(tA.charCodeAt(j2)))
+      if (j2 && j2 < tA.length && j2 < tB.length && surrogateHigh$1(tA.charCodeAt(j2 - 1)) && surrogateLow$1(tA.charCodeAt(j2)))
         pos--;
       return pos;
     }
@@ -51527,7 +51595,7 @@ function findDiffEnd$1(a2, b2, posA, posB) {
         posA--;
         posB--;
       }
-      if (iA2 && iB2 && iA2 < tA.length && surrogateHigh(tA.charCodeAt(iA2 - 1)) && surrogateLow(tA.charCodeAt(iA2))) {
+      if (iA2 && iB2 && iA2 < tA.length && surrogateHigh$1(tA.charCodeAt(iA2 - 1)) && surrogateLow$1(tA.charCodeAt(iA2))) {
         posA++;
         posB++;
       }
@@ -51542,10 +51610,10 @@ function findDiffEnd$1(a2, b2, posA, posB) {
     posB -= size2;
   }
 }
-function surrogateLow(ch) {
+function surrogateLow$1(ch) {
   return ch >= 56320 && ch < 57344;
 }
-function surrogateHigh(ch) {
+function surrogateHigh$1(ch) {
   return ch >= 55296 && ch < 56320;
 }
 let Fragment$1 = class Fragment {
@@ -70394,8 +70462,8 @@ var TiptapContext = reactExports.createContext({
 });
 TiptapContext.displayName = "TiptapContext";
 var useTiptap = () => reactExports.useContext(TiptapContext);
-function TiptapWrapper({ editor, instance, children }) {
-  const resolvedEditor = editor != null ? editor : instance;
+function TiptapWrapper({ children, ...props }) {
+  const resolvedEditor = "editor" in props ? props.editor : props.instance;
   if (!resolvedEditor) {
     throw new Error("Tiptap: An editor instance is required. Pass a non-null `editor` prop.");
   }
@@ -70446,8 +70514,11 @@ function findDiffStart(a2, b2, pos) {
     if (!childA.sameMarkup(childB))
       return pos;
     if (childA.isText && childA.text != childB.text) {
-      for (let j2 = 0; childA.text[j2] == childB.text[j2]; j2++)
+      let tA = childA.text, tB = childB.text, j2 = 0;
+      for (; tA[j2] == tB[j2]; j2++)
         pos++;
+      if (j2 && j2 < tA.length && j2 < tB.length && surrogateHigh(tA.charCodeAt(j2 - 1)) && surrogateLow(tA.charCodeAt(j2)))
+        pos--;
       return pos;
     }
     if (childA.content.size || childB.content.size) {
@@ -70471,11 +70542,16 @@ function findDiffEnd(a2, b2, posA, posB) {
     if (!childA.sameMarkup(childB))
       return { a: posA, b: posB };
     if (childA.isText && childA.text != childB.text) {
-      let same = 0, minSize = Math.min(childA.text.length, childB.text.length);
-      while (same < minSize && childA.text[childA.text.length - same - 1] == childB.text[childB.text.length - same - 1]) {
-        same++;
+      let tA = childA.text, tB = childB.text, iA2 = tA.length, iB2 = tB.length;
+      while (iA2 > 0 && iB2 > 0 && tA[iA2 - 1] == tB[iB2 - 1]) {
+        iA2--;
+        iB2--;
         posA--;
         posB--;
+      }
+      if (iA2 && iB2 && iA2 < tA.length && surrogateHigh(tA.charCodeAt(iA2 - 1)) && surrogateLow(tA.charCodeAt(iA2))) {
+        posA++;
+        posB++;
       }
       return { a: posA, b: posB };
     }
@@ -70487,6 +70563,12 @@ function findDiffEnd(a2, b2, posA, posB) {
     posA -= size2;
     posB -= size2;
   }
+}
+function surrogateLow(ch) {
+  return ch >= 56320 && ch < 57344;
+}
+function surrogateHigh(ch) {
+  return ch >= 55296 && ch < 56320;
 }
 var Fragment2 = class _Fragment {
   /**
@@ -74387,6 +74469,7 @@ var Link = Mark2.create({
     };
   },
   addAttributes() {
+    var _a2, _b2, _c2;
     return {
       href: {
         default: null,
@@ -74395,13 +74478,16 @@ var Link = Mark2.create({
         }
       },
       target: {
-        default: this.options.HTMLAttributes.target
+        // Coerce `undefined` to `null` because `undefined` is an invalid attribute value
+        default: (_a2 = this.options.HTMLAttributes.target) != null ? _a2 : null
       },
       rel: {
-        default: this.options.HTMLAttributes.rel
+        // Coerce `undefined` to `null` because `undefined` is an invalid attribute value
+        default: (_b2 = this.options.HTMLAttributes.rel) != null ? _b2 : null
       },
       class: {
-        default: this.options.HTMLAttributes.class
+        // Coerce `undefined` to `null` because `undefined` is an invalid attribute value
+        default: (_c2 = this.options.HTMLAttributes.class) != null ? _c2 : null
       },
       title: {
         default: null
@@ -75288,6 +75374,7 @@ var ORDERED_LIST_LINE_START_REGEX = new RegExp(
   `^(\\s*)(${ORDERED_LIST_MARKER_PATTERN})([.)])\\s+`
 );
 var INDENTED_LINE_REGEX = /^\s/;
+var HEADING_LINE_REGEX = /^#{1,6}(?:\s|$)/;
 function isOrderedListMarkerLine(line) {
   return ORDERED_LIST_ITEM_REGEX.test(line.trimStart());
 }
@@ -75295,7 +75382,7 @@ function isBlockContentLine(line) {
   const trimmedLine = line.trimStart();
   return (
     // oxlint-disable-next-line prefer-string-starts-ends-with
-    /^[-+*]\s+/.test(trimmedLine) || isOrderedListMarkerLine(trimmedLine) || // oxlint-disable-next-line prefer-string-starts-ends-with
+    /^[-+*]\s+/.test(trimmedLine) || isOrderedListMarkerLine(trimmedLine) || HEADING_LINE_REGEX.test(trimmedLine) || // oxlint-disable-next-line prefer-string-starts-ends-with
     /^>\s?/.test(trimmedLine) || // oxlint-disable-next-line prefer-string-starts-ends-with
     /^```/.test(trimmedLine) || // oxlint-disable-next-line prefer-string-starts-ends-with
     /^~~~/.test(trimmedLine)
@@ -75364,7 +75451,7 @@ function collectOrderedListItems(lines) {
         itemContentLines.push(nextLine.slice(Math.min(leadingWhitespace, contentIndent)));
         nextLineIndex += 1;
       } else {
-        if (sawBlankLine) {
+        if (sawBlankLine || HEADING_LINE_REGEX.test(nextLine)) {
           break;
         }
         itemLines.push(nextLine);
@@ -76315,6 +76402,7 @@ class DropCursorView {
     this.cursorPos = null;
     this.element = null;
     this.timeout = -1;
+    this.lastDragEvent = null;
     this.width = (_a2 = options.width) !== null && _a2 !== void 0 ? _a2 : 1;
     this.color = options.color === false ? void 0 : options.color || "black";
     this.class = options.class;
@@ -76331,10 +76419,15 @@ class DropCursorView {
   }
   update(editorView, prevState) {
     if (this.cursorPos != null && prevState.doc != editorView.state.doc) {
-      if (this.cursorPos > editorView.state.doc.content.size)
-        this.setCursor(null);
-      else
+      if (this.lastDragEvent) {
+        let target = this.computeTarget(this.lastDragEvent);
+        if (target == this.cursorPos)
+          this.updateOverlay();
+        else
+          this.setCursor(target);
+      } else {
         this.updateOverlay();
+      }
     }
   }
   setCursor(pos) {
@@ -76403,20 +76496,27 @@ class DropCursorView {
     clearTimeout(this.timeout);
     this.timeout = setTimeout(() => this.setCursor(null), timeout2);
   }
-  dragover(event) {
-    if (!this.editorView.editable)
-      return;
+  computeTarget(event) {
     let pos = this.editorView.posAtCoords({ left: event.clientX, top: event.clientY });
     let node = pos && pos.inside >= 0 && this.editorView.state.doc.nodeAt(pos.inside);
     let disableDropCursor = node && node.type.spec.disableDropCursor;
     let disabled = typeof disableDropCursor == "function" ? disableDropCursor(this.editorView, pos, event) : disableDropCursor;
-    if (pos && !disabled) {
-      let target = pos.pos;
-      if (this.editorView.dragging && this.editorView.dragging.slice) {
-        let point2 = dropPoint(this.editorView.state.doc, target, this.editorView.dragging.slice);
-        if (point2 != null)
-          target = point2;
-      }
+    if (!pos || disabled)
+      return null;
+    let target = pos.pos;
+    if (this.editorView.dragging && this.editorView.dragging.slice) {
+      let point2 = dropPoint(this.editorView.state.doc, target, this.editorView.dragging.slice);
+      if (point2 != null)
+        target = point2;
+    }
+    return target;
+  }
+  dragover(event) {
+    if (!this.editorView.editable)
+      return;
+    this.lastDragEvent = event;
+    let target = this.computeTarget(event);
+    if (target != null) {
       this.setCursor(target);
       this.scheduleRemoval(5e3);
     }
@@ -79581,7 +79681,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Bo1t4II5.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-hma8F17b.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

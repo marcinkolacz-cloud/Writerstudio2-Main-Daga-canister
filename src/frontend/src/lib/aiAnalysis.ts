@@ -279,7 +279,9 @@ async function callAi(
   apiKey: string,
   provider: "openai" | "claude",
   expectJson: boolean,
+  model: string,
   maxTokens = 8000,
+  temperature?: number,
 ): Promise<string> {
   // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional ISO-8859-1 range filter
   const safeApiKey = apiKey.replace(/[^\x00-\xFF]/g, "").trim();
@@ -310,6 +312,14 @@ async function callAi(
     };
     return data.choices?.[0]?.message?.content ?? "";
   }
+  const body: Record<string, unknown> = {
+    model,
+    max_tokens: maxTokens,
+    messages: [{ role: "user", content: prompt }],
+  };
+  if (temperature !== undefined && model !== "claude-sonnet-5") {
+    body.temperature = temperature;
+  }
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -318,11 +328,7 @@ async function callAi(
       "anthropic-version": "2023-06-01",
       "anthropic-dangerous-direct-browser-access": "true",
     },
-    body: JSON.stringify({
-      model: "claude-sonnet-5",
-      max_tokens: maxTokens,
-      messages: [{ role: "user", content: prompt }],
-    }),
+    body: JSON.stringify(body),
   });
   if (!res.ok) {
     const err = await res.text();
@@ -346,7 +352,15 @@ export async function analyzeGrammarStyle(
     throw new Error("Tekst za długi");
   }
   const prompt = buildGrammarPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8000,
+    0.3,
+  );
   const annotations = parsePipeAnnotations(responseText);
   console.log("[PARSED]", annotations.length, annotations);
   return validateAnnotations(annotations);
@@ -367,7 +381,15 @@ export async function analyzeWithContext(
     previousChaptersSummaries,
     bookContext,
   );
-  const responseText = await callAi(prompt, apiKey, provider, false);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8000,
+    0.3,
+  );
   const annotations = parsePipeAnnotations(responseText);
   return validateAnnotations(annotations);
 }
@@ -382,7 +404,15 @@ export async function analyzeDialogue(
     throw new Error("Tekst za długi");
   }
   const prompt = buildDialoguePrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8000,
+    0.3,
+  );
   const annotations = parsePipeAnnotations(responseText);
   return validateAnnotations(annotations);
 }
@@ -411,7 +441,15 @@ Tekst do sformatowania:
 ${text}
 """`;
 
-  return await callAi(prompt, apiKey, provider, false, 20000);
+  return await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    20000,
+    0.3,
+  );
 }
 
 export async function analyzeSceneExpansion(
@@ -424,7 +462,15 @@ export async function analyzeSceneExpansion(
     throw new Error("Tekst za długi");
   }
   const prompt = buildSceneExpansionPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8000,
+    0.3,
+  );
   const annotations = parsePipeAnnotations(responseText);
   return validateAnnotations(annotations);
 }
@@ -439,7 +485,15 @@ export async function analyzeEmotion(
     throw new Error("Tekst za długi");
   }
   const prompt = buildEmotionPrompt(text, bookContext);
-  const responseText = await callAi(prompt, apiKey, provider, false);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8000,
+    0.3,
+  );
   const annotations = parsePipeAnnotations(responseText);
   const validated = validateAnnotations(annotations);
   // Force purple color for all emotion annotations
@@ -455,7 +509,15 @@ export async function analyzeConsistency(
     throw new Error("Tekst za długi");
   }
   const prompt = buildConsistencyPrompt(allChaptersText);
-  return await callAi(prompt, apiKey, provider, false);
+  return await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8000,
+    0.3,
+  );
 }
 
 export async function generateSummary(
@@ -468,7 +530,7 @@ export async function generateSummary(
     throw new Error("Tekst za długi");
   }
   const prompt = buildSummaryPrompt(allChaptersText, summaryType);
-  return await callAi(prompt, apiKey, provider, false);
+  return await callAi(prompt, apiKey, provider, false, "claude-sonnet-5");
 }
 
 export interface ChatMessage {
@@ -517,7 +579,15 @@ export async function getSynonyms(
   }
   const cleanWord = word.trim();
   const prompt = `Podaj 5-8 synonimów polskiego słowa "${cleanWord}" w kontekście języka literackiego. Zwróć wynik jako JSON array zawierający tylko synonimy jako stringi. Nie dodawaj żadnego tekstu przed ani po JSON. Odpowiedź musi być poprawnym JSON.`;
-  const responseText = await callAi(prompt, apiKey, provider, true);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    true,
+    "claude-sonnet-4-6",
+    8000,
+    0.3,
+  );
   try {
     const parsed = JSON.parse(responseText);
     if (!Array.isArray(parsed)) {
@@ -546,5 +616,5 @@ export async function chatWithBook(
   chapterSummaries?: string[],
 ): Promise<string> {
   const prompt = buildChatPrompt(messages, bookContext, chapterSummaries);
-  return await callAi(prompt, apiKey, provider, false);
+  return await callAi(prompt, apiKey, provider, false, "claude-sonnet-5");
 }
