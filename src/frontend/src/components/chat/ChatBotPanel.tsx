@@ -127,6 +127,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
   }, []);
 
   const messageCountRef = useRef(0);
+  const hadErrorRef = useRef(false);
 
   const currentMessages = useMemo(() => {
     const backendMsgs = messages ?? [];
@@ -386,16 +387,30 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
         content: reply,
         provider,
       });
-    } catch {
-      // Silent fail — user can retry; placeholder stays visible
+    } catch (err) {
+      console.error("Chat send failed:", err);
+      hadErrorRef.current = true;
+      setOptimisticMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantOptId
+            ? {
+                ...m,
+                content:
+                  "Wystąpił błąd podczas generowania odpowiedzi. Sprawdź klucz API i połączenie z internetem, a następnie spróbuj ponownie.",
+              }
+            : m,
+        ),
+      );
     } finally {
       setIsSending(false);
-      // Refresh from backend and clear optimistic messages after a short delay
       setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: ["chat", BigInt(bookId)],
-        });
-        setOptimisticMessages([]);
+        if (!hadErrorRef.current) {
+          queryClient.invalidateQueries({
+            queryKey: ["chat", BigInt(bookId)],
+          });
+          setOptimisticMessages([]);
+        }
+        hadErrorRef.current = false;
       }, 500);
     }
   }, [

@@ -42577,6 +42577,7 @@ function ChatBotPanel({ bookId, book: bookProp }) {
     (_a2 = messagesEndRef.current) == null ? void 0 : _a2.scrollIntoView({ behavior: "smooth" });
   }, []);
   const messageCountRef = reactExports.useRef(0);
+  const hadErrorRef = reactExports.useRef(false);
   const currentMessages = reactExports.useMemo(() => {
     const backendMsgs = messages ?? [];
     const optimisticOnly = optimisticMessages.filter(
@@ -42803,14 +42804,27 @@ ${chapterTitles}`;
         content: reply,
         provider
       });
-    } catch {
+    } catch (err) {
+      console.error("Chat send failed:", err);
+      hadErrorRef.current = true;
+      setOptimisticMessages(
+        (prev) => prev.map(
+          (m2) => m2.id === assistantOptId ? {
+            ...m2,
+            content: "Wystąpił błąd podczas generowania odpowiedzi. Sprawdź klucz API i połączenie z internetem, a następnie spróbuj ponownie."
+          } : m2
+        )
+      );
     } finally {
       setIsSending(false);
       setTimeout(() => {
-        queryClient2.invalidateQueries({
-          queryKey: ["chat", BigInt(bookId)]
-        });
-        setOptimisticMessages([]);
+        if (!hadErrorRef.current) {
+          queryClient2.invalidateQueries({
+            queryKey: ["chat", BigInt(bookId)]
+          });
+          setOptimisticMessages([]);
+        }
+        hadErrorRef.current = false;
       }, 500);
     }
   }, [
@@ -79681,7 +79695,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-hma8F17b.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Du6vYwjx.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
