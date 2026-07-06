@@ -79670,7 +79670,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-0R8beD7f.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BEznb8Ra.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -80663,6 +80663,7 @@ function ChapterEditorPage() {
   const [analysisError, setAnalysisError] = reactExports.useState(null);
   const [analysisMode, setAnalysisMode] = reactExports.useState("grammar");
   const [summaryType, setSummaryType] = reactExports.useState("short");
+  const [analysisTextLength, setAnalysisTextLength] = reactExports.useState(0);
   const [summaryResult, setSummaryResult] = reactExports.useState(null);
   const [commentsPanelOpen, setCommentsPanelOpen] = reactExports.useState(false);
   const [contextChatPanelOpen, setContextChatPanelOpen] = reactExports.useState(false);
@@ -80708,6 +80709,21 @@ function ChapterEditorPage() {
     const prov = localStorage.getItem("ws_api_provider") || "openai";
     setApiKey2(getApiKey(prov, principal));
   }, [principal]);
+  const computeAnalysisTextLength = reactExports.useCallback(() => {
+    if (!editorRef.current) return 0;
+    const editor = editorRef.current;
+    if (analysisMode === "summary" || analysisMode === "consistency") {
+      return editor.getText().length;
+    }
+    const { from: from2, to } = editor.state.selection;
+    if (from2 !== to) {
+      return editor.state.doc.textBetween(from2, to, " ").length;
+    }
+    return editor.getText().length;
+  }, [analysisMode]);
+  reactExports.useEffect(() => {
+    setAnalysisTextLength(computeAnalysisTextLength());
+  }, [computeAnalysisTextLength]);
   const doSave = reactExports.useCallback(
     (newTitle, newContent) => {
       if (!chapter) return;
@@ -80818,6 +80834,7 @@ function ChapterEditorPage() {
   );
   const handleContentChange = reactExports.useCallback(
     (val) => {
+      setAnalysisTextLength(computeAnalysisTextLength());
       if (isApplyingAnnotationsRef.current) return;
       setContent2(val);
       setSaveStatus("unsaved");
@@ -80829,7 +80846,7 @@ function ChapterEditorPage() {
         doSave(title, val);
       }, 3e3);
     },
-    [title, doSave, chapter, chapter == null ? void 0 : chapter.id]
+    [title, doSave, chapter, chapter == null ? void 0 : chapter.id, computeAnalysisTextLength]
   );
   const isLoading = bookLoading || chapterLoading;
   if (isLoading) {
@@ -80857,6 +80874,8 @@ function ChapterEditorPage() {
       )
     ] });
   }
+  const analysisCharLimit = analysisMode === "summary" || analysisMode === "consistency" ? 5e4 : 16e3;
+  const isOverAnalysisLimit = analysisTextLength > analysisCharLimit;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col h-full gap-4", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between shrink-0", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center gap-3", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -81030,7 +81049,7 @@ function ChapterEditorPage() {
                 size: "sm",
                 variant: "outline",
                 className: "border-[1.5px] border-solid border-primary font-medium",
-                disabled: analysisStatus === "loading" || !apiKey.trim(),
+                disabled: analysisStatus === "loading" || !apiKey.trim() || isOverAnalysisLimit,
                 onClick: async () => {
                   if (!editorRef.current || !chapter || !book) return;
                   if (analysisMode === "context") {
@@ -81198,6 +81217,20 @@ ${getPlainText(ch.content)}`
                   /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "h-3.5 w-3.5 mr-1.5" }),
                   "Analizuj"
                 ] })
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(
+              "span",
+              {
+                className: `text-xs shrink-0 ${isOverAnalysisLimit ? "text-destructive font-medium" : "text-muted-foreground"}`,
+                "data-ocid": "chapter.analysis_char_counter",
+                children: [
+                  analysisTextLength.toLocaleString("pl-PL"),
+                  " /",
+                  " ",
+                  analysisCharLimit.toLocaleString("pl-PL"),
+                  " znaków"
+                ]
               }
             ),
             (currentAnnotations.length > 0 || persistedAnnotations && persistedAnnotations.length > 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -81676,6 +81709,7 @@ ${getPlainText(ch.content)}`
                         );
                       } catch {
                       }
+                      setAnalysisTextLength(computeAnalysisTextLength());
                       cursorDebounceRef.current = null;
                     }, 2e3);
                   };

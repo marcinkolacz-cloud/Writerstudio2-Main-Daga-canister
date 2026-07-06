@@ -348,6 +348,7 @@ export function ChapterEditorPage() {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("grammar");
   const [summaryType, setSummaryType] = useState<SummaryType>("short");
+  const [analysisTextLength, setAnalysisTextLength] = useState(0);
   const [summaryResult, setSummaryResult] = useState<string | null>(null);
 
   // Comments state
@@ -416,6 +417,23 @@ export function ChapterEditorPage() {
     setApiKey(getApiKey(prov, principal));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [principal]);
+
+  const computeAnalysisTextLength = useCallback(() => {
+    if (!editorRef.current) return 0;
+    const editor = editorRef.current;
+    if (analysisMode === "summary" || analysisMode === "consistency") {
+      return editor.getText().length;
+    }
+    const { from, to } = editor.state.selection;
+    if (from !== to) {
+      return editor.state.doc.textBetween(from, to, " ").length;
+    }
+    return editor.getText().length;
+  }, [analysisMode]);
+
+  useEffect(() => {
+    setAnalysisTextLength(computeAnalysisTextLength());
+  }, [computeAnalysisTextLength]);
 
   const doSave = useCallback(
     (newTitle: string, newContent: string) => {
@@ -545,6 +563,7 @@ export function ChapterEditorPage() {
 
   const handleContentChange = useCallback(
     (val: string) => {
+      setAnalysisTextLength(computeAnalysisTextLength());
       if (isApplyingAnnotationsRef.current) return;
       setContent(val);
       setSaveStatus("unsaved");
@@ -556,7 +575,7 @@ export function ChapterEditorPage() {
         doSave(title, val);
       }, 3000);
     },
-    [title, doSave, chapter, chapter?.id],
+    [title, doSave, chapter, chapter?.id, computeAnalysisTextLength],
   );
 
   const isLoading = bookLoading || chapterLoading;
@@ -591,6 +610,12 @@ export function ChapterEditorPage() {
       </div>
     );
   }
+
+  const analysisCharLimit =
+    analysisMode === "summary" || analysisMode === "consistency"
+      ? 50000
+      : 16000;
+  const isOverAnalysisLimit = analysisTextLength > analysisCharLimit;
 
   return (
     <div className="flex flex-col h-full gap-4">
@@ -773,7 +798,11 @@ export function ChapterEditorPage() {
             size="sm"
             variant="outline"
             className="border-[1.5px] border-solid border-primary font-medium"
-            disabled={analysisStatus === "loading" || !apiKey.trim()}
+            disabled={
+              analysisStatus === "loading" ||
+              !apiKey.trim() ||
+              isOverAnalysisLimit
+            }
             onClick={async () => {
               if (!editorRef.current || !chapter || !book) return;
 
@@ -972,6 +1001,13 @@ export function ChapterEditorPage() {
               </>
             )}
           </Button>
+          <span
+            className={`text-xs shrink-0 ${isOverAnalysisLimit ? "text-destructive font-medium" : "text-muted-foreground"}`}
+            data-ocid="chapter.analysis_char_counter"
+          >
+            {analysisTextLength.toLocaleString("pl-PL")} /{" "}
+            {analysisCharLimit.toLocaleString("pl-PL")} znaków
+          </span>
 
           {/* Approve changes button */}
           {(currentAnnotations.length > 0 ||
@@ -1483,6 +1519,7 @@ export function ChapterEditorPage() {
                   } catch {
                     // Ignore storage write failures (e.g. quota / private mode).
                   }
+                  setAnalysisTextLength(computeAnalysisTextLength());
                   cursorDebounceRef.current = null;
                 }, 2000);
               };
