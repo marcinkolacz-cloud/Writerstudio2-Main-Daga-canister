@@ -274,7 +274,7 @@ function validateAnnotations(annotations: Annotation[]): Annotation[] {
     .filter((item): item is NonNullable<typeof item> => item !== null);
 }
 
-async function callAi(
+export async function callAi(
   prompt: string,
   apiKey: string,
   provider: "openai" | "claude",
@@ -348,7 +348,7 @@ export async function analyzeGrammarStyle(
   provider: "openai" | "claude",
   bookContext?: BookContext,
 ): Promise<Annotation[]> {
-  if (text.length > 8000) {
+  if (text.length > 16000) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildGrammarPrompt(text, bookContext);
@@ -358,7 +358,7 @@ export async function analyzeGrammarStyle(
     provider,
     false,
     "claude-sonnet-4-6",
-    8000,
+    12000,
     0.3,
   );
   const annotations = parsePipeAnnotations(responseText);
@@ -373,7 +373,7 @@ export async function analyzeWithContext(
   provider: "openai" | "claude",
   bookContext?: BookContext,
 ): Promise<Annotation[]> {
-  if (currentChapterText.length > 8000) {
+  if (currentChapterText.length > 16000) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildContextPrompt(
@@ -387,7 +387,7 @@ export async function analyzeWithContext(
     provider,
     false,
     "claude-sonnet-4-6",
-    8000,
+    12000,
     0.3,
   );
   const annotations = parsePipeAnnotations(responseText);
@@ -400,7 +400,7 @@ export async function analyzeDialogue(
   provider: "openai" | "claude",
   bookContext?: BookContext,
 ): Promise<Annotation[]> {
-  if (text.length > 8000) {
+  if (text.length > 16000) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildDialoguePrompt(text, bookContext);
@@ -410,7 +410,7 @@ export async function analyzeDialogue(
     provider,
     false,
     "claude-sonnet-4-6",
-    8000,
+    12000,
     0.3,
   );
   const annotations = parsePipeAnnotations(responseText);
@@ -458,7 +458,7 @@ export async function analyzeSceneExpansion(
   provider: "openai" | "claude",
   bookContext?: BookContext,
 ): Promise<Annotation[]> {
-  if (text.length > 8000) {
+  if (text.length > 16000) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildSceneExpansionPrompt(text, bookContext);
@@ -468,7 +468,7 @@ export async function analyzeSceneExpansion(
     provider,
     false,
     "claude-sonnet-4-6",
-    8000,
+    12000,
     0.3,
   );
   const annotations = parsePipeAnnotations(responseText);
@@ -481,7 +481,7 @@ export async function analyzeEmotion(
   provider: "openai" | "claude",
   bookContext?: BookContext,
 ): Promise<Annotation[]> {
-  if (text.length > 8000) {
+  if (text.length > 16000) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildEmotionPrompt(text, bookContext);
@@ -491,7 +491,7 @@ export async function analyzeEmotion(
     provider,
     false,
     "claude-sonnet-4-6",
-    8000,
+    12000,
     0.3,
   );
   const annotations = parsePipeAnnotations(responseText);

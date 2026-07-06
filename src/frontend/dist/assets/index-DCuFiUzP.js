@@ -42298,7 +42298,7 @@ async function callAi(prompt, apiKey, provider, expectJson, model, maxTokens = 8
   return responseText;
 }
 async function analyzeGrammarStyle(text, apiKey, provider, bookContext) {
-  if (text.length > 8e3) {
+  if (text.length > 16e3) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildGrammarPrompt(text, bookContext);
@@ -42308,7 +42308,7 @@ async function analyzeGrammarStyle(text, apiKey, provider, bookContext) {
     provider,
     false,
     "claude-sonnet-4-6",
-    8e3,
+    12e3,
     0.3
   );
   const annotations = parsePipeAnnotations(responseText);
@@ -42316,7 +42316,7 @@ async function analyzeGrammarStyle(text, apiKey, provider, bookContext) {
   return validateAnnotations(annotations);
 }
 async function analyzeWithContext(currentChapterText, previousChaptersSummaries, apiKey, provider, bookContext) {
-  if (currentChapterText.length > 8e3) {
+  if (currentChapterText.length > 16e3) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildContextPrompt(
@@ -42330,14 +42330,14 @@ async function analyzeWithContext(currentChapterText, previousChaptersSummaries,
     provider,
     false,
     "claude-sonnet-4-6",
-    8e3,
+    12e3,
     0.3
   );
   const annotations = parsePipeAnnotations(responseText);
   return validateAnnotations(annotations);
 }
 async function analyzeDialogue(text, apiKey, provider, bookContext) {
-  if (text.length > 8e3) {
+  if (text.length > 16e3) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildDialoguePrompt(text, bookContext);
@@ -42347,7 +42347,7 @@ async function analyzeDialogue(text, apiKey, provider, bookContext) {
     provider,
     false,
     "claude-sonnet-4-6",
-    8e3,
+    12e3,
     0.3
   );
   const annotations = parsePipeAnnotations(responseText);
@@ -42383,7 +42383,7 @@ ${text}
   );
 }
 async function analyzeSceneExpansion(text, apiKey, provider, bookContext) {
-  if (text.length > 8e3) {
+  if (text.length > 16e3) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildSceneExpansionPrompt(text, bookContext);
@@ -42393,14 +42393,14 @@ async function analyzeSceneExpansion(text, apiKey, provider, bookContext) {
     provider,
     false,
     "claude-sonnet-4-6",
-    8e3,
+    12e3,
     0.3
   );
   const annotations = parsePipeAnnotations(responseText);
   return validateAnnotations(annotations);
 }
 async function analyzeEmotion(text, apiKey, provider, bookContext) {
-  if (text.length > 8e3) {
+  if (text.length > 16e3) {
     throw new Error("Tekst za długi");
   }
   const prompt = buildEmotionPrompt(text, bookContext);
@@ -42410,7 +42410,7 @@ async function analyzeEmotion(text, apiKey, provider, bookContext) {
     provider,
     false,
     "claude-sonnet-4-6",
-    8e3,
+    12e3,
     0.3
   );
   const annotations = parsePipeAnnotations(responseText);
@@ -50601,7 +50601,7 @@ ${summaryLines.join("\n")}` : "Analiza kontekstowa nie wykryła żadnych problem
     [deleteSession, chapterId, selectedSessionId, queryClient2]
   );
   const handleSendMessage = reactExports.useCallback(async () => {
-    var _a3, _b2, _c2, _d2, _e2, _f2;
+    var _a3;
     if (!inputText.trim() || !selectedSessionId || isLoading) return;
     const userContent = inputText.trim();
     setInputText("");
@@ -50646,40 +50646,15 @@ HISTORIA ROZMOWY:
 ${history2}
 
 Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
-      const response = await fetch(
-        provider === "openai" ? "https://api.openai.com/v1/chat/completions" : "https://api.anthropic.com/v1/messages",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...provider === "openai" ? { Authorization: `Bearer ${apiKey}` } : {
-              "x-api-key": apiKey,
-              "anthropic-version": "2023-06-01",
-              "anthropic-dangerous-direct-browser-access": "true"
-            }
-          },
-          body: JSON.stringify(
-            provider === "openai" ? {
-              model: "gpt-4o-mini",
-              messages: [{ role: "user", content: prompt }],
-              max_tokens: 4e3,
-              temperature: 0.7
-            } : {
-              model: "claude-sonnet-4-6",
-              max_tokens: 4e3,
-              messages: [{ role: "user", content: prompt }],
-              temperature: 0.7
-            }
-          )
-        }
+      const assistantContent = await callAi(
+        prompt,
+        apiKey,
+        provider,
+        false,
+        "claude-sonnet-4-6",
+        8e3,
+        0.3
       );
-      if (!response.ok) {
-        throw new Error(`AI API error: ${response.status}`);
-      }
-      const data = await response.json();
-      const assistantContent = provider === "openai" ? ((_c2 = (_b2 = (_a3 = data.choices) == null ? void 0 : _a3[0]) == null ? void 0 : _b2.message) == null ? void 0 : _c2.content) ?? "" : ((_e2 = (_d2 = data.content) == null ? void 0 : _d2.find(
-        (c2) => c2.type === "text"
-      )) == null ? void 0 : _e2.text) ?? "";
       await addMessage.mutateAsync({
         sessionId: selectedSessionId,
         role: "assistant",
@@ -50694,7 +50669,7 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
       });
     } finally {
       setIsLoading(false);
-      (_f2 = inputRef.current) == null ? void 0 : _f2.focus();
+      (_a3 = inputRef.current) == null ? void 0 : _a3.focus();
     }
   }, [
     inputText,
@@ -79695,7 +79670,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Du6vYwjx.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-0R8beD7f.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

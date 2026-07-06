@@ -10,7 +10,7 @@ import {
   useCreateChatSession,
   useDeleteChatSession,
 } from "@/hooks/useBackend";
-import { type BookContext, analyzeWithContext } from "@/lib/aiAnalysis";
+import { type BookContext, analyzeWithContext, callAi } from "@/lib/aiAnalysis";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Editor } from "@tiptap/react";
 import {
@@ -278,51 +278,15 @@ ${history}
 
 Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
 
-      const response = await fetch(
-        provider === "openai"
-          ? "https://api.openai.com/v1/chat/completions"
-          : "https://api.anthropic.com/v1/messages",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(provider === "openai"
-              ? { Authorization: `Bearer ${apiKey}` }
-              : {
-                  "x-api-key": apiKey,
-                  "anthropic-version": "2023-06-01",
-                  "anthropic-dangerous-direct-browser-access": "true",
-                }),
-          },
-          body: JSON.stringify(
-            provider === "openai"
-              ? {
-                  model: "gpt-4o-mini",
-                  messages: [{ role: "user", content: prompt }],
-                  max_tokens: 4000,
-                  temperature: 0.7,
-                }
-              : {
-                  model: "claude-sonnet-4-6",
-                  max_tokens: 4000,
-                  messages: [{ role: "user", content: prompt }],
-                  temperature: 0.7,
-                },
-          ),
-        },
+      const assistantContent = await callAi(
+        prompt,
+        apiKey,
+        provider,
+        false,
+        "claude-sonnet-4-6",
+        8000,
+        0.3,
       );
-
-      if (!response.ok) {
-        throw new Error(`AI API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      const assistantContent =
-        provider === "openai"
-          ? (data.choices?.[0]?.message?.content ?? "")
-          : (data.content?.find(
-              (c: { type?: string; text?: string }) => c.type === "text",
-            )?.text ?? "");
 
       await addMessage.mutateAsync({
         sessionId: selectedSessionId,
