@@ -102,6 +102,8 @@ import {
   getGlobalIndents,
 } from "../components/editor/IndentRuler";
 
+const COST_ESTIMATION_ENABLED = false;
+
 type SaveStatus = "saved" | "saving" | "unsaved";
 type AnalysisStatus = "idle" | "loading" | "success" | "error";
 type AnalysisMode =
@@ -871,18 +873,20 @@ export function ChapterEditorPage() {
                       provider,
                       resultContent: summary,
                     });
-                    const modelUsed =
-                      provider === "claude"
-                        ? analysisMode === "summary"
-                          ? "claude-sonnet-5"
-                          : "claude-sonnet-4-6"
-                        : "gpt-4o-mini";
-                    const cost = await estimateAnalysisCost(
-                      allChaptersText.length,
-                      summary.length,
-                      modelUsed,
-                    );
-                    setLastAnalysisCost(cost);
+                    if (COST_ESTIMATION_ENABLED) {
+                      const modelUsed =
+                        provider === "claude"
+                          ? analysisMode === "summary"
+                            ? "claude-sonnet-5"
+                            : "claude-sonnet-4-6"
+                          : "gpt-4o-mini";
+                      const cost = await estimateAnalysisCost(
+                        allChaptersText.length,
+                        summary.length,
+                        modelUsed,
+                      );
+                      setLastAnalysisCost(cost);
+                    }
                   } else {
                     const consistencyReport = await analyzeConsistency(
                       allChaptersText,
@@ -898,16 +902,18 @@ export function ChapterEditorPage() {
                       provider,
                       resultContent: consistencyReport,
                     });
-                    const modelUsed =
-                      provider === "claude"
-                        ? "claude-sonnet-4-6"
-                        : "gpt-4o-mini";
-                    const cost = await estimateAnalysisCost(
-                      allChaptersText.length,
-                      consistencyReport.length,
-                      modelUsed,
-                    );
-                    setLastAnalysisCost(cost);
+                    if (COST_ESTIMATION_ENABLED) {
+                      const modelUsed =
+                        provider === "claude"
+                          ? "claude-sonnet-4-6"
+                          : "gpt-4o-mini";
+                      const cost = await estimateAnalysisCost(
+                        allChaptersText.length,
+                        consistencyReport.length,
+                        modelUsed,
+                      );
+                      setLastAnalysisCost(cost);
+                    }
                   }
                   setAnalysisStatus("success");
                   setTimeout(() => setAnalysisStatus("idle"), 3000);
@@ -1001,14 +1007,16 @@ export function ChapterEditorPage() {
                   },
                 );
                 setAnalysisStatus("success");
-                const modelUsed =
-                  provider === "claude" ? "claude-sonnet-4-6" : "gpt-4o-mini";
-                const cost = await estimateAnalysisCost(
-                  text.length,
-                  JSON.stringify(annotations).length,
-                  modelUsed,
-                );
-                setLastAnalysisCost(cost);
+                if (COST_ESTIMATION_ENABLED) {
+                  const modelUsed =
+                    provider === "claude" ? "claude-sonnet-4-6" : "gpt-4o-mini";
+                  const cost = await estimateAnalysisCost(
+                    text.length,
+                    JSON.stringify(annotations).length,
+                    modelUsed,
+                  );
+                  setLastAnalysisCost(cost);
+                }
                 setTimeout(() => setAnalysisStatus("idle"), 3000);
               } catch (err) {
                 setAnalysisError(
@@ -1361,7 +1369,7 @@ export function ChapterEditorPage() {
         </div>
       )}
 
-      {lastAnalysisCost && (
+      {COST_ESTIMATION_ENABLED && lastAnalysisCost && (
         <div
           className="shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border"
           data-ocid="chapter.analysis_cost_estimate"

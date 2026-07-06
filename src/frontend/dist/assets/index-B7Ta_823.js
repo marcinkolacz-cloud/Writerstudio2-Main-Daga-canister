@@ -79725,7 +79725,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DUQy-rzH.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-JuDn_S1-.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -80534,6 +80534,7 @@ function getGlobalIndents() {
     firstLine: getStoredIndent(STORAGE_KEYS.firstLine)
   };
 }
+const COST_ESTIMATION_ENABLED = false;
 function SaveIndicator({ status }) {
   const labels = {
     saved: "Zapisano",
@@ -81156,13 +81157,7 @@ ${getPlainText(ch.content)}`
                           provider,
                           resultContent: summary
                         });
-                        const modelUsed2 = provider === "claude" ? analysisMode === "summary" ? "claude-sonnet-5" : "claude-sonnet-4-6" : "gpt-4o-mini";
-                        const cost2 = await estimateAnalysisCost(
-                          allChaptersText.length,
-                          summary.length,
-                          modelUsed2
-                        );
-                        setLastAnalysisCost(cost2);
+                        if (COST_ESTIMATION_ENABLED) ;
                       } else {
                         const consistencyReport = await analyzeConsistency(
                           allChaptersText,
@@ -81177,13 +81172,7 @@ ${getPlainText(ch.content)}`
                           provider,
                           resultContent: consistencyReport
                         });
-                        const modelUsed2 = provider === "claude" ? "claude-sonnet-4-6" : "gpt-4o-mini";
-                        const cost2 = await estimateAnalysisCost(
-                          allChaptersText.length,
-                          consistencyReport.length,
-                          modelUsed2
-                        );
-                        setLastAnalysisCost(cost2);
+                        if (COST_ESTIMATION_ENABLED) ;
                       }
                       setAnalysisStatus("success");
                       setTimeout(() => setAnalysisStatus("idle"), 3e3);
@@ -81269,13 +81258,7 @@ ${getPlainText(ch.content)}`
                       }
                     );
                     setAnalysisStatus("success");
-                    const modelUsed = provider === "claude" ? "claude-sonnet-4-6" : "gpt-4o-mini";
-                    const cost = await estimateAnalysisCost(
-                      text.length,
-                      JSON.stringify(annotations).length,
-                      modelUsed
-                    );
-                    setLastAnalysisCost(cost);
+                    if (COST_ESTIMATION_ENABLED) ;
                     setTimeout(() => setAnalysisStatus("idle"), 3e3);
                   } catch (err) {
                     setAnalysisError(
@@ -81634,27 +81617,7 @@ ${getPlainText(ch.content)}`
         children: analysisError
       }
     ),
-    lastAnalysisCost && /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "div",
-      {
-        className: "shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border",
-        "data-ocid": "chapter.analysis_cost_estimate",
-        children: [
-          "Szacowany koszt tej analizy (~",
-          lastAnalysisCost.inputTokens.toLocaleString("pl-PL"),
-          " tok. wej. / ~",
-          lastAnalysisCost.outputTokens.toLocaleString("pl-PL"),
-          " tok. wyj., model ",
-          lastAnalysisCost.model,
-          "): ~",
-          (lastAnalysisCost.pln * 100).toFixed(2),
-          " gr (kurs",
-          " ",
-          lastAnalysisCost.usdToPlnRate.toFixed(2),
-          " PLN/USD). To przybliżenie na podstawie długości tekstu, nie dokładna wartość z API."
-        ]
-      }
-    ),
+    COST_ESTIMATION_ENABLED,
     /* @__PURE__ */ jsxRuntimeExports.jsx(
       Dialog,
       {
