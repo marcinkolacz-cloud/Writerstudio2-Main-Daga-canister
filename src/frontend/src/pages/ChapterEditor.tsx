@@ -65,6 +65,8 @@ import {
 } from "@/lib/aiAnalysis";
 import type { Annotation } from "@/lib/aiAnalysis";
 import { getApiKey, setApiKey } from "@/lib/apiKeyStorage";
+import { estimateAnalysisCost } from "@/lib/costEstimator";
+import type { AnalysisCostEstimate } from "@/lib/costEstimator";
 import {
   exportToDOCX,
   exportToDOCXWithRedaction,
@@ -349,6 +351,8 @@ export function ChapterEditorPage() {
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("grammar");
   const [summaryType, setSummaryType] = useState<SummaryType>("short");
   const [analysisTextLength, setAnalysisTextLength] = useState(0);
+  const [lastAnalysisCost, setLastAnalysisCost] =
+    useState<AnalysisCostEstimate | null>(null);
   const [summaryResult, setSummaryResult] = useState<string | null>(null);
 
   // Comments state
@@ -838,6 +842,7 @@ export function ChapterEditorPage() {
               setAnalysisStatus("loading");
               setAnalysisError(null);
               setSummaryResult(null);
+              setLastAnalysisCost(null);
               try {
                 if (
                   analysisMode === "summary" ||
@@ -866,6 +871,18 @@ export function ChapterEditorPage() {
                       provider,
                       resultContent: summary,
                     });
+                    const modelUsed =
+                      provider === "claude"
+                        ? analysisMode === "summary"
+                          ? "claude-sonnet-5"
+                          : "claude-sonnet-4-6"
+                        : "gpt-4o-mini";
+                    const cost = await estimateAnalysisCost(
+                      allChaptersText.length,
+                      summary.length,
+                      modelUsed,
+                    );
+                    setLastAnalysisCost(cost);
                   } else {
                     const consistencyReport = await analyzeConsistency(
                       allChaptersText,
@@ -881,6 +898,16 @@ export function ChapterEditorPage() {
                       provider,
                       resultContent: consistencyReport,
                     });
+                    const modelUsed =
+                      provider === "claude"
+                        ? "claude-sonnet-4-6"
+                        : "gpt-4o-mini";
+                    const cost = await estimateAnalysisCost(
+                      allChaptersText.length,
+                      consistencyReport.length,
+                      modelUsed,
+                    );
+                    setLastAnalysisCost(cost);
                   }
                   setAnalysisStatus("success");
                   setTimeout(() => setAnalysisStatus("idle"), 3000);
@@ -974,6 +1001,14 @@ export function ChapterEditorPage() {
                   },
                 );
                 setAnalysisStatus("success");
+                const modelUsed =
+                  provider === "claude" ? "claude-sonnet-4-6" : "gpt-4o-mini";
+                const cost = await estimateAnalysisCost(
+                  text.length,
+                  JSON.stringify(annotations).length,
+                  modelUsed,
+                );
+                setLastAnalysisCost(cost);
                 setTimeout(() => setAnalysisStatus("idle"), 3000);
               } catch (err) {
                 setAnalysisError(
@@ -1323,6 +1358,21 @@ export function ChapterEditorPage() {
           data-ocid="chapter.analysis_error"
         >
           {analysisError}
+        </div>
+      )}
+
+      {lastAnalysisCost && (
+        <div
+          className="shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border"
+          data-ocid="chapter.analysis_cost_estimate"
+        >
+          Szacowany koszt tej analizy (~
+          {lastAnalysisCost.inputTokens.toLocaleString("pl-PL")} tok. wej. / ~
+          {lastAnalysisCost.outputTokens.toLocaleString("pl-PL")} tok. wyj.,
+          model {lastAnalysisCost.model}): ~
+          {(lastAnalysisCost.pln * 100).toFixed(2)} gr (kurs{" "}
+          {lastAnalysisCost.usdToPlnRate.toFixed(2)} PLN/USD). To przybliżenie
+          na podstawie długości tekstu, nie dokładna wartość z API.
         </div>
       )}
 

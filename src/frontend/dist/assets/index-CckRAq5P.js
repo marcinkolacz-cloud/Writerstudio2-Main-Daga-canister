@@ -79540,6 +79540,61 @@ function DropdownMenuItem({
     }
   );
 }
+function getPricing(model) {
+  const sonnet5PromoEnds = /* @__PURE__ */ new Date("2026-08-31T23:59:59Z");
+  const now2 = /* @__PURE__ */ new Date();
+  if (model === "claude-sonnet-5") {
+    return now2 < sonnet5PromoEnds ? { inputPerMillion: 2, outputPerMillion: 10 } : { inputPerMillion: 3, outputPerMillion: 15 };
+  }
+  if (model === "claude-sonnet-4-6") {
+    return { inputPerMillion: 3, outputPerMillion: 15 };
+  }
+  return { inputPerMillion: 0.15, outputPerMillion: 0.6 };
+}
+function estimateTokens(charCount) {
+  return Math.ceil(charCount / 4);
+}
+let cachedUsdToPln = null;
+let cacheTimestamp = 0;
+async function getUsdToPlnRate() {
+  var _a2, _b2;
+  const now2 = Date.now();
+  if (cachedUsdToPln !== null && now2 - cacheTimestamp < 60 * 60 * 1e3) {
+    return cachedUsdToPln;
+  }
+  try {
+    const res = await fetch(
+      "https://api.nbp.pl/api/exchangerates/rates/a/usd?format=json"
+    );
+    if (!res.ok) throw new Error("NBP API error");
+    const data = await res.json();
+    const rate = (_b2 = (_a2 = data.rates) == null ? void 0 : _a2[0]) == null ? void 0 : _b2.mid;
+    if (typeof rate === "number") {
+      cachedUsdToPln = rate;
+      cacheTimestamp = now2;
+      return rate;
+    }
+    throw new Error("Brak kursu w odpowiedzi");
+  } catch {
+    return cachedUsdToPln ?? 4;
+  }
+}
+async function estimateAnalysisCost(inputCharCount, outputCharCount, model) {
+  const pricing = getPricing(model);
+  const inputTokens = estimateTokens(inputCharCount);
+  const outputTokens = estimateTokens(outputCharCount);
+  const usd = inputTokens / 1e6 * pricing.inputPerMillion + outputTokens / 1e6 * pricing.outputPerMillion;
+  const usdToPlnRate = await getUsdToPlnRate();
+  return {
+    model,
+    inputTokens,
+    outputTokens,
+    usd,
+    pln: usd * usdToPlnRate,
+    usdToPlnRate,
+    isEstimate: true
+  };
+}
 const scriptRel = "modulepreload";
 const assetsURL = function(dep) {
   return "/" + dep;
@@ -79670,7 +79725,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BEznb8Ra.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DUQy-rzH.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -80664,6 +80719,7 @@ function ChapterEditorPage() {
   const [analysisMode, setAnalysisMode] = reactExports.useState("grammar");
   const [summaryType, setSummaryType] = reactExports.useState("short");
   const [analysisTextLength, setAnalysisTextLength] = reactExports.useState(0);
+  const [lastAnalysisCost, setLastAnalysisCost] = reactExports.useState(null);
   const [summaryResult, setSummaryResult] = reactExports.useState(null);
   const [commentsPanelOpen, setCommentsPanelOpen] = reactExports.useState(false);
   const [contextChatPanelOpen, setContextChatPanelOpen] = reactExports.useState(false);
@@ -81077,6 +81133,7 @@ function ChapterEditorPage() {
                   setAnalysisStatus("loading");
                   setAnalysisError(null);
                   setSummaryResult(null);
+                  setLastAnalysisCost(null);
                   try {
                     if (analysisMode === "summary" || analysisMode === "consistency") {
                       const allChaptersText = (chapters ?? []).sort((a2, b2) => Number(a2.orderIndex - b2.orderIndex)).map(
@@ -81099,6 +81156,13 @@ ${getPlainText(ch.content)}`
                           provider,
                           resultContent: summary
                         });
+                        const modelUsed2 = provider === "claude" ? analysisMode === "summary" ? "claude-sonnet-5" : "claude-sonnet-4-6" : "gpt-4o-mini";
+                        const cost2 = await estimateAnalysisCost(
+                          allChaptersText.length,
+                          summary.length,
+                          modelUsed2
+                        );
+                        setLastAnalysisCost(cost2);
                       } else {
                         const consistencyReport = await analyzeConsistency(
                           allChaptersText,
@@ -81113,6 +81177,13 @@ ${getPlainText(ch.content)}`
                           provider,
                           resultContent: consistencyReport
                         });
+                        const modelUsed2 = provider === "claude" ? "claude-sonnet-4-6" : "gpt-4o-mini";
+                        const cost2 = await estimateAnalysisCost(
+                          allChaptersText.length,
+                          consistencyReport.length,
+                          modelUsed2
+                        );
+                        setLastAnalysisCost(cost2);
                       }
                       setAnalysisStatus("success");
                       setTimeout(() => setAnalysisStatus("idle"), 3e3);
@@ -81198,6 +81269,13 @@ ${getPlainText(ch.content)}`
                       }
                     );
                     setAnalysisStatus("success");
+                    const modelUsed = provider === "claude" ? "claude-sonnet-4-6" : "gpt-4o-mini";
+                    const cost = await estimateAnalysisCost(
+                      text.length,
+                      JSON.stringify(annotations).length,
+                      modelUsed
+                    );
+                    setLastAnalysisCost(cost);
                     setTimeout(() => setAnalysisStatus("idle"), 3e3);
                   } catch (err) {
                     setAnalysisError(
@@ -81554,6 +81632,27 @@ ${getPlainText(ch.content)}`
         className: "shrink-0 text-xs text-destructive bg-destructive/10 rounded-md px-3 py-2",
         "data-ocid": "chapter.analysis_error",
         children: analysisError
+      }
+    ),
+    lastAnalysisCost && /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "div",
+      {
+        className: "shrink-0 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border",
+        "data-ocid": "chapter.analysis_cost_estimate",
+        children: [
+          "Szacowany koszt tej analizy (~",
+          lastAnalysisCost.inputTokens.toLocaleString("pl-PL"),
+          " tok. wej. / ~",
+          lastAnalysisCost.outputTokens.toLocaleString("pl-PL"),
+          " tok. wyj., model ",
+          lastAnalysisCost.model,
+          "): ~",
+          (lastAnalysisCost.pln * 100).toFixed(2),
+          " gr (kurs",
+          " ",
+          lastAnalysisCost.usdToPlnRate.toFixed(2),
+          " PLN/USD). To przybliżenie na podstawie długości tekstu, nie dokładna wartość z API."
+        ]
       }
     ),
     /* @__PURE__ */ jsxRuntimeExports.jsx(
