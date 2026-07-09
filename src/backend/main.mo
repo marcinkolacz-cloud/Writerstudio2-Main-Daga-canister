@@ -54,7 +54,7 @@ actor {
 
   func _callerIsAdmin(caller : Principal) : Bool {
     switch (adminPrincipal) {
-      case null { true };
+      case null { false };
       case (?admin) { caller == admin };
     }
   };
@@ -77,7 +77,7 @@ actor {
     if (not _callerIsAdmin(caller)) {
       Runtime.trap("Only admin can generate invite codes");
     };
-    _generateInviteCode(caller)
+    await _generateInviteCode(caller)
   };
 
   public shared ({ caller }) func checkAccess(code : Text) : async Bool {
@@ -91,10 +91,10 @@ actor {
     _listInviteCodes()
   };
 
-  public shared ({ caller }) func revokeInviteCode(code : Text) : async () {
+  public shared ({ caller }) func revokeInviteCode(code : Text) : async Bool {
     if (not _callerIsAdmin(caller)) {
       Runtime.trap("Only admin can revoke invite codes");
     };
-    _revokeInviteCode(code);
+    _revokeInviteCode(code)
   };
 };

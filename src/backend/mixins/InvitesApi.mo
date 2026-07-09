@@ -8,10 +8,10 @@ mixin (
   books : Map.Map<Nat, Types.Book>,
   inviteCodes : Map.Map<Text, Types.InviteCode>,
 ) {
-  func _generateInviteCode(caller : Principal) : Text {
-    var code = InvitesLib.generateRandomCode();
+  func _generateInviteCode(caller : Principal) : async Text {
+    var code = await InvitesLib.generateRandomCode();
     while (inviteCodes.get(code) != null) {
-      code := InvitesLib.generateRandomCode();
+      code := await InvitesLib.generateRandomCode();
     };
     let inviteCode : Types.InviteCode = {
       code;
@@ -31,7 +31,7 @@ mixin (
     InvitesLib.listCodes(inviteCodes)
   };
 
-  func _revokeInviteCode(code : Text) : () {
-    InvitesLib.revokeCode(inviteCodes, code);
+  func _revokeInviteCode(code : Text) : Bool {
+    InvitesLib.revokeCode(inviteCodes, code)
   };
 };

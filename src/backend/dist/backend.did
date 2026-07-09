@@ -209,7 +209,7 @@ service : {
           voice: text;
         });
   reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);
-  revokeInviteCode: (code: text) -> ();
+  revokeInviteCode: (code: text) -> (bool);
   saveAnalysis: (bookId: nat, chapterId: opt nat, analysisType: text,
    provider: text, resultContent: text) -> (nat);
   saveAnnotations: (analysisId: nat, annotationData:

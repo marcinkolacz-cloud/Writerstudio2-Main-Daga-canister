@@ -200,7 +200,7 @@ export interface _SERVICE {
     Array<{ 'id' : bigint, 'voice' : string, 'createdAt' : bigint }>
   >,
   'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
-  'revokeInviteCode' : ActorMethod<[string], undefined>,
+  'revokeInviteCode' : ActorMethod<[string], boolean>,
   'saveAnalysis' : ActorMethod<
     [bigint, [] | [bigint], string, string, string],
     bigint

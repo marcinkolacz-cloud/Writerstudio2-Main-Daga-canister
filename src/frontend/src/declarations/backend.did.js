@@ -236,7 +236,7 @@ export const idlService = IDL.Service({
       [],
     ),
   'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
-  'revokeInviteCode' : IDL.Func([IDL.Text], [], []),
+  'revokeInviteCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'saveAnalysis' : IDL.Func(
       [IDL.Nat, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text],
       [IDL.Nat],
@@ -553,7 +553,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
-    'revokeInviteCode' : IDL.Func([IDL.Text], [], []),
+    'revokeInviteCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'saveAnalysis' : IDL.Func(
         [IDL.Nat, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text],
         [IDL.Nat],

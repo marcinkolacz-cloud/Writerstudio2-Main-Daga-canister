@@ -212,7 +212,7 @@ export interface backendInterface {
         createdAt: bigint;
     }>>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
-    revokeInviteCode(code: string): Promise<void>;
+    revokeInviteCode(code: string): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
     saveAnnotations(analysisId: bigint, annotationData: Array<{
         alternativeProposal?: string;
@@ -1036,7 +1036,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async revokeInviteCode(arg0: string): Promise<void> {
+    async revokeInviteCode(arg0: string): Promise<boolean> {
         if (this.processError) {
             try {
                 const result = await this.actor.revokeInviteCode(arg0);

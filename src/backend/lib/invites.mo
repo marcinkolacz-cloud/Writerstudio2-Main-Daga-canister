@@ -2,7 +2,7 @@ import Map "mo:core/Map";
 import List "mo:core/List";
 import Principal "mo:core/Principal";
 import Time "mo:core/Time";
-import Int "mo:core/Int";
+import Random "mo:core/Random";
 
 module {
   public type InviteCode = {
@@ -12,19 +12,18 @@ module {
     usedAt : ?Int;
   };
 
-  public func generateRandomCode() : Text {
-    let charArray = [
-      'A','B','C','D','E','F','G','H','I','J','K','L','M',
-      'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-      '0','1','2','3','4','5','6','7','8','9'
-    ];
-    let charCount = charArray.size();
+  let charArray = [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+  ];
+  let charCount = 36;
+
+  public func generateRandomCode() : async Text {
     var code = "";
     var i = 0;
-    var seed = Int.abs(Time.now());
     while (i < 8) {
-      seed := (seed * 1103515245 + 12345) % 2147483648;
-      let idx = seed % charCount;
+      let idx = await Random.natRange(0, charCount);
       code := code # charArray[idx].toText();
       i += 1;
     };
@@ -63,8 +62,14 @@ module {
     result.toArray()
   };
 
-  public func revokeCode(codes : Map.Map<Text, InviteCode>, code : Text) : () {
-    let _ = codes.remove(code);
+  public func revokeCode(codes : Map.Map<Text, InviteCode>, code : Text) : Bool {
+    switch (codes.get(code)) {
+      case (?_) {
+        codes.remove(code);
+        true
+      };
+      case null { false };
+    }
   };
 
   public func hasRedeemed(codes : Map.Map<Text, InviteCode>, caller : Principal) : Bool {

@@ -146,7 +146,7 @@ export interface backendInterface {
         createdAt: bigint;
     }>>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
-    revokeInviteCode(code: string): Promise<void>;
+    revokeInviteCode(code: string): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
     saveAnnotations(analysisId: bigint, annotationData: Array<{
         alternativeProposal?: string;
