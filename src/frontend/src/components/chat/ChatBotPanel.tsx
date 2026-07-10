@@ -78,7 +78,8 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { data: messages, isLoading } = useChatMessages(bookId);
+  const sessionId = "default";
+  const { data: messages, isLoading } = useChatMessages(bookId, sessionId);
 
   // View state: 'chat' | 'history' | 'archive'
   const [view, setView] = useState<"chat" | "history" | "archive">("chat");
@@ -267,7 +268,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     const archives = loadArchives(bookId);
     archives.unshift(archive);
     saveArchives(bookId, archives);
-    clearChat.mutate({ bookId: BigInt(bookId) });
+    clearChat.mutate({ bookId: BigInt(bookId), sessionId });
     setView("chat");
   }, [currentMessages, bookId, clearChat]);
 
@@ -322,6 +323,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       // Save user message in background (fire-and-forget)
       sendMessage.mutate({
         bookId: BigInt(bookId),
+        sessionId,
         role: "user",
         content: trimmed,
         provider: "",
@@ -385,6 +387,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       // Save assistant message in background (fire-and-forget)
       sendMessage.mutate({
         bookId: BigInt(bookId),
+        sessionId,
         role: "assistant",
         content: reply,
         provider,

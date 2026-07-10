@@ -3,6 +3,7 @@ import type {
   Analysis,
   Book,
   Chapter,
+  ChatArchive,
   ChatMessage,
   ChatSession,
   ChatSessionMessage,
@@ -146,6 +147,9 @@ export function useUpdateChapterIndents() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["chapter", variables.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["chapters"],
       });
     },
   });
@@ -308,7 +312,118 @@ export function useSaveAnnotations() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["annotations", "analysis", variables.analysisId],
+        queryKey: ["chatSessions", variables.analysisId],
+      });
+    },
+  });
+}
+
+export function useChatArchivesByBook(bookId: string | number) {
+  const { actor } = useActorLocal(createActor);
+  const id = BigInt(bookId);
+  return useQuery<ChatArchive[]>({
+    queryKey: ["chatArchives", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listArchivesByBook(id);
+    },
+    enabled: !!actor && !!bookId,
+  });
+}
+
+export function useCreateChatArchive() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      bookId,
+      sessionId,
+      title,
+    }: {
+      bookId: bigint;
+      sessionId: string;
+      title: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.createArchive(bookId, sessionId, title);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chatArchives", variables.bookId],
+      });
+    },
+  });
+}
+
+export function useRenameChatArchive() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      bookId: _bookId,
+      newTitle,
+    }: {
+      id: bigint;
+      bookId: bigint;
+      newTitle: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.renameArchive(id, newTitle);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chatArchives", variables.bookId],
+      });
+    },
+  });
+}
+
+export function useDeleteChatArchive() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      bookId: _bookId,
+    }: {
+      id: bigint;
+      bookId: bigint;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteArchive(id);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chatArchives", variables.bookId],
+      });
+    },
+  });
+}
+
+export function useSetChatArchiveSummary() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      bookId: _bookId,
+      summary,
+    }: {
+      id: bigint;
+      bookId: bigint;
+      summary: string;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.setArchiveSummary(id, summary);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["chatArchives", variables.bookId],
       });
     },
   });
@@ -363,14 +478,14 @@ export function useCreateBook() {
   });
 }
 
-export function useChatMessages(bookId: string | number) {
+export function useChatMessages(bookId: string | number, sessionId: string) {
   const { actor } = useActorLocal(createActor);
   const id = BigInt(bookId);
   return useQuery<ChatMessage[]>({
-    queryKey: ["chat", id],
+    queryKey: ["chat", id, sessionId],
     queryFn: async () => {
       if (!actor) return [];
-      const messages = await actor.listMessagesByBook(id, "");
+      const messages = await actor.listMessagesByBook(id, sessionId);
       return messages.sort((a, b) => Number(a.createdAt - b.createdAt));
     },
     enabled: !!actor && !!bookId,
@@ -384,21 +499,23 @@ export function useSendMessage() {
   return useMutation({
     mutationFn: async ({
       bookId,
+      sessionId,
       role,
       content,
       provider,
     }: {
       bookId: bigint;
+      sessionId: string;
       role: string;
       content: string;
       provider: string;
     }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.sendMessage(bookId, "", role, content, provider);
+      return actor.sendMessage(bookId, sessionId, role, content, provider);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["chat", variables.bookId],
+        queryKey: ["chat", variables.bookId, variables.sessionId],
       });
     },
   });
@@ -452,7 +569,7 @@ export function useCreateComment() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["comments", variables.chapterId],
+        queryKey: ["annotations", "analysis", variables.chapterId],
       });
     },
   });
@@ -734,13 +851,19 @@ export function useClearChat() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ bookId }: { bookId: bigint }) => {
+    mutationFn: async ({
+      bookId,
+      sessionId,
+    }: {
+      bookId: bigint;
+      sessionId: string;
+    }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.clearChat(bookId, "");
+      return actor.clearChat(bookId, sessionId);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["chat", variables.bookId],
+        queryKey: ["chat", variables.bookId, variables.sessionId],
       });
     },
   });

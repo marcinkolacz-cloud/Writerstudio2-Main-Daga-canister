@@ -38253,7 +38253,7 @@ function useSaveAnnotations() {
     },
     onSuccess: (_2, variables) => {
       queryClient2.invalidateQueries({
-        queryKey: ["annotations", "analysis", variables.analysisId]
+        queryKey: ["chatSessions", variables.analysisId]
       });
     }
   });
@@ -38287,14 +38287,14 @@ function useCreateBook() {
     }
   });
 }
-function useChatMessages(bookId) {
+function useChatMessages(bookId, sessionId) {
   const { actor } = useActorLocal(createActor);
   const id = BigInt(bookId);
   return useQuery({
-    queryKey: ["chat", id],
+    queryKey: ["chat", id, sessionId],
     queryFn: async () => {
       if (!actor) return [];
-      const messages = await actor.listMessagesByBook(id, "");
+      const messages = await actor.listMessagesByBook(id, sessionId);
       return messages.sort((a2, b2) => Number(a2.createdAt - b2.createdAt));
     },
     enabled: !!actor && !!bookId
@@ -38306,16 +38306,17 @@ function useSendMessage() {
   return useMutation({
     mutationFn: async ({
       bookId,
+      sessionId,
       role,
       content,
       provider
     }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.sendMessage(bookId, "", role, content, provider);
+      return actor.sendMessage(bookId, sessionId, role, content, provider);
     },
     onSuccess: (_2, variables) => {
       queryClient2.invalidateQueries({
-        queryKey: ["chat", variables.bookId]
+        queryKey: ["chat", variables.bookId, variables.sessionId]
       });
     }
   });
@@ -38360,7 +38361,7 @@ function useCreateComment() {
     },
     onSuccess: (_2, variables) => {
       queryClient2.invalidateQueries({
-        queryKey: ["comments", variables.chapterId]
+        queryKey: ["annotations", "analysis", variables.chapterId]
       });
     }
   });
@@ -38568,13 +38569,16 @@ function useClearChat() {
   const { actor } = useActorLocal(createActor);
   const queryClient2 = useQueryClient();
   return useMutation({
-    mutationFn: async ({ bookId }) => {
+    mutationFn: async ({
+      bookId,
+      sessionId
+    }) => {
       if (!actor) throw new Error("Actor not available");
-      return actor.clearChat(bookId, "");
+      return actor.clearChat(bookId, sessionId);
     },
     onSuccess: (_2, variables) => {
       queryClient2.invalidateQueries({
-        queryKey: ["chat", variables.bookId]
+        queryKey: ["chat", variables.bookId, variables.sessionId]
       });
     }
   });
@@ -47226,7 +47230,8 @@ function ChatBotPanel({ bookId, book: bookProp }) {
   const [optimisticMessages, setOptimisticMessages] = reactExports.useState([]);
   const messagesEndRef = reactExports.useRef(null);
   const textareaRef = reactExports.useRef(null);
-  const { data: messages, isLoading } = useChatMessages(bookId);
+  const sessionId = "default";
+  const { data: messages, isLoading } = useChatMessages(bookId, sessionId);
   const [view, setView] = reactExports.useState("chat");
   const [selectedArchive, setSelectedArchive] = reactExports.useState(
     null
@@ -47386,7 +47391,7 @@ function ChatBotPanel({ bookId, book: bookProp }) {
     const archives2 = loadArchives(bookId);
     archives2.unshift(archive);
     saveArchives(bookId, archives2);
-    clearChat.mutate({ bookId: BigInt(bookId) });
+    clearChat.mutate({ bookId: BigInt(bookId), sessionId });
     setView("chat");
   }, [currentMessages, bookId, clearChat]);
   const handleDeleteArchive = reactExports.useCallback(
@@ -47430,6 +47435,7 @@ function ChatBotPanel({ bookId, book: bookProp }) {
     try {
       sendMessage.mutate({
         bookId: BigInt(bookId),
+        sessionId,
         role: "user",
         content: trimmed,
         provider: ""
@@ -47483,6 +47489,7 @@ ${chapterTitles}`;
       );
       sendMessage.mutate({
         bookId: BigInt(bookId),
+        sessionId,
         role: "assistant",
         content: reply,
         provider
@@ -84701,7 +84708,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CIoMDKYV.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-dWwd50fH.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -85864,6 +85871,7 @@ function ChapterEditorPage() {
     localStorage.setItem("writerstudio-chat-open", "true");
     sendMessage.mutate({
       bookId: book.id,
+      sessionId: "default",
       role: "user",
       content: text,
       provider
