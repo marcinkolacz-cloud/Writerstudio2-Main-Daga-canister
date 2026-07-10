@@ -38326,6 +38326,25 @@ function useDeleteChatArchive() {
     }
   });
 }
+function useSetChatArchiveSummary() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      bookId: _bookId,
+      summary
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.setArchiveSummary(id, summary);
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["chatArchives", variables.bookId]
+      });
+    }
+  });
+}
 function useAnalysesByBook(bookId) {
   const { actor } = useActorLocal(createActor);
   const id = BigInt(bookId);
@@ -47192,7 +47211,7 @@ async function generateSummary(allChaptersText, summaryType, apiKey, provider) {
   const prompt = buildSummaryPrompt(allChaptersText, summaryType);
   return await callAi(prompt, apiKey, provider, false, "claude-sonnet-5");
 }
-function buildChatPrompt(messages, bookContext, chapterSummaries) {
+function buildChatPrompt(messages, bookContext, chapterSummaries, pastSessionSummaries) {
   const history2 = messages.map(
     (m2) => `${m2.role === "user" ? "Użytkownik" : "Asystent"}: ${m2.content}`
   ).join("\n\n");
@@ -47206,6 +47225,13 @@ ${bookContext}`;
 
 STRESZCZENIA ROZDZIAŁÓW KSIĄŻKI:
 ${chapterSummaries.map((s2, i) => `Rozdział ${i + 1}:
+${s2}`).join("\n\n")}`;
+  }
+  if (pastSessionSummaries && pastSessionSummaries.length > 0) {
+    system += `
+
+STRESZCZENIA POPRZEDNICH ROZMÓW Z TĄ KSIĄŻKĄ:
+${pastSessionSummaries.map((s2, i) => `Rozmowa ${i + 1}:
 ${s2}`).join("\n\n")}`;
   }
   system += `
@@ -47254,8 +47280,44 @@ async function getSynonyms(word, apiKey, provider) {
     return [];
   }
 }
-async function chatWithBook(messages, bookContext, apiKey, provider, chapterSummaries) {
-  const prompt = buildChatPrompt(messages, bookContext, chapterSummaries);
+function buildSessionSummaryPrompt(messages) {
+  const history2 = messages.map(
+    (m2) => `${m2.role === "user" ? "Użytkownik" : "Asystent"}: ${m2.content}`
+  ).join("\n\n");
+  return `Jesteś asystentem pisarskim. Przeanalizuj poniższą rozmowę z autorem i stwórz BARDZO KRÓTKIE streszczenie (4-5 zdań) obejmujące WYŁĄCZNIE treści fabularne: wydarzenia fabuły, postacie, wątki storyline oraz decyzje twórcze podjęte podczas rozmowy.
+
+POMIŃ całkowicie:
+- aspekty techniczne i narzędziowe,
+- analizę gramatyki, stylu i poprawności językowej,
+- uwagi o formacie, edycji tekstu lub interfejsie.
+
+Zwróć WYŁĄCZNIE tekst streszczenia, bez żadnych wstępów, nagłówków ani komentarzy.
+
+ROZMOWA:
+${history2}`;
+}
+async function generateSessionSummary(messages, apiKey, provider) {
+  if (messages.length === 0) {
+    return "";
+  }
+  const prompt = buildSessionSummaryPrompt(messages);
+  return await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    700,
+    0.3
+  );
+}
+async function chatWithBook(messages, bookContext, apiKey, provider, chapterSummaries, pastSessionSummaries) {
+  const prompt = buildChatPrompt(
+    messages,
+    bookContext,
+    chapterSummaries,
+    pastSessionSummaries
+  );
   return await callAi(prompt, apiKey, provider, false, "claude-sonnet-5");
 }
 function getArchiveKey(bookId) {
@@ -47295,6 +47357,7 @@ function ChatBotPanel({ bookId, book: bookProp }) {
   const createChatArchive = useCreateChatArchive();
   const renameChatArchive = useRenameChatArchive();
   const deleteChatArchive = useDeleteChatArchive();
+  const setChatArchiveSummary = useSetChatArchiveSummary();
   const { data: backendArchives } = useChatArchivesByBook(bookId);
   const queryClient2 = useQueryClient();
   const [input, setInput] = reactExports.useState("");
@@ -47459,21 +47522,53 @@ function ChatBotPanel({ bookId, book: bookProp }) {
       minute: "2-digit"
     });
   }
-  const handleArchive = reactExports.useCallback(() => {
+  const handleArchive = reactExports.useCallback(async () => {
     var _a2;
     if (currentMessages.length === 0) return;
     const firstSentence = ((_a2 = currentMessages[0]) == null ? void 0 : _a2.content) ?? "";
     const title = firstSentence.length > 50 ? `${firstSentence.slice(0, 50)}…` : firstSentence || "Archiwum";
-    createChatArchive.mutate({
+    const archivedMessages = currentMessages;
+    const provider = localStorage.getItem("ws_api_provider") || "openai";
+    const apiKey = getApiKey(provider, principal);
+    createChatArchive.mutateAsync({
       bookId: BigInt(bookId),
       sessionId: activeSessionId,
       title
+    }).then(async (newArchiveId) => {
+      if (!apiKey.trim()) return;
+      try {
+        const summary = await generateSessionSummary(
+          archivedMessages.map((m2) => ({
+            role: m2.role === "user" ? "user" : "assistant",
+            content: m2.content
+          })),
+          apiKey.trim(),
+          provider
+        );
+        const trimmedSummary = summary.trim();
+        if (trimmedSummary) {
+          setChatArchiveSummary.mutate({
+            id: newArchiveId,
+            bookId: BigInt(bookId),
+            summary: trimmedSummary
+          });
+        }
+      } catch (err) {
+        console.error("Session summary generation failed:", err);
+      }
     });
     const newSessionId = crypto.randomUUID();
     setActiveSessionId(newSessionId);
     setOptimisticMessages([]);
     setView("chat");
-  }, [currentMessages, bookId, activeSessionId, createChatArchive]);
+  }, [
+    currentMessages,
+    bookId,
+    activeSessionId,
+    createChatArchive,
+    setChatArchiveSummary,
+    principal
+  ]);
   const handleDeleteArchive = reactExports.useCallback(
     (timestamp) => {
       const archives2 = loadArchives(bookId).filter(
@@ -47579,12 +47674,16 @@ ${chapterTitles}`;
       );
       currentSessionMessages.push({ role: "user", content: trimmed });
       const chapterSummaries = (analyses ?? []).filter((a2) => a2.analysisType === "summary").sort((a2, b2) => Number(a2.createdAt - b2.createdAt)).map((a2) => a2.resultContent);
+      const pastSessionSummaries = (backendArchives ?? []).map((a2) => a2.summary).filter(
+        (s2) => s2.trim() !== "" && s2 !== "Brak istotnych ustaleń fabularnych."
+      );
       const reply = await chatWithBook(
         currentSessionMessages,
         bookContext,
         apiKey.trim(),
         provider,
-        chapterSummaries.length > 0 ? chapterSummaries : void 0
+        chapterSummaries.length > 0 ? chapterSummaries : void 0,
+        pastSessionSummaries.length > 0 ? pastSessionSummaries : void 0
       );
       setOptimisticMessages(
         (prev) => prev.map(
@@ -47629,6 +47728,7 @@ ${chapterTitles}`;
     chapters,
     currentMessages,
     analyses,
+    backendArchives,
     sendMessage,
     queryClient2,
     principal,
@@ -84986,7 +85086,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-H2rDZY8e.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BfGfmyEc.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

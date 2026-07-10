@@ -11,9 +11,10 @@ import {
   useDeleteMessage,
   useRenameChatArchive,
   useSendMessage,
+  useSetChatArchiveSummary,
 } from "@/hooks/useBackend";
 import { useElapsedSeconds } from "@/hooks/useElapsedSeconds";
-import { chatWithBook } from "@/lib/aiAnalysis";
+import { chatWithBook, generateSessionSummary } from "@/lib/aiAnalysis";
 import type { ChatMessage as AiChatMessage } from "@/lib/aiAnalysis";
 import { getApiKey } from "@/lib/apiKeyStorage";
 import { useAppStore } from "@/store/useAppStore";
@@ -76,6 +77,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
   const createChatArchive = useCreateChatArchive();
   const renameChatArchive = useRenameChatArchive();
   const deleteChatArchive = useDeleteChatArchive();
+  const setChatArchiveSummary = useSetChatArchiveSummary();
   const { data: backendArchives } = useChatArchivesByBook(bookId);
 
   const queryClient = useQueryClient();
@@ -273,23 +275,59 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     });
   }
 
-  const handleArchive = useCallback(() => {
+  const handleArchive = useCallback(async () => {
     if (currentMessages.length === 0) return;
     const firstSentence = currentMessages[0]?.content ?? "";
     const title =
       firstSentence.length > 50
         ? `${firstSentence.slice(0, 50)}…`
         : firstSentence || "Archiwum";
-    createChatArchive.mutate({
-      bookId: BigInt(bookId),
-      sessionId: activeSessionId,
-      title,
-    });
+    const archivedMessages = currentMessages;
+    const provider =
+      (localStorage.getItem("ws_api_provider") as "openai" | "claude") ||
+      "openai";
+    const apiKey = getApiKey(provider, principal);
+    createChatArchive
+      .mutateAsync({
+        bookId: BigInt(bookId),
+        sessionId: activeSessionId,
+        title,
+      })
+      .then(async (newArchiveId) => {
+        if (!apiKey.trim()) return;
+        try {
+          const summary = await generateSessionSummary(
+            archivedMessages.map((m) => ({
+              role: m.role === "user" ? "user" : "assistant",
+              content: m.content,
+            })),
+            apiKey.trim(),
+            provider,
+          );
+          const trimmedSummary = summary.trim();
+          if (trimmedSummary) {
+            setChatArchiveSummary.mutate({
+              id: newArchiveId,
+              bookId: BigInt(bookId),
+              summary: trimmedSummary,
+            });
+          }
+        } catch (err) {
+          console.error("Session summary generation failed:", err);
+        }
+      });
     const newSessionId = crypto.randomUUID();
     setActiveSessionId(newSessionId);
     setOptimisticMessages([]);
     setView("chat");
-  }, [currentMessages, bookId, activeSessionId, createChatArchive]);
+  }, [
+    currentMessages,
+    bookId,
+    activeSessionId,
+    createChatArchive,
+    setChatArchiveSummary,
+    principal,
+  ]);
 
   const handleDeleteArchive = useCallback(
     (timestamp: number) => {
@@ -414,12 +452,19 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
         .sort((a, b) => Number(a.createdAt - b.createdAt))
         .map((a) => a.resultContent);
 
+      const pastSessionSummaries = (backendArchives ?? [])
+        .map((a) => a.summary)
+        .filter(
+          (s) => s.trim() !== "" && s !== "Brak istotnych ustaleń fabularnych.",
+        );
+
       const reply = await chatWithBook(
         currentSessionMessages,
         bookContext,
         apiKey.trim(),
         provider,
         chapterSummaries.length > 0 ? chapterSummaries : undefined,
+        pastSessionSummaries.length > 0 ? pastSessionSummaries : undefined,
       );
 
       // Update optimistic placeholder with real reply
@@ -471,6 +516,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     chapters,
     currentMessages,
     analyses,
+    backendArchives,
     sendMessage,
     queryClient,
     principal,

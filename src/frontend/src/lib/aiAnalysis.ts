@@ -542,6 +542,7 @@ function buildChatPrompt(
   messages: ChatMessage[],
   bookContext: string,
   chapterSummaries?: string[],
+  pastSessionSummaries?: string[],
 ): string {
   const history = messages
     .map(
@@ -558,6 +559,10 @@ ${bookContext}`;
 
   if (chapterSummaries && chapterSummaries.length > 0) {
     system += `\n\nSTRESZCZENIA ROZDZIAŁÓW KSIĄŻKI:\n${chapterSummaries.map((s, i) => `Rozdział ${i + 1}:\n${s}`).join("\n\n")}`;
+  }
+
+  if (pastSessionSummaries && pastSessionSummaries.length > 0) {
+    system += `\n\nSTRESZCZENIA POPRZEDNICH ROZMÓW Z TĄ KSIĄŻKĄ:\n${pastSessionSummaries.map((s, i) => `Rozmowa ${i + 1}:\n${s}`).join("\n\n")}`;
   }
 
   system += `\n\nHISTORIA ROZMOWY:\n${history}\n\nOdpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i inspirujący.`;
@@ -608,13 +613,59 @@ export async function getSynonyms(
   }
 }
 
+function buildSessionSummaryPrompt(messages: ChatMessage[]): string {
+  const history = messages
+    .map(
+      (m) => `${m.role === "user" ? "Użytkownik" : "Asystent"}: ${m.content}`,
+    )
+    .join("\n\n");
+
+  return `Jesteś asystentem pisarskim. Przeanalizuj poniższą rozmowę z autorem i stwórz BARDZO KRÓTKIE streszczenie (4-5 zdań) obejmujące WYŁĄCZNIE treści fabularne: wydarzenia fabuły, postacie, wątki storyline oraz decyzje twórcze podjęte podczas rozmowy.
+
+POMIŃ całkowicie:
+- aspekty techniczne i narzędziowe,
+- analizę gramatyki, stylu i poprawności językowej,
+- uwagi o formacie, edycji tekstu lub interfejsie.
+
+Zwróć WYŁĄCZNIE tekst streszczenia, bez żadnych wstępów, nagłówków ani komentarzy.
+
+ROZMOWA:
+${history}`;
+}
+
+export async function generateSessionSummary(
+  messages: ChatMessage[],
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<string> {
+  if (messages.length === 0) {
+    return "";
+  }
+  const prompt = buildSessionSummaryPrompt(messages);
+  return await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    700,
+    0.3,
+  );
+}
+
 export async function chatWithBook(
   messages: ChatMessage[],
   bookContext: string,
   apiKey: string,
   provider: "openai" | "claude",
   chapterSummaries?: string[],
+  pastSessionSummaries?: string[],
 ): Promise<string> {
-  const prompt = buildChatPrompt(messages, bookContext, chapterSummaries);
+  const prompt = buildChatPrompt(
+    messages,
+    bookContext,
+    chapterSummaries,
+    pastSessionSummaries,
+  );
   return await callAi(prompt, apiKey, provider, false, "claude-sonnet-5");
 }
