@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useRecordWritingActivity } from "./useBackend";
+import { useRecordHourlyActivity } from "./useBackend";
 
 const IDLE_SESSION_GAP_MS = 5 * 60 * 1000;
 const ACTIVE_GAP_THRESHOLD_MS = 2 * 60 * 1000;
@@ -23,6 +24,7 @@ export function useWritingStatsTracker(
   content: string,
 ) {
   const recordActivity = useRecordWritingActivity();
+  const recordHourly = useRecordHourlyActivity();
 
   const lastWordCountRef = useRef<number | null>(null);
   const lastChangeTimeRef = useRef<number | null>(null);
@@ -52,6 +54,13 @@ export function useWritingStatsTracker(
       wordsRemoved: BigInt(Math.max(wordsRemoved, 0)),
       activeMinutes: BigInt(Math.max(activeMinutes, sessionCount > 0 ? 1 : 0)),
     });
+
+    if (wordsAdded > 0) {
+      recordHourly.mutate({
+        hour: BigInt(new Date().getHours()),
+        wordsAdded: BigInt(wordsAdded),
+      });
+    }
   };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: flush reads refs only, intentional omission

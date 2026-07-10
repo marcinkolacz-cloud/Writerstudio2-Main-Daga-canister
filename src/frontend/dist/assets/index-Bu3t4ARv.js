@@ -38027,6 +38027,18 @@ function useRecordWritingActivity() {
     }
   });
 }
+function useRecordHourlyActivity() {
+  const { actor } = useActorLocal(createActor);
+  return useMutation({
+    mutationFn: async ({
+      hour,
+      wordsAdded
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.recordHourlyActivity(hour, wordsAdded);
+    }
+  });
+}
 function useStatsByBook(bookId, fromDate, toDate) {
   const { actor } = useActorLocal(createActor);
   const id = BigInt(bookId);
@@ -84222,6 +84234,7 @@ function todayDate() {
 }
 function useWritingStatsTracker(bookId, chapterId, content) {
   const recordActivity = useRecordWritingActivity();
+  const recordHourly = useRecordHourlyActivity();
   const lastWordCountRef = reactExports.useRef(null);
   const lastChangeTimeRef = reactExports.useRef(null);
   const lastChapterIdRef = reactExports.useRef(void 0);
@@ -84247,6 +84260,12 @@ function useWritingStatsTracker(bookId, chapterId, content) {
       wordsRemoved: BigInt(Math.max(wordsRemoved, 0)),
       activeMinutes: BigInt(Math.max(activeMinutes, sessionCount > 0 ? 1 : 0))
     });
+    if (wordsAdded > 0) {
+      recordHourly.mutate({
+        hour: BigInt((/* @__PURE__ */ new Date()).getHours()),
+        wordsAdded: BigInt(wordsAdded)
+      });
+    }
   };
   reactExports.useEffect(() => {
     if (lastChapterIdRef.current !== chapterId) {
@@ -84471,7 +84490,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DWSFlZCq.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CyeCL-Bw.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

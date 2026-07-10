@@ -191,6 +191,19 @@ export function useRecordWritingActivity() {
   });
 }
 
+export function useRecordHourlyActivity() {
+  const { actor } = useActorLocal(createActor);
+  return useMutation({
+    mutationFn: async ({
+      hour,
+      wordsAdded,
+    }: { hour: bigint; wordsAdded: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.recordHourlyActivity(hour, wordsAdded);
+    },
+  });
+}
+
 export function useStatsByBook(
   bookId: string | number,
   fromDate: string,
