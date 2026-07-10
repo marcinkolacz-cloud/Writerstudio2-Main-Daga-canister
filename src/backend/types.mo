@@ -102,4 +102,16 @@ module {
     usedAt : ?Int;
   };
 
+  public type DailyWritingStat = {
+    id : Nat;
+    ownerId : Principal;
+    bookId : Nat;
+    date : Text;
+    wordsAdded : Nat;
+    wordsRemoved : Nat;
+    netWords : Int;
+    activeMinutes : Nat;
+    sessionCount : Nat;
+  };
+
 };

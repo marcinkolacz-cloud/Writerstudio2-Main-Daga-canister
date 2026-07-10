@@ -76,6 +76,17 @@ export interface Comment {
   'chapterId' : bigint,
   'anchorText' : string,
 }
+export interface DailyWritingStat {
+  'id' : bigint,
+  'activeMinutes' : bigint,
+  'ownerId' : Principal,
+  'wordsAdded' : bigint,
+  'date' : string,
+  'bookId' : bigint,
+  'netWords' : bigint,
+  'sessionCount' : bigint,
+  'wordsRemoved' : bigint,
+}
 export interface InviteCode {
   'code' : string,
   'usedAt' : [] | [bigint],
@@ -151,6 +162,10 @@ export interface _SERVICE {
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Recording]>
   >,
+  '__writingStats' : ActorMethod<
+    [[] | [string], [] | [bigint]],
+    Array<[string, DailyWritingStat]>
+  >,
   'addChatMessage' : ActorMethod<[bigint, string, string], bigint>,
   'checkAccess' : ActorMethod<[string], boolean>,
   'clearChat' : ActorMethod<[bigint, string], boolean>,
@@ -182,11 +197,16 @@ export interface _SERVICE {
   'getChapter' : ActorMethod<[bigint], [] | [Chapter]>,
   'getChatMessages' : ActorMethod<[bigint], Array<ChatSessionMessage>>,
   'getChatSessionsByChapter' : ActorMethod<[bigint], Array<ChatSession>>,
+  'getGlobalStats' : ActorMethod<[string, string], Array<DailyWritingStat>>,
   'getOverallStats' : ActorMethod<
     [],
     { 'totalBooks' : bigint, 'totalChapters' : bigint, 'totalWords' : bigint }
   >,
   'getRecordingAudio' : ActorMethod<[bigint], [] | [Uint8Array]>,
+  'getStatsByBook' : ActorMethod<
+    [bigint, string, string],
+    Array<DailyWritingStat>
+  >,
   'listAnalysesByBook' : ActorMethod<[bigint], Array<Analysis>>,
   'listAnalysesByChapter' : ActorMethod<[bigint], Array<Analysis>>,
   'listAnnotationsByAnalysis' : ActorMethod<[bigint], Array<TextAnnotation>>,
@@ -198,6 +218,10 @@ export interface _SERVICE {
   'listRecordingsByChapter' : ActorMethod<
     [bigint],
     Array<{ 'id' : bigint, 'voice' : string, 'createdAt' : bigint }>
+  >,
+  'recordWritingActivity' : ActorMethod<
+    [bigint, string, bigint, bigint, bigint],
+    undefined
   >,
   'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
   'revokeInviteCode' : ActorMethod<[string], boolean>,

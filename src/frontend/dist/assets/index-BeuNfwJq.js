@@ -29078,6 +29078,17 @@ const Recording = Record({
   "bookId": Nat,
   "chapterId": Nat
 });
+const DailyWritingStat = Record({
+  "id": Nat,
+  "activeMinutes": Nat,
+  "ownerId": Principal2,
+  "wordsAdded": Nat,
+  "date": Text$3,
+  "bookId": Nat,
+  "netWords": Int,
+  "sessionCount": Nat,
+  "wordsRemoved": Nat
+});
 Service({
   "__adminPrincipal": Func([], [Opt(Principal2)], ["query"]),
   "__analyses": Func(
@@ -29139,6 +29150,11 @@ Service({
     [Vec(Tuple(Nat, Recording))],
     ["query"]
   ),
+  "__writingStats": Func(
+    [Opt(Text$3), Opt(Nat)],
+    [Vec(Tuple(Text$3, DailyWritingStat))],
+    ["query"]
+  ),
   "addChatMessage": Func([Nat, Text$3, Text$3], [Nat], []),
   "checkAccess": Func([Text$3], [Bool], []),
   "clearChat": Func([Nat, Text$3], [Bool], []),
@@ -29173,6 +29189,11 @@ Service({
   "getChapter": Func([Nat], [Opt(Chapter)], []),
   "getChatMessages": Func([Nat], [Vec(ChatSessionMessage)], []),
   "getChatSessionsByChapter": Func([Nat], [Vec(ChatSession)], []),
+  "getGlobalStats": Func(
+    [Text$3, Text$3],
+    [Vec(DailyWritingStat)],
+    []
+  ),
   "getOverallStats": Func(
     [],
     [
@@ -29185,6 +29206,11 @@ Service({
     []
   ),
   "getRecordingAudio": Func([Nat], [Opt(Vec(Nat8))], []),
+  "getStatsByBook": Func(
+    [Nat, Text$3, Text$3],
+    [Vec(DailyWritingStat)],
+    []
+  ),
   "listAnalysesByBook": Func([Nat], [Vec(Analysis)], []),
   "listAnalysesByChapter": Func([Nat], [Vec(Analysis)], []),
   "listAnnotationsByAnalysis": Func(
@@ -29212,6 +29238,11 @@ Service({
         })
       )
     ],
+    []
+  ),
+  "recordWritingActivity": Func(
+    [Nat, Text$3, Nat, Nat, Nat],
+    [],
     []
   ),
   "reorderChapters": Func([Nat, Vec(Nat)], [Bool], []),
@@ -29387,6 +29418,17 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "bookId": IDL2.Nat,
     "chapterId": IDL2.Nat
   });
+  const DailyWritingStat2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "activeMinutes": IDL2.Nat,
+    "ownerId": IDL2.Principal,
+    "wordsAdded": IDL2.Nat,
+    "date": IDL2.Text,
+    "bookId": IDL2.Nat,
+    "netWords": IDL2.Int,
+    "sessionCount": IDL2.Nat,
+    "wordsRemoved": IDL2.Nat
+  });
   return IDL2.Service({
     "__adminPrincipal": IDL2.Func([], [IDL2.Opt(IDL2.Principal)], ["query"]),
     "__analyses": IDL2.Func(
@@ -29448,6 +29490,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Recording2))],
       ["query"]
     ),
+    "__writingStats": IDL2.Func(
+      [IDL2.Opt(IDL2.Text), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Text, DailyWritingStat2))],
+      ["query"]
+    ),
     "addChatMessage": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "checkAccess": IDL2.Func([IDL2.Text], [IDL2.Bool], []),
     "clearChat": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Bool], []),
@@ -29486,6 +29533,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(ChatSession2)],
       []
     ),
+    "getGlobalStats": IDL2.Func(
+      [IDL2.Text, IDL2.Text],
+      [IDL2.Vec(DailyWritingStat2)],
+      []
+    ),
     "getOverallStats": IDL2.Func(
       [],
       [
@@ -29498,6 +29550,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
       []
     ),
     "getRecordingAudio": IDL2.Func([IDL2.Nat], [IDL2.Opt(IDL2.Vec(IDL2.Nat8))], []),
+    "getStatsByBook": IDL2.Func(
+      [IDL2.Nat, IDL2.Text, IDL2.Text],
+      [IDL2.Vec(DailyWritingStat2)],
+      []
+    ),
     "listAnalysesByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Analysis2)], []),
     "listAnalysesByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Analysis2)], []),
     "listAnnotationsByAnalysis": IDL2.Func(
@@ -29525,6 +29582,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
           })
         )
       ],
+      []
+    ),
+    "recordWritingActivity": IDL2.Func(
+      [IDL2.Nat, IDL2.Text, IDL2.Nat, IDL2.Nat, IDL2.Nat],
+      [],
       []
     ),
     "reorderChapters": IDL2.Func([IDL2.Nat, IDL2.Vec(IDL2.Nat)], [IDL2.Bool], []),
@@ -34579,6 +34641,20 @@ class Backend {
       return result;
     }
   }
+  async __writingStats(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__writingStats(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__writingStats(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
   async addChatMessage(arg0, arg1, arg2) {
     if (this.processError) {
       try {
@@ -34901,6 +34977,20 @@ class Backend {
       return result;
     }
   }
+  async getGlobalStats(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getGlobalStats(arg0, arg1);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getGlobalStats(arg0, arg1);
+      return result;
+    }
+  }
   async getOverallStats() {
     if (this.processError) {
       try {
@@ -34927,6 +35017,20 @@ class Backend {
     } else {
       const result = await this.actor.getRecordingAudio(arg0);
       return from_candid_opt_n24(this._uploadFile, this._downloadFile, result);
+    }
+  }
+  async getStatsByBook(arg0, arg1, arg2) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getStatsByBook(arg0, arg1, arg2);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getStatsByBook(arg0, arg1, arg2);
+      return result;
     }
   }
   async listAnalysesByBook(arg0) {
@@ -35052,6 +35156,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.listRecordingsByChapter(arg0);
+      return result;
+    }
+  }
+  async recordWritingActivity(arg0, arg1, arg2, arg3, arg4) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.recordWritingActivity(arg0, arg1, arg2, arg3, arg4);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.recordWritingActivity(arg0, arg1, arg2, arg3, arg4);
       return result;
     }
   }
@@ -84153,7 +84271,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Bd8OleGG.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BNUkQgu6.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

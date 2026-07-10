@@ -53,6 +53,17 @@ function record_opt_to_undefined<T>(arg: T | null): T | undefined {
 }
 import { ExternalBlob } from "@caffeineai/object-storage";
 export { ExternalBlob } from "@caffeineai/object-storage";
+export interface DailyWritingStat {
+    id: bigint;
+    activeMinutes: bigint;
+    ownerId: Principal;
+    wordsAdded: bigint;
+    date: string;
+    bookId: bigint;
+    netWords: bigint;
+    sessionCount: bigint;
+    wordsRemoved: bigint;
+}
 export interface ChatSessionMessage {
     id: bigint;
     content: string;
@@ -164,6 +175,7 @@ export interface backendInterface {
     __nextCommentId(): Promise<bigint>;
     __nextRecordingId(): Promise<bigint>;
     __recordings(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Recording]>>;
+    __writingStats(ko: string | null, count: bigint | null): Promise<Array<[string, DailyWritingStat]>>;
     addChatMessage(sessionId: bigint, role: string, content: string): Promise<bigint>;
     checkAccess(code: string): Promise<boolean>;
     clearChat(bookId: bigint, sessionId: string): Promise<boolean>;
@@ -192,12 +204,14 @@ export interface backendInterface {
     getChapter(id: bigint): Promise<Chapter | null>;
     getChatMessages(sessionId: bigint): Promise<Array<ChatSessionMessage>>;
     getChatSessionsByChapter(chapterId: bigint): Promise<Array<ChatSession>>;
+    getGlobalStats(fromDate: string, toDate: string): Promise<Array<DailyWritingStat>>;
     getOverallStats(): Promise<{
         totalBooks: bigint;
         totalChapters: bigint;
         totalWords: bigint;
     }>;
     getRecordingAudio(id: bigint): Promise<Uint8Array | null>;
+    getStatsByBook(bookId: bigint, fromDate: string, toDate: string): Promise<Array<DailyWritingStat>>;
     listAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listAnnotationsByAnalysis(analysisId: bigint): Promise<Array<TextAnnotation>>;
@@ -211,6 +225,7 @@ export interface backendInterface {
         voice: string;
         createdAt: bigint;
     }>>;
+    recordWritingActivity(bookId: bigint, date: string, wordsAdded: bigint, wordsRemoved: bigint, activeMinutes: bigint): Promise<void>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     revokeInviteCode(code: string): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
@@ -530,6 +545,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.__recordings(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async __writingStats(arg0: string | null, arg1: bigint | null): Promise<Array<[string, DailyWritingStat]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__writingStats(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__writingStats(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
@@ -860,6 +889,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getGlobalStats(arg0: string, arg1: string): Promise<Array<DailyWritingStat>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getGlobalStats(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getGlobalStats(arg0, arg1);
+            return result;
+        }
+    }
     async getOverallStats(): Promise<{
         totalBooks: bigint;
         totalChapters: bigint;
@@ -890,6 +933,20 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.getRecordingAudio(arg0);
             return from_candid_opt_n24(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getStatsByBook(arg0: bigint, arg1: string, arg2: string): Promise<Array<DailyWritingStat>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getStatsByBook(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getStatsByBook(arg0, arg1, arg2);
+            return result;
         }
     }
     async listAnalysesByBook(arg0: bigint): Promise<Array<Analysis>> {
@@ -1019,6 +1076,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.listRecordingsByChapter(arg0);
+            return result;
+        }
+    }
+    async recordWritingActivity(arg0: bigint, arg1: string, arg2: bigint, arg3: bigint, arg4: bigint): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.recordWritingActivity(arg0, arg1, arg2, arg3, arg4);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.recordWritingActivity(arg0, arg1, arg2, arg3, arg4);
             return result;
         }
     }

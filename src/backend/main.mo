@@ -10,6 +10,7 @@ import ChatApi "mixins/ChatApi";
 import ChatsApi "mixins/ChatsApi";
 import CommentsApi "mixins/CommentsApi";
 import StatsApi "mixins/StatsApi";
+import WritingStatsApi "mixins/WritingStatsApi";
 import RecordingsApi "mixins/RecordingsApi";
 import InvitesApi "mixins/InvitesApi";
 import TtsApi "mixins/TtsApi";
@@ -26,6 +27,7 @@ actor {
   let comments : Map.Map<Nat, Types.Comment>;
   let recordings : Map.Map<Nat, Types.Recording>;
   let inviteCodes : Map.Map<Text, Types.InviteCode>;
+  let writingStats : Map.Map<Text, Types.DailyWritingStat>;
 
   var nextBookId : Nat;
   var nextChapterId : Nat;
@@ -46,6 +48,7 @@ actor {
   include ChatsApi(books, chapters, chatSessions, chatSessionMessages);
   include CommentsApi(books, chapters, comments);
   include StatsApi(books, chapters);
+  include WritingStatsApi(writingStats);
   include RecordingsApi(books, chapters, recordings);
   include TtsApi();
   include InvitesApi(books, inviteCodes);

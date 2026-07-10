@@ -7,6 +7,17 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface DailyWritingStat {
+    id: bigint;
+    activeMinutes: bigint;
+    ownerId: Principal;
+    wordsAdded: bigint;
+    date: string;
+    bookId: bigint;
+    netWords: bigint;
+    sessionCount: bigint;
+    wordsRemoved: bigint;
+}
 export interface ChatSessionMessage {
     id: bigint;
     content: string;
@@ -126,12 +137,14 @@ export interface backendInterface {
     getChapter(id: bigint): Promise<Chapter | null>;
     getChatMessages(sessionId: bigint): Promise<Array<ChatSessionMessage>>;
     getChatSessionsByChapter(chapterId: bigint): Promise<Array<ChatSession>>;
+    getGlobalStats(fromDate: string, toDate: string): Promise<Array<DailyWritingStat>>;
     getOverallStats(): Promise<{
         totalBooks: bigint;
         totalChapters: bigint;
         totalWords: bigint;
     }>;
     getRecordingAudio(id: bigint): Promise<Uint8Array | null>;
+    getStatsByBook(bookId: bigint, fromDate: string, toDate: string): Promise<Array<DailyWritingStat>>;
     listAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listAnnotationsByAnalysis(analysisId: bigint): Promise<Array<TextAnnotation>>;
@@ -145,6 +158,7 @@ export interface backendInterface {
         voice: string;
         createdAt: bigint;
     }>>;
+    recordWritingActivity(bookId: bigint, date: string, wordsAdded: bigint, wordsRemoved: bigint, activeMinutes: bigint): Promise<void>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     revokeInviteCode(code: string): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;

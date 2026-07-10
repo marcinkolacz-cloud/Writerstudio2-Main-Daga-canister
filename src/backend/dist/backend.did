@@ -25,6 +25,18 @@ type InviteCode =
    usedAt: opt int;
    usedBy: opt principal;
  };
+type DailyWritingStat = 
+ record {
+   activeMinutes: nat;
+   bookId: nat;
+   date: text;
+   id: nat;
+   netWords: int;
+   ownerId: principal;
+   sessionCount: nat;
+   wordsAdded: nat;
+   wordsRemoved: nat;
+ };
 type Comment = 
  record {
    anchorText: text;
@@ -158,6 +170,11 @@ service : {
           nat;
           Recording;
         }) query;
+  __writingStats: (ko: opt text, count: opt nat) ->
+   (vec record {
+          text;
+          DailyWritingStat;
+        }) query;
   addChatMessage: (sessionId: nat, role: text, content: text) -> (nat);
   checkAccess: (code: text) -> (bool);
   clearChat: (bookId: nat, sessionId: text) -> (bool);
@@ -187,6 +204,7 @@ service : {
   getChapter: (id: nat) -> (opt Chapter);
   getChatMessages: (sessionId: nat) -> (vec ChatSessionMessage);
   getChatSessionsByChapter: (chapterId: nat) -> (vec ChatSession);
+  getGlobalStats: (fromDate: text, toDate: text) -> (vec DailyWritingStat);
   getOverallStats: () ->
    (record {
       totalBooks: nat;
@@ -194,6 +212,8 @@ service : {
       totalWords: nat;
     });
   getRecordingAudio: (id: nat) -> (opt vec nat8);
+  getStatsByBook: (bookId: nat, fromDate: text, toDate: text) ->
+   (vec DailyWritingStat);
   listAnalysesByBook: (bookId: nat) -> (vec Analysis);
   listAnalysesByChapter: (chapterId: nat) -> (vec Analysis);
   listAnnotationsByAnalysis: (analysisId: nat) -> (vec TextAnnotation);
@@ -208,6 +228,8 @@ service : {
           id: nat;
           voice: text;
         });
+  recordWritingActivity: (bookId: nat, date: text, wordsAdded: nat,
+   wordsRemoved: nat, activeMinutes: nat) -> ();
   reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);
   revokeInviteCode: (code: text) -> (bool);
   saveAnalysis: (bookId: nat, chapterId: opt nat, analysisType: text,

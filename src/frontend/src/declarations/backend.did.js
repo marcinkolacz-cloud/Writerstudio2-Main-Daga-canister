@@ -98,6 +98,17 @@ export const Recording = IDL.Record({
   'bookId' : IDL.Nat,
   'chapterId' : IDL.Nat,
 });
+export const DailyWritingStat = IDL.Record({
+  'id' : IDL.Nat,
+  'activeMinutes' : IDL.Nat,
+  'ownerId' : IDL.Principal,
+  'wordsAdded' : IDL.Nat,
+  'date' : IDL.Text,
+  'bookId' : IDL.Nat,
+  'netWords' : IDL.Int,
+  'sessionCount' : IDL.Nat,
+  'wordsRemoved' : IDL.Nat,
+});
 
 export const idlService = IDL.Service({
   '__adminPrincipal' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
@@ -160,6 +171,11 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
       ['query'],
     ),
+  '__writingStats' : IDL.Func(
+      [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Text, DailyWritingStat))],
+      ['query'],
+    ),
   'addChatMessage' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
   'checkAccess' : IDL.Func([IDL.Text], [IDL.Bool], []),
   'clearChat' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
@@ -194,6 +210,11 @@ export const idlService = IDL.Service({
   'getChapter' : IDL.Func([IDL.Nat], [IDL.Opt(Chapter)], []),
   'getChatMessages' : IDL.Func([IDL.Nat], [IDL.Vec(ChatSessionMessage)], []),
   'getChatSessionsByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(ChatSession)], []),
+  'getGlobalStats' : IDL.Func(
+      [IDL.Text, IDL.Text],
+      [IDL.Vec(DailyWritingStat)],
+      [],
+    ),
   'getOverallStats' : IDL.Func(
       [],
       [
@@ -206,6 +227,11 @@ export const idlService = IDL.Service({
       [],
     ),
   'getRecordingAudio' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Vec(IDL.Nat8))], []),
+  'getStatsByBook' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Text],
+      [IDL.Vec(DailyWritingStat)],
+      [],
+    ),
   'listAnalysesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
   'listAnalysesByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
   'listAnnotationsByAnalysis' : IDL.Func(
@@ -233,6 +259,11 @@ export const idlService = IDL.Service({
           })
         ),
       ],
+      [],
+    ),
+  'recordWritingActivity' : IDL.Func(
+      [IDL.Nat, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat],
+      [],
       [],
     ),
   'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
@@ -411,6 +442,17 @@ export const idlFactory = ({ IDL }) => {
     'bookId' : IDL.Nat,
     'chapterId' : IDL.Nat,
   });
+  const DailyWritingStat = IDL.Record({
+    'id' : IDL.Nat,
+    'activeMinutes' : IDL.Nat,
+    'ownerId' : IDL.Principal,
+    'wordsAdded' : IDL.Nat,
+    'date' : IDL.Text,
+    'bookId' : IDL.Nat,
+    'netWords' : IDL.Int,
+    'sessionCount' : IDL.Nat,
+    'wordsRemoved' : IDL.Nat,
+  });
   
   return IDL.Service({
     '__adminPrincipal' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
@@ -473,6 +515,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
         ['query'],
       ),
+    '__writingStats' : IDL.Func(
+        [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Text, DailyWritingStat))],
+        ['query'],
+      ),
     'addChatMessage' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
     'checkAccess' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'clearChat' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
@@ -511,6 +558,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(ChatSession)],
         [],
       ),
+    'getGlobalStats' : IDL.Func(
+        [IDL.Text, IDL.Text],
+        [IDL.Vec(DailyWritingStat)],
+        [],
+      ),
     'getOverallStats' : IDL.Func(
         [],
         [
@@ -523,6 +575,11 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'getRecordingAudio' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Vec(IDL.Nat8))], []),
+    'getStatsByBook' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text],
+        [IDL.Vec(DailyWritingStat)],
+        [],
+      ),
     'listAnalysesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
     'listAnalysesByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
     'listAnnotationsByAnalysis' : IDL.Func(
@@ -550,6 +607,11 @@ export const idlFactory = ({ IDL }) => {
             })
           ),
         ],
+        [],
+      ),
+    'recordWritingActivity' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat],
+        [],
         [],
       ),
     'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
