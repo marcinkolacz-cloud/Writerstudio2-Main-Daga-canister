@@ -53694,6 +53694,23 @@ const DEFAULT_SETTINGS = {
   firstLineIndent: 1.25,
   pageNumbers: true
 };
+const REDACTION_SETTINGS_KEY = "ws_redaction_settings";
+function loadSavedSettings() {
+  try {
+    const raw = localStorage.getItem(REDACTION_SETTINGS_KEY);
+    if (!raw) return DEFAULT_SETTINGS;
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULT_SETTINGS, ...parsed };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+function saveSettings(settings) {
+  try {
+    localStorage.setItem(REDACTION_SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+  }
+}
 function RedactionModal({
   open,
   onOpenChange,
@@ -53703,12 +53720,16 @@ function RedactionModal({
   const [aiParagraphs, setAiParagraphs] = reactExports.useState(false);
   reactExports.useEffect(() => {
     if (open) {
-      setSettings(DEFAULT_SETTINGS);
+      setSettings(loadSavedSettings());
       setAiParagraphs(false);
     }
   }, [open]);
   const update = (key, value) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
+    setSettings((prev) => {
+      const next = { ...prev, [key]: value };
+      saveSettings(next);
+      return next;
+    });
   };
   const handleGenerate = () => {
     onGenerate(settings, aiParagraphs);
@@ -84501,7 +84522,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-C9-jd9FX.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-B1bpgRwQ.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

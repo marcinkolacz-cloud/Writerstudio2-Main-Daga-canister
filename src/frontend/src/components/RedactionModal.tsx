@@ -51,6 +51,27 @@ const DEFAULT_SETTINGS: RedactionSettings = {
   pageNumbers: true,
 };
 
+const REDACTION_SETTINGS_KEY = "ws_redaction_settings";
+
+function loadSavedSettings(): RedactionSettings {
+  try {
+    const raw = localStorage.getItem(REDACTION_SETTINGS_KEY);
+    if (!raw) return DEFAULT_SETTINGS;
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULT_SETTINGS, ...parsed };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+function saveSettings(settings: RedactionSettings) {
+  try {
+    localStorage.setItem(REDACTION_SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // Ignore storage write failures (quota / private mode).
+  }
+}
+
 export function RedactionModal({
   open,
   onOpenChange,
@@ -62,7 +83,7 @@ export function RedactionModal({
   // Reset to defaults whenever the modal opens
   useEffect(() => {
     if (open) {
-      setSettings(DEFAULT_SETTINGS);
+      setSettings(loadSavedSettings());
       setAiParagraphs(false);
     }
   }, [open]);
@@ -71,7 +92,11 @@ export function RedactionModal({
     key: K,
     value: RedactionSettings[K],
   ) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
+    setSettings((prev) => {
+      const next = { ...prev, [key]: value };
+      saveSettings(next);
+      return next;
+    });
   };
 
   const handleGenerate = () => {
