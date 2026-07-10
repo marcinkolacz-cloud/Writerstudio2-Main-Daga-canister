@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBookStats, useBooks, useOverallStats } from "@/hooks/useBackend";
+import { useGlobalWritingStats, useStatsByBook } from "@/hooks/useBackend";
 import { BarChart3, BookOpen, FileText, Layers } from "lucide-react";
+import { useState } from "react";
 import {
   Bar,
   BarChart,
@@ -11,6 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Legend, Line, LineChart } from "recharts";
 
 function StatCard({
   label,
@@ -111,9 +114,71 @@ function BookStatsRow({
   );
 }
 
+function isoDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function defaultFromDate(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 29);
+  return isoDate(d);
+}
+
+function defaultToDate(): string {
+  return isoDate(new Date());
+}
+
 export function StatisticsPage() {
   const { data: overall, isLoading: overallLoading } = useOverallStats();
   const { data: books, isLoading: booksLoading } = useBooks();
+
+  const [statsScope, setStatsScope] = useState<"global" | "book">("global");
+  const [selectedStatsBookId, setSelectedStatsBookId] = useState<string>("");
+  const [fromDate, setFromDate] = useState(defaultFromDate());
+  const [toDate, setToDate] = useState(defaultToDate());
+
+  const { data: globalStats, isLoading: globalStatsLoading } =
+    useGlobalWritingStats(fromDate, toDate);
+  const { data: bookScopedStats, isLoading: bookScopedStatsLoading } =
+    useStatsByBook(selectedStatsBookId || "0", fromDate, toDate);
+
+  const writingStatsData =
+    statsScope === "global" ? globalStats : bookScopedStats;
+  const writingStatsLoading =
+    statsScope === "global" ? globalStatsLoading : bookScopedStatsLoading;
+
+  const dailyChartData = (() => {
+    const byDate = new Map<
+      string,
+      {
+        date: string;
+        wordsAdded: number;
+        wordsRemoved: number;
+        netWords: number;
+      }
+    >();
+    for (const stat of writingStatsData ?? []) {
+      const existing = byDate.get(stat.date);
+      const wordsAdded = Number(stat.wordsAdded);
+      const wordsRemoved = Number(stat.wordsRemoved);
+      const netWords = Number(stat.netWords);
+      if (existing) {
+        existing.wordsAdded += wordsAdded;
+        existing.wordsRemoved += wordsRemoved;
+        existing.netWords += netWords;
+      } else {
+        byDate.set(stat.date, {
+          date: stat.date,
+          wordsAdded,
+          wordsRemoved,
+          netWords,
+        });
+      }
+    }
+    return Array.from(byDate.values()).sort((a, b) =>
+      a.date.localeCompare(b.date),
+    );
+  })();
 
   const bookIds = books?.map((b) => b.id.toString()) ?? [];
 
@@ -275,6 +340,137 @@ export function StatisticsPage() {
             </p>
           </div>
         )}
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-display font-semibold text-foreground">
+            Aktywność pisania
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center h-8 rounded-md border border-border overflow-hidden">
+              <button
+                type="button"
+                className={`h-8 px-3 text-xs font-medium transition-colors ${statsScope === "global" ? "bg-primary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
+                onClick={() => setStatsScope("global")}
+                data-ocid="statistics.writing_stats.scope_global_button"
+              >
+                Wszystkie książki
+              </button>
+              <button
+                type="button"
+                className={`h-8 px-3 text-xs font-medium transition-colors ${statsScope === "book" ? "bg-primary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
+                onClick={() => setStatsScope("book")}
+                data-ocid="statistics.writing_stats.scope_book_button"
+              >
+                Jedna książka
+              </button>
+            </div>
+            {statsScope === "book" && (
+              <select
+                value={selectedStatsBookId}
+                onChange={(e) => setSelectedStatsBookId(e.target.value)}
+                className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
+                data-ocid="statistics.writing_stats.book_select"
+              >
+                <option value="">Wybierz książkę</option>
+                {(books ?? []).map((b) => (
+                  <option key={b.id.toString()} value={b.id.toString()}>
+                    {b.title}
+                  </option>
+                ))}
+              </select>
+            )}
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
+              data-ocid="statistics.writing_stats.from_date_input"
+            />
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
+              data-ocid="statistics.writing_stats.to_date_input"
+            />
+          </div>
+        </div>
+
+        <Card className="bg-card border-border shadow-subtle">
+          <CardHeader>
+            <CardTitle className="font-display text-lg text-foreground">
+              Słowa napisane dziennie
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-72 w-full">
+              {writingStatsLoading ? (
+                <div className="flex h-full items-center justify-center">
+                  <Skeleton className="h-48 w-full" />
+                </div>
+              ) : dailyChartData.length === 0 ? (
+                <div
+                  className="flex h-full items-center justify-center text-sm text-muted-foreground"
+                  data-ocid="statistics.writing_stats.empty_state"
+                >
+                  Brak danych o pisaniu w wybranym zakresie dat.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={dailyChartData}
+                    margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="oklch(var(--border))"
+                    />
+                    <XAxis
+                      dataKey="date"
+                      tick={{
+                        fill: "oklch(var(--muted-foreground))",
+                        fontSize: 11,
+                      }}
+                    />
+                    <YAxis
+                      tick={{
+                        fill: "oklch(var(--muted-foreground))",
+                        fontSize: 12,
+                      }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "oklch(var(--card))",
+                        border: "1px solid oklch(var(--border))",
+                        borderRadius: "var(--radius)",
+                        color: "oklch(var(--foreground))",
+                      }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Line
+                      type="monotone"
+                      dataKey="wordsAdded"
+                      name="Dodane słowa"
+                      stroke="oklch(var(--primary))"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="netWords"
+                      name="Bilans netto"
+                      stroke="oklch(var(--chart-2))"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </section>
     </div>
   );
