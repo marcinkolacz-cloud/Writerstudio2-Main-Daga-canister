@@ -312,7 +312,7 @@ export function useSaveAnnotations() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["chatSessions", variables.analysisId],
+        queryKey: ["annotations", "analysis", variables.analysisId],
       });
     },
   });
@@ -569,7 +569,7 @@ export function useCreateComment() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["annotations", "analysis", variables.chapterId],
+        queryKey: ["comments", variables.chapterId],
       });
     },
   });

@@ -1,12 +1,15 @@
-import type { Book } from "@/backend";
+import type { Book, ChatArchive } from "@/backend";
 import { Button } from "@/components/ui/button";
 import {
   useAnalysesByBook,
   useBook,
   useChapters,
+  useChatArchivesByBook,
   useChatMessages,
-  useClearChat,
+  useCreateChatArchive,
+  useDeleteChatArchive,
   useDeleteMessage,
+  useRenameChatArchive,
   useSendMessage,
 } from "@/hooks/useBackend";
 import { useElapsedSeconds } from "@/hooks/useElapsedSeconds";
@@ -15,7 +18,7 @@ import type { ChatMessage as AiChatMessage } from "@/lib/aiAnalysis";
 import { getApiKey } from "@/lib/apiKeyStorage";
 import { useAppStore } from "@/store/useAppStore";
 import { useQueryClient } from "@tanstack/react-query";
-import { Clock, MessageCircle, Send, Trash2, X } from "lucide-react";
+import { Clock, MessageCircle, Pencil, Send, Trash2, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface ChatBotPanelProps {
@@ -31,6 +34,10 @@ interface ArchiveEntry {
 
 function getArchiveKey(bookId: string) {
   return `ws_chat_archives_${bookId}`;
+}
+
+function getActiveSessionKey(bookId: string) {
+  return `ws_active_chat_session_${bookId}`;
 }
 
 function loadArchives(bookId: string): ArchiveEntry[] {
@@ -66,7 +73,10 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
   const { data: analyses } = useAnalysesByBook(bookId);
   const sendMessage = useSendMessage();
   const deleteMessage = useDeleteMessage();
-  const clearChat = useClearChat();
+  const createChatArchive = useCreateChatArchive();
+  const renameChatArchive = useRenameChatArchive();
+  const deleteChatArchive = useDeleteChatArchive();
+  const { data: backendArchives } = useChatArchivesByBook(bookId);
 
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
@@ -78,11 +88,26 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const sessionId = "default";
-  const { data: messages, isLoading } = useChatMessages(bookId, sessionId);
+  const [activeSessionId, setActiveSessionId] = useState<string>(() => {
+    const key = getActiveSessionKey(bookId);
+    const stored = localStorage.getItem(key);
+    if (stored !== null) return stored;
+    localStorage.setItem(key, "");
+    return "";
+  });
+
+  useEffect(() => {
+    localStorage.setItem(getActiveSessionKey(bookId), activeSessionId);
+  }, [activeSessionId, bookId]);
+
+  const { data: messages, isLoading } = useChatMessages(
+    bookId,
+    activeSessionId,
+  );
 
   // View state: 'chat' | 'history' | 'archive'
   const [view, setView] = useState<"chat" | "history" | "archive">("chat");
+  const [historyTab, setHistoryTab] = useState<"backend" | "local">("backend");
   const [selectedArchive, setSelectedArchive] = useState<ArchiveEntry | null>(
     null,
   );
@@ -250,27 +275,21 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
 
   const handleArchive = useCallback(() => {
     if (currentMessages.length === 0) return;
-    setOptimisticMessages([]);
     const firstSentence = currentMessages[0]?.content ?? "";
     const title =
       firstSentence.length > 50
         ? `${firstSentence.slice(0, 50)}…`
         : firstSentence || "Archiwum";
-    const archive: ArchiveEntry = {
-      timestamp: Date.now(),
+    createChatArchive.mutate({
+      bookId: BigInt(bookId),
+      sessionId: activeSessionId,
       title,
-      messages: currentMessages.map((m) => ({
-        role: m.role,
-        content: m.content,
-        createdAt: Number(m.createdAt / 1000000n),
-      })),
-    };
-    const archives = loadArchives(bookId);
-    archives.unshift(archive);
-    saveArchives(bookId, archives);
-    clearChat.mutate({ bookId: BigInt(bookId), sessionId });
+    });
+    const newSessionId = crypto.randomUUID();
+    setActiveSessionId(newSessionId);
+    setOptimisticMessages([]);
     setView("chat");
-  }, [currentMessages, bookId, clearChat]);
+  }, [currentMessages, bookId, activeSessionId, createChatArchive]);
 
   const handleDeleteArchive = useCallback(
     (timestamp: number) => {
@@ -286,6 +305,32 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       setInput((v) => v);
     },
     [bookId, selectedArchive],
+  );
+
+  const handleRenameBackendArchive = useCallback(
+    (archive: ChatArchive, newTitle: string) => {
+      const trimmed = newTitle.trim();
+      if (!trimmed) return;
+      renameChatArchive.mutate({
+        id: archive.id,
+        bookId: BigInt(bookId),
+        newTitle: trimmed,
+      });
+    },
+    [bookId, renameChatArchive],
+  );
+
+  const handleDeleteBackendArchive = useCallback(
+    (archive: ChatArchive) => {
+      deleteChatArchive.mutate({
+        id: archive.id,
+        bookId: BigInt(bookId),
+      });
+      if (archive.sessionId === activeSessionId) {
+        setActiveSessionId(crypto.randomUUID());
+      }
+    },
+    [bookId, deleteChatArchive, activeSessionId],
   );
 
   const handleSend = useCallback(async () => {
@@ -323,7 +368,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       // Save user message in background (fire-and-forget)
       sendMessage.mutate({
         bookId: BigInt(bookId),
-        sessionId,
+        sessionId: activeSessionId,
         role: "user",
         content: trimmed,
         provider: "",
@@ -387,7 +432,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       // Save assistant message in background (fire-and-forget)
       sendMessage.mutate({
         bookId: BigInt(bookId),
-        sessionId,
+        sessionId: activeSessionId,
         role: "assistant",
         content: reply,
         provider,
@@ -429,6 +474,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     sendMessage,
     queryClient,
     principal,
+    activeSessionId,
   ]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -616,54 +662,124 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       )}
 
       {view === "history" && (
-        <div className="flex-1 overflow-y-auto p-3 min-h-0">
-          {archives.length === 0 && (
-            <div
-              className="text-xs text-muted-foreground text-center py-8"
-              data-ocid="chat.history.empty_state"
+        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+          {/* Tab switch */}
+          <div className="flex border-b border-border bg-muted/30">
+            <button
+              type="button"
+              className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+                historyTab === "backend"
+                  ? "text-primary border-b-2 border-primary bg-card"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => setHistoryTab("backend")}
+              data-ocid="chat.history.tab.backend"
             >
-              Brak archiwów.
-              <br />
-              Kliknij ikonę kosza, aby zarchiwizować bieżącą rozmowę.
+              Archiwum (backend)
+            </button>
+            <button
+              type="button"
+              className={`flex-1 px-3 py-2 text-xs font-medium transition-colors ${
+                historyTab === "local"
+                  ? "text-primary border-b-2 border-primary bg-card"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => setHistoryTab("local")}
+              data-ocid="chat.history.tab.local"
+            >
+              Stare archiwum (lokalne)
+            </button>
+          </div>
+
+          {/* Backend tab */}
+          {historyTab === "backend" && (
+            <div className="flex-1 overflow-y-auto p-3 min-h-0">
+              {!backendArchives ||
+                (backendArchives.length === 0 && (
+                  <div
+                    className="text-xs text-muted-foreground text-center py-8"
+                    data-ocid="chat.history.backend.empty_state"
+                  >
+                    Brak archiwów na backendzie.
+                    <br />
+                    Kliknij ikonę kosza w nagłówku, aby zarchiwizować bieżącą
+                    rozmowę.
+                  </div>
+                ))}
+              <div className="space-y-2">
+                {backendArchives?.map((archive, idx) => (
+                  <BackendArchiveRow
+                    key={String(archive.id)}
+                    archive={archive}
+                    index={idx}
+                    isActive={archive.sessionId === activeSessionId}
+                    onSwitch={() => {
+                      setActiveSessionId(archive.sessionId);
+                      setView("chat");
+                    }}
+                    onRename={(newTitle) =>
+                      handleRenameBackendArchive(archive, newTitle)
+                    }
+                    onDelete={() => handleDeleteBackendArchive(archive)}
+                  />
+                ))}
+              </div>
             </div>
           )}
-          <div className="space-y-2">
-            {archives.map((archive, idx) => (
-              <div
-                key={archive.timestamp}
-                className="group flex items-center gap-2 p-3 rounded-lg border border-border bg-background hover:bg-muted/50 transition-colors"
-                data-ocid={`chat.archive.item.${idx + 1}`}
-              >
-                <button
-                  type="button"
-                  className="flex-1 min-w-0 text-left cursor-pointer"
-                  onClick={() => {
-                    setSelectedArchive(archive);
-                    setView("archive");
-                  }}
-                  data-ocid={`chat.archive.open_button.${idx + 1}`}
+
+          {/* Local tab */}
+          {historyTab === "local" && (
+            <div className="flex-1 overflow-y-auto p-3 min-h-0">
+              <h3 className="text-xs font-semibold text-muted-foreground mb-2">
+                Stare archiwum (lokalne, tylko odczyt)
+              </h3>
+              {archives.length === 0 && (
+                <div
+                  className="text-xs text-muted-foreground text-center py-8"
+                  data-ocid="chat.history.local.empty_state"
                 >
-                  <div className="text-sm font-medium text-foreground truncate">
-                    {archive.title}
+                  Brak lokalnych archiwów.
+                </div>
+              )}
+              <div className="space-y-2">
+                {archives.map((archive, idx) => (
+                  <div
+                    key={archive.timestamp}
+                    className="group flex items-center gap-2 p-3 rounded-lg border border-border bg-background hover:bg-muted/50 transition-colors"
+                    data-ocid={`chat.archive.item.${idx + 1}`}
+                  >
+                    <button
+                      type="button"
+                      className="flex-1 min-w-0 text-left cursor-pointer"
+                      onClick={() => {
+                        setSelectedArchive(archive);
+                        setView("archive");
+                      }}
+                      data-ocid={`chat.archive.open_button.${idx + 1}`}
+                    >
+                      <div className="text-sm font-medium text-foreground truncate">
+                        {archive.title}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatArchiveDate(archive.timestamp)}
+                      </div>
+                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
+                      onClick={() => handleDeleteArchive(archive.timestamp)}
+                      title="Usuń archiwum"
+                      data-chat-action
+                      data-ocid={`chat.archive.delete_button.${idx + 1}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatArchiveDate(archive.timestamp)}
-                  </div>
-                </button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
-                  onClick={() => handleDeleteArchive(archive.timestamp)}
-                  title="Usuń archiwum"
-                  data-chat-action
-                  data-ocid={`chat.archive.delete_button.${idx + 1}`}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -731,6 +847,147 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
           />
         </svg>
       </div>
+    </div>
+  );
+}
+
+function BackendArchiveRow({
+  archive,
+  index,
+  isActive,
+  onSwitch,
+  onRename,
+  onDelete,
+}: {
+  archive: ChatArchive;
+  index: number;
+  isActive: boolean;
+  onSwitch: () => void;
+  onRename: (newTitle: string) => void;
+  onDelete: () => void;
+}) {
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(archive.title);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isRenaming) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [isRenaming]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const submitRename = () => {
+    const trimmed = renameValue.trim();
+    if (trimmed && trimmed !== archive.title) {
+      onRename(trimmed);
+    } else {
+      setRenameValue(archive.title);
+    }
+    setIsRenaming(false);
+  };
+
+  const handleDeleteClick = () => {
+    if (confirmDelete) {
+      onDelete();
+      setConfirmDelete(false);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    } else {
+      setConfirmDelete(true);
+      timeoutRef.current = setTimeout(() => setConfirmDelete(false), 2000);
+    }
+  };
+
+  const createdAtMs = Number(archive.createdAt / 1000000n);
+
+  return (
+    <div
+      className={`group flex items-center gap-2 p-3 rounded-lg border transition-colors ${
+        isActive
+          ? "border-primary bg-primary/5"
+          : "border-border bg-background hover:bg-muted/50"
+      }`}
+      data-ocid={`chat.backend_archive.item.${index + 1}`}
+    >
+      <div className="flex-1 min-w-0">
+        {isRenaming ? (
+          <input
+            ref={inputRef}
+            type="text"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                submitRename();
+              } else if (e.key === "Escape") {
+                setRenameValue(archive.title);
+                setIsRenaming(false);
+              }
+            }}
+            onBlur={submitRename}
+            className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            data-ocid={`chat.backend_archive.rename_input.${index + 1}`}
+          />
+        ) : (
+          <button
+            type="button"
+            className="w-full text-left cursor-pointer"
+            onClick={onSwitch}
+            data-ocid={`chat.backend_archive.open_button.${index + 1}`}
+          >
+            <div className="text-sm font-medium text-foreground truncate">
+              {archive.title}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {new Date(createdAtMs).toLocaleDateString("pl-PL", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
+          </button>
+        )}
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0"
+        onClick={() => {
+          setRenameValue(archive.title);
+          setIsRenaming(true);
+        }}
+        title="Zmień nazwę"
+        data-chat-action
+        data-ocid={`chat.backend_archive.rename_button.${index + 1}`}
+      >
+        <Pencil className="h-3.5 w-3.5" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`h-7 w-7 p-0 transition-opacity shrink-0 ${
+          confirmDelete
+            ? "opacity-100 bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground"
+            : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
+        }`}
+        onClick={handleDeleteClick}
+        title={confirmDelete ? "Kliknij ponownie, aby usunąć" : "Usuń archiwum"}
+        data-chat-action
+        data-ocid={`chat.backend_archive.delete_button.${index + 1}`}
+      >
+        <Trash2 className="h-3.5 w-3.5" />
+      </Button>
     </div>
   );
 }
