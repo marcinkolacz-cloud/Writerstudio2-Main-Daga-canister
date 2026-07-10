@@ -114,4 +114,11 @@ module {
     sessionCount : Nat;
   };
 
+  public type HourlyActivityStat = {
+    id : Nat;
+    ownerId : Principal;
+    hour : Nat;
+    wordsAdded : Nat;
+  };
+
 };

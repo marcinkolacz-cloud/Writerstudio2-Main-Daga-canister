@@ -25,11 +25,17 @@ export interface ChatSessionMessage {
     role: string;
     sessionId: bigint;
 }
-export interface InviteCode {
-    code: string;
-    usedAt?: bigint;
-    usedBy?: Principal;
+export interface ChatSession {
+    id: bigint;
+    title: string;
     createdAt: bigint;
+    chapterId: bigint;
+}
+export interface HourlyActivityStat {
+    id: bigint;
+    ownerId: Principal;
+    wordsAdded: bigint;
+    hour: bigint;
 }
 export interface Comment {
     id: bigint;
@@ -94,12 +100,6 @@ export interface Chapter {
     sessionId: string;
     orderIndex: bigint;
 }
-export interface ChatSession {
-    id: bigint;
-    title: string;
-    createdAt: bigint;
-    chapterId: bigint;
-}
 export interface Recording {
     id: bigint;
     voice: string;
@@ -107,6 +107,12 @@ export interface Recording {
     audioData: Uint8Array;
     bookId: bigint;
     chapterId: bigint;
+}
+export interface InviteCode {
+    code: string;
+    usedAt?: bigint;
+    usedBy?: Principal;
+    createdAt: bigint;
 }
 export interface backendInterface {
     addChatMessage(sessionId: bigint, role: string, content: string): Promise<bigint>;
@@ -138,6 +144,7 @@ export interface backendInterface {
     getChatMessages(sessionId: bigint): Promise<Array<ChatSessionMessage>>;
     getChatSessionsByChapter(chapterId: bigint): Promise<Array<ChatSession>>;
     getGlobalStats(fromDate: string, toDate: string): Promise<Array<DailyWritingStat>>;
+    getHourlyDistribution(): Promise<Array<HourlyActivityStat>>;
     getOverallStats(): Promise<{
         totalBooks: bigint;
         totalChapters: bigint;
@@ -158,6 +165,7 @@ export interface backendInterface {
         voice: string;
         createdAt: bigint;
     }>>;
+    recordHourlyActivity(hour: bigint, wordsAdded: bigint): Promise<void>;
     recordWritingActivity(bookId: bigint, date: string, wordsAdded: bigint, wordsRemoved: bigint, activeMinutes: bigint): Promise<void>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     revokeInviteCode(code: string): Promise<boolean>;

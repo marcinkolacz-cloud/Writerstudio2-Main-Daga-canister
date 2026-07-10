@@ -29064,6 +29064,12 @@ const Comment = Record({
   "chapterId": Nat,
   "anchorText": Text$3
 });
+const HourlyActivityStat = Record({
+  "id": Nat,
+  "ownerId": Principal2,
+  "wordsAdded": Nat,
+  "hour": Nat
+});
 const InviteCode = Record({
   "code": Text$3,
   "usedAt": Opt(Int),
@@ -29131,6 +29137,11 @@ Service({
     [Vec(Tuple(Nat, Comment))],
     ["query"]
   ),
+  "__hourlyStats": Func(
+    [Opt(Text$3), Opt(Nat)],
+    [Vec(Tuple(Text$3, HourlyActivityStat))],
+    ["query"]
+  ),
   "__inviteCodes": Func(
     [Opt(Text$3), Opt(Nat)],
     [Vec(Tuple(Text$3, InviteCode))],
@@ -29194,6 +29205,7 @@ Service({
     [Vec(DailyWritingStat)],
     []
   ),
+  "getHourlyDistribution": Func([], [Vec(HourlyActivityStat)], []),
   "getOverallStats": Func(
     [],
     [
@@ -29240,6 +29252,7 @@ Service({
     ],
     []
   ),
+  "recordHourlyActivity": Func([Nat, Nat], [], []),
   "recordWritingActivity": Func(
     [Nat, Text$3, Nat, Nat, Nat],
     [],
@@ -29404,6 +29417,12 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "chapterId": IDL2.Nat,
     "anchorText": IDL2.Text
   });
+  const HourlyActivityStat2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "ownerId": IDL2.Principal,
+    "wordsAdded": IDL2.Nat,
+    "hour": IDL2.Nat
+  });
   const InviteCode2 = IDL2.Record({
     "code": IDL2.Text,
     "usedAt": IDL2.Opt(IDL2.Int),
@@ -29469,6 +29488,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "__comments": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Comment2))],
+      ["query"]
+    ),
+    "__hourlyStats": IDL2.Func(
+      [IDL2.Opt(IDL2.Text), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Text, HourlyActivityStat2))],
       ["query"]
     ),
     "__inviteCodes": IDL2.Func(
@@ -29538,6 +29562,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(DailyWritingStat2)],
       []
     ),
+    "getHourlyDistribution": IDL2.Func([], [IDL2.Vec(HourlyActivityStat2)], []),
     "getOverallStats": IDL2.Func(
       [],
       [
@@ -29584,6 +29609,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
       ],
       []
     ),
+    "recordHourlyActivity": IDL2.Func([IDL2.Nat, IDL2.Nat], [], []),
     "recordWritingActivity": IDL2.Func(
       [IDL2.Nat, IDL2.Text, IDL2.Nat, IDL2.Nat, IDL2.Nat],
       [],
@@ -34487,6 +34513,20 @@ class Backend {
       return result;
     }
   }
+  async __hourlyStats(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__hourlyStats(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__hourlyStats(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
   async __inviteCodes(arg0, arg1) {
     if (this.processError) {
       try {
@@ -34991,6 +35031,20 @@ class Backend {
       return result;
     }
   }
+  async getHourlyDistribution() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.getHourlyDistribution();
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.getHourlyDistribution();
+      return result;
+    }
+  }
   async getOverallStats() {
     if (this.processError) {
       try {
@@ -35156,6 +35210,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.listRecordingsByChapter(arg0);
+      return result;
+    }
+  }
+  async recordHourlyActivity(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.recordHourlyActivity(arg0, arg1);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.recordHourlyActivity(arg0, arg1);
       return result;
     }
   }
@@ -84403,7 +84471,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DpIk4vb9.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DWSFlZCq.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

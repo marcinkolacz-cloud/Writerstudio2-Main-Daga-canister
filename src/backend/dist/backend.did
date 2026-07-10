@@ -25,6 +25,13 @@ type InviteCode =
    usedAt: opt int;
    usedBy: opt principal;
  };
+type HourlyActivityStat = 
+ record {
+   hour: nat;
+   id: nat;
+   ownerId: principal;
+   wordsAdded: nat;
+ };
 type DailyWritingStat = 
  record {
    activeMinutes: nat;
@@ -151,6 +158,11 @@ service : {
           nat;
           Comment;
         }) query;
+  __hourlyStats: (ko: opt text, count: opt nat) ->
+   (vec record {
+          text;
+          HourlyActivityStat;
+        }) query;
   __inviteCodes: (ko: opt text, count: opt nat) ->
    (vec record {
           text;
@@ -205,6 +217,7 @@ service : {
   getChatMessages: (sessionId: nat) -> (vec ChatSessionMessage);
   getChatSessionsByChapter: (chapterId: nat) -> (vec ChatSession);
   getGlobalStats: (fromDate: text, toDate: text) -> (vec DailyWritingStat);
+  getHourlyDistribution: () -> (vec HourlyActivityStat);
   getOverallStats: () ->
    (record {
       totalBooks: nat;
@@ -228,6 +241,7 @@ service : {
           id: nat;
           voice: text;
         });
+  recordHourlyActivity: (hour: nat, wordsAdded: nat) -> ();
   recordWritingActivity: (bookId: nat, date: text, wordsAdded: nat,
    wordsRemoved: nat, activeMinutes: nat) -> ();
   reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);

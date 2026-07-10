@@ -87,6 +87,12 @@ export interface DailyWritingStat {
   'sessionCount' : bigint,
   'wordsRemoved' : bigint,
 }
+export interface HourlyActivityStat {
+  'id' : bigint,
+  'ownerId' : Principal,
+  'wordsAdded' : bigint,
+  'hour' : bigint,
+}
 export interface InviteCode {
   'code' : string,
   'usedAt' : [] | [bigint],
@@ -145,6 +151,10 @@ export interface _SERVICE {
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Comment]>
   >,
+  '__hourlyStats' : ActorMethod<
+    [[] | [string], [] | [bigint]],
+    Array<[string, HourlyActivityStat]>
+  >,
   '__inviteCodes' : ActorMethod<
     [[] | [string], [] | [bigint]],
     Array<[string, InviteCode]>
@@ -198,6 +208,7 @@ export interface _SERVICE {
   'getChatMessages' : ActorMethod<[bigint], Array<ChatSessionMessage>>,
   'getChatSessionsByChapter' : ActorMethod<[bigint], Array<ChatSession>>,
   'getGlobalStats' : ActorMethod<[string, string], Array<DailyWritingStat>>,
+  'getHourlyDistribution' : ActorMethod<[], Array<HourlyActivityStat>>,
   'getOverallStats' : ActorMethod<
     [],
     { 'totalBooks' : bigint, 'totalChapters' : bigint, 'totalWords' : bigint }
@@ -219,6 +230,7 @@ export interface _SERVICE {
     [bigint],
     Array<{ 'id' : bigint, 'voice' : string, 'createdAt' : bigint }>
   >,
+  'recordHourlyActivity' : ActorMethod<[bigint, bigint], undefined>,
   'recordWritingActivity' : ActorMethod<
     [bigint, string, bigint, bigint, bigint],
     undefined

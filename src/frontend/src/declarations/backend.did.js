@@ -84,6 +84,12 @@ export const Comment = IDL.Record({
   'chapterId' : IDL.Nat,
   'anchorText' : IDL.Text,
 });
+export const HourlyActivityStat = IDL.Record({
+  'id' : IDL.Nat,
+  'ownerId' : IDL.Principal,
+  'wordsAdded' : IDL.Nat,
+  'hour' : IDL.Nat,
+});
 export const InviteCode = IDL.Record({
   'code' : IDL.Text,
   'usedAt' : IDL.Opt(IDL.Int),
@@ -152,6 +158,11 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Tuple(IDL.Nat, Comment))],
       ['query'],
     ),
+  '__hourlyStats' : IDL.Func(
+      [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Text, HourlyActivityStat))],
+      ['query'],
+    ),
   '__inviteCodes' : IDL.Func(
       [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat)],
       [IDL.Vec(IDL.Tuple(IDL.Text, InviteCode))],
@@ -215,6 +226,7 @@ export const idlService = IDL.Service({
       [IDL.Vec(DailyWritingStat)],
       [],
     ),
+  'getHourlyDistribution' : IDL.Func([], [IDL.Vec(HourlyActivityStat)], []),
   'getOverallStats' : IDL.Func(
       [],
       [
@@ -261,6 +273,7 @@ export const idlService = IDL.Service({
       ],
       [],
     ),
+  'recordHourlyActivity' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
   'recordWritingActivity' : IDL.Func(
       [IDL.Nat, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat],
       [],
@@ -428,6 +441,12 @@ export const idlFactory = ({ IDL }) => {
     'chapterId' : IDL.Nat,
     'anchorText' : IDL.Text,
   });
+  const HourlyActivityStat = IDL.Record({
+    'id' : IDL.Nat,
+    'ownerId' : IDL.Principal,
+    'wordsAdded' : IDL.Nat,
+    'hour' : IDL.Nat,
+  });
   const InviteCode = IDL.Record({
     'code' : IDL.Text,
     'usedAt' : IDL.Opt(IDL.Int),
@@ -494,6 +513,11 @@ export const idlFactory = ({ IDL }) => {
     '__comments' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Comment))],
+        ['query'],
+      ),
+    '__hourlyStats' : IDL.Func(
+        [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Text, HourlyActivityStat))],
         ['query'],
       ),
     '__inviteCodes' : IDL.Func(
@@ -563,6 +587,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(DailyWritingStat)],
         [],
       ),
+    'getHourlyDistribution' : IDL.Func([], [IDL.Vec(HourlyActivityStat)], []),
     'getOverallStats' : IDL.Func(
         [],
         [
@@ -609,6 +634,7 @@ export const idlFactory = ({ IDL }) => {
         ],
         [],
       ),
+    'recordHourlyActivity' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
     'recordWritingActivity' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat],
         [],
