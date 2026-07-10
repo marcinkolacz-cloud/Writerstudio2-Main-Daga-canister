@@ -3450,11 +3450,6 @@ video {
   background-color: oklch(var(--accent) / var(--tw-bg-opacity, 1));
 }
 
-.hover\:bg-destructive:hover {
-  --tw-bg-opacity: 1;
-  background-color: oklch(var(--destructive) / var(--tw-bg-opacity, 1));
-}
-
 .hover\:bg-destructive\/10:hover {
   background-color: oklch(var(--destructive) / 0.1);
 }
@@ -3512,10 +3507,6 @@ video {
 .hover\:text-destructive:hover {
   --tw-text-opacity: 1;
   color: oklch(var(--destructive) / var(--tw-text-opacity, 1));
-}
-
-.hover\:text-destructive-foreground:hover {
-  color: oklch(var(--destructive-foreground));
 }
 
 .hover\:text-foreground:hover {

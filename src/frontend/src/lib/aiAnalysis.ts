@@ -667,5 +667,12 @@ export async function chatWithBook(
     chapterSummaries,
     pastSessionSummaries,
   );
-  return await callAi(prompt, apiKey, provider, false, "claude-sonnet-5");
+  return await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-5",
+    16000,
+  );
 }

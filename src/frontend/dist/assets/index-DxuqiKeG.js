@@ -47318,7 +47318,14 @@ async function chatWithBook(messages, bookContext, apiKey, provider, chapterSumm
     chapterSummaries,
     pastSessionSummaries
   );
-  return await callAi(prompt, apiKey, provider, false, "claude-sonnet-5");
+  return await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-5",
+    16e3
+  );
 }
 function getArchiveKey(bookId) {
   return `ws_chat_archives_${bookId}`;
@@ -47373,6 +47380,9 @@ function ChatBotPanel({ bookId, book: bookProp }) {
     localStorage.setItem(key, "");
     return "";
   });
+  const [previousSessionId, setPreviousSessionId] = reactExports.useState(
+    null
+  );
   reactExports.useEffect(() => {
     localStorage.setItem(getActiveSessionKey(bookId), activeSessionId);
   }, [activeSessionId, bookId]);
@@ -47604,9 +47614,19 @@ function ChatBotPanel({ bookId, book: bookProp }) {
       if (archive.sessionId === activeSessionId) {
         setActiveSessionId(crypto.randomUUID());
       }
+      if (archive.sessionId === previousSessionId) {
+        setPreviousSessionId(null);
+      }
     },
-    [bookId, deleteChatArchive, activeSessionId]
+    [bookId, deleteChatArchive, activeSessionId, previousSessionId]
   );
+  const handleReturnToActiveSession = reactExports.useCallback(() => {
+    if (previousSessionId !== null) {
+      setActiveSessionId(previousSessionId);
+      setPreviousSessionId(null);
+      setView("chat");
+    }
+  }, [previousSessionId]);
   const handleSend = reactExports.useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || isSending || !book) return;
@@ -47837,6 +47857,20 @@ ${chapterTitles}`;
           }
         ),
         view === "chat" && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+          previousSessionId !== null && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between gap-2 px-3 py-2 bg-muted/50 border-b border-border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate", children: "Przeglądasz inną rozmowę" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Button,
+              {
+                variant: "outline",
+                size: "sm",
+                className: "h-7 px-2 text-xs shrink-0",
+                onClick: handleReturnToActiveSession,
+                "data-ocid": "chat.return_to_active_button",
+                children: "Wróć do aktywnego czatu"
+              }
+            )
+          ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 space-y-3 min-h-0", children: [
             isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx(
               "div",
@@ -47910,6 +47944,20 @@ ${chapterTitles}`;
           ] })
         ] }),
         view === "history" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto min-h-0 flex flex-col", children: [
+          previousSessionId !== null && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between gap-2 px-3 py-2 bg-muted/50 border-b border-border", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-muted-foreground truncate", children: "Przeglądasz inną rozmowę" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Button,
+              {
+                variant: "outline",
+                size: "sm",
+                className: "h-7 px-2 text-xs shrink-0",
+                onClick: handleReturnToActiveSession,
+                "data-ocid": "chat.history.return_to_active_button",
+                children: "Wróć do aktywnego czatu"
+              }
+            )
+          ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex border-b border-border bg-muted/30", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(
               "button",
@@ -47952,6 +48000,9 @@ ${chapterTitles}`;
                 index: idx,
                 isActive: archive.sessionId === activeSessionId,
                 onSwitch: () => {
+                  if (archive.sessionId !== activeSessionId && previousSessionId === null) {
+                    setPreviousSessionId(activeSessionId);
+                  }
                   setActiveSessionId(archive.sessionId);
                   setView("chat");
                 },
@@ -48087,8 +48138,7 @@ function BackendArchiveRow({
 }) {
   const [isRenaming, setIsRenaming] = reactExports.useState(false);
   const [renameValue, setRenameValue] = reactExports.useState(archive.title);
-  const [confirmDelete, setConfirmDelete] = reactExports.useState(false);
-  const timeoutRef = reactExports.useRef(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = reactExports.useState(false);
   const inputRef = reactExports.useRef(null);
   reactExports.useEffect(() => {
     var _a2, _b2;
@@ -48097,11 +48147,6 @@ function BackendArchiveRow({
       (_b2 = inputRef.current) == null ? void 0 : _b2.select();
     }
   }, [isRenaming]);
-  reactExports.useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
   const submitRename = () => {
     const trimmed = renameValue.trim();
     if (trimmed && trimmed !== archive.title) {
@@ -48111,23 +48156,42 @@ function BackendArchiveRow({
     }
     setIsRenaming(false);
   };
-  const handleDeleteClick = () => {
-    if (confirmDelete) {
-      onDelete();
-      setConfirmDelete(false);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    } else {
-      setConfirmDelete(true);
-      timeoutRef.current = setTimeout(() => setConfirmDelete(false), 2e3);
-    }
-  };
   const createdAtMs = Number(archive.createdAt / 1000000n);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
     "div",
     {
       className: `group flex items-center gap-2 p-3 rounded-lg border transition-colors ${isActive2 ? "border-primary bg-primary/5" : "border-border bg-background hover:bg-muted/50"}`,
       "data-ocid": `chat.backend_archive.item.${index2 + 1}`,
-      children: [
+      children: showDeleteConfirm ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 flex items-center justify-between gap-2 min-w-0", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-xs text-foreground truncate", children: "Na pewno usunąć tę rozmowę?" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 shrink-0", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Button,
+            {
+              variant: "destructive",
+              size: "sm",
+              className: "h-7 px-2 text-xs",
+              onClick: () => {
+                onDelete();
+                setShowDeleteConfirm(false);
+              },
+              "data-ocid": `chat.backend_archive.confirm_delete_button.${index2 + 1}`,
+              children: "Usuń"
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(
+            Button,
+            {
+              variant: "ghost",
+              size: "sm",
+              className: "h-7 px-2 text-xs",
+              onClick: () => setShowDeleteConfirm(false),
+              "data-ocid": `chat.backend_archive.cancel_delete_button.${index2 + 1}`,
+              children: "Anuluj"
+            }
+          )
+        ] })
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 min-w-0", children: isRenaming ? /* @__PURE__ */ jsxRuntimeExports.jsx(
           "input",
           {
@@ -48188,15 +48252,15 @@ function BackendArchiveRow({
           {
             variant: "ghost",
             size: "sm",
-            className: `h-7 w-7 p-0 transition-opacity shrink-0 ${confirmDelete ? "opacity-100 bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground" : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"}`,
-            onClick: handleDeleteClick,
-            title: confirmDelete ? "Kliknij ponownie, aby usunąć" : "Usuń archiwum",
+            className: "h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0",
+            onClick: () => setShowDeleteConfirm(true),
+            title: "Usuń archiwum",
             "data-chat-action": true,
             "data-ocid": `chat.backend_archive.delete_button.${index2 + 1}`,
             children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3.5 w-3.5" })
           }
         )
-      ]
+      ] })
     }
   );
 }
@@ -85086,7 +85150,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BfGfmyEc.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-EPGdypZ7.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

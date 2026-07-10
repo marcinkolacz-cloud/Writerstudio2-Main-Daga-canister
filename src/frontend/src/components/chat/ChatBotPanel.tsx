@@ -97,6 +97,9 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
     localStorage.setItem(key, "");
     return "";
   });
+  const [previousSessionId, setPreviousSessionId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     localStorage.setItem(getActiveSessionKey(bookId), activeSessionId);
@@ -367,9 +370,20 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       if (archive.sessionId === activeSessionId) {
         setActiveSessionId(crypto.randomUUID());
       }
+      if (archive.sessionId === previousSessionId) {
+        setPreviousSessionId(null);
+      }
     },
-    [bookId, deleteChatArchive, activeSessionId],
+    [bookId, deleteChatArchive, activeSessionId, previousSessionId],
   );
+
+  const handleReturnToActiveSession = useCallback(() => {
+    if (previousSessionId !== null) {
+      setActiveSessionId(previousSessionId);
+      setPreviousSessionId(null);
+      setView("chat");
+    }
+  }, [previousSessionId]);
 
   const handleSend = useCallback(async () => {
     const trimmed = input.trim();
@@ -628,6 +642,22 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
       {/* Content */}
       {view === "chat" && (
         <>
+          {previousSessionId !== null && (
+            <div className="flex items-center justify-between gap-2 px-3 py-2 bg-muted/50 border-b border-border">
+              <span className="text-xs text-muted-foreground truncate">
+                Przeglądasz inną rozmowę
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs shrink-0"
+                onClick={handleReturnToActiveSession}
+                data-ocid="chat.return_to_active_button"
+              >
+                Wróć do aktywnego czatu
+              </Button>
+            </div>
+          )}
           <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
             {isLoading && (
               <div
@@ -709,6 +739,22 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
 
       {view === "history" && (
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+          {previousSessionId !== null && (
+            <div className="flex items-center justify-between gap-2 px-3 py-2 bg-muted/50 border-b border-border">
+              <span className="text-xs text-muted-foreground truncate">
+                Przeglądasz inną rozmowę
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 px-2 text-xs shrink-0"
+                onClick={handleReturnToActiveSession}
+                data-ocid="chat.history.return_to_active_button"
+              >
+                Wróć do aktywnego czatu
+              </Button>
+            </div>
+          )}
           {/* Tab switch */}
           <div className="flex border-b border-border bg-muted/30">
             <button
@@ -760,6 +806,12 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
                     index={idx}
                     isActive={archive.sessionId === activeSessionId}
                     onSwitch={() => {
+                      if (
+                        archive.sessionId !== activeSessionId &&
+                        previousSessionId === null
+                      ) {
+                        setPreviousSessionId(activeSessionId);
+                      }
                       setActiveSessionId(archive.sessionId);
                       setView("chat");
                     }}
@@ -914,8 +966,7 @@ function BackendArchiveRow({
 }) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(archive.title);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -925,12 +976,6 @@ function BackendArchiveRow({
     }
   }, [isRenaming]);
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, []);
-
   const submitRename = () => {
     const trimmed = renameValue.trim();
     if (trimmed && trimmed !== archive.title) {
@@ -939,17 +984,6 @@ function BackendArchiveRow({
       setRenameValue(archive.title);
     }
     setIsRenaming(false);
-  };
-
-  const handleDeleteClick = () => {
-    if (confirmDelete) {
-      onDelete();
-      setConfirmDelete(false);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    } else {
-      setConfirmDelete(true);
-      timeoutRef.current = setTimeout(() => setConfirmDelete(false), 2000);
-    }
   };
 
   const createdAtMs = Number(archive.createdAt / 1000000n);
@@ -963,77 +997,106 @@ function BackendArchiveRow({
       }`}
       data-ocid={`chat.backend_archive.item.${index + 1}`}
     >
-      <div className="flex-1 min-w-0">
-        {isRenaming ? (
-          <input
-            ref={inputRef}
-            type="text"
-            value={renameValue}
-            onChange={(e) => setRenameValue(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                submitRename();
-              } else if (e.key === "Escape") {
-                setRenameValue(archive.title);
-                setIsRenaming(false);
-              }
+      {showDeleteConfirm ? (
+        <div className="flex-1 flex items-center justify-between gap-2 min-w-0">
+          <span className="text-xs text-foreground truncate">
+            Na pewno usunąć tę rozmowę?
+          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="destructive"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => {
+                onDelete();
+                setShowDeleteConfirm(false);
+              }}
+              data-ocid={`chat.backend_archive.confirm_delete_button.${index + 1}`}
+            >
+              Usuń
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => setShowDeleteConfirm(false)}
+              data-ocid={`chat.backend_archive.cancel_delete_button.${index + 1}`}
+            >
+              Anuluj
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex-1 min-w-0">
+            {isRenaming ? (
+              <input
+                ref={inputRef}
+                type="text"
+                value={renameValue}
+                onChange={(e) => setRenameValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    submitRename();
+                  } else if (e.key === "Escape") {
+                    setRenameValue(archive.title);
+                    setIsRenaming(false);
+                  }
+                }}
+                onBlur={submitRename}
+                className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                data-ocid={`chat.backend_archive.rename_input.${index + 1}`}
+              />
+            ) : (
+              <button
+                type="button"
+                className="w-full text-left cursor-pointer"
+                onClick={onSwitch}
+                data-ocid={`chat.backend_archive.open_button.${index + 1}`}
+              >
+                <div className="text-sm font-medium text-foreground truncate">
+                  {archive.title}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(createdAtMs).toLocaleDateString("pl-PL", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
+              </button>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0"
+            onClick={() => {
+              setRenameValue(archive.title);
+              setIsRenaming(true);
             }}
-            onBlur={submitRename}
-            className="w-full rounded-md border border-input bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            data-ocid={`chat.backend_archive.rename_input.${index + 1}`}
-          />
-        ) : (
-          <button
-            type="button"
-            className="w-full text-left cursor-pointer"
-            onClick={onSwitch}
-            data-ocid={`chat.backend_archive.open_button.${index + 1}`}
+            title="Zmień nazwę"
+            data-chat-action
+            data-ocid={`chat.backend_archive.rename_button.${index + 1}`}
           >
-            <div className="text-sm font-medium text-foreground truncate">
-              {archive.title}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {new Date(createdAtMs).toLocaleDateString("pl-PL", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </div>
-          </button>
-        )}
-      </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0"
-        onClick={() => {
-          setRenameValue(archive.title);
-          setIsRenaming(true);
-        }}
-        title="Zmień nazwę"
-        data-chat-action
-        data-ocid={`chat.backend_archive.rename_button.${index + 1}`}
-      >
-        <Pencil className="h-3.5 w-3.5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className={`h-7 w-7 p-0 transition-opacity shrink-0 ${
-          confirmDelete
-            ? "opacity-100 bg-destructive text-destructive-foreground hover:bg-destructive hover:text-destructive-foreground"
-            : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
-        }`}
-        onClick={handleDeleteClick}
-        title={confirmDelete ? "Kliknij ponownie, aby usunąć" : "Usuń archiwum"}
-        data-chat-action
-        data-ocid={`chat.backend_archive.delete_button.${index + 1}`}
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </Button>
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
+            onClick={() => setShowDeleteConfirm(true)}
+            title="Usuń archiwum"
+            data-chat-action
+            data-ocid={`chat.backend_archive.delete_button.${index + 1}`}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </>
+      )}
     </div>
   );
 }
