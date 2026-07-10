@@ -80,6 +80,16 @@ module {
     createdAt : Int;
   };
 
+  public type ChatArchive = {
+    id : Nat;
+    bookId : Nat;
+    sessionId : Text;
+    title : Text;
+    summary : Text;
+    createdAt : Int;
+    updatedAt : Int;
+  };
+
   public type ChatSession = {
     id : Nat;
     chapterId : Nat;

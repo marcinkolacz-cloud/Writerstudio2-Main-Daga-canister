@@ -77,6 +77,16 @@ type ChatMessage =
    role: text;
    sessionId: text;
  };
+type ChatArchive = 
+ record {
+   bookId: nat;
+   createdAt: int;
+   id: nat;
+   sessionId: text;
+   summary: text;
+   title: text;
+   updatedAt: int;
+ };
 type Chapter = 
  record {
    bookId: nat;
@@ -138,6 +148,11 @@ service : {
           nat;
           Chapter;
         }) query;
+  __chatArchives: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          ChatArchive;
+        }) query;
   __chatMessages: (ko: opt nat, count: opt nat) ->
    (vec record {
           nat;
@@ -172,6 +187,7 @@ service : {
   __nextAnnotationId: () -> (nat) query;
   __nextBookId: () -> (nat) query;
   __nextChapterId: () -> (nat) query;
+  __nextChatArchiveId: () -> (nat) query;
   __nextChatMessageId: () -> (nat) query;
   __nextChatSessionId: () -> (nat) query;
   __nextChatSessionMessageId: () -> (nat) query;
@@ -190,11 +206,13 @@ service : {
   addChatMessage: (sessionId: nat, role: text, content: text) -> (nat);
   checkAccess: (code: text) -> (bool);
   clearChat: (bookId: nat, sessionId: text) -> (bool);
+  createArchive: (bookId: nat, sessionId: text, title: text) -> (nat);
   createBook: (title: text, description: text, category: text) -> (nat);
   createChapter: (bookId: nat, title: text) -> (nat);
   createChatSession: (chapterId: nat, title: text) -> (nat);
   createComment: (chapterId: nat, anchorText: text, content: text) -> (nat);
   deleteAnalysis: (id: nat) -> (bool);
+  deleteArchive: (id: nat) -> (bool);
   deleteBook: (id: nat) -> (bool);
   deleteChapter: (id: nat) -> (bool);
   deleteChatSession: (sessionId: nat) -> ();
@@ -230,6 +248,7 @@ service : {
   listAnalysesByBook: (bookId: nat) -> (vec Analysis);
   listAnalysesByChapter: (chapterId: nat) -> (vec Analysis);
   listAnnotationsByAnalysis: (analysisId: nat) -> (vec TextAnnotation);
+  listArchivesByBook: (bookId: nat) -> (vec ChatArchive);
   listBooksByOwner: () -> (vec Book);
   listChaptersByBook: (bookId: nat) -> (vec Chapter);
   listCommentsByChapter: (chapterId: nat) -> (vec Comment);
@@ -244,6 +263,7 @@ service : {
   recordHourlyActivity: (hour: nat, wordsAdded: nat) -> ();
   recordWritingActivity: (bookId: nat, date: text, wordsAdded: nat,
    wordsRemoved: nat, activeMinutes: nat) -> ();
+  renameArchive: (id: nat, newTitle: text) -> (bool);
   reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);
   revokeInviteCode: (code: text) -> (bool);
   saveAnalysis: (bookId: nat, chapterId: opt nat, analysisType: text,
@@ -262,6 +282,7 @@ service : {
   sendMessage: (bookId: nat, sessionId: text, role: text, content: text,
    provider: text) -> (nat);
   setAdminPrincipal: (p: principal) -> ();
+  setArchiveSummary: (id: nat, summary: text) -> (bool);
   synthesizeSpeech: ("text": text, voice: text, apiKey: text) -> (blob);
   ttsTransform: (raw:
    record {

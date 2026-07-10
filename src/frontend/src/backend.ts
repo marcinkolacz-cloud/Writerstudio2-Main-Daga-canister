@@ -99,6 +99,15 @@ export interface Analysis {
     chapterId?: bigint;
     resultContent: string;
 }
+export interface ChatArchive {
+    id: bigint;
+    title: string;
+    createdAt: bigint;
+    bookId: bigint;
+    summary: string;
+    updatedAt: bigint;
+    sessionId: string;
+}
 export interface Book {
     id: bigint;
     title: string;
@@ -166,6 +175,7 @@ export interface backendInterface {
     __annotations(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, TextAnnotation]>>;
     __books(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Book]>>;
     __chapters(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Chapter]>>;
+    __chatArchives(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, ChatArchive]>>;
     __chatMessages(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, ChatMessage]>>;
     __chatSessionMessages(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, ChatSessionMessage]>>;
     __chatSessions(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, ChatSession]>>;
@@ -176,6 +186,7 @@ export interface backendInterface {
     __nextAnnotationId(): Promise<bigint>;
     __nextBookId(): Promise<bigint>;
     __nextChapterId(): Promise<bigint>;
+    __nextChatArchiveId(): Promise<bigint>;
     __nextChatMessageId(): Promise<bigint>;
     __nextChatSessionId(): Promise<bigint>;
     __nextChatSessionMessageId(): Promise<bigint>;
@@ -186,11 +197,13 @@ export interface backendInterface {
     addChatMessage(sessionId: bigint, role: string, content: string): Promise<bigint>;
     checkAccess(code: string): Promise<boolean>;
     clearChat(bookId: bigint, sessionId: string): Promise<boolean>;
+    createArchive(bookId: bigint, sessionId: string, title: string): Promise<bigint>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
     createChatSession(chapterId: bigint, title: string): Promise<bigint>;
     createComment(chapterId: bigint, anchorText: string, content: string): Promise<bigint>;
     deleteAnalysis(id: bigint): Promise<boolean>;
+    deleteArchive(id: bigint): Promise<boolean>;
     deleteBook(id: bigint): Promise<boolean>;
     deleteChapter(id: bigint): Promise<boolean>;
     deleteChatSession(sessionId: bigint): Promise<void>;
@@ -223,6 +236,7 @@ export interface backendInterface {
     listAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listAnnotationsByAnalysis(analysisId: bigint): Promise<Array<TextAnnotation>>;
+    listArchivesByBook(bookId: bigint): Promise<Array<ChatArchive>>;
     listBooksByOwner(): Promise<Array<Book>>;
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
     listCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
@@ -235,6 +249,7 @@ export interface backendInterface {
     }>>;
     recordHourlyActivity(hour: bigint, wordsAdded: bigint): Promise<void>;
     recordWritingActivity(bookId: bigint, date: string, wordsAdded: bigint, wordsRemoved: bigint, activeMinutes: bigint): Promise<void>;
+    renameArchive(id: bigint, newTitle: string): Promise<boolean>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     revokeInviteCode(code: string): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
@@ -248,6 +263,7 @@ export interface backendInterface {
     saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
     sendMessage(bookId: bigint, sessionId: string, role: string, content: string, provider: string): Promise<bigint>;
     setAdminPrincipal(p: Principal): Promise<void>;
+    setArchiveSummary(id: bigint, summary: string): Promise<boolean>;
     synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
     ttsTransform(raw: {
         context: Uint8Array;
@@ -344,6 +360,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.__chapters(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async __chatArchives(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, ChatArchive]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__chatArchives(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__chatArchives(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
@@ -487,6 +517,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async __nextChatArchiveId(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__nextChatArchiveId();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__nextChatArchiveId();
+            return result;
+        }
+    }
     async __nextChatMessageId(): Promise<bigint> {
         if (this.processError) {
             try {
@@ -627,6 +671,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async createArchive(arg0: bigint, arg1: string, arg2: string): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createArchive(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createArchive(arg0, arg1, arg2);
+            return result;
+        }
+    }
     async createBook(arg0: string, arg1: string, arg2: string): Promise<bigint> {
         if (this.processError) {
             try {
@@ -694,6 +752,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.deleteAnalysis(arg0);
+            return result;
+        }
+    }
+    async deleteArchive(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.deleteArchive(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.deleteArchive(arg0);
             return result;
         }
     }
@@ -1028,6 +1100,20 @@ export class Backend implements backendInterface {
             return from_candid_vec_n21(this._uploadFile, this._downloadFile, result);
         }
     }
+    async listArchivesByBook(arg0: bigint): Promise<Array<ChatArchive>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listArchivesByBook(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listArchivesByBook(arg0);
+            return result;
+        }
+    }
     async listBooksByOwner(): Promise<Array<Book>> {
         if (this.processError) {
             try {
@@ -1144,6 +1230,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async renameArchive(arg0: bigint, arg1: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.renameArchive(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.renameArchive(arg0, arg1);
+            return result;
+        }
+    }
     async reorderChapters(arg0: bigint, arg1: Array<bigint>): Promise<boolean> {
         if (this.processError) {
             try {
@@ -1245,6 +1345,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.setAdminPrincipal(arg0);
+            return result;
+        }
+    }
+    async setArchiveSummary(arg0: bigint, arg1: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.setArchiveSummary(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.setArchiveSummary(arg0, arg1);
             return result;
         }
     }

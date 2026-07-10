@@ -29035,6 +29035,15 @@ const Chapter = Record({
   "sessionId": Text$3,
   "orderIndex": Nat
 });
+const ChatArchive = Record({
+  "id": Nat,
+  "title": Text$3,
+  "createdAt": Int,
+  "bookId": Nat,
+  "summary": Text$3,
+  "updatedAt": Int,
+  "sessionId": Text$3
+});
 const ChatMessage = Record({
   "id": Nat,
   "content": Text$3,
@@ -29117,6 +29126,11 @@ Service({
     [Vec(Tuple(Nat, Chapter))],
     ["query"]
   ),
+  "__chatArchives": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, ChatArchive))],
+    ["query"]
+  ),
   "__chatMessages": Func(
     [Opt(Nat), Opt(Nat)],
     [Vec(Tuple(Nat, ChatMessage))],
@@ -29151,6 +29165,7 @@ Service({
   "__nextAnnotationId": Func([], [Nat], ["query"]),
   "__nextBookId": Func([], [Nat], ["query"]),
   "__nextChapterId": Func([], [Nat], ["query"]),
+  "__nextChatArchiveId": Func([], [Nat], ["query"]),
   "__nextChatMessageId": Func([], [Nat], ["query"]),
   "__nextChatSessionId": Func([], [Nat], ["query"]),
   "__nextChatSessionMessageId": Func([], [Nat], ["query"]),
@@ -29169,11 +29184,13 @@ Service({
   "addChatMessage": Func([Nat, Text$3, Text$3], [Nat], []),
   "checkAccess": Func([Text$3], [Bool], []),
   "clearChat": Func([Nat, Text$3], [Bool], []),
+  "createArchive": Func([Nat, Text$3, Text$3], [Nat], []),
   "createBook": Func([Text$3, Text$3, Text$3], [Nat], []),
   "createChapter": Func([Nat, Text$3], [Nat], []),
   "createChatSession": Func([Nat, Text$3], [Nat], []),
   "createComment": Func([Nat, Text$3, Text$3], [Nat], []),
   "deleteAnalysis": Func([Nat], [Bool], []),
+  "deleteArchive": Func([Nat], [Bool], []),
   "deleteBook": Func([Nat], [Bool], []),
   "deleteChapter": Func([Nat], [Bool], []),
   "deleteChatSession": Func([Nat], [], []),
@@ -29230,6 +29247,7 @@ Service({
     [Vec(TextAnnotation)],
     []
   ),
+  "listArchivesByBook": Func([Nat], [Vec(ChatArchive)], []),
   "listBooksByOwner": Func([], [Vec(Book)], []),
   "listChaptersByBook": Func([Nat], [Vec(Chapter)], []),
   "listCommentsByChapter": Func([Nat], [Vec(Comment)], []),
@@ -29258,6 +29276,7 @@ Service({
     [],
     []
   ),
+  "renameArchive": Func([Nat, Text$3], [Bool], []),
   "reorderChapters": Func([Nat, Vec(Nat)], [Bool], []),
   "revokeInviteCode": Func([Text$3], [Bool], []),
   "saveAnalysis": Func(
@@ -29292,6 +29311,7 @@ Service({
     []
   ),
   "setAdminPrincipal": Func([Principal2], [], []),
+  "setArchiveSummary": Func([Nat, Text$3], [Bool], []),
   "synthesizeSpeech": Func(
     [Text$3, Text$3, Text$3],
     [Vec(Nat8)],
@@ -29388,6 +29408,15 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "sessionId": IDL2.Text,
     "orderIndex": IDL2.Nat
   });
+  const ChatArchive2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "title": IDL2.Text,
+    "createdAt": IDL2.Int,
+    "bookId": IDL2.Nat,
+    "summary": IDL2.Text,
+    "updatedAt": IDL2.Int,
+    "sessionId": IDL2.Text
+  });
   const ChatMessage2 = IDL2.Record({
     "id": IDL2.Nat,
     "content": IDL2.Text,
@@ -29470,6 +29499,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Chapter2))],
       ["query"]
     ),
+    "__chatArchives": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, ChatArchive2))],
+      ["query"]
+    ),
     "__chatMessages": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, ChatMessage2))],
@@ -29504,6 +29538,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "__nextAnnotationId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextBookId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChapterId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__nextChatArchiveId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChatMessageId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChatSessionId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextChatSessionMessageId": IDL2.Func([], [IDL2.Nat], ["query"]),
@@ -29522,11 +29557,13 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "addChatMessage": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "checkAccess": IDL2.Func([IDL2.Text], [IDL2.Bool], []),
     "clearChat": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Bool], []),
+    "createArchive": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "createBook": IDL2.Func([IDL2.Text, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "createChapter": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
     "createChatSession": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Nat], []),
     "createComment": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Nat], []),
     "deleteAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "deleteArchive": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteBook": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteChapter": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteChatSession": IDL2.Func([IDL2.Nat], [], []),
@@ -29587,6 +29624,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(TextAnnotation2)],
       []
     ),
+    "listArchivesByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(ChatArchive2)], []),
     "listBooksByOwner": IDL2.Func([], [IDL2.Vec(Book2)], []),
     "listChaptersByBook": IDL2.Func([IDL2.Nat], [IDL2.Vec(Chapter2)], []),
     "listCommentsByChapter": IDL2.Func([IDL2.Nat], [IDL2.Vec(Comment2)], []),
@@ -29615,6 +29653,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [],
       []
     ),
+    "renameArchive": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Bool], []),
     "reorderChapters": IDL2.Func([IDL2.Nat, IDL2.Vec(IDL2.Nat)], [IDL2.Bool], []),
     "revokeInviteCode": IDL2.Func([IDL2.Text], [IDL2.Bool], []),
     "saveAnalysis": IDL2.Func(
@@ -29649,6 +29688,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
       []
     ),
     "setAdminPrincipal": IDL2.Func([IDL2.Principal], [], []),
+    "setArchiveSummary": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Bool], []),
     "synthesizeSpeech": IDL2.Func(
       [IDL2.Text, IDL2.Text, IDL2.Text],
       [IDL2.Vec(IDL2.Nat8)],
@@ -34457,6 +34497,20 @@ class Backend {
       return result;
     }
   }
+  async __chatArchives(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__chatArchives(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__chatArchives(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
   async __chatMessages(arg0, arg1) {
     if (this.processError) {
       try {
@@ -34594,6 +34648,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.__nextChapterId();
+      return result;
+    }
+  }
+  async __nextChatArchiveId() {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__nextChatArchiveId();
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__nextChatArchiveId();
       return result;
     }
   }
@@ -34737,6 +34805,20 @@ class Backend {
       return result;
     }
   }
+  async createArchive(arg0, arg1, arg2) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.createArchive(arg0, arg1, arg2);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.createArchive(arg0, arg1, arg2);
+      return result;
+    }
+  }
   async createBook(arg0, arg1, arg2) {
     if (this.processError) {
       try {
@@ -34804,6 +34886,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.deleteAnalysis(arg0);
+      return result;
+    }
+  }
+  async deleteArchive(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.deleteArchive(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.deleteArchive(arg0);
       return result;
     }
   }
@@ -35129,6 +35225,20 @@ class Backend {
       return from_candid_vec_n21(this._uploadFile, this._downloadFile, result);
     }
   }
+  async listArchivesByBook(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.listArchivesByBook(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.listArchivesByBook(arg0);
+      return result;
+    }
+  }
   async listBooksByOwner() {
     if (this.processError) {
       try {
@@ -35241,6 +35351,20 @@ class Backend {
       return result;
     }
   }
+  async renameArchive(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.renameArchive(arg0, arg1);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.renameArchive(arg0, arg1);
+      return result;
+    }
+  }
   async reorderChapters(arg0, arg1) {
     if (this.processError) {
       try {
@@ -35336,6 +35460,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.setAdminPrincipal(arg0);
+      return result;
+    }
+  }
+  async setArchiveSummary(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.setArchiveSummary(arg0, arg1);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.setArchiveSummary(arg0, arg1);
       return result;
     }
   }
@@ -84563,7 +84701,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BIBgtSVO.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CIoMDKYV.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

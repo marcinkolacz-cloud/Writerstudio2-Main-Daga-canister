@@ -7,6 +7,7 @@ import ChaptersApi "mixins/ChaptersApi";
 import AnalysesApi "mixins/AnalysesApi";
 import TextAnnotationsApi "mixins/TextAnnotationsApi";
 import ChatApi "mixins/ChatApi";
+import ChatArchivesApi "mixins/ChatArchivesApi";
 import ChatsApi "mixins/ChatsApi";
 import CommentsApi "mixins/CommentsApi";
 import StatsApi "mixins/StatsApi";
@@ -23,6 +24,7 @@ actor {
   let analyses : Map.Map<Nat, Types.Analysis>;
   let annotations : Map.Map<Nat, Types.TextAnnotation>;
   let chatMessages : Map.Map<Nat, Types.ChatMessage>;
+  let chatArchives : Map.Map<Nat, Types.ChatArchive>;
   let chatSessions : Map.Map<Nat, Types.ChatSession>;
   let chatSessionMessages : Map.Map<Nat, Types.ChatSessionMessage>;
   let comments : Map.Map<Nat, Types.Comment>;
@@ -36,6 +38,7 @@ actor {
   var nextAnalysisId : Nat;
   var nextAnnotationId : Nat;
   var nextChatMessageId : Nat;
+  var nextChatArchiveId : Nat;
   var nextChatSessionId : Nat;
   var nextChatSessionMessageId : Nat;
   var nextCommentId : Nat;
@@ -47,6 +50,7 @@ actor {
   include AnalysesApi(books, chapters, analyses);
   include TextAnnotationsApi(books, analyses, annotations);
   include ChatApi(books, chatMessages);
+  include ChatArchivesApi(books, chatArchives);
   include ChatsApi(books, chapters, chatSessions, chatSessionMessages);
   include CommentsApi(books, chapters, comments);
   include StatsApi(books, chapters);

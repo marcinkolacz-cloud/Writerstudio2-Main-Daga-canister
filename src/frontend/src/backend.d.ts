@@ -53,6 +53,15 @@ export interface Analysis {
     chapterId?: bigint;
     resultContent: string;
 }
+export interface ChatArchive {
+    id: bigint;
+    title: string;
+    createdAt: bigint;
+    bookId: bigint;
+    summary: string;
+    updatedAt: bigint;
+    sessionId: string;
+}
 export interface Book {
     id: bigint;
     title: string;
@@ -118,11 +127,13 @@ export interface backendInterface {
     addChatMessage(sessionId: bigint, role: string, content: string): Promise<bigint>;
     checkAccess(code: string): Promise<boolean>;
     clearChat(bookId: bigint, sessionId: string): Promise<boolean>;
+    createArchive(bookId: bigint, sessionId: string, title: string): Promise<bigint>;
     createBook(title: string, description: string, category: string): Promise<bigint>;
     createChapter(bookId: bigint, title: string): Promise<bigint>;
     createChatSession(chapterId: bigint, title: string): Promise<bigint>;
     createComment(chapterId: bigint, anchorText: string, content: string): Promise<bigint>;
     deleteAnalysis(id: bigint): Promise<boolean>;
+    deleteArchive(id: bigint): Promise<boolean>;
     deleteBook(id: bigint): Promise<boolean>;
     deleteChapter(id: bigint): Promise<boolean>;
     deleteChatSession(sessionId: bigint): Promise<void>;
@@ -155,6 +166,7 @@ export interface backendInterface {
     listAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
     listAnalysesByChapter(chapterId: bigint): Promise<Array<Analysis>>;
     listAnnotationsByAnalysis(analysisId: bigint): Promise<Array<TextAnnotation>>;
+    listArchivesByBook(bookId: bigint): Promise<Array<ChatArchive>>;
     listBooksByOwner(): Promise<Array<Book>>;
     listChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
     listCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
@@ -167,6 +179,7 @@ export interface backendInterface {
     }>>;
     recordHourlyActivity(hour: bigint, wordsAdded: bigint): Promise<void>;
     recordWritingActivity(bookId: bigint, date: string, wordsAdded: bigint, wordsRemoved: bigint, activeMinutes: bigint): Promise<void>;
+    renameArchive(id: bigint, newTitle: string): Promise<boolean>;
     reorderChapters(bookId: bigint, orderedIds: Array<bigint>): Promise<boolean>;
     revokeInviteCode(code: string): Promise<boolean>;
     saveAnalysis(bookId: bigint, chapterId: bigint | null, analysisType: string, provider: string, resultContent: string): Promise<bigint>;
@@ -180,6 +193,7 @@ export interface backendInterface {
     saveRecording(chapterId: bigint, bookId: bigint, voice: string, audioData: Uint8Array): Promise<bigint>;
     sendMessage(bookId: bigint, sessionId: string, role: string, content: string, provider: string): Promise<bigint>;
     setAdminPrincipal(p: Principal): Promise<void>;
+    setArchiveSummary(id: bigint, summary: string): Promise<boolean>;
     synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
     ttsTransform(raw: {
         context: Uint8Array;
