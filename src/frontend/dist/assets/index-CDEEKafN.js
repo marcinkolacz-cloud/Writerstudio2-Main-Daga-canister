@@ -84536,7 +84536,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CGMXRWB3.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-VsI_TyVd.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -85669,8 +85669,8 @@ function ChapterEditorPage() {
       console.log("[CURSOR] content empty, waiting");
       return;
     }
-    if (lastSyncedChapterIdRef.current !== chapterId) {
-      console.log("[CURSOR] content not yet synced for this chapter, waiting");
+    if (!chapter || content !== chapter.content) {
+      console.log("[CURSOR] content not yet matching loaded chapter, waiting");
       return;
     }
     const editor = editorRef.current;
@@ -85699,7 +85699,7 @@ function ChapterEditorPage() {
       console.error("[CURSOR] error restoring", err);
     }
     lastCursorRestoredChapterIdRef.current = chapterId;
-  }, [chapterId, content]);
+  }, [chapterId, content, chapter]);
   const handleSendToChat = (text) => {
     if (!book) return;
     localStorage.setItem("writerstudio-chat-open", "true");

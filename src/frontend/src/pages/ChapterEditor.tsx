@@ -531,8 +531,8 @@ export function ChapterEditorPage() {
       console.log("[CURSOR] content empty, waiting");
       return;
     }
-    if (lastSyncedChapterIdRef.current !== chapterId) {
-      console.log("[CURSOR] content not yet synced for this chapter, waiting");
+    if (!chapter || content !== chapter.content) {
+      console.log("[CURSOR] content not yet matching loaded chapter, waiting");
       return;
     }
     const editor = editorRef.current;
@@ -561,7 +561,7 @@ export function ChapterEditorPage() {
       console.error("[CURSOR] error restoring", err);
     }
     lastCursorRestoredChapterIdRef.current = chapterId;
-  }, [chapterId, content]);
+  }, [chapterId, content, chapter]);
 
   const handleSendToChat = (text: string) => {
     if (!book) return;
