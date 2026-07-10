@@ -37929,6 +37929,36 @@ function useUpdateChapter() {
     }
   });
 }
+function useRecordWritingActivity() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      bookId,
+      date: date2,
+      wordsAdded,
+      wordsRemoved,
+      activeMinutes
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.recordWritingActivity(
+        bookId,
+        date2,
+        wordsAdded,
+        wordsRemoved,
+        activeMinutes
+      );
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["writingStats", "book", variables.bookId]
+      });
+      queryClient2.invalidateQueries({
+        queryKey: ["writingStats", "global"]
+      });
+    }
+  });
+}
 function useSaveAnalysis() {
   const { actor } = useActorLocal(createActor);
   const queryClient2 = useQueryClient();
@@ -37971,7 +38001,7 @@ function useSaveAnnotations() {
     },
     onSuccess: (_2, variables) => {
       queryClient2.invalidateQueries({
-        queryKey: ["annotations", variables.analysisId]
+        queryKey: ["annotations", "analysis", variables.analysisId]
       });
     }
   });
@@ -84086,6 +84116,85 @@ function DropdownMenuItem({
     }
   );
 }
+const IDLE_SESSION_GAP_MS = 5 * 60 * 1e3;
+const ACTIVE_GAP_THRESHOLD_MS = 2 * 60 * 1e3;
+const FLUSH_INTERVAL_MS = 60 * 1e3;
+function countWords(html) {
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  const text = div.textContent || div.innerText || "";
+  return text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;
+}
+function todayDate() {
+  const d2 = /* @__PURE__ */ new Date();
+  return `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, "0")}-${String(d2.getDate()).padStart(2, "0")}`;
+}
+function useWritingStatsTracker(bookId, chapterId, content) {
+  const recordActivity = useRecordWritingActivity();
+  const lastWordCountRef = reactExports.useRef(null);
+  const lastChangeTimeRef = reactExports.useRef(null);
+  const lastChapterIdRef = reactExports.useRef(void 0);
+  const pendingWordsAddedRef = reactExports.useRef(0);
+  const pendingWordsRemovedRef = reactExports.useRef(0);
+  const pendingActiveMsRef = reactExports.useRef(0);
+  const pendingSessionCountRef = reactExports.useRef(0);
+  const flush = () => {
+    if (!bookId) return;
+    const wordsAdded = pendingWordsAddedRef.current;
+    const wordsRemoved = pendingWordsRemovedRef.current;
+    const activeMinutes = Math.round(pendingActiveMsRef.current / 6e4);
+    const sessionCount = pendingSessionCountRef.current;
+    if (wordsAdded === 0 && wordsRemoved === 0 && sessionCount === 0) return;
+    pendingWordsAddedRef.current = 0;
+    pendingWordsRemovedRef.current = 0;
+    pendingActiveMsRef.current = 0;
+    pendingSessionCountRef.current = 0;
+    recordActivity.mutate({
+      bookId,
+      date: todayDate(),
+      wordsAdded: BigInt(wordsAdded),
+      wordsRemoved: BigInt(Math.max(wordsRemoved, 0)),
+      activeMinutes: BigInt(Math.max(activeMinutes, sessionCount > 0 ? 1 : 0))
+    });
+  };
+  reactExports.useEffect(() => {
+    if (lastChapterIdRef.current !== chapterId) {
+      flush();
+      lastWordCountRef.current = null;
+      lastChangeTimeRef.current = null;
+      lastChapterIdRef.current = chapterId;
+    }
+  }, [chapterId]);
+  reactExports.useEffect(() => {
+    const newCount = countWords(content);
+    const now2 = Date.now();
+    if (lastWordCountRef.current !== null) {
+      const diff = newCount - lastWordCountRef.current;
+      if (diff > 0) pendingWordsAddedRef.current += diff;
+      if (diff < 0) pendingWordsRemovedRef.current += -diff;
+      if (lastChangeTimeRef.current !== null) {
+        const gap = now2 - lastChangeTimeRef.current;
+        if (gap <= ACTIVE_GAP_THRESHOLD_MS) {
+          pendingActiveMsRef.current += gap;
+        } else if (gap > IDLE_SESSION_GAP_MS) {
+          pendingSessionCountRef.current += 1;
+        }
+      }
+    }
+    lastWordCountRef.current = newCount;
+    lastChangeTimeRef.current = now2;
+  }, [content]);
+  reactExports.useEffect(() => {
+    const interval = setInterval(flush, FLUSH_INTERVAL_MS);
+    const onBeforeUnload = () => flush();
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+      flush();
+    };
+  }, [bookId]);
+}
 function getPricing(model) {
   const sonnet5PromoEnds = /* @__PURE__ */ new Date("2026-08-31T23:59:59Z");
   const now2 = /* @__PURE__ */ new Date();
@@ -84271,7 +84380,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BNUkQgu6.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DbyA8LR3.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -85259,6 +85368,7 @@ function ChapterEditorPage() {
   const saveAnnotations = useSaveAnnotations();
   const [title, setTitle] = reactExports.useState("");
   const [content, setContent2] = reactExports.useState("");
+  useWritingStatsTracker(book == null ? void 0 : book.id, chapterId, content);
   const [saveStatus, setSaveStatus] = reactExports.useState("saved");
   const [saveErrorBannerVisible, setSaveErrorBannerVisible] = reactExports.useState(false);
   const [analysisStatus, setAnalysisStatus] = reactExports.useState("idle");

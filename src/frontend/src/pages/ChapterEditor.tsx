@@ -52,6 +52,7 @@ import {
   useUpdateAnnotationApproved,
   useUpdateChapter,
 } from "@/hooks/useBackend";
+import { useWritingStatsTracker } from "@/hooks/useWritingStatsTracker";
 import {
   analyzeConsistency,
   analyzeDialogue,
@@ -344,6 +345,7 @@ export function ChapterEditorPage() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  useWritingStatsTracker(book?.id, chapterId, content);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const [saveErrorBannerVisible, setSaveErrorBannerVisible] = useState(false);
 

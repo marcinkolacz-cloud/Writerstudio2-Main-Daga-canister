@@ -7,6 +7,7 @@ import type {
   ChatSession,
   ChatSessionMessage,
   Comment,
+  DailyWritingStat,
   InviteCode,
   TextAnnotation,
 } from "@/backend";
@@ -150,6 +151,75 @@ export function useUpdateChapterIndents() {
   });
 }
 
+export type { DailyWritingStat };
+
+export function useRecordWritingActivity() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      bookId,
+      date,
+      wordsAdded,
+      wordsRemoved,
+      activeMinutes,
+    }: {
+      bookId: bigint;
+      date: string;
+      wordsAdded: bigint;
+      wordsRemoved: bigint;
+      activeMinutes: bigint;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.recordWritingActivity(
+        bookId,
+        date,
+        wordsAdded,
+        wordsRemoved,
+        activeMinutes,
+      );
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["writingStats", "book", variables.bookId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["writingStats", "global"],
+      });
+    },
+  });
+}
+
+export function useStatsByBook(
+  bookId: string | number,
+  fromDate: string,
+  toDate: string,
+) {
+  const { actor } = useActorLocal(createActor);
+  const id = BigInt(bookId);
+  return useQuery<DailyWritingStat[]>({
+    queryKey: ["writingStats", "book", id, fromDate, toDate],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getStatsByBook(id, fromDate, toDate);
+    },
+    enabled: !!actor && !!bookId,
+  });
+}
+
+export function useGlobalWritingStats(fromDate: string, toDate: string) {
+  const { actor } = useActorLocal(createActor);
+  return useQuery<DailyWritingStat[]>({
+    queryKey: ["writingStats", "global", fromDate, toDate],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getGlobalStats(fromDate, toDate);
+    },
+    enabled: !!actor,
+  });
+}
+
 export function useSaveAnalysis() {
   const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();
@@ -213,7 +283,7 @@ export function useSaveAnnotations() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["annotations", variables.analysisId],
+        queryKey: ["annotations", "analysis", variables.analysisId],
       });
     },
   });
