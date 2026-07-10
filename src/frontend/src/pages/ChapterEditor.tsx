@@ -552,7 +552,7 @@ export function ChapterEditorPage() {
         return;
       }
       console.log("[CURSOR] restoring position", pos);
-      editor.commands.setTextSelection(pos);
+      editor.chain().focus().setTextSelection(pos).scrollIntoView().run();
     } catch (err) {
       console.error("[CURSOR] error restoring", err);
     }

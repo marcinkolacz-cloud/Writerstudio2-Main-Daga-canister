@@ -84536,7 +84536,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-C5F5BooG.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Bc51__RE.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -85690,7 +85690,7 @@ function ChapterEditorPage() {
         return;
       }
       console.log("[CURSOR] restoring position", pos);
-      editor.commands.setTextSelection(pos);
+      editor.chain().focus().setTextSelection(pos).scrollIntoView().run();
     } catch (err) {
       console.error("[CURSOR] error restoring", err);
     }
