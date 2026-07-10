@@ -201,6 +201,7 @@ export function StatisticsPage() {
         wordsAdded: number;
         wordsRemoved: number;
         netWords: number;
+        activeMinutes: number;
       }
     >();
     for (const stat of writingStatsData ?? []) {
@@ -208,22 +209,29 @@ export function StatisticsPage() {
       const wordsAdded = Number(stat.wordsAdded);
       const wordsRemoved = Number(stat.wordsRemoved);
       const netWords = Number(stat.netWords);
+      const activeMinutes = Number(stat.activeMinutes);
       if (existing) {
         existing.wordsAdded += wordsAdded;
         existing.wordsRemoved += wordsRemoved;
         existing.netWords += netWords;
+        existing.activeMinutes += activeMinutes;
       } else {
         byDate.set(stat.date, {
           date: stat.date,
           wordsAdded,
           wordsRemoved,
           netWords,
+          activeMinutes,
         });
       }
     }
-    return Array.from(byDate.values()).sort((a, b) =>
-      a.date.localeCompare(b.date),
-    );
+    return Array.from(byDate.values())
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((d) => ({
+        ...d,
+        wpm:
+          d.activeMinutes > 0 ? Math.round(d.wordsAdded / d.activeMinutes) : 0,
+      }));
   })();
 
   const bookIds = books?.map((b) => b.id.toString()) ?? [];
@@ -546,6 +554,76 @@ export function StatisticsPage() {
               Intensywność koloru odzwierciedla liczbę słów dodanych danego
               dnia. Ciemniejszy odcień = więcej napisanego tekstu.
             </p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-border shadow-subtle">
+          <CardHeader>
+            <CardTitle className="font-display text-lg text-foreground">
+              Tempo pisania (słowa na minutę)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-72 w-full">
+              {writingStatsLoading ? (
+                <div className="flex h-full items-center justify-center">
+                  <Skeleton className="h-48 w-full" />
+                </div>
+              ) : dailyChartData.length === 0 ? (
+                <div
+                  className="flex h-full items-center justify-center text-sm text-muted-foreground"
+                  data-ocid="statistics.writing_stats.wpm_empty_state"
+                >
+                  Brak danych o tempie pisania w wybranym zakresie dat.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={dailyChartData}
+                    margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="oklch(var(--border))"
+                    />
+                    <XAxis
+                      dataKey="date"
+                      tick={{
+                        fill: "oklch(var(--muted-foreground))",
+                        fontSize: 11,
+                      }}
+                    />
+                    <YAxis
+                      tick={{
+                        fill: "oklch(var(--muted-foreground))",
+                        fontSize: 12,
+                      }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "oklch(var(--card))",
+                        border: "1px solid oklch(var(--border))",
+                        borderRadius: "var(--radius)",
+                        color: "oklch(var(--foreground))",
+                      }}
+                      formatter={(value: number) => [
+                        `${value.toLocaleString("pl-PL")} słów/min`,
+                        "Tempo",
+                      ]}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Line
+                      type="monotone"
+                      dataKey="wpm"
+                      name="Słowa na minutę"
+                      stroke="oklch(var(--chart-3))"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </CardContent>
         </Card>
       </section>

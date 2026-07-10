@@ -84403,7 +84403,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-ZMMyivSU.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DpIk4vb9.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -108289,22 +108289,26 @@ function StatisticsPage() {
       const wordsAdded = Number(stat.wordsAdded);
       const wordsRemoved = Number(stat.wordsRemoved);
       const netWords = Number(stat.netWords);
+      const activeMinutes = Number(stat.activeMinutes);
       if (existing) {
         existing.wordsAdded += wordsAdded;
         existing.wordsRemoved += wordsRemoved;
         existing.netWords += netWords;
+        existing.activeMinutes += activeMinutes;
       } else {
         byDate.set(stat.date, {
           date: stat.date,
           wordsAdded,
           wordsRemoved,
-          netWords
+          netWords,
+          activeMinutes
         });
       }
     }
-    return Array.from(byDate.values()).sort(
-      (a2, b2) => a2.date.localeCompare(b2.date)
-    );
+    return Array.from(byDate.values()).sort((a2, b2) => a2.date.localeCompare(b2.date)).map((d2) => ({
+      ...d2,
+      wpm: d2.activeMinutes > 0 ? Math.round(d2.wordsAdded / d2.activeMinutes) : 0
+    }));
   })();
   const bookIds = (books == null ? void 0 : books.map((b2) => b2.id.toString())) ?? [];
   const bookStats1 = useBookStats(bookIds[0] ?? "");
@@ -108611,6 +108615,78 @@ function StatisticsPage() {
           ),
           /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-3 text-xs text-muted-foreground", children: "Intensywność koloru odzwierciedla liczbę słów dodanych danego dnia. Ciemniejszy odcień = więcej napisanego tekstu." })
         ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-card border-border shadow-subtle", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(CardHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(CardTitle, { className: "font-display text-lg text-foreground", children: "Tempo pisania (słowa na minutę)" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(CardContent, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-72 w-full", children: writingStatsLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex h-full items-center justify-center", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Skeleton, { className: "h-48 w-full" }) }) : dailyChartData.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
+          {
+            className: "flex h-full items-center justify-center text-sm text-muted-foreground",
+            "data-ocid": "statistics.writing_stats.wpm_empty_state",
+            children: "Brak danych o tempie pisania w wybranym zakresie dat."
+          }
+        ) : /* @__PURE__ */ jsxRuntimeExports.jsx(ResponsiveContainer, { width: "100%", height: "100%", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          LineChart,
+          {
+            data: dailyChartData,
+            margin: { top: 8, right: 8, bottom: 8, left: 8 },
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                CartesianGrid,
+                {
+                  strokeDasharray: "3 3",
+                  stroke: "oklch(var(--border))"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                XAxis,
+                {
+                  dataKey: "date",
+                  tick: {
+                    fill: "oklch(var(--muted-foreground))",
+                    fontSize: 11
+                  }
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                YAxis,
+                {
+                  tick: {
+                    fill: "oklch(var(--muted-foreground))",
+                    fontSize: 12
+                  }
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Tooltip,
+                {
+                  contentStyle: {
+                    backgroundColor: "oklch(var(--card))",
+                    border: "1px solid oklch(var(--border))",
+                    borderRadius: "var(--radius)",
+                    color: "oklch(var(--foreground))"
+                  },
+                  formatter: (value) => [
+                    `${value.toLocaleString("pl-PL")} słów/min`,
+                    "Tempo"
+                  ]
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(Legend, { wrapperStyle: { fontSize: 12 } }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Line,
+                {
+                  type: "monotone",
+                  dataKey: "wpm",
+                  name: "Słowa na minutę",
+                  stroke: "oklch(var(--chart-3))",
+                  strokeWidth: 2,
+                  dot: false
+                }
+              )
+            ]
+          }
+        ) }) }) })
       ] })
     ] })
   ] });
