@@ -82691,6 +82691,12 @@ function RichTextEditor({
           return true;
         }
         return false;
+      },
+      handleDOMEvents: {
+        cut: (_view, event) => {
+          event.preventDefault();
+          return true;
+        }
       }
     }
   });
@@ -84275,13 +84281,7 @@ function useWritingStatsTracker(bookId, chapterId, content) {
   const pendingActiveMsRef = reactExports.useRef(0);
   const pendingSessionCountRef = reactExports.useRef(0);
   const flush = () => {
-    console.log("[STATS] flush called, bookId:", bookId);
     if (bookId === void 0) return;
-    console.log("[STATS] pending values:", {
-      wordsAdded: pendingWordsAddedRef.current,
-      wordsRemoved: pendingWordsRemovedRef.current,
-      sessionCount: pendingSessionCountRef.current
-    });
     const wordsAdded = pendingWordsAddedRef.current;
     const wordsRemoved = pendingWordsRemovedRef.current;
     const activeMinutes = Math.round(pendingActiveMsRef.current / 6e4);
@@ -84291,21 +84291,13 @@ function useWritingStatsTracker(bookId, chapterId, content) {
     pendingWordsRemovedRef.current = 0;
     pendingActiveMsRef.current = 0;
     pendingSessionCountRef.current = 0;
-    recordActivity.mutate(
-      {
-        bookId,
-        date: todayDate(),
-        wordsAdded: BigInt(wordsAdded),
-        wordsRemoved: BigInt(Math.max(wordsRemoved, 0)),
-        activeMinutes: BigInt(
-          Math.max(activeMinutes, sessionCount > 0 ? 1 : 0)
-        )
-      },
-      {
-        onSuccess: () => console.log("[STATS] recordWritingActivity SUCCESS"),
-        onError: (err) => console.error("[STATS] recordWritingActivity ERROR", err)
-      }
-    );
+    recordActivity.mutate({
+      bookId,
+      date: todayDate(),
+      wordsAdded: BigInt(wordsAdded),
+      wordsRemoved: BigInt(Math.max(wordsRemoved, 0)),
+      activeMinutes: BigInt(Math.max(activeMinutes, sessionCount > 0 ? 1 : 0))
+    });
     if (wordsAdded > 0) {
       recordHourly.mutate({
         hour: BigInt((/* @__PURE__ */ new Date()).getHours()),
@@ -84536,7 +84528,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CalG6kPA.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Bei8a5n1.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -85658,50 +85650,37 @@ function ChapterEditorPage() {
   }, [chapter, chapterId, updateChapter.mutate]);
   reactExports.useEffect(() => {
     if (!editorRef.current) {
-      console.log("[CURSOR] no editor yet");
       return;
     }
     if (lastCursorRestoredChapterIdRef.current === chapterId) {
-      console.log("[CURSOR] already restored for this chapter", chapterId);
       return;
     }
     if (content.length === 0) {
-      console.log("[CURSOR] content empty, waiting");
       return;
     }
     if (!chapter || content !== chapter.content) {
-      console.log("[CURSOR] content not yet matching loaded chapter, waiting");
       return;
     }
     const editor = editorRef.current;
     const docSize = editor.state.doc.content.size;
     try {
       const saved = localStorage.getItem(`ws_cursor_position_${chapterId}`);
-      console.log(
-        "[CURSOR] saved value from localStorage:",
-        saved,
-        "docSize:",
-        docSize
-      );
       if (saved === null) {
         lastCursorRestoredChapterIdRef.current = chapterId;
         return;
       }
       const pos = Number.parseInt(saved, 10);
       if (Number.isNaN(pos) || pos < 0 || pos > docSize) {
-        console.log("[CURSOR] position out of range, ignoring", pos);
         lastCursorRestoredChapterIdRef.current = chapterId;
         return;
       }
-      console.log("[CURSOR] restoring position", pos);
       editor.chain().focus().setTextSelection(pos).run();
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           editor.commands.scrollIntoView();
         });
       });
-    } catch (err) {
-      console.error("[CURSOR] error restoring", err);
+    } catch {
     }
     lastCursorRestoredChapterIdRef.current = chapterId;
   }, [chapterId, content, chapter]);

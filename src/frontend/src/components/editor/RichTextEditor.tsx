@@ -93,6 +93,12 @@ export function RichTextEditor({
 
         return false;
       },
+      handleDOMEvents: {
+        cut: (_view, event) => {
+          event.preventDefault();
+          return true;
+        },
+      },
     },
   });
 

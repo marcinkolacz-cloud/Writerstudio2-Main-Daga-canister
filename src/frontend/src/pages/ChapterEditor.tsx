@@ -520,51 +520,37 @@ export function ChapterEditorPage() {
   // `content` is a dep so this runs after content is applied to the editor.
   useEffect(() => {
     if (!editorRef.current) {
-      console.log("[CURSOR] no editor yet");
       return;
     }
     if (lastCursorRestoredChapterIdRef.current === chapterId) {
-      console.log("[CURSOR] already restored for this chapter", chapterId);
       return;
     }
     if (content.length === 0) {
-      console.log("[CURSOR] content empty, waiting");
       return;
     }
     if (!chapter || content !== chapter.content) {
-      console.log("[CURSOR] content not yet matching loaded chapter, waiting");
       return;
     }
     const editor = editorRef.current;
     const docSize = editor.state.doc.content.size;
     try {
       const saved = localStorage.getItem(`ws_cursor_position_${chapterId}`);
-      console.log(
-        "[CURSOR] saved value from localStorage:",
-        saved,
-        "docSize:",
-        docSize,
-      );
       if (saved === null) {
         lastCursorRestoredChapterIdRef.current = chapterId;
         return;
       }
       const pos = Number.parseInt(saved, 10);
       if (Number.isNaN(pos) || pos < 0 || pos > docSize) {
-        console.log("[CURSOR] position out of range, ignoring", pos);
         lastCursorRestoredChapterIdRef.current = chapterId;
         return;
       }
-      console.log("[CURSOR] restoring position", pos);
       editor.chain().focus().setTextSelection(pos).run();
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           editor.commands.scrollIntoView();
         });
       });
-    } catch (err) {
-      console.error("[CURSOR] error restoring", err);
-    }
+    } catch {}
     lastCursorRestoredChapterIdRef.current = chapterId;
   }, [chapterId, content, chapter]);
 

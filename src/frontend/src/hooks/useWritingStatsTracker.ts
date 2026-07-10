@@ -35,13 +35,7 @@ export function useWritingStatsTracker(
   const pendingSessionCountRef = useRef(0);
 
   const flush = () => {
-    console.log("[STATS] flush called, bookId:", bookId);
     if (bookId === undefined) return;
-    console.log("[STATS] pending values:", {
-      wordsAdded: pendingWordsAddedRef.current,
-      wordsRemoved: pendingWordsRemovedRef.current,
-      sessionCount: pendingSessionCountRef.current,
-    });
     const wordsAdded = pendingWordsAddedRef.current;
     const wordsRemoved = pendingWordsRemovedRef.current;
     const activeMinutes = Math.round(pendingActiveMsRef.current / 60000);
@@ -53,22 +47,13 @@ export function useWritingStatsTracker(
     pendingActiveMsRef.current = 0;
     pendingSessionCountRef.current = 0;
 
-    recordActivity.mutate(
-      {
-        bookId,
-        date: todayDate(),
-        wordsAdded: BigInt(wordsAdded),
-        wordsRemoved: BigInt(Math.max(wordsRemoved, 0)),
-        activeMinutes: BigInt(
-          Math.max(activeMinutes, sessionCount > 0 ? 1 : 0),
-        ),
-      },
-      {
-        onSuccess: () => console.log("[STATS] recordWritingActivity SUCCESS"),
-        onError: (err) =>
-          console.error("[STATS] recordWritingActivity ERROR", err),
-      },
-    );
+    recordActivity.mutate({
+      bookId,
+      date: todayDate(),
+      wordsAdded: BigInt(wordsAdded),
+      wordsRemoved: BigInt(Math.max(wordsRemoved, 0)),
+      activeMinutes: BigInt(Math.max(activeMinutes, sessionCount > 0 ? 1 : 0)),
+    });
 
     if (wordsAdded > 0) {
       recordHourly.mutate({
