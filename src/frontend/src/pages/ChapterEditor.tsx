@@ -556,7 +556,12 @@ export function ChapterEditorPage() {
         return;
       }
       console.log("[CURSOR] restoring position", pos);
-      editor.chain().focus().setTextSelection(pos).scrollIntoView().run();
+      editor.chain().focus().setTextSelection(pos).run();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          editor.commands.scrollIntoView();
+        });
+      });
     } catch (err) {
       console.error("[CURSOR] error restoring", err);
     }
