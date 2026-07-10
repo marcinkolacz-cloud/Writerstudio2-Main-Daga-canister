@@ -2479,11 +2479,20 @@ video {
 .bg-primary\/20 {
   background-color: oklch(var(--primary) / 0.2);
 }
+.bg-primary\/25 {
+  background-color: oklch(var(--primary) / 0.25);
+}
 .bg-primary\/30 {
   background-color: oklch(var(--primary) / 0.3);
 }
 .bg-primary\/5 {
   background-color: oklch(var(--primary) / 0.05);
+}
+.bg-primary\/50 {
+  background-color: oklch(var(--primary) / 0.5);
+}
+.bg-primary\/75 {
+  background-color: oklch(var(--primary) / 0.75);
 }
 .bg-purple-500\/25 {
   background-color: rgb(168 85 247 / 0.25);

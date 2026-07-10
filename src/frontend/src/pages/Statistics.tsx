@@ -147,6 +147,52 @@ export function StatisticsPage() {
   const writingStatsLoading =
     statsScope === "global" ? globalStatsLoading : bookScopedStatsLoading;
 
+  const heatmapToDate = defaultToDate();
+  const heatmapFromDate = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 89);
+    return isoDate(d);
+  })();
+
+  const { data: heatmapGlobalStats, isLoading: heatmapGlobalLoading } =
+    useGlobalWritingStats(heatmapFromDate, heatmapToDate);
+  const { data: heatmapBookScopedStats, isLoading: heatmapBookScopedLoading } =
+    useStatsByBook(selectedStatsBookId || "0", heatmapFromDate, heatmapToDate);
+
+  const heatmapStatsData =
+    statsScope === "global" ? heatmapGlobalStats : heatmapBookScopedStats;
+  const heatmapLoading =
+    statsScope === "global" ? heatmapGlobalLoading : heatmapBookScopedLoading;
+
+  const heatmapCells = (() => {
+    const byDate = new Map<string, number>();
+    for (const stat of heatmapStatsData ?? []) {
+      const words = Number(stat.wordsAdded);
+      byDate.set(stat.date, (byDate.get(stat.date) ?? 0) + words);
+    }
+    const cells: Array<{ date: string; words: number }> = [];
+    const start = new Date();
+    start.setDate(start.getDate() - 89);
+    for (let i = 0; i < 90; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const dateStr = isoDate(d);
+      cells.push({ date: dateStr, words: byDate.get(dateStr) ?? 0 });
+    }
+    return cells;
+  })();
+
+  const maxHeatmapWords = Math.max(1, ...heatmapCells.map((c) => c.words));
+
+  function heatmapIntensityClass(words: number): string {
+    if (words === 0) return "bg-muted";
+    const ratio = words / maxHeatmapWords;
+    if (ratio < 0.25) return "bg-primary/25";
+    if (ratio < 0.5) return "bg-primary/50";
+    if (ratio < 0.75) return "bg-primary/75";
+    return "bg-primary";
+  }
+
   const dailyChartData = (() => {
     const byDate = new Map<
       string,
@@ -469,6 +515,37 @@ export function StatisticsPage() {
                 </ResponsiveContainer>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-border shadow-subtle">
+          <CardHeader>
+            <CardTitle className="font-display text-lg text-foreground">
+              Regularność pisania (ostatnie 90 dni)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {heatmapLoading ? (
+              <Skeleton className="h-32 w-full" />
+            ) : (
+              <div
+                className="grid gap-1"
+                style={{ gridTemplateColumns: "repeat(18, minmax(0, 1fr))" }}
+                data-ocid="statistics.writing_stats.heatmap"
+              >
+                {heatmapCells.map((cell) => (
+                  <div
+                    key={cell.date}
+                    title={`${cell.date}: ${cell.words.toLocaleString("pl-PL")} słów`}
+                    className={`aspect-square rounded-sm ${heatmapIntensityClass(cell.words)}`}
+                  />
+                ))}
+              </div>
+            )}
+            <p className="mt-3 text-xs text-muted-foreground">
+              Intensywność koloru odzwierciedla liczbę słów dodanych danego
+              dnia. Ciemniejszy odcień = więcej napisanego tekstu.
+            </p>
           </CardContent>
         </Card>
       </section>

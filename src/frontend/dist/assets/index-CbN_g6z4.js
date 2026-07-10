@@ -37968,7 +37968,7 @@ function useStatsByBook(bookId, fromDate, toDate) {
       if (!actor) return [];
       return actor.getStatsByBook(id, fromDate, toDate);
     },
-    enabled: !!actor && true
+    enabled: !!actor && !!bookId
   });
 }
 function useGlobalWritingStats(fromDate, toDate) {
@@ -84403,7 +84403,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Blr_CSyw.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-ZMMyivSU.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -108246,6 +108246,42 @@ function StatisticsPage() {
   const { data: bookScopedStats, isLoading: bookScopedStatsLoading } = useStatsByBook(selectedStatsBookId || "0", fromDate, toDate);
   const writingStatsData = statsScope === "global" ? globalStats : bookScopedStats;
   const writingStatsLoading = statsScope === "global" ? globalStatsLoading : bookScopedStatsLoading;
+  const heatmapToDate = defaultToDate();
+  const heatmapFromDate = (() => {
+    const d2 = /* @__PURE__ */ new Date();
+    d2.setDate(d2.getDate() - 89);
+    return isoDate(d2);
+  })();
+  const { data: heatmapGlobalStats, isLoading: heatmapGlobalLoading } = useGlobalWritingStats(heatmapFromDate, heatmapToDate);
+  const { data: heatmapBookScopedStats, isLoading: heatmapBookScopedLoading } = useStatsByBook(selectedStatsBookId || "0", heatmapFromDate, heatmapToDate);
+  const heatmapStatsData = statsScope === "global" ? heatmapGlobalStats : heatmapBookScopedStats;
+  const heatmapLoading = statsScope === "global" ? heatmapGlobalLoading : heatmapBookScopedLoading;
+  const heatmapCells = (() => {
+    const byDate = /* @__PURE__ */ new Map();
+    for (const stat of heatmapStatsData ?? []) {
+      const words = Number(stat.wordsAdded);
+      byDate.set(stat.date, (byDate.get(stat.date) ?? 0) + words);
+    }
+    const cells = [];
+    const start = /* @__PURE__ */ new Date();
+    start.setDate(start.getDate() - 89);
+    for (let i = 0; i < 90; i++) {
+      const d2 = new Date(start);
+      d2.setDate(start.getDate() + i);
+      const dateStr = isoDate(d2);
+      cells.push({ date: dateStr, words: byDate.get(dateStr) ?? 0 });
+    }
+    return cells;
+  })();
+  const maxHeatmapWords = Math.max(1, ...heatmapCells.map((c2) => c2.words));
+  function heatmapIntensityClass(words) {
+    if (words === 0) return "bg-muted";
+    const ratio = words / maxHeatmapWords;
+    if (ratio < 0.25) return "bg-primary/25";
+    if (ratio < 0.5) return "bg-primary/50";
+    if (ratio < 0.75) return "bg-primary/75";
+    return "bg-primary";
+  }
   const dailyChartData = (() => {
     const byDate = /* @__PURE__ */ new Map();
     for (const stat of writingStatsData ?? []) {
@@ -108553,6 +108589,28 @@ function StatisticsPage() {
             ]
           }
         ) }) }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-card border-border shadow-subtle", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(CardHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(CardTitle, { className: "font-display text-lg text-foreground", children: "Regularność pisania (ostatnie 90 dni)" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(CardContent, { children: [
+          heatmapLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx(Skeleton, { className: "h-32 w-full" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "grid gap-1",
+              style: { gridTemplateColumns: "repeat(18, minmax(0, 1fr))" },
+              "data-ocid": "statistics.writing_stats.heatmap",
+              children: heatmapCells.map((cell) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  title: `${cell.date}: ${cell.words.toLocaleString("pl-PL")} słów`,
+                  className: `aspect-square rounded-sm ${heatmapIntensityClass(cell.words)}`
+                },
+                cell.date
+              ))
+            }
+          ),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-3 text-xs text-muted-foreground", children: "Intensywność koloru odzwierciedla liczbę słów dodanych danego dnia. Ciemniejszy odcień = więcej napisanego tekstu." })
+        ] })
       ] })
     ] })
   ] });
