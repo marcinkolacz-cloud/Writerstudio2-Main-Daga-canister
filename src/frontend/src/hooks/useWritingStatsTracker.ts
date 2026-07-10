@@ -36,7 +36,7 @@ export function useWritingStatsTracker(
 
   const flush = () => {
     console.log("[STATS] flush called, bookId:", bookId);
-    if (!bookId) return;
+    if (bookId === undefined) return;
     console.log("[STATS] pending values:", {
       wordsAdded: pendingWordsAddedRef.current,
       wordsRemoved: pendingWordsRemovedRef.current,

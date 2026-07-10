@@ -84276,7 +84276,7 @@ function useWritingStatsTracker(bookId, chapterId, content) {
   const pendingSessionCountRef = reactExports.useRef(0);
   const flush = () => {
     console.log("[STATS] flush called, bookId:", bookId);
-    if (!bookId) return;
+    if (bookId === void 0) return;
     console.log("[STATS] pending values:", {
       wordsAdded: pendingWordsAddedRef.current,
       wordsRemoved: pendingWordsRemovedRef.current,
@@ -84536,7 +84536,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Bc51__RE.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Rnmb9Re4.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
