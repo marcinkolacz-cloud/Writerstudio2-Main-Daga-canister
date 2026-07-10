@@ -84380,7 +84380,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DbyA8LR3.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DLEDeXss.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -85503,6 +85503,7 @@ function ChapterEditorPage() {
   reactExports.useEffect(() => {
     if (!editorRef.current) return;
     if (lastCursorRestoredChapterIdRef.current === chapterId) return;
+    if (content.length === 0) return;
     const editor = editorRef.current;
     const docSize = editor.state.doc.content.size;
     try {

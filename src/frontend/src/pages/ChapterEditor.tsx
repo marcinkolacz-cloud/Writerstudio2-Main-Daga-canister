@@ -517,11 +517,11 @@ export function ChapterEditorPage() {
 
   // Restore saved cursor position once per chapter load, after editor is ready.
   // Only moves the cursor — does not touch content or save logic.
-  // `content` is intentionally a dep so this runs after content is applied to the editor.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: content is a trigger, not read inside
+  // `content` is a dep so this runs after content is applied to the editor.
   useEffect(() => {
     if (!editorRef.current) return;
     if (lastCursorRestoredChapterIdRef.current === chapterId) return;
+    if (content.length === 0) return;
     const editor = editorRef.current;
     const docSize = editor.state.doc.content.size;
     try {
