@@ -531,6 +531,10 @@ export function ChapterEditorPage() {
       console.log("[CURSOR] content empty, waiting");
       return;
     }
+    if (lastSyncedChapterIdRef.current !== chapterId) {
+      console.log("[CURSOR] content not yet synced for this chapter, waiting");
+      return;
+    }
     const editor = editorRef.current;
     const docSize = editor.state.doc.content.size;
     try {

@@ -84536,7 +84536,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Rnmb9Re4.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CGMXRWB3.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -85667,6 +85667,10 @@ function ChapterEditorPage() {
     }
     if (content.length === 0) {
       console.log("[CURSOR] content empty, waiting");
+      return;
+    }
+    if (lastSyncedChapterIdRef.current !== chapterId) {
+      console.log("[CURSOR] content not yet synced for this chapter, waiting");
       return;
     }
     const editor = editorRef.current;
