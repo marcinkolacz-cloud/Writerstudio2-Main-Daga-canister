@@ -519,26 +519,42 @@ export function ChapterEditorPage() {
   // Only moves the cursor — does not touch content or save logic.
   // `content` is a dep so this runs after content is applied to the editor.
   useEffect(() => {
-    if (!editorRef.current) return;
-    if (lastCursorRestoredChapterIdRef.current === chapterId) return;
-    if (content.length === 0) return;
+    if (!editorRef.current) {
+      console.log("[CURSOR] no editor yet");
+      return;
+    }
+    if (lastCursorRestoredChapterIdRef.current === chapterId) {
+      console.log("[CURSOR] already restored for this chapter", chapterId);
+      return;
+    }
+    if (content.length === 0) {
+      console.log("[CURSOR] content empty, waiting");
+      return;
+    }
     const editor = editorRef.current;
     const docSize = editor.state.doc.content.size;
     try {
       const saved = localStorage.getItem(`ws_cursor_position_${chapterId}`);
+      console.log(
+        "[CURSOR] saved value from localStorage:",
+        saved,
+        "docSize:",
+        docSize,
+      );
       if (saved === null) {
         lastCursorRestoredChapterIdRef.current = chapterId;
         return;
       }
       const pos = Number.parseInt(saved, 10);
       if (Number.isNaN(pos) || pos < 0 || pos > docSize) {
-        // Out of range (e.g. text was shortened) — ignore silently, leave cursor at start.
+        console.log("[CURSOR] position out of range, ignoring", pos);
         lastCursorRestoredChapterIdRef.current = chapterId;
         return;
       }
+      console.log("[CURSOR] restoring position", pos);
       editor.commands.setTextSelection(pos);
-    } catch {
-      // Swallow any unexpected error — never throw during cursor restore.
+    } catch (err) {
+      console.error("[CURSOR] error restoring", err);
     }
     lastCursorRestoredChapterIdRef.current = chapterId;
   }, [chapterId, content]);
