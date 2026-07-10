@@ -10,6 +10,7 @@ import {
   useCreateChatSession,
   useDeleteChatSession,
 } from "@/hooks/useBackend";
+import { useElapsedSeconds } from "@/hooks/useElapsedSeconds";
 import { type BookContext, analyzeWithContext, callAi } from "@/lib/aiAnalysis";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Editor } from "@tiptap/react";
@@ -64,6 +65,7 @@ export function ContextChatPanel({
   );
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const loadingElapsed = useElapsedSeconds(isLoading);
   const [isAutoStarting, setIsAutoStarting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -562,6 +564,9 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
             <div className="flex justify-start">
               <div className="bg-muted rounded-lg px-3 py-2 text-sm">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <span className="text-xs text-muted-foreground ml-2">
+                  {loadingElapsed}s
+                </span>
               </div>
             </div>
           )}

@@ -52,6 +52,7 @@ import {
   useUpdateAnnotationApproved,
   useUpdateChapter,
 } from "@/hooks/useBackend";
+import { useElapsedSeconds } from "@/hooks/useElapsedSeconds";
 import { useWritingStatsTracker } from "@/hooks/useWritingStatsTracker";
 import {
   analyzeConsistency,
@@ -396,6 +397,8 @@ export function ChapterEditorPage() {
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [redactionModalOpen, setRedactionModalOpen] = useState(false);
   const [aiFormatting, setAiFormatting] = useState(false);
+  const analysisElapsed = useElapsedSeconds(analysisStatus === "loading");
+  const redactionElapsed = useElapsedSeconds(aiFormatting);
   const [provider, setProvider] = useState<"openai" | "claude">(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
@@ -1043,7 +1046,7 @@ export function ChapterEditorPage() {
             {analysisStatus === "loading" ? (
               <>
                 <Wand2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                Analizowanie...
+                {`Analizowanie... (${analysisElapsed}s)`}
               </>
             ) : analysisMode === "summary" ? (
               <>
@@ -1690,7 +1693,8 @@ export function ChapterEditorPage() {
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-6 shadow-lg">
             <Wand2 className="h-6 w-6 animate-spin text-primary" />
             <p className="text-sm text-foreground">
-              Formatowanie AI... (może potrwać do minuty dla długich rozdziałów)
+              Formatowanie AI... (może potrwać do minuty dla długich rozdziałów){" "}
+              {`(${redactionElapsed}s)`}
             </p>
           </div>
         </div>

@@ -9,6 +9,7 @@ import {
   useDeleteMessage,
   useSendMessage,
 } from "@/hooks/useBackend";
+import { useElapsedSeconds } from "@/hooks/useElapsedSeconds";
 import { chatWithBook } from "@/lib/aiAnalysis";
 import type { ChatMessage as AiChatMessage } from "@/lib/aiAnalysis";
 import { getApiKey } from "@/lib/apiKeyStorage";
@@ -70,6 +71,7 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
   const queryClient = useQueryClient();
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const sendElapsed = useElapsedSeconds(isSending);
   const [optimisticMessages, setOptimisticMessages] = useState<
     Array<{ id: string; role: string; content: string; createdAt: bigint }>
   >([]);
@@ -600,6 +602,12 @@ export function ChatBotPanel({ bookId, book: bookProp }: ChatBotPanelProps) {
                 )}
               </Button>
             </div>
+            {isSending && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Generuję odpowiedź... ({sendElapsed}s, może potrwać kilka minut
+                przy długich fragmentach)
+              </p>
+            )}
           </div>
         </>
       )}

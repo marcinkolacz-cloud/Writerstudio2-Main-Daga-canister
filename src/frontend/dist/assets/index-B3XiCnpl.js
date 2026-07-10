@@ -46505,6 +46505,26 @@ function SettingsModal({ open, onOpenChange }) {
     ] })
   ] }) });
 }
+function useElapsedSeconds(isActive2) {
+  const [elapsed, setElapsed] = reactExports.useState(0);
+  const startRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    if (!isActive2) {
+      startRef.current = null;
+      setElapsed(0);
+      return;
+    }
+    startRef.current = Date.now();
+    setElapsed(0);
+    const interval = setInterval(() => {
+      if (startRef.current !== null) {
+        setElapsed(Math.floor((Date.now() - startRef.current) / 1e3));
+      }
+    }, 1e3);
+    return () => clearInterval(interval);
+  }, [isActive2]);
+  return elapsed;
+}
 function buildBookContextPrompt(bookContext) {
   if (!bookContext) return "";
   const parts = [];
@@ -47064,6 +47084,7 @@ function ChatBotPanel({ bookId, book: bookProp }) {
   const queryClient2 = useQueryClient();
   const [input, setInput] = reactExports.useState("");
   const [isSending, setIsSending] = reactExports.useState(false);
+  const sendElapsed = useElapsedSeconds(isSending);
   const [optimisticMessages, setOptimisticMessages] = reactExports.useState([]);
   const messagesEndRef = reactExports.useRef(null);
   const textareaRef = reactExports.useRef(null);
@@ -47504,32 +47525,39 @@ ${chapterTitles}`;
             )),
             /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: messagesEndRef })
           ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-t border-border p-3 bg-card", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-end gap-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "textarea",
-              {
-                ref: textareaRef,
-                value: input,
-                onChange: (e3) => setInput(e3.target.value),
-                onKeyDown: handleKeyDown2,
-                placeholder: "Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)",
-                className: "flex-1 min-h-[96px] max-h-[200px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                rows: 4,
-                "data-ocid": "chat.input"
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              Button,
-              {
-                size: "sm",
-                disabled: !input.trim() || isSending,
-                onClick: handleSend,
-                className: "h-9 w-9 p-0 shrink-0",
-                "data-ocid": "chat.send_button",
-                children: isSending ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Send, { className: "h-4 w-4" })
-              }
-            )
-          ] }) })
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-border p-3 bg-card", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-end gap-2", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "textarea",
+                {
+                  ref: textareaRef,
+                  value: input,
+                  onChange: (e3) => setInput(e3.target.value),
+                  onKeyDown: handleKeyDown2,
+                  placeholder: "Napisz wiadomość... (Enter wyślij, Shift+Enter nowa linia)",
+                  className: "flex-1 min-h-[96px] max-h-[200px] resize-none rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                  rows: 4,
+                  "data-ocid": "chat.input"
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                Button,
+                {
+                  size: "sm",
+                  disabled: !input.trim() || isSending,
+                  onClick: handleSend,
+                  className: "h-9 w-9 p-0 shrink-0",
+                  "data-ocid": "chat.send_button",
+                  children: isSending ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Send, { className: "h-4 w-4" })
+                }
+              )
+            ] }),
+            isSending && /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-xs text-muted-foreground mt-1", children: [
+              "Generuję odpowiedź... (",
+              sendElapsed,
+              "s, może potrwać kilka minut przy długich fragmentach)"
+            ] })
+          ] })
         ] }),
         view === "history" && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1 overflow-y-auto p-3 min-h-0", children: [
           archives.length === 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -55129,6 +55157,7 @@ function ContextChatPanel({
   );
   const [inputText, setInputText] = reactExports.useState("");
   const [isLoading, setIsLoading] = reactExports.useState(false);
+  const loadingElapsed = useElapsedSeconds(isLoading);
   const [isAutoStarting, setIsAutoStarting] = reactExports.useState(false);
   const scrollRef = reactExports.useRef(null);
   const inputRef = reactExports.useRef(null);
@@ -55534,7 +55563,13 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
           String(msg.id)
         );
       }),
-      isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-start", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-muted rounded-lg px-3 py-2 text-sm", children: /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "h-4 w-4 animate-spin text-muted-foreground" }) }) })
+      isLoading && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex justify-start", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "bg-muted rounded-lg px-3 py-2 text-sm", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { className: "h-4 w-4 animate-spin text-muted-foreground" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-xs text-muted-foreground ml-2", children: [
+          loadingElapsed,
+          "s"
+        ] })
+      ] }) })
     ] }) }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-3 border-t border-border", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -84528,7 +84563,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Bei8a5n1.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BIBgtSVO.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -85553,6 +85588,8 @@ function ChapterEditorPage() {
   const [settingsModalOpen, setSettingsModalOpen] = reactExports.useState(false);
   const [redactionModalOpen, setRedactionModalOpen] = reactExports.useState(false);
   const [aiFormatting, setAiFormatting] = reactExports.useState(false);
+  const analysisElapsed = useElapsedSeconds(analysisStatus === "loading");
+  const redactionElapsed = useElapsedSeconds(aiFormatting);
   const [provider, setProvider] = reactExports.useState(() => {
     const saved = localStorage.getItem("ws_api_provider");
     return saved === "claude" ? "claude" : "openai";
@@ -86089,7 +86126,7 @@ ${getPlainText(ch.content)}`
                 "data-ocid": "chapter.analyze_button",
                 children: analysisStatus === "loading" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsx(WandSparkles, { className: "h-3.5 w-3.5 mr-1.5 animate-spin" }),
-                  "Analizowanie..."
+                  `Analizowanie... (${analysisElapsed}s)`
                 ] }) : analysisMode === "summary" ? /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
                   /* @__PURE__ */ jsxRuntimeExports.jsx(Sparkles, { className: "h-3.5 w-3.5 mr-1.5" }),
                   "Generuj streszczenie"
@@ -86674,7 +86711,11 @@ ${getPlainText(ch.content)}`
         "data-ocid": "chapter.ai_formatting.loading_state",
         children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-6 shadow-lg", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(WandSparkles, { className: "h-6 w-6 animate-spin text-primary" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-foreground", children: "Formatowanie AI... (może potrwać do minuty dla długich rozdziałów)" })
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-foreground", children: [
+            "Formatowanie AI... (może potrwać do minuty dla długich rozdziałów)",
+            " ",
+            `(${redactionElapsed}s)`
+          ] })
         ] })
       }
     ),
