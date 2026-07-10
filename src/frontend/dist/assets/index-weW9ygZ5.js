@@ -38039,6 +38039,17 @@ function useRecordHourlyActivity() {
     }
   });
 }
+function useHourlyDistribution() {
+  const { actor } = useActorLocal(createActor);
+  return useQuery({
+    queryKey: ["hourlyDistribution"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getHourlyDistribution();
+    },
+    enabled: !!actor
+  });
+}
 function useStatsByBook(bookId, fromDate, toDate) {
   const { actor } = useActorLocal(createActor);
   const id = BigInt(bookId);
@@ -84490,7 +84501,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CyeCL-Bw.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-C9-jd9FX.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -108361,6 +108372,11 @@ function StatisticsPage() {
     return cells;
   })();
   const maxHeatmapWords = Math.max(1, ...heatmapCells.map((c2) => c2.words));
+  const { data: hourlyData, isLoading: hourlyLoading } = useHourlyDistribution();
+  const hourlyChartData = Array.from({ length: 24 }, (_2, h2) => {
+    const found2 = (hourlyData ?? []).find((s2) => Number(s2.hour) === h2);
+    return { hour: `${h2}:00`, words: found2 ? Number(found2.wordsAdded) : 0 };
+  });
   function heatmapIntensityClass(words) {
     if (words === 0) return "bg-muted";
     const ratio = words / maxHeatmapWords;
@@ -108774,6 +108790,71 @@ function StatisticsPage() {
             ]
           }
         ) }) }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Card, { className: "bg-card border-border shadow-subtle", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(CardHeader, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(CardTitle, { className: "font-display text-lg text-foreground", children: "Rozkład godzinowy (cała historia)" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(CardContent, { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "h-64 w-full", children: hourlyLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx(Skeleton, { className: "h-40 w-full" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ResponsiveContainer, { width: "100%", height: "100%", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            BarChart,
+            {
+              data: hourlyChartData,
+              margin: { top: 8, right: 8, bottom: 8, left: 8 },
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  CartesianGrid,
+                  {
+                    strokeDasharray: "3 3",
+                    stroke: "oklch(var(--border))"
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  XAxis,
+                  {
+                    dataKey: "hour",
+                    tick: {
+                      fill: "oklch(var(--muted-foreground))",
+                      fontSize: 10
+                    },
+                    interval: 1
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  YAxis,
+                  {
+                    tick: {
+                      fill: "oklch(var(--muted-foreground))",
+                      fontSize: 12
+                    }
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Tooltip,
+                  {
+                    contentStyle: {
+                      backgroundColor: "oklch(var(--card))",
+                      border: "1px solid oklch(var(--border))",
+                      borderRadius: "var(--radius)",
+                      color: "oklch(var(--foreground))"
+                    },
+                    formatter: (value) => [
+                      `${value.toLocaleString("pl-PL")} słów`,
+                      "Słowa"
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  Bar,
+                  {
+                    dataKey: "words",
+                    fill: "oklch(var(--chart-4))",
+                    radius: [4, 4, 0, 0]
+                  }
+                )
+              ]
+            }
+          ) }) }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-3 text-xs text-muted-foreground", children: "Suma słów napisanych o danej godzinie, ze wszystkich dni (niezależnie od filtra dat powyżej)." })
+        ] })
       ] })
     ] })
   ] });

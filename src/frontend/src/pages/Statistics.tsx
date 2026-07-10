@@ -1,7 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBookStats, useBooks, useOverallStats } from "@/hooks/useBackend";
-import { useGlobalWritingStats, useStatsByBook } from "@/hooks/useBackend";
+import {
+  useGlobalWritingStats,
+  useHourlyDistribution,
+  useStatsByBook,
+} from "@/hooks/useBackend";
 import { BarChart3, BookOpen, FileText, Layers } from "lucide-react";
 import { useState } from "react";
 import {
@@ -183,6 +187,13 @@ export function StatisticsPage() {
   })();
 
   const maxHeatmapWords = Math.max(1, ...heatmapCells.map((c) => c.words));
+
+  const { data: hourlyData, isLoading: hourlyLoading } =
+    useHourlyDistribution();
+  const hourlyChartData = Array.from({ length: 24 }, (_, h) => {
+    const found = (hourlyData ?? []).find((s) => Number(s.hour) === h);
+    return { hour: `${h}:00`, words: found ? Number(found.wordsAdded) : 0 };
+  });
 
   function heatmapIntensityClass(words: number): string {
     if (words === 0) return "bg-muted";
@@ -624,6 +635,68 @@ export function StatisticsPage() {
                 </ResponsiveContainer>
               )}
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-border shadow-subtle">
+          <CardHeader>
+            <CardTitle className="font-display text-lg text-foreground">
+              Rozkład godzinowy (cała historia)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 w-full">
+              {hourlyLoading ? (
+                <Skeleton className="h-40 w-full" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={hourlyChartData}
+                    margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="oklch(var(--border))"
+                    />
+                    <XAxis
+                      dataKey="hour"
+                      tick={{
+                        fill: "oklch(var(--muted-foreground))",
+                        fontSize: 10,
+                      }}
+                      interval={1}
+                    />
+                    <YAxis
+                      tick={{
+                        fill: "oklch(var(--muted-foreground))",
+                        fontSize: 12,
+                      }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "oklch(var(--card))",
+                        border: "1px solid oklch(var(--border))",
+                        borderRadius: "var(--radius)",
+                        color: "oklch(var(--foreground))",
+                      }}
+                      formatter={(value: number) => [
+                        `${value.toLocaleString("pl-PL")} słów`,
+                        "Słowa",
+                      ]}
+                    />
+                    <Bar
+                      dataKey="words"
+                      fill="oklch(var(--chart-4))"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Suma słów napisanych o danej godzinie, ze wszystkich dni
+              (niezależnie od filtra dat powyżej).
+            </p>
           </CardContent>
         </Card>
       </section>

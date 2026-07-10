@@ -204,6 +204,18 @@ export function useRecordHourlyActivity() {
   });
 }
 
+export function useHourlyDistribution() {
+  const { actor } = useActorLocal(createActor);
+  return useQuery<{ hour: bigint; wordsAdded: bigint }[]>({
+    queryKey: ["hourlyDistribution"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getHourlyDistribution();
+    },
+    enabled: !!actor,
+  });
+}
+
 export function useStatsByBook(
   bookId: string | number,
   fromDate: string,
