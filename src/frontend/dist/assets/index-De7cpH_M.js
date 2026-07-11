@@ -39863,6 +39863,51 @@ function AccessGatePage() {
     }
   );
 }
+const createStoreImpl = (createState) => {
+  let state;
+  const listeners = /* @__PURE__ */ new Set();
+  const setState = (partial, replace2) => {
+    const nextState = typeof partial === "function" ? partial(state) : partial;
+    if (!Object.is(nextState, state)) {
+      const previousState = state;
+      state = (replace2 != null ? replace2 : typeof nextState !== "object" || nextState === null) ? nextState : Object.assign({}, state, nextState);
+      listeners.forEach((listener) => listener(state, previousState));
+    }
+  };
+  const getState2 = () => state;
+  const getInitialState = () => initialState;
+  const subscribe2 = (listener) => {
+    listeners.add(listener);
+    return () => listeners.delete(listener);
+  };
+  const api = { setState, getState: getState2, getInitialState, subscribe: subscribe2 };
+  const initialState = state = createState(setState, getState2, api);
+  return api;
+};
+const createStore = (createState) => createState ? createStoreImpl(createState) : createStoreImpl;
+const identity$c = (arg) => arg;
+function useStore$1(api, selector = identity$c) {
+  const slice2 = React$4.useSyncExternalStore(
+    api.subscribe,
+    React$4.useCallback(() => selector(api.getState()), [api, selector]),
+    React$4.useCallback(() => selector(api.getInitialState()), [api, selector])
+  );
+  React$4.useDebugValue(slice2);
+  return slice2;
+}
+const createImpl = (createState) => {
+  const api = createStore(createState);
+  const useBoundStore = (selector) => useStore$1(api, selector);
+  Object.assign(useBoundStore, api);
+  return useBoundStore;
+};
+const create = (createState) => createState ? createImpl(createState) : createImpl;
+const useAppStore = create((set) => ({
+  principal: null,
+  isAuthenticated: false,
+  setPrincipal: (principal) => set({ principal, isAuthenticated: principal !== null }),
+  clearAuth: () => set({ principal: null, isAuthenticated: false })
+}));
 var prefix = "Invariant failed";
 function invariant(condition, message) {
   if (condition) {
@@ -43176,7 +43221,7 @@ withSelector_production.useSyncExternalStoreWithSelector = function(subscribe2, 
   withSelector.exports = withSelector_production;
 }
 var withSelectorExports = withSelector.exports;
-function useStore$1(store, selector = (d2) => d2) {
+function useStore(store, selector = (d2) => d2) {
   const slice2 = withSelectorExports.useSyncExternalStoreWithSelector(
     store.subscribe,
     () => store.state,
@@ -43251,7 +43296,7 @@ function useRouterState(opts) {
   });
   const router2 = (opts == null ? void 0 : opts.router) || contextRouter;
   const previousResult = reactExports.useRef(void 0);
-  return useStore$1(router2.__store, (state) => {
+  return useStore(router2.__store, (state) => {
     if (opts == null ? void 0 : opts.select) {
       if (opts.structuralSharing ?? router2.options.defaultStructuralSharing) {
         const newSlice = replaceEqualDeep(
@@ -46346,51 +46391,6 @@ function TableCell({ className, ...props }) {
     }
   );
 }
-const createStoreImpl = (createState) => {
-  let state;
-  const listeners = /* @__PURE__ */ new Set();
-  const setState = (partial, replace2) => {
-    const nextState = typeof partial === "function" ? partial(state) : partial;
-    if (!Object.is(nextState, state)) {
-      const previousState = state;
-      state = (replace2 != null ? replace2 : typeof nextState !== "object" || nextState === null) ? nextState : Object.assign({}, state, nextState);
-      listeners.forEach((listener) => listener(state, previousState));
-    }
-  };
-  const getState2 = () => state;
-  const getInitialState = () => initialState;
-  const subscribe2 = (listener) => {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-  };
-  const api = { setState, getState: getState2, getInitialState, subscribe: subscribe2 };
-  const initialState = state = createState(setState, getState2, api);
-  return api;
-};
-const createStore = (createState) => createState ? createStoreImpl(createState) : createStoreImpl;
-const identity$c = (arg) => arg;
-function useStore(api, selector = identity$c) {
-  const slice2 = React$4.useSyncExternalStore(
-    api.subscribe,
-    React$4.useCallback(() => selector(api.getState()), [api, selector]),
-    React$4.useCallback(() => selector(api.getInitialState()), [api, selector])
-  );
-  React$4.useDebugValue(slice2);
-  return slice2;
-}
-const createImpl = (createState) => {
-  const api = createStore(createState);
-  const useBoundStore = (selector) => useStore(api, selector);
-  Object.assign(useBoundStore, api);
-  return useBoundStore;
-};
-const create = (createState) => createState ? createImpl(createState) : createImpl;
-const useAppStore = create((set) => ({
-  principal: null,
-  isAuthenticated: false,
-  setPrincipal: (principal) => set({ principal, isAuthenticated: principal !== null }),
-  clearAuth: () => set({ principal: null, isAuthenticated: false })
-}));
 function AdminPage() {
   const principal = useAppStore((s2) => s2.principal);
   const setAdminMutation = useSetAdminPrincipal();
@@ -85150,7 +85150,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-EPGdypZ7.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-pN6sl6Js.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -87647,13 +87647,11 @@ const indexRoute = createRoute({
 function LoginPage() {
   const navigate = useNavigate();
   const { login, loginStatus, identity: identity3 } = useAuthClient();
-  const { setPrincipal, isAuthenticated } = useAppStore();
   reactExports.useEffect(() => {
-    if (identity3 && loginStatus === "success" && !isAuthenticated) {
-      setPrincipal(identity3.getPrincipal());
+    if (identity3 && loginStatus === "success") {
       navigate({ to: "/dashboard" });
     }
-  }, [identity3, loginStatus, isAuthenticated, setPrincipal, navigate]);
+  }, [identity3, loginStatus, navigate]);
   const handleLogin = async () => {
     await login();
   };
@@ -109560,17 +109558,32 @@ function subscribeAccess(callback) {
   window.addEventListener("storage", handler);
   return () => window.removeEventListener("storage", handler);
 }
+function AuthGate({ children }) {
+  const { identity: identity3, isInitializing } = useAuthContext();
+  const setPrincipal = useAppStore((s2) => s2.setPrincipal);
+  const clearAuth = useAppStore((s2) => s2.clearAuth);
+  reactExports.useEffect(() => {
+    if (identity3 && !identity3.getPrincipal().isAnonymous()) {
+      setPrincipal(identity3.getPrincipal());
+    } else {
+      clearAuth();
+    }
+  }, [identity3, setPrincipal, clearAuth]);
+  if (isInitializing) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex min-h-screen items-center justify-center bg-background text-foreground", children: "Sprawdzanie sesji..." });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children });
+}
 function App() {
-  const [queryClient2] = reactExports.useState(() => new QueryClient());
   const accessGranted = reactExports.useSyncExternalStore(
     subscribeAccess,
     getAccessGranted,
     getAccessGranted
   );
   if (!accessGranted) {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientProvider, { client: queryClient2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AccessGatePage, {}) });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(AuthGate, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(AccessGatePage, {}) });
   }
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientProvider, { client: queryClient2, children: /* @__PURE__ */ jsxRuntimeExports.jsx(RouterProvider, { router }) });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(AuthGate, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(RouterProvider, { router }) });
 }
 BigInt.prototype.toJSON = function() {
   return this.toString();

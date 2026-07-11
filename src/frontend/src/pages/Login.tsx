@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useAppStore } from "@/store/useAppStore";
 import { useNavigate } from "@tanstack/react-router";
 import { BookOpen, LogIn } from "lucide-react";
 import { useEffect } from "react";
@@ -15,14 +14,12 @@ import { useAuthClient } from "../hooks/useAuthClient";
 export function LoginPage() {
   const navigate = useNavigate();
   const { login, loginStatus, identity } = useAuthClient();
-  const { setPrincipal, isAuthenticated } = useAppStore();
 
   useEffect(() => {
-    if (identity && loginStatus === "success" && !isAuthenticated) {
-      setPrincipal(identity.getPrincipal());
+    if (identity && loginStatus === "success") {
       navigate({ to: "/dashboard" });
     }
-  }, [identity, loginStatus, isAuthenticated, setPrincipal, navigate]);
+  }, [identity, loginStatus, navigate]);
 
   const handleLogin = async () => {
     await login();

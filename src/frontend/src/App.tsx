@@ -1,7 +1,9 @@
 import { AccessGatePage } from "@/pages/AccessGatePage";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useAuthContext } from "@/providers/AuthProvider";
+import { useAppStore } from "@/store/useAppStore";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import type { ReactNode } from "react";
 import { adminRoute } from "./routes/admin";
 import { bookRoute } from "./routes/book";
 import { chapterRoute } from "./routes/chapter";
@@ -42,8 +44,31 @@ function subscribeAccess(callback: () => void) {
   return () => window.removeEventListener("storage", handler);
 }
 
+function AuthGate({ children }: { children: ReactNode }) {
+  const { identity, isInitializing } = useAuthContext();
+  const setPrincipal = useAppStore((s) => s.setPrincipal);
+  const clearAuth = useAppStore((s) => s.clearAuth);
+
+  useEffect(() => {
+    if (identity && !identity.getPrincipal().isAnonymous()) {
+      setPrincipal(identity.getPrincipal());
+    } else {
+      clearAuth();
+    }
+  }, [identity, setPrincipal, clearAuth]);
+
+  if (isInitializing) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+        Sprawdzanie sesji...
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
 export default function App() {
-  const [queryClient] = useState(() => new QueryClient());
   const accessGranted = useSyncExternalStore(
     subscribeAccess,
     getAccessGranted,
@@ -52,15 +77,15 @@ export default function App() {
 
   if (!accessGranted) {
     return (
-      <QueryClientProvider client={queryClient}>
+      <AuthGate>
         <AccessGatePage />
-      </QueryClientProvider>
+      </AuthGate>
     );
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <AuthGate>
       <RouterProvider router={router} />
-    </QueryClientProvider>
+    </AuthGate>
   );
 }
