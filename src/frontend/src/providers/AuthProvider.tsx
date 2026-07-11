@@ -56,6 +56,7 @@ function createAuthClient(): AuthClient {
     identityProvider: getIdentityProvider(),
     windowOpenerFeatures: WINDOW_OPENER_FEATURES,
     derivationOrigin: window.location.origin,
+    idleOptions: { idleTimeout: 60 * 60 * 1000 },
   });
 }
 

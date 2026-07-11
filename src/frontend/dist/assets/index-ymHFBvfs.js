@@ -38044,7 +38044,8 @@ function createAuthClient() {
   return new AuthClient({
     identityProvider: getIdentityProvider(),
     windowOpenerFeatures: WINDOW_OPENER_FEATURES,
-    derivationOrigin: window.location.origin
+    derivationOrigin: window.location.origin,
+    idleOptions: { idleTimeout: 60 * 60 * 1e3 }
   });
 }
 const AuthContext = reactExports.createContext(null);
@@ -85407,7 +85408,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CHN6vwJ9.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-B7nE1hOX.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
