@@ -38657,6 +38657,48 @@ function useSaveRecording() {
     }
   });
 }
+function useStartRecordingUpload() {
+  const { actor } = useActorLocal(createActor);
+  return useMutation({
+    mutationFn: async ({
+      chapterId,
+      bookId,
+      voice,
+      totalChunks
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.startRecordingUpload(chapterId, bookId, voice, totalChunks);
+    }
+  });
+}
+function useUploadRecordingChunk() {
+  const { actor } = useActorLocal(createActor);
+  return useMutation({
+    mutationFn: async ({
+      uploadId,
+      chunkIndex,
+      data
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.uploadRecordingChunk(uploadId, chunkIndex, data);
+    }
+  });
+}
+function useFinishRecordingUpload() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ uploadId }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.finishRecordingUpload(uploadId);
+    },
+    onSuccess: () => {
+      queryClient2.invalidateQueries({
+        queryKey: ["recordings"]
+      });
+    }
+  });
+}
 function useDeleteRecording() {
   const { actor } = useActorLocal(createActor);
   const queryClient2 = useQueryClient();
@@ -56455,6 +56497,9 @@ function LektorPanel({ editor, chapterId, bookId }) {
   const audioRef = reactExports.useRef(null);
   const objectUrlRef = reactExports.useRef(null);
   const saveRecording = useSaveRecording();
+  const startRecordingUpload = useStartRecordingUpload();
+  const uploadRecordingChunk = useUploadRecordingChunk();
+  const finishRecordingUpload = useFinishRecordingUpload();
   reactExports.useEffect(() => {
     localStorage.setItem("ws_lektor_provider", ttsProvider);
   }, [ttsProvider]);
@@ -56479,6 +56524,8 @@ function LektorPanel({ editor, chapterId, bookId }) {
     setDuration(0);
   }, []);
   const handleSaveRecording = reactExports.useCallback(async () => {
+    const CHUNK_SIZE = 1e6;
+    const DIRECT_UPLOAD_LIMIT = 15e5;
     if (!generatedBlob) return;
     setSaving(true);
     setError(null);
@@ -56486,12 +56533,33 @@ function LektorPanel({ editor, chapterId, bookId }) {
     try {
       const arrayBuffer = await generatedBlob.arrayBuffer();
       const audioData = new Uint8Array(arrayBuffer);
-      await saveRecording.mutateAsync({
-        chapterId,
-        bookId,
-        voice,
-        audioData
-      });
+      if (audioData.length <= DIRECT_UPLOAD_LIMIT) {
+        await saveRecording.mutateAsync({
+          chapterId,
+          bookId,
+          voice,
+          audioData
+        });
+      } else {
+        const totalChunks2 = Math.ceil(audioData.length / CHUNK_SIZE);
+        const uploadId = await startRecordingUpload.mutateAsync({
+          chapterId,
+          bookId,
+          voice,
+          totalChunks: BigInt(totalChunks2)
+        });
+        for (let i = 0; i < totalChunks2; i++) {
+          const start = i * CHUNK_SIZE;
+          const end = Math.min(start + CHUNK_SIZE, audioData.length);
+          const chunk = audioData.slice(start, end);
+          await uploadRecordingChunk.mutateAsync({
+            uploadId,
+            chunkIndex: BigInt(i),
+            data: chunk
+          });
+        }
+        await finishRecordingUpload.mutateAsync({ uploadId });
+      }
       setSuccess("Nagranie zostało zapisane pomyślnie.");
       setGeneratedBlob(null);
     } catch (err) {
@@ -56509,7 +56577,16 @@ function LektorPanel({ editor, chapterId, bookId }) {
       document.body.removeChild(link);
       setTimeout(() => URL.revokeObjectURL(downloadUrl), 1e4);
     }
-  }, [generatedBlob, chapterId, bookId, voice, saveRecording]);
+  }, [
+    generatedBlob,
+    chapterId,
+    bookId,
+    voice,
+    saveRecording,
+    startRecordingUpload,
+    uploadRecordingChunk,
+    finishRecordingUpload
+  ]);
   reactExports.useEffect(() => {
     return () => cleanupAudio();
   }, [cleanupAudio]);
@@ -85330,7 +85407,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DSCfeX4K.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-CHN6vwJ9.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

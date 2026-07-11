@@ -680,6 +680,63 @@ export function useSaveRecording() {
   });
 }
 
+export function useStartRecordingUpload() {
+  const { actor } = useActorLocal(createActor);
+
+  return useMutation({
+    mutationFn: async ({
+      chapterId,
+      bookId,
+      voice,
+      totalChunks,
+    }: {
+      chapterId: bigint;
+      bookId: bigint;
+      voice: string;
+      totalChunks: bigint;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.startRecordingUpload(chapterId, bookId, voice, totalChunks);
+    },
+  });
+}
+
+export function useUploadRecordingChunk() {
+  const { actor } = useActorLocal(createActor);
+
+  return useMutation({
+    mutationFn: async ({
+      uploadId,
+      chunkIndex,
+      data,
+    }: {
+      uploadId: bigint;
+      chunkIndex: bigint;
+      data: Uint8Array;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.uploadRecordingChunk(uploadId, chunkIndex, data);
+    },
+  });
+}
+
+export function useFinishRecordingUpload() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ uploadId }: { uploadId: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.finishRecordingUpload(uploadId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["recordings"],
+      });
+    },
+  });
+}
+
 export function useDeleteRecording() {
   const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();

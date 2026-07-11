@@ -8,7 +8,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { useSaveRecording } from "@/hooks/useBackend";
+import {
+  useFinishRecordingUpload,
+  useSaveRecording,
+  useStartRecordingUpload,
+  useUploadRecordingChunk,
+} from "@/hooks/useBackend";
 import { getApiKey } from "@/lib/apiKeyStorage";
 import { generateSpeech } from "@/lib/tts";
 import { useAppStore } from "@/store/useAppStore";
@@ -72,6 +77,9 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
   const objectUrlRef = useRef<string | null>(null);
 
   const saveRecording = useSaveRecording();
+  const startRecordingUpload = useStartRecordingUpload();
+  const uploadRecordingChunk = useUploadRecordingChunk();
+  const finishRecordingUpload = useFinishRecordingUpload();
 
   useEffect(() => {
     localStorage.setItem("ws_lektor_provider", ttsProvider);
@@ -100,6 +108,8 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
   }, []);
 
   const handleSaveRecording = useCallback(async () => {
+    const CHUNK_SIZE = 1_000_000;
+    const DIRECT_UPLOAD_LIMIT = 1_500_000;
     if (!generatedBlob) return;
     setSaving(true);
     setError(null);
@@ -107,12 +117,33 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
     try {
       const arrayBuffer = await generatedBlob.arrayBuffer();
       const audioData = new Uint8Array(arrayBuffer);
-      await saveRecording.mutateAsync({
-        chapterId,
-        bookId,
-        voice,
-        audioData,
-      });
+      if (audioData.length <= DIRECT_UPLOAD_LIMIT) {
+        await saveRecording.mutateAsync({
+          chapterId,
+          bookId,
+          voice,
+          audioData,
+        });
+      } else {
+        const totalChunks = Math.ceil(audioData.length / CHUNK_SIZE);
+        const uploadId = await startRecordingUpload.mutateAsync({
+          chapterId,
+          bookId,
+          voice,
+          totalChunks: BigInt(totalChunks),
+        });
+        for (let i = 0; i < totalChunks; i++) {
+          const start = i * CHUNK_SIZE;
+          const end = Math.min(start + CHUNK_SIZE, audioData.length);
+          const chunk = audioData.slice(start, end);
+          await uploadRecordingChunk.mutateAsync({
+            uploadId,
+            chunkIndex: BigInt(i),
+            data: chunk,
+          });
+        }
+        await finishRecordingUpload.mutateAsync({ uploadId });
+      }
       setSuccess("Nagranie zostało zapisane pomyślnie.");
       setGeneratedBlob(null);
     } catch (err) {
@@ -132,7 +163,16 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
       document.body.removeChild(link);
       setTimeout(() => URL.revokeObjectURL(downloadUrl), 10000);
     }
-  }, [generatedBlob, chapterId, bookId, voice, saveRecording]);
+  }, [
+    generatedBlob,
+    chapterId,
+    bookId,
+    voice,
+    saveRecording,
+    startRecordingUpload,
+    uploadRecordingChunk,
+    finishRecordingUpload,
+  ]);
 
   useEffect(() => {
     return () => cleanupAudio();
