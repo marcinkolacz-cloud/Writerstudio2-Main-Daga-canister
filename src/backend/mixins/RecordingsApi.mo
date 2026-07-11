@@ -2,11 +2,14 @@ import Map "mo:core/Map";
 import Types "../types";
 import RecordingsLib "../lib/Recordings";
 import Principal "mo:core/Principal";
+import Array "mo:core/Array";
 
 mixin (
   books : Map.Map<Nat, Types.Book>,
   chapters : Map.Map<Nat, Types.Chapter>,
   recordings : Map.Map<Nat, Types.Recording>,
+  pendingUploads : Map.Map<Nat, Types.PendingUpload>,
+  uploadChunks : Map.Map<Text, [Nat8]>,
 ) {
 
   func recordingGetBookOwner(chapterId : Nat) : ?Principal {
@@ -81,6 +84,82 @@ mixin (
         }
       };
       case null { false }
+    }
+  };
+
+  public shared ({ caller }) func startRecordingUpload(chapterId : Nat, bookId : Nat, voice : Text, totalChunks : Nat) : async Nat {
+    switch (books.get(bookId)) {
+      case (?book) {
+        if (Principal.equal(book.ownerId, caller)) {
+          let newId = RecordingsLib.getNextUploadId(pendingUploads);
+          let pending = RecordingsLib.createPendingUpload(newId, chapterId, bookId, voice, totalChunks);
+          pendingUploads.add(newId, pending);
+          newId
+        } else {
+          0
+        }
+      };
+      case null { 0 }
+    }
+  };
+
+  public shared ({ caller }) func uploadRecordingChunk(uploadId : Nat, chunkIndex : Nat, data : [Nat8]) : async Bool {
+    switch (pendingUploads.get(uploadId)) {
+      case (?pending) {
+        switch (books.get(pending.bookId)) {
+          case (?book) {
+            if (Principal.equal(book.ownerId, caller)) {
+              let key = RecordingsLib.chunkKey(uploadId, chunkIndex);
+              let alreadyReceived = uploadChunks.get(key) != null;
+              uploadChunks.add(key, data);
+              if (not alreadyReceived) {
+                let updated = { pending with receivedChunks = pending.receivedChunks + 1 };
+                pendingUploads.add(uploadId, updated);
+              };
+              true
+            } else {
+              false
+            }
+          };
+          case null { false }
+        }
+      };
+      case null { false }
+    }
+  };
+
+  public shared ({ caller }) func finishRecordingUpload(uploadId : Nat) : async Nat {
+    switch (pendingUploads.get(uploadId)) {
+      case (?pending) {
+        switch (books.get(pending.bookId)) {
+          case (?book) {
+            if (Principal.equal(book.ownerId, caller) and pending.receivedChunks == pending.totalChunks) {
+              let chunks : [[Nat8]] = Array.tabulate(pending.totalChunks, func(i : Nat) : [Nat8] {
+                let key = RecordingsLib.chunkKey(uploadId, i);
+                switch (uploadChunks.get(key)) {
+                  case (?chunk) { chunk };
+                  case null { [] };
+                }
+              });
+              var i = 0;
+              while (i < pending.totalChunks) {
+                uploadChunks.remove(RecordingsLib.chunkKey(uploadId, i));
+                i += 1;
+              };
+              let assembled = chunks.flatten();
+              let newId = RecordingsLib.getNextId(recordings);
+              let recording = RecordingsLib.createRecordingRecord(newId, pending.chapterId, pending.bookId, pending.voice, assembled);
+              recordings.add(newId, recording);
+              pendingUploads.remove(uploadId);
+              newId
+            } else {
+              0
+            }
+          };
+          case null { 0 }
+        }
+      };
+      case null { 0 }
     }
   };
 }

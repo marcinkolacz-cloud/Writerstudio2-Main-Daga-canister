@@ -53,35 +53,12 @@ function record_opt_to_undefined<T>(arg: T | null): T | undefined {
 }
 import { ExternalBlob } from "@caffeineai/object-storage";
 export { ExternalBlob } from "@caffeineai/object-storage";
-export interface DailyWritingStat {
-    id: bigint;
-    activeMinutes: bigint;
-    ownerId: Principal;
-    wordsAdded: bigint;
-    date: string;
-    bookId: bigint;
-    netWords: bigint;
-    sessionCount: bigint;
-    wordsRemoved: bigint;
-}
 export interface ChatSessionMessage {
     id: bigint;
     content: string;
     createdAt: bigint;
     role: string;
     sessionId: bigint;
-}
-export interface ChatSession {
-    id: bigint;
-    title: string;
-    createdAt: bigint;
-    chapterId: bigint;
-}
-export interface HourlyActivityStat {
-    id: bigint;
-    ownerId: Principal;
-    wordsAdded: bigint;
-    hour: bigint;
 }
 export interface Comment {
     id: bigint;
@@ -99,15 +76,6 @@ export interface Analysis {
     chapterId?: bigint;
     resultContent: string;
 }
-export interface ChatArchive {
-    id: bigint;
-    title: string;
-    createdAt: bigint;
-    bookId: bigint;
-    summary: string;
-    updatedAt: bigint;
-    sessionId: string;
-}
 export interface Book {
     id: bigint;
     title: string;
@@ -120,6 +88,68 @@ export interface Book {
     keyContext: string;
     category: string;
     ageCategory: string;
+}
+export interface Chapter {
+    id: bigint;
+    charCount: bigint;
+    title: string;
+    indentFirstLine: bigint;
+    content: string;
+    indentRight: bigint;
+    wordCount: bigint;
+    indentLeft: bigint;
+    createdAt: bigint;
+    bookId: bigint;
+    updatedAt: bigint;
+    sessionId: string;
+    orderIndex: bigint;
+}
+export interface ChatSession {
+    id: bigint;
+    title: string;
+    createdAt: bigint;
+    chapterId: bigint;
+}
+export interface PendingUpload {
+    id: bigint;
+    voice: string;
+    createdAt: bigint;
+    receivedChunks: bigint;
+    bookId: bigint;
+    chapterId: bigint;
+    totalChunks: bigint;
+}
+export interface DailyWritingStat {
+    id: bigint;
+    activeMinutes: bigint;
+    ownerId: Principal;
+    wordsAdded: bigint;
+    date: string;
+    bookId: bigint;
+    netWords: bigint;
+    sessionCount: bigint;
+    wordsRemoved: bigint;
+}
+export interface InviteCode {
+    code: string;
+    usedAt?: bigint;
+    usedBy?: Principal;
+    createdAt: bigint;
+}
+export interface HourlyActivityStat {
+    id: bigint;
+    ownerId: Principal;
+    wordsAdded: bigint;
+    hour: bigint;
+}
+export interface ChatArchive {
+    id: bigint;
+    title: string;
+    createdAt: bigint;
+    bookId: bigint;
+    summary: string;
+    updatedAt: bigint;
+    sessionId: string;
 }
 export interface TextAnnotation {
     id: bigint;
@@ -140,21 +170,6 @@ export interface ChatMessage {
     bookId: bigint;
     sessionId: string;
 }
-export interface Chapter {
-    id: bigint;
-    charCount: bigint;
-    title: string;
-    indentFirstLine: bigint;
-    content: string;
-    indentRight: bigint;
-    wordCount: bigint;
-    indentLeft: bigint;
-    createdAt: bigint;
-    bookId: bigint;
-    updatedAt: bigint;
-    sessionId: string;
-    orderIndex: bigint;
-}
 export interface Recording {
     id: bigint;
     voice: string;
@@ -162,12 +177,6 @@ export interface Recording {
     audioData: Uint8Array;
     bookId: bigint;
     chapterId: bigint;
-}
-export interface InviteCode {
-    code: string;
-    usedAt?: bigint;
-    usedBy?: Principal;
-    createdAt: bigint;
 }
 export interface backendInterface {
     __adminPrincipal(): Promise<Principal | null>;
@@ -192,7 +201,9 @@ export interface backendInterface {
     __nextChatSessionMessageId(): Promise<bigint>;
     __nextCommentId(): Promise<bigint>;
     __nextRecordingId(): Promise<bigint>;
+    __pendingUploads(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, PendingUpload]>>;
     __recordings(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Recording]>>;
+    __uploadChunks(ko: string | null, count: bigint | null): Promise<Array<[string, Uint8Array]>>;
     __writingStats(ko: string | null, count: bigint | null): Promise<Array<[string, DailyWritingStat]>>;
     addChatMessage(sessionId: bigint, role: string, content: string): Promise<bigint>;
     checkAccess(code: string): Promise<boolean>;
@@ -210,6 +221,7 @@ export interface backendInterface {
     deleteComment(id: bigint): Promise<boolean>;
     deleteMessage(id: bigint): Promise<boolean>;
     deleteRecording(id: bigint): Promise<boolean>;
+    finishRecordingUpload(uploadId: bigint): Promise<bigint>;
     generateInviteCode(): Promise<string>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotation(id: bigint): Promise<TextAnnotation | null>;
@@ -264,6 +276,7 @@ export interface backendInterface {
     sendMessage(bookId: bigint, sessionId: string, role: string, content: string, provider: string): Promise<bigint>;
     setAdminPrincipal(p: Principal): Promise<void>;
     setArchiveSummary(id: bigint, summary: string): Promise<boolean>;
+    startRecordingUpload(chapterId: bigint, bookId: bigint, voice: string, totalChunks: bigint): Promise<bigint>;
     synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
     ttsTransform(raw: {
         context: Uint8Array;
@@ -289,6 +302,7 @@ export interface backendInterface {
     updateBookMetadata(id: bigint, ageCategory: string, authorSummary: string, keyContext: string, themes: string, writingStyle: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
     updateChapterIndents(id: bigint, indentLeft: bigint, indentRight: bigint, indentFirstLine: bigint): Promise<boolean>;
+    uploadRecordingChunk(uploadId: bigint, chunkIndex: bigint, data: Uint8Array): Promise<boolean>;
 }
 import type { Analysis as _Analysis, Book as _Book, Chapter as _Chapter, InviteCode as _InviteCode, TextAnnotation as _TextAnnotation } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -601,6 +615,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async __pendingUploads(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, PendingUpload]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__pendingUploads(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__pendingUploads(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
     async __recordings(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, Recording]>> {
         if (this.processError) {
             try {
@@ -612,6 +640,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.__recordings(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async __uploadChunks(arg0: string | null, arg1: bigint | null): Promise<Array<[string, Uint8Array]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__uploadChunks(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__uploadChunks(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
@@ -850,6 +892,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.deleteRecording(arg0);
+            return result;
+        }
+    }
+    async finishRecordingUpload(arg0: bigint): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.finishRecordingUpload(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.finishRecordingUpload(arg0);
             return result;
         }
     }
@@ -1362,6 +1418,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async startRecordingUpload(arg0: bigint, arg1: bigint, arg2: string, arg3: bigint): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.startRecordingUpload(arg0, arg1, arg2, arg3);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.startRecordingUpload(arg0, arg1, arg2, arg3);
+            return result;
+        }
+    }
     async synthesizeSpeech(arg0: string, arg1: string, arg2: string): Promise<Uint8Array> {
         if (this.processError) {
             try {
@@ -1488,6 +1558,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.updateChapterIndents(arg0, arg1, arg2, arg3);
+            return result;
+        }
+    }
+    async uploadRecordingChunk(arg0: bigint, arg1: bigint, arg2: Uint8Array): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.uploadRecordingChunk(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.uploadRecordingChunk(arg0, arg1, arg2);
             return result;
         }
     }

@@ -18,6 +18,16 @@ type Recording =
    id: nat;
    voice: text;
  };
+type PendingUpload = 
+ record {
+   bookId: nat;
+   chapterId: nat;
+   createdAt: int;
+   id: nat;
+   receivedChunks: nat;
+   totalChunks: nat;
+   voice: text;
+ };
 type InviteCode = 
  record {
    code: text;
@@ -193,10 +203,20 @@ service : {
   __nextChatSessionMessageId: () -> (nat) query;
   __nextCommentId: () -> (nat) query;
   __nextRecordingId: () -> (nat) query;
+  __pendingUploads: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          PendingUpload;
+        }) query;
   __recordings: (ko: opt nat, count: opt nat) ->
    (vec record {
           nat;
           Recording;
+        }) query;
+  __uploadChunks: (ko: opt text, count: opt nat) ->
+   (vec record {
+          text;
+          vec nat8;
         }) query;
   __writingStats: (ko: opt text, count: opt nat) ->
    (vec record {
@@ -219,6 +239,7 @@ service : {
   deleteComment: (id: nat) -> (bool);
   deleteMessage: (id: nat) -> (bool);
   deleteRecording: (id: nat) -> (bool);
+  finishRecordingUpload: (uploadId: nat) -> (nat);
   generateInviteCode: () -> (text);
   getAnalysis: (id: nat) -> (opt Analysis);
   getAnnotation: (id: nat) -> (opt TextAnnotation);
@@ -283,6 +304,8 @@ service : {
    provider: text) -> (nat);
   setAdminPrincipal: (p: principal) -> ();
   setArchiveSummary: (id: nat, summary: text) -> (bool);
+  startRecordingUpload: (chapterId: nat, bookId: nat, voice: text,
+   totalChunks: nat) -> (nat);
   synthesizeSpeech: ("text": text, voice: text, apiKey: text) -> (blob);
   ttsTransform: (raw:
    record {
@@ -314,4 +337,6 @@ service : {
   updateChapter: (id: nat, title: text, content: text) -> (bool);
   updateChapterIndents: (id: nat, indentLeft: nat, indentRight: nat,
    indentFirstLine: nat) -> (bool);
+  uploadRecordingChunk: (uploadId: nat, chunkIndex: nat, data: vec nat8) ->
+   (bool);
 }

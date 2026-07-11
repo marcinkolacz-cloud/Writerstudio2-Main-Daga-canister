@@ -105,6 +105,15 @@ export const InviteCode = IDL.Record({
   'usedBy' : IDL.Opt(IDL.Principal),
   'createdAt' : IDL.Int,
 });
+export const PendingUpload = IDL.Record({
+  'id' : IDL.Nat,
+  'voice' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'receivedChunks' : IDL.Nat,
+  'bookId' : IDL.Nat,
+  'chapterId' : IDL.Nat,
+  'totalChunks' : IDL.Nat,
+});
 export const Recording = IDL.Record({
   'id' : IDL.Nat,
   'voice' : IDL.Text,
@@ -192,9 +201,19 @@ export const idlService = IDL.Service({
   '__nextChatSessionMessageId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextCommentId' : IDL.Func([], [IDL.Nat], ['query']),
   '__nextRecordingId' : IDL.Func([], [IDL.Nat], ['query']),
+  '__pendingUploads' : IDL.Func(
+      [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, PendingUpload))],
+      ['query'],
+    ),
   '__recordings' : IDL.Func(
       [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
       [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
+      ['query'],
+    ),
+  '__uploadChunks' : IDL.Func(
+      [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Vec(IDL.Nat8)))],
       ['query'],
     ),
   '__writingStats' : IDL.Func(
@@ -218,6 +237,7 @@ export const idlService = IDL.Service({
   'deleteComment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'deleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+  'finishRecordingUpload' : IDL.Func([IDL.Nat], [IDL.Nat], []),
   'generateInviteCode' : IDL.Func([], [IDL.Text], []),
   'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
   'getAnnotation' : IDL.Func([IDL.Nat], [IDL.Opt(TextAnnotation)], []),
@@ -333,6 +353,11 @@ export const idlService = IDL.Service({
     ),
   'setAdminPrincipal' : IDL.Func([IDL.Principal], [], []),
   'setArchiveSummary' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
+  'startRecordingUpload' : IDL.Func(
+      [IDL.Nat, IDL.Nat, IDL.Text, IDL.Nat],
+      [IDL.Nat],
+      [],
+    ),
   'synthesizeSpeech' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text],
       [IDL.Vec(IDL.Nat8)],
@@ -377,6 +402,11 @@ export const idlService = IDL.Service({
   'updateChapter' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Bool], []),
   'updateChapterIndents' : IDL.Func(
       [IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+      [IDL.Bool],
+      [],
+    ),
+  'uploadRecordingChunk' : IDL.Func(
+      [IDL.Nat, IDL.Nat, IDL.Vec(IDL.Nat8)],
       [IDL.Bool],
       [],
     ),
@@ -482,6 +512,15 @@ export const idlFactory = ({ IDL }) => {
     'usedBy' : IDL.Opt(IDL.Principal),
     'createdAt' : IDL.Int,
   });
+  const PendingUpload = IDL.Record({
+    'id' : IDL.Nat,
+    'voice' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'receivedChunks' : IDL.Nat,
+    'bookId' : IDL.Nat,
+    'chapterId' : IDL.Nat,
+    'totalChunks' : IDL.Nat,
+  });
   const Recording = IDL.Record({
     'id' : IDL.Nat,
     'voice' : IDL.Text,
@@ -569,9 +608,19 @@ export const idlFactory = ({ IDL }) => {
     '__nextChatSessionMessageId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextCommentId' : IDL.Func([], [IDL.Nat], ['query']),
     '__nextRecordingId' : IDL.Func([], [IDL.Nat], ['query']),
+    '__pendingUploads' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, PendingUpload))],
+        ['query'],
+      ),
     '__recordings' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
+        ['query'],
+      ),
+    '__uploadChunks' : IDL.Func(
+        [IDL.Opt(IDL.Text), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Vec(IDL.Nat8)))],
         ['query'],
       ),
     '__writingStats' : IDL.Func(
@@ -595,6 +644,7 @@ export const idlFactory = ({ IDL }) => {
     'deleteComment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'finishRecordingUpload' : IDL.Func([IDL.Nat], [IDL.Nat], []),
     'generateInviteCode' : IDL.Func([], [IDL.Text], []),
     'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
     'getAnnotation' : IDL.Func([IDL.Nat], [IDL.Opt(TextAnnotation)], []),
@@ -714,6 +764,11 @@ export const idlFactory = ({ IDL }) => {
       ),
     'setAdminPrincipal' : IDL.Func([IDL.Principal], [], []),
     'setArchiveSummary' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
+    'startRecordingUpload' : IDL.Func(
+        [IDL.Nat, IDL.Nat, IDL.Text, IDL.Nat],
+        [IDL.Nat],
+        [],
+      ),
     'synthesizeSpeech' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text],
         [IDL.Vec(IDL.Nat8)],
@@ -758,6 +813,11 @@ export const idlFactory = ({ IDL }) => {
     'updateChapter' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Bool], []),
     'updateChapterIndents' : IDL.Func(
         [IDL.Nat, IDL.Nat, IDL.Nat, IDL.Nat],
+        [IDL.Bool],
+        [],
+      ),
+    'uploadRecordingChunk' : IDL.Func(
+        [IDL.Nat, IDL.Nat, IDL.Vec(IDL.Nat8)],
         [IDL.Bool],
         [],
       ),

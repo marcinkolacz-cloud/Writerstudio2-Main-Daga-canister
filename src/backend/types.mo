@@ -70,6 +70,16 @@ module {
     createdAt : Int;
   };
 
+  public type PendingUpload = {
+    id : Nat;
+    chapterId : Nat;
+    bookId : Nat;
+    voice : Text;
+    totalChunks : Nat;
+    receivedChunks : Nat;
+    createdAt : Int;
+  };
+
   public type ChatMessage = {
     id : Nat;
     bookId : Nat;

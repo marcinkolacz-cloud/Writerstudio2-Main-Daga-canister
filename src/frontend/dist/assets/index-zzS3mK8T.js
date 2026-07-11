@@ -29085,6 +29085,15 @@ const InviteCode = Record({
   "usedBy": Opt(Principal2),
   "createdAt": Int
 });
+const PendingUpload = Record({
+  "id": Nat,
+  "voice": Text$3,
+  "createdAt": Int,
+  "receivedChunks": Nat,
+  "bookId": Nat,
+  "chapterId": Nat,
+  "totalChunks": Nat
+});
 const Recording = Record({
   "id": Nat,
   "voice": Text$3,
@@ -29171,9 +29180,19 @@ Service({
   "__nextChatSessionMessageId": Func([], [Nat], ["query"]),
   "__nextCommentId": Func([], [Nat], ["query"]),
   "__nextRecordingId": Func([], [Nat], ["query"]),
+  "__pendingUploads": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, PendingUpload))],
+    ["query"]
+  ),
   "__recordings": Func(
     [Opt(Nat), Opt(Nat)],
     [Vec(Tuple(Nat, Recording))],
+    ["query"]
+  ),
+  "__uploadChunks": Func(
+    [Opt(Text$3), Opt(Nat)],
+    [Vec(Tuple(Text$3, Vec(Nat8)))],
     ["query"]
   ),
   "__writingStats": Func(
@@ -29197,6 +29216,7 @@ Service({
   "deleteComment": Func([Nat], [Bool], []),
   "deleteMessage": Func([Nat], [Bool], []),
   "deleteRecording": Func([Nat], [Bool], []),
+  "finishRecordingUpload": Func([Nat], [Nat], []),
   "generateInviteCode": Func([], [Text$3], []),
   "getAnalysis": Func([Nat], [Opt(Analysis)], []),
   "getAnnotation": Func([Nat], [Opt(TextAnnotation)], []),
@@ -29312,6 +29332,11 @@ Service({
   ),
   "setAdminPrincipal": Func([Principal2], [], []),
   "setArchiveSummary": Func([Nat, Text$3], [Bool], []),
+  "startRecordingUpload": Func(
+    [Nat, Nat, Text$3, Nat],
+    [Nat],
+    []
+  ),
   "synthesizeSpeech": Func(
     [Text$3, Text$3, Text$3],
     [Vec(Nat8)],
@@ -29356,6 +29381,11 @@ Service({
   "updateChapter": Func([Nat, Text$3, Text$3], [Bool], []),
   "updateChapterIndents": Func(
     [Nat, Nat, Nat, Nat],
+    [Bool],
+    []
+  ),
+  "uploadRecordingChunk": Func(
+    [Nat, Nat, Vec(Nat8)],
     [Bool],
     []
   )
@@ -29458,6 +29488,15 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "usedBy": IDL2.Opt(IDL2.Principal),
     "createdAt": IDL2.Int
   });
+  const PendingUpload2 = IDL2.Record({
+    "id": IDL2.Nat,
+    "voice": IDL2.Text,
+    "createdAt": IDL2.Int,
+    "receivedChunks": IDL2.Nat,
+    "bookId": IDL2.Nat,
+    "chapterId": IDL2.Nat,
+    "totalChunks": IDL2.Nat
+  });
   const Recording2 = IDL2.Record({
     "id": IDL2.Nat,
     "voice": IDL2.Text,
@@ -29544,9 +29583,19 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "__nextChatSessionMessageId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextCommentId": IDL2.Func([], [IDL2.Nat], ["query"]),
     "__nextRecordingId": IDL2.Func([], [IDL2.Nat], ["query"]),
+    "__pendingUploads": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, PendingUpload2))],
+      ["query"]
+    ),
     "__recordings": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Recording2))],
+      ["query"]
+    ),
+    "__uploadChunks": IDL2.Func(
+      [IDL2.Opt(IDL2.Text), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Text, IDL2.Vec(IDL2.Nat8)))],
       ["query"]
     ),
     "__writingStats": IDL2.Func(
@@ -29570,6 +29619,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "deleteComment": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteMessage": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
     "deleteRecording": IDL2.Func([IDL2.Nat], [IDL2.Bool], []),
+    "finishRecordingUpload": IDL2.Func([IDL2.Nat], [IDL2.Nat], []),
     "generateInviteCode": IDL2.Func([], [IDL2.Text], []),
     "getAnalysis": IDL2.Func([IDL2.Nat], [IDL2.Opt(Analysis2)], []),
     "getAnnotation": IDL2.Func([IDL2.Nat], [IDL2.Opt(TextAnnotation2)], []),
@@ -29689,6 +29739,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
     ),
     "setAdminPrincipal": IDL2.Func([IDL2.Principal], [], []),
     "setArchiveSummary": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Bool], []),
+    "startRecordingUpload": IDL2.Func(
+      [IDL2.Nat, IDL2.Nat, IDL2.Text, IDL2.Nat],
+      [IDL2.Nat],
+      []
+    ),
     "synthesizeSpeech": IDL2.Func(
       [IDL2.Text, IDL2.Text, IDL2.Text],
       [IDL2.Vec(IDL2.Nat8)],
@@ -29733,6 +29788,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "updateChapter": IDL2.Func([IDL2.Nat, IDL2.Text, IDL2.Text], [IDL2.Bool], []),
     "updateChapterIndents": IDL2.Func(
       [IDL2.Nat, IDL2.Nat, IDL2.Nat, IDL2.Nat],
+      [IDL2.Bool],
+      []
+    ),
+    "uploadRecordingChunk": IDL2.Func(
+      [IDL2.Nat, IDL2.Nat, IDL2.Vec(IDL2.Nat8)],
       [IDL2.Bool],
       []
     )
@@ -34735,6 +34795,20 @@ class Backend {
       return result;
     }
   }
+  async __pendingUploads(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__pendingUploads(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__pendingUploads(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
   async __recordings(arg0, arg1) {
     if (this.processError) {
       try {
@@ -34746,6 +34820,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.__recordings(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
+  async __uploadChunks(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__uploadChunks(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__uploadChunks(to_candid_opt_n13(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
@@ -34984,6 +35072,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.deleteRecording(arg0);
+      return result;
+    }
+  }
+  async finishRecordingUpload(arg0) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.finishRecordingUpload(arg0);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.finishRecordingUpload(arg0);
       return result;
     }
   }
@@ -35477,6 +35579,20 @@ class Backend {
       return result;
     }
   }
+  async startRecordingUpload(arg0, arg1, arg2, arg3) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.startRecordingUpload(arg0, arg1, arg2, arg3);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.startRecordingUpload(arg0, arg1, arg2, arg3);
+      return result;
+    }
+  }
   async synthesizeSpeech(arg0, arg1, arg2) {
     if (this.processError) {
       try {
@@ -35586,6 +35702,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.updateChapterIndents(arg0, arg1, arg2, arg3);
+      return result;
+    }
+  }
+  async uploadRecordingChunk(arg0, arg1, arg2) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.uploadRecordingChunk(arg0, arg1, arg2);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.uploadRecordingChunk(arg0, arg1, arg2);
       return result;
     }
   }
@@ -85200,7 +85330,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BEwvdAOz.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DSCfeX4K.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

@@ -108,6 +108,15 @@ export interface InviteCode {
   'usedBy' : [] | [Principal],
   'createdAt' : bigint,
 }
+export interface PendingUpload {
+  'id' : bigint,
+  'voice' : string,
+  'createdAt' : bigint,
+  'receivedChunks' : bigint,
+  'bookId' : bigint,
+  'chapterId' : bigint,
+  'totalChunks' : bigint,
+}
 export interface Recording {
   'id' : bigint,
   'voice' : string,
@@ -182,9 +191,17 @@ export interface _SERVICE {
   '__nextChatSessionMessageId' : ActorMethod<[], bigint>,
   '__nextCommentId' : ActorMethod<[], bigint>,
   '__nextRecordingId' : ActorMethod<[], bigint>,
+  '__pendingUploads' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, PendingUpload]>
+  >,
   '__recordings' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Recording]>
+  >,
+  '__uploadChunks' : ActorMethod<
+    [[] | [string], [] | [bigint]],
+    Array<[string, Uint8Array]>
   >,
   '__writingStats' : ActorMethod<
     [[] | [string], [] | [bigint]],
@@ -206,6 +223,7 @@ export interface _SERVICE {
   'deleteComment' : ActorMethod<[bigint], boolean>,
   'deleteMessage' : ActorMethod<[bigint], boolean>,
   'deleteRecording' : ActorMethod<[bigint], boolean>,
+  'finishRecordingUpload' : ActorMethod<[bigint], bigint>,
   'generateInviteCode' : ActorMethod<[], string>,
   'getAnalysis' : ActorMethod<[bigint], [] | [Analysis]>,
   'getAnnotation' : ActorMethod<[bigint], [] | [TextAnnotation]>,
@@ -278,6 +296,10 @@ export interface _SERVICE {
   'sendMessage' : ActorMethod<[bigint, string, string, string, string], bigint>,
   'setAdminPrincipal' : ActorMethod<[Principal], undefined>,
   'setArchiveSummary' : ActorMethod<[bigint, string], boolean>,
+  'startRecordingUpload' : ActorMethod<
+    [bigint, bigint, string, bigint],
+    bigint
+  >,
   'synthesizeSpeech' : ActorMethod<[string, string, string], Uint8Array>,
   'ttsTransform' : ActorMethod<
     [
@@ -308,6 +330,7 @@ export interface _SERVICE {
     [bigint, bigint, bigint, bigint],
     boolean
   >,
+  'uploadRecordingChunk' : ActorMethod<[bigint, bigint, Uint8Array], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

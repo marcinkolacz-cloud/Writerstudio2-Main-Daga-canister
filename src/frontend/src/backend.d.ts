@@ -7,35 +7,12 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
-export interface DailyWritingStat {
-    id: bigint;
-    activeMinutes: bigint;
-    ownerId: Principal;
-    wordsAdded: bigint;
-    date: string;
-    bookId: bigint;
-    netWords: bigint;
-    sessionCount: bigint;
-    wordsRemoved: bigint;
-}
 export interface ChatSessionMessage {
     id: bigint;
     content: string;
     createdAt: bigint;
     role: string;
     sessionId: bigint;
-}
-export interface ChatSession {
-    id: bigint;
-    title: string;
-    createdAt: bigint;
-    chapterId: bigint;
-}
-export interface HourlyActivityStat {
-    id: bigint;
-    ownerId: Principal;
-    wordsAdded: bigint;
-    hour: bigint;
 }
 export interface Comment {
     id: bigint;
@@ -53,15 +30,6 @@ export interface Analysis {
     chapterId?: bigint;
     resultContent: string;
 }
-export interface ChatArchive {
-    id: bigint;
-    title: string;
-    createdAt: bigint;
-    bookId: bigint;
-    summary: string;
-    updatedAt: bigint;
-    sessionId: string;
-}
 export interface Book {
     id: bigint;
     title: string;
@@ -74,6 +42,68 @@ export interface Book {
     keyContext: string;
     category: string;
     ageCategory: string;
+}
+export interface Chapter {
+    id: bigint;
+    charCount: bigint;
+    title: string;
+    indentFirstLine: bigint;
+    content: string;
+    indentRight: bigint;
+    wordCount: bigint;
+    indentLeft: bigint;
+    createdAt: bigint;
+    bookId: bigint;
+    updatedAt: bigint;
+    sessionId: string;
+    orderIndex: bigint;
+}
+export interface ChatSession {
+    id: bigint;
+    title: string;
+    createdAt: bigint;
+    chapterId: bigint;
+}
+export interface PendingUpload {
+    id: bigint;
+    voice: string;
+    createdAt: bigint;
+    receivedChunks: bigint;
+    bookId: bigint;
+    chapterId: bigint;
+    totalChunks: bigint;
+}
+export interface DailyWritingStat {
+    id: bigint;
+    activeMinutes: bigint;
+    ownerId: Principal;
+    wordsAdded: bigint;
+    date: string;
+    bookId: bigint;
+    netWords: bigint;
+    sessionCount: bigint;
+    wordsRemoved: bigint;
+}
+export interface InviteCode {
+    code: string;
+    usedAt?: bigint;
+    usedBy?: Principal;
+    createdAt: bigint;
+}
+export interface HourlyActivityStat {
+    id: bigint;
+    ownerId: Principal;
+    wordsAdded: bigint;
+    hour: bigint;
+}
+export interface ChatArchive {
+    id: bigint;
+    title: string;
+    createdAt: bigint;
+    bookId: bigint;
+    summary: string;
+    updatedAt: bigint;
+    sessionId: string;
 }
 export interface TextAnnotation {
     id: bigint;
@@ -94,21 +124,6 @@ export interface ChatMessage {
     bookId: bigint;
     sessionId: string;
 }
-export interface Chapter {
-    id: bigint;
-    charCount: bigint;
-    title: string;
-    indentFirstLine: bigint;
-    content: string;
-    indentRight: bigint;
-    wordCount: bigint;
-    indentLeft: bigint;
-    createdAt: bigint;
-    bookId: bigint;
-    updatedAt: bigint;
-    sessionId: string;
-    orderIndex: bigint;
-}
 export interface Recording {
     id: bigint;
     voice: string;
@@ -116,12 +131,6 @@ export interface Recording {
     audioData: Uint8Array;
     bookId: bigint;
     chapterId: bigint;
-}
-export interface InviteCode {
-    code: string;
-    usedAt?: bigint;
-    usedBy?: Principal;
-    createdAt: bigint;
 }
 export interface backendInterface {
     addChatMessage(sessionId: bigint, role: string, content: string): Promise<bigint>;
@@ -140,6 +149,7 @@ export interface backendInterface {
     deleteComment(id: bigint): Promise<boolean>;
     deleteMessage(id: bigint): Promise<boolean>;
     deleteRecording(id: bigint): Promise<boolean>;
+    finishRecordingUpload(uploadId: bigint): Promise<bigint>;
     generateInviteCode(): Promise<string>;
     getAnalysis(id: bigint): Promise<Analysis | null>;
     getAnnotation(id: bigint): Promise<TextAnnotation | null>;
@@ -194,6 +204,7 @@ export interface backendInterface {
     sendMessage(bookId: bigint, sessionId: string, role: string, content: string, provider: string): Promise<bigint>;
     setAdminPrincipal(p: Principal): Promise<void>;
     setArchiveSummary(id: bigint, summary: string): Promise<boolean>;
+    startRecordingUpload(chapterId: bigint, bookId: bigint, voice: string, totalChunks: bigint): Promise<bigint>;
     synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
     ttsTransform(raw: {
         context: Uint8Array;
@@ -219,4 +230,5 @@ export interface backendInterface {
     updateBookMetadata(id: bigint, ageCategory: string, authorSummary: string, keyContext: string, themes: string, writingStyle: string): Promise<boolean>;
     updateChapter(id: bigint, title: string, content: string): Promise<boolean>;
     updateChapterIndents(id: bigint, indentLeft: bigint, indentRight: bigint, indentFirstLine: bigint): Promise<boolean>;
+    uploadRecordingChunk(uploadId: bigint, chunkIndex: bigint, data: Uint8Array): Promise<boolean>;
 }

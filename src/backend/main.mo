@@ -29,6 +29,8 @@ actor {
   let chatSessionMessages : Map.Map<Nat, Types.ChatSessionMessage>;
   let comments : Map.Map<Nat, Types.Comment>;
   let recordings : Map.Map<Nat, Types.Recording>;
+  let pendingUploads : Map.Map<Nat, Types.PendingUpload>;
+  let uploadChunks : Map.Map<Text, [Nat8]>;
   let inviteCodes : Map.Map<Text, Types.InviteCode>;
   let writingStats : Map.Map<Text, Types.DailyWritingStat>;
   let hourlyStats : Map.Map<Text, Types.HourlyActivityStat>;
@@ -56,7 +58,7 @@ actor {
   include StatsApi(books, chapters);
   include WritingStatsApi(writingStats);
   include HourlyStatsApi(hourlyStats);
-  include RecordingsApi(books, chapters, recordings);
+  include RecordingsApi(books, chapters, recordings, pendingUploads, uploadChunks);
   include TtsApi();
   include InvitesApi(books, inviteCodes);
 
