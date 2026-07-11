@@ -1,16 +1,18 @@
-const MAX_CHUNK_LENGTH = 4000;
+function getMaxChunkLength(provider: "openai" | "polly"): number {
+  return provider === "polly" ? 2800 : 4000;
+}
 
-function splitTextIntoChunks(text: string): string[] {
-  if (text.length <= MAX_CHUNK_LENGTH) {
+function splitTextIntoChunks(text: string, maxLength: number): string[] {
+  if (text.length <= maxLength) {
     return [text];
   }
 
   const chunks: string[] = [];
   let remaining = text;
 
-  while (remaining.length > MAX_CHUNK_LENGTH) {
+  while (remaining.length > maxLength) {
     // Try to find a sentence boundary within the last 500 chars of the chunk
-    const searchEnd = MAX_CHUNK_LENGTH;
+    const searchEnd = maxLength;
     const searchStart = Math.max(0, searchEnd - 500);
     let splitIndex = -1;
 
@@ -45,7 +47,7 @@ function splitTextIntoChunks(text: string): string[] {
     }
 
     if (splitIndex === -1 || splitIndex <= 0) {
-      splitIndex = MAX_CHUNK_LENGTH;
+      splitIndex = maxLength;
     }
 
     chunks.push(remaining.slice(0, splitIndex).trim());
@@ -63,16 +65,20 @@ async function generateSpeechChunk(
   text: string,
   voice: string,
   apiKey: string,
+  provider: "openai" | "polly",
 ): Promise<Blob> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (provider === "openai") {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
   const response = await fetch(
     "https://writerstudio-tts.marcinkolacz.workers.dev",
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({ model: "tts-1", input: text, voice }),
+      headers,
+      body: JSON.stringify({ provider, model: "tts-1", input: text, voice }),
     },
   );
   if (!response.ok) {
@@ -86,16 +92,18 @@ export async function generateSpeech(
   voice: string,
   apiKey: string,
   onProgress?: (current: number, total: number) => void,
+  provider: "openai" | "polly" = "openai",
 ): Promise<Blob> {
   if (!text.trim()) {
     throw new Error("Brak tekstu do odczytania");
   }
 
-  const chunks = splitTextIntoChunks(text);
+  const maxLength = getMaxChunkLength(provider);
+  const chunks = splitTextIntoChunks(text, maxLength);
 
   if (chunks.length === 1) {
     onProgress?.(1, 1);
-    return generateSpeechChunk(chunks[0], voice, apiKey);
+    return generateSpeechChunk(chunks[0], voice, apiKey, provider);
   }
 
   const blobs: Blob[] = new Array(chunks.length);
@@ -114,7 +122,12 @@ export async function generateSpeech(
 
     await Promise.all(
       batchIndices.map(async (index) => {
-        const blob = await generateSpeechChunk(chunks[index], voice, apiKey);
+        const blob = await generateSpeechChunk(
+          chunks[index],
+          voice,
+          apiKey,
+          provider,
+        );
         blobs[index] = blob;
         onProgress?.(index + 1, chunks.length);
       }),

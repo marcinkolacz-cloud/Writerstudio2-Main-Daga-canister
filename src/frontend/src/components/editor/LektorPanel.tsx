@@ -23,13 +23,19 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const VOICES = [
+const OPENAI_VOICES = [
   { value: "alloy", label: "Alloy" },
   { value: "echo", label: "Echo" },
   { value: "fable", label: "Fable" },
   { value: "onyx", label: "Onyx" },
   { value: "nova", label: "Nova" },
   { value: "shimmer", label: "Shimmer" },
+];
+
+const POLLY_VOICES = [
+  { value: "Ewa", label: "Ewa (polski, kobieta)" },
+  { value: "Maja", label: "Maja (polski, kobieta)" },
+  { value: "Jacek", label: "Jacek (polski, mężczyzna)" },
 ];
 
 interface LektorPanelProps {
@@ -43,7 +49,14 @@ type PlaybackState = "idle" | "loading" | "playing" | "paused";
 export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
   const principal = useAppStore((s) => s.principal);
   const apiKey = getApiKey("openai", principal);
-  const [voice, setVoice] = useState("alloy");
+  const [ttsProvider, setTtsProvider] = useState<"openai" | "polly">(() => {
+    const stored = localStorage.getItem("ws_lektor_provider");
+    return stored === "polly" ? "polly" : "openai";
+  });
+  const [voice, setVoice] = useState(() => {
+    const stored = localStorage.getItem("ws_lektor_provider");
+    return stored === "polly" ? "Ewa" : "alloy";
+  });
   const [speed, setSpeed] = useState([1.0]);
   const [playbackState, setPlaybackState] = useState<PlaybackState>("idle");
   const [progress, setProgress] = useState(0);
@@ -59,6 +72,15 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
   const objectUrlRef = useRef<string | null>(null);
 
   const saveRecording = useSaveRecording();
+
+  useEffect(() => {
+    localStorage.setItem("ws_lektor_provider", ttsProvider);
+  }, [ttsProvider]);
+
+  const handleProviderChange = (newProvider: "openai" | "polly") => {
+    setTtsProvider(newProvider);
+    setVoice(newProvider === "polly" ? "Ewa" : "alloy");
+  };
 
   const cleanupAudio = useCallback(() => {
     if (audioRef.current) {
@@ -139,6 +161,7 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
           setCurrentChunk(current);
           setProgress((current / total) * 100);
         },
+        ttsProvider,
       );
       setGeneratedBlob(blob);
 
@@ -175,7 +198,7 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
       setError(err instanceof Error ? err.message : "Błąd generowania audio");
       setPlaybackState("idle");
     }
-  }, [editor, apiKey, voice, cleanupAudio]);
+  }, [editor, apiKey, voice, cleanupAudio, ttsProvider]);
 
   const handlePause = useCallback(() => {
     if (audioRef.current && playbackState === "playing") {
@@ -210,6 +233,23 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
         Lektor
       </div>
 
+      {/* Provider selector */}
+      <div className="flex items-center gap-2">
+        <Label className="text-xs text-muted-foreground shrink-0">Silnik</Label>
+        <Select value={ttsProvider} onValueChange={handleProviderChange}>
+          <SelectTrigger
+            className="h-8 w-[110px] text-sm"
+            data-ocid="lektor.provider_select"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="openai">OpenAI</SelectItem>
+            <SelectItem value="polly">Amazon Polly</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Voice selector */}
       <div className="flex items-center gap-2">
         <Label className="text-xs text-muted-foreground shrink-0">Głos</Label>
@@ -221,11 +261,13 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {VOICES.map((v) => (
-              <SelectItem key={v.value} value={v.value}>
-                {v.label}
-              </SelectItem>
-            ))}
+            {(ttsProvider === "polly" ? POLLY_VOICES : OPENAI_VOICES).map(
+              (v) => (
+                <SelectItem key={v.value} value={v.value}>
+                  {v.label}
+                </SelectItem>
+              ),
+            )}
           </SelectContent>
         </Select>
       </div>
@@ -254,7 +296,10 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
         <Button
           size="sm"
           variant={playbackState === "playing" ? "outline" : "default"}
-          disabled={playbackState === "loading" || !apiKey.trim()}
+          disabled={
+            playbackState === "loading" ||
+            (ttsProvider === "openai" && !apiKey.trim())
+          }
           onClick={
             playbackState === "playing" || playbackState === "paused"
               ? handlePause

@@ -56185,15 +56185,17 @@ Odpowiedz na ostatnie pytanie użytkownika. Bądź konstruktywny, konkretny i in
     ] }) })
   ] });
 }
-const MAX_CHUNK_LENGTH = 4e3;
-function splitTextIntoChunks(text) {
-  if (text.length <= MAX_CHUNK_LENGTH) {
+function getMaxChunkLength(provider) {
+  return provider === "polly" ? 2800 : 4e3;
+}
+function splitTextIntoChunks(text, maxLength) {
+  if (text.length <= maxLength) {
     return [text];
   }
   const chunks = [];
   let remaining = text;
-  while (remaining.length > MAX_CHUNK_LENGTH) {
-    const searchEnd = MAX_CHUNK_LENGTH;
+  while (remaining.length > maxLength) {
+    const searchEnd = maxLength;
     const searchStart = Math.max(0, searchEnd - 500);
     let splitIndex = -1;
     for (let i = searchEnd; i >= searchStart; i--) {
@@ -56223,7 +56225,7 @@ function splitTextIntoChunks(text) {
       }
     }
     if (splitIndex === -1 || splitIndex <= 0) {
-      splitIndex = MAX_CHUNK_LENGTH;
+      splitIndex = maxLength;
     }
     chunks.push(remaining.slice(0, splitIndex).trim());
     remaining = remaining.slice(splitIndex).trim();
@@ -56233,16 +56235,19 @@ function splitTextIntoChunks(text) {
   }
   return chunks;
 }
-async function generateSpeechChunk(text, voice, apiKey) {
+async function generateSpeechChunk(text, voice, apiKey, provider) {
+  const headers = {
+    "Content-Type": "application/json"
+  };
+  if (provider === "openai") {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
   const response = await fetch(
     "https://writerstudio-tts.marcinkolacz.workers.dev",
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({ model: "tts-1", input: text, voice })
+      headers,
+      body: JSON.stringify({ provider, model: "tts-1", input: text, voice })
     }
   );
   if (!response.ok) {
@@ -56250,14 +56255,15 @@ async function generateSpeechChunk(text, voice, apiKey) {
   }
   return response.blob();
 }
-async function generateSpeech(text, voice, apiKey, onProgress) {
+async function generateSpeech(text, voice, apiKey, onProgress, provider = "openai") {
   if (!text.trim()) {
     throw new Error("Brak tekstu do odczytania");
   }
-  const chunks = splitTextIntoChunks(text);
+  const maxLength = getMaxChunkLength(provider);
+  const chunks = splitTextIntoChunks(text, maxLength);
   if (chunks.length === 1) {
     onProgress == null ? void 0 : onProgress(1, 1);
-    return generateSpeechChunk(chunks[0], voice, apiKey);
+    return generateSpeechChunk(chunks[0], voice, apiKey, provider);
   }
   const blobs = new Array(chunks.length);
   const CONCURRENCY = 3;
@@ -56269,7 +56275,12 @@ async function generateSpeech(text, voice, apiKey, onProgress) {
     );
     await Promise.all(
       batchIndices.map(async (index2) => {
-        const blob = await generateSpeechChunk(chunks[index2], voice, apiKey);
+        const blob = await generateSpeechChunk(
+          chunks[index2],
+          voice,
+          apiKey,
+          provider
+        );
         blobs[index2] = blob;
         onProgress == null ? void 0 : onProgress(index2 + 1, chunks.length);
       })
@@ -56277,7 +56288,7 @@ async function generateSpeech(text, voice, apiKey, onProgress) {
   }
   return new Blob(blobs, { type: "audio/mpeg" });
 }
-const VOICES = [
+const OPENAI_VOICES = [
   { value: "alloy", label: "Alloy" },
   { value: "echo", label: "Echo" },
   { value: "fable", label: "Fable" },
@@ -56285,10 +56296,22 @@ const VOICES = [
   { value: "nova", label: "Nova" },
   { value: "shimmer", label: "Shimmer" }
 ];
+const POLLY_VOICES = [
+  { value: "Ewa", label: "Ewa (polski, kobieta)" },
+  { value: "Maja", label: "Maja (polski, kobieta)" },
+  { value: "Jacek", label: "Jacek (polski, mężczyzna)" }
+];
 function LektorPanel({ editor, chapterId, bookId }) {
   const principal = useAppStore((s2) => s2.principal);
   const apiKey = getApiKey("openai", principal);
-  const [voice, setVoice] = reactExports.useState("alloy");
+  const [ttsProvider, setTtsProvider] = reactExports.useState(() => {
+    const stored = localStorage.getItem("ws_lektor_provider");
+    return stored === "polly" ? "polly" : "openai";
+  });
+  const [voice, setVoice] = reactExports.useState(() => {
+    const stored = localStorage.getItem("ws_lektor_provider");
+    return stored === "polly" ? "Ewa" : "alloy";
+  });
   const [speed, setSpeed] = reactExports.useState([1]);
   const [playbackState, setPlaybackState] = reactExports.useState("idle");
   const [progress, setProgress] = reactExports.useState(0);
@@ -56302,6 +56325,13 @@ function LektorPanel({ editor, chapterId, bookId }) {
   const audioRef = reactExports.useRef(null);
   const objectUrlRef = reactExports.useRef(null);
   const saveRecording = useSaveRecording();
+  reactExports.useEffect(() => {
+    localStorage.setItem("ws_lektor_provider", ttsProvider);
+  }, [ttsProvider]);
+  const handleProviderChange = (newProvider) => {
+    setTtsProvider(newProvider);
+    setVoice(newProvider === "polly" ? "Ewa" : "alloy");
+  };
   const cleanupAudio = reactExports.useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -56373,7 +56403,8 @@ function LektorPanel({ editor, chapterId, bookId }) {
           setTotalChunks(total);
           setCurrentChunk(current);
           setProgress(current / total * 100);
-        }
+        },
+        ttsProvider
       );
       setGeneratedBlob(blob);
       cleanupAudio();
@@ -56401,7 +56432,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
       setError(err instanceof Error ? err.message : "Błąd generowania audio");
       setPlaybackState("idle");
     }
-  }, [editor, apiKey, voice, cleanupAudio]);
+  }, [editor, apiKey, voice, cleanupAudio, ttsProvider]);
   const handlePause = reactExports.useCallback(() => {
     if (audioRef.current && playbackState === "playing") {
       audioRef.current.pause();
@@ -56432,6 +56463,23 @@ function LektorPanel({ editor, chapterId, bookId }) {
           "Lektor"
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { className: "text-xs text-muted-foreground shrink-0", children: "Silnik" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: ttsProvider, onValueChange: handleProviderChange, children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              SelectTrigger,
+              {
+                className: "h-8 w-[110px] text-sm",
+                "data-ocid": "lektor.provider_select",
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, {})
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs(SelectContent, { children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "openai", children: "OpenAI" }),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: "polly", children: "Amazon Polly" })
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(Label$2, { className: "text-xs text-muted-foreground shrink-0", children: "Głos" }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs(Select, { value: voice, onValueChange: setVoice, children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -56442,7 +56490,9 @@ function LektorPanel({ editor, chapterId, bookId }) {
                 children: /* @__PURE__ */ jsxRuntimeExports.jsx(SelectValue, {})
               }
             ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(SelectContent, { children: VOICES.map((v2) => /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: v2.value, children: v2.label }, v2.value)) })
+            /* @__PURE__ */ jsxRuntimeExports.jsx(SelectContent, { children: (ttsProvider === "polly" ? POLLY_VOICES : OPENAI_VOICES).map(
+              (v2) => /* @__PURE__ */ jsxRuntimeExports.jsx(SelectItem, { value: v2.value, children: v2.label }, v2.value)
+            ) })
           ] })
         ] }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3 min-w-[180px]", children: [
@@ -56470,7 +56520,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
             {
               size: "sm",
               variant: playbackState === "playing" ? "outline" : "default",
-              disabled: playbackState === "loading" || !apiKey.trim(),
+              disabled: playbackState === "loading" || ttsProvider === "openai" && !apiKey.trim(),
               onClick: playbackState === "playing" || playbackState === "paused" ? handlePause : handlePlay,
               "data-ocid": "lektor.play_pause_button",
               children: [
@@ -85150,7 +85200,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Dok-lIIo.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BEwvdAOz.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
