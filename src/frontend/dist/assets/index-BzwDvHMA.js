@@ -56354,7 +56354,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
     return () => cleanupAudio();
   }, [cleanupAudio]);
   const handlePlay = reactExports.useCallback(async () => {
-    if (!editor) return;
+    if (!editor || editor.isDestroyed) return;
     const text = editor.getText();
     if (!text.trim()) {
       setError("Brak tekstu do odczytania");
@@ -56522,7 +56522,7 @@ function LektorPanel({ editor, chapterId, bookId }) {
             formatTime(duration)
           ] })
         ] }),
-        editor && editor.getText().trim().split(/\s+/).length > 5e3 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full flex items-center gap-2 text-xs text-amber-600 bg-amber-50 rounded-md px-3 py-2", children: [
+        editor && !editor.isDestroyed && editor.getText().trim().split(/\s+/).length > 5e3 && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "w-full flex items-center gap-2 text-xs text-amber-600 bg-amber-50 rounded-md px-3 py-2", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsx(TriangleAlert, { className: "h-3.5 w-3.5 shrink-0" }),
           "Długie rozdziały (ponad 5000 słów) mogą nie zmieścić się w limicie — podziel tekst na mniejsze fragmenty."
         ] }),
@@ -85150,7 +85150,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-pN6sl6Js.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-Dok-lIIo.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

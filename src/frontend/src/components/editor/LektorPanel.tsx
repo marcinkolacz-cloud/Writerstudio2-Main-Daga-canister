@@ -117,7 +117,7 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
   }, [cleanupAudio]);
 
   const handlePlay = useCallback(async () => {
-    if (!editor) return;
+    if (!editor || editor.isDestroyed) return;
     const text = editor.getText();
     if (!text.trim()) {
       setError("Brak tekstu do odczytania");
@@ -321,13 +321,15 @@ export function LektorPanel({ editor, chapterId, bookId }: LektorPanelProps) {
       )}
 
       {/* Word count warning */}
-      {editor && editor.getText().trim().split(/\s+/).length > 5000 && (
-        <div className="w-full flex items-center gap-2 text-xs text-amber-600 bg-amber-50 rounded-md px-3 py-2">
-          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-          Długie rozdziały (ponad 5000 słów) mogą nie zmieścić się w limicie —
-          podziel tekst na mniejsze fragmenty.
-        </div>
-      )}
+      {editor &&
+        !editor.isDestroyed &&
+        editor.getText().trim().split(/\s+/).length > 5000 && (
+          <div className="w-full flex items-center gap-2 text-xs text-amber-600 bg-amber-50 rounded-md px-3 py-2">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+            Długie rozdziały (ponad 5000 słów) mogą nie zmieścić się w limicie —
+            podziel tekst na mniejsze fragmenty.
+          </div>
+        )}
 
       {/* Success message */}
       {success && (
