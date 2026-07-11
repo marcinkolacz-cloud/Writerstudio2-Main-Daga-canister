@@ -2356,6 +2356,9 @@ video {
 .border-primary\/30 {
   border-color: oklch(var(--primary) / 0.3);
 }
+.border-primary\/40 {
+  border-color: oklch(var(--primary) / 0.4);
+}
 .border-purple-500 {
   --tw-border-opacity: 1;
   border-color: rgb(168 85 247 / var(--tw-border-opacity, 1));
@@ -3585,6 +3588,11 @@ video {
 
 .focus\:z-10:focus {
   z-index: 10;
+}
+
+.focus\:border-primary:focus {
+  --tw-border-opacity: 1;
+  border-color: oklch(var(--primary) / var(--tw-border-opacity, 1));
 }
 
 .focus\:bg-accent:focus {

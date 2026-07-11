@@ -38768,6 +38768,25 @@ function useDeleteRecording() {
     }
   });
 }
+function useSetRecordingName() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient2 = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      name,
+      chapterId: _chapterId
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.setRecordingName(id, name);
+    },
+    onSuccess: (_2, variables) => {
+      queryClient2.invalidateQueries({
+        queryKey: ["recordings", variables.chapterId]
+      });
+    }
+  });
+}
 async function fetchRecordingAudio(actor, id) {
   if (!actor) return null;
   return actor.getRecordingAudio(id);
@@ -56554,6 +56573,9 @@ function LektorPanel({ editor, chapterId, bookId }) {
   const startRecordingUpload = useStartRecordingUpload();
   const uploadRecordingChunk = useUploadRecordingChunk();
   const finishRecordingUpload = useFinishRecordingUpload();
+  const { data: book } = useBook(bookId.toString());
+  const { data: chapter } = useChapter(chapterId.toString());
+  const setRecordingName = useSetRecordingName();
   reactExports.useEffect(() => {
     localStorage.setItem("ws_lektor_provider", ttsProvider);
   }, [ttsProvider]);
@@ -56587,13 +56609,21 @@ function LektorPanel({ editor, chapterId, bookId }) {
     try {
       const arrayBuffer = await generatedBlob.arrayBuffer();
       const audioData = new Uint8Array(arrayBuffer);
+      const defaultName = book && chapter ? `${book.title} - ${chapter.title}` : null;
       if (audioData.length <= DIRECT_UPLOAD_LIMIT) {
-        await saveRecording.mutateAsync({
+        const newId = await saveRecording.mutateAsync({
           chapterId,
           bookId,
           voice,
           audioData
         });
+        if (defaultName) {
+          await setRecordingName.mutateAsync({
+            id: newId,
+            name: defaultName,
+            chapterId
+          });
+        }
       } else {
         const totalChunks2 = Math.ceil(audioData.length / CHUNK_SIZE);
         const uploadId = await startRecordingUpload.mutateAsync({
@@ -56612,7 +56642,14 @@ function LektorPanel({ editor, chapterId, bookId }) {
             data: chunk
           });
         }
-        await finishRecordingUpload.mutateAsync({ uploadId });
+        const newId = await finishRecordingUpload.mutateAsync({ uploadId });
+        if (defaultName) {
+          await setRecordingName.mutateAsync({
+            id: newId,
+            name: defaultName,
+            chapterId
+          });
+        }
       }
       setSuccess("Nagranie zostało zapisane pomyślnie.");
       setGeneratedBlob(null);
@@ -56639,7 +56676,10 @@ function LektorPanel({ editor, chapterId, bookId }) {
     saveRecording,
     startRecordingUpload,
     uploadRecordingChunk,
-    finishRecordingUpload
+    finishRecordingUpload,
+    setRecordingName,
+    book,
+    chapter
   ]);
   reactExports.useEffect(() => {
     return () => cleanupAudio();
@@ -56847,6 +56887,7 @@ function RecordingsPanel({ chapterId }) {
   const { actor } = useActorLocal(createActor);
   const { data: recordings, isLoading } = useRecordings(Number(chapterId));
   const deleteRecording = useDeleteRecording();
+  const setRecordingName = useSetRecordingName();
   const [playingId, setPlayingId] = reactExports.useState(null);
   const [loadingId, setLoadingId] = reactExports.useState(null);
   const audioRef = reactExports.useRef(null);
@@ -56954,49 +56995,130 @@ function RecordingsPanel({ chapterId }) {
           "Brak zapisanych nagrań"
         ]
       }
-    ) : recordings.map((recording, index2) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
-      "div",
+    ) : recordings.map((recording, index2) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+      RecordingItem,
       {
-        className: "group rounded-md border border-border bg-background p-3 hover:border-primary/40 transition-colors",
-        "data-ocid": `recordings.item.${index2 + 1}`,
-        children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-2", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Mic, { className: "h-3 w-3 text-muted-foreground" }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: voiceLabels[recording.voice] ?? recording.voice })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1", children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                Button,
-                {
-                  variant: "ghost",
-                  size: "icon",
-                  className: "h-7 w-7",
-                  disabled: loadingId === recording.id,
-                  onClick: () => handlePlay(recording.id),
-                  "data-ocid": `recordings.play_button.${index2 + 1}`,
-                  children: loadingId === recording.id ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" }) : playingId === recording.id ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-3 w-3 rounded-full bg-primary" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Play, { className: "h-3 w-3" })
-                }
-              ),
-              /* @__PURE__ */ jsxRuntimeExports.jsx(
-                Button,
-                {
-                  variant: "ghost",
-                  size: "icon",
-                  className: "h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity",
-                  onClick: () => handleDelete2(recording.id),
-                  "data-ocid": `recordings.delete_button.${index2 + 1}`,
-                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3 w-3" })
-                }
-              )
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] text-muted-foreground/60", children: formatDate2(recording.createdAt) })
-        ]
+        recording,
+        index: index2,
+        isPlaying: playingId === recording.id,
+        isLoading: loadingId === recording.id,
+        voiceLabels,
+        onPlay: () => handlePlay(recording.id),
+        onDelete: () => handleDelete2(recording.id),
+        onRename: (newName) => setRecordingName.mutate({
+          id: recording.id,
+          name: newName,
+          chapterId
+        }),
+        formatDate: formatDate2
       },
       String(recording.id)
     )) }) })
   ] });
+}
+function RecordingItem({
+  recording,
+  index: index2,
+  isPlaying,
+  isLoading,
+  voiceLabels,
+  onPlay,
+  onDelete,
+  onRename,
+  formatDate: formatDate2
+}) {
+  const displayName = recording.name && recording.name.length > 0 ? recording.name : voiceLabels[recording.voice] ?? recording.voice;
+  const [isRenaming, setIsRenaming] = reactExports.useState(false);
+  const [renameValue, setRenameValue] = reactExports.useState(displayName);
+  const inputRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    if (isRenaming && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isRenaming]);
+  const submitRename = () => {
+    const trimmed = renameValue.trim();
+    if (trimmed && trimmed !== displayName) {
+      onRename(trimmed);
+    } else {
+      setRenameValue(displayName);
+    }
+    setIsRenaming(false);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+    "div",
+    {
+      className: "group rounded-md border border-border bg-background p-3 hover:border-primary/40 transition-colors",
+      "data-ocid": `recordings.item.${index2 + 1}`,
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between mb-2", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 min-w-0", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Mic, { className: "h-3 w-3 text-muted-foreground shrink-0" }),
+            isRenaming ? /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "input",
+              {
+                ref: inputRef,
+                value: renameValue,
+                onChange: (e3) => setRenameValue(e3.target.value),
+                onKeyDown: (e3) => {
+                  if (e3.key === "Enter") {
+                    submitRename();
+                  } else if (e3.key === "Escape") {
+                    setRenameValue(displayName);
+                    setIsRenaming(false);
+                  }
+                },
+                onBlur: submitRename,
+                className: "text-sm font-medium bg-transparent border-b border-primary/40 outline-none focus:border-primary flex-1 min-w-0",
+                "data-ocid": `recordings.rename_input.${index2 + 1}`
+              }
+            ) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm font-medium truncate", children: displayName })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-1 shrink-0", children: [
+            !isRenaming && /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Button,
+              {
+                variant: "ghost",
+                size: "icon",
+                className: "h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity",
+                onClick: () => {
+                  setRenameValue(displayName);
+                  setIsRenaming(true);
+                },
+                "data-ocid": `recordings.rename_button.${index2 + 1}`,
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(Pencil, { className: "h-3 w-3" })
+              }
+            ),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Button,
+              {
+                variant: "ghost",
+                size: "icon",
+                className: "h-7 w-7",
+                disabled: isLoading,
+                onClick: onPlay,
+                "data-ocid": `recordings.play_button.${index2 + 1}`,
+                children: isLoading ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" }) : isPlaying ? /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "h-3 w-3 rounded-full bg-primary" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Play, { className: "h-3 w-3" })
+              }
+            ),
+            !isRenaming && /* @__PURE__ */ jsxRuntimeExports.jsx(
+              Button,
+              {
+                variant: "ghost",
+                size: "icon",
+                className: "h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity",
+                onClick: onDelete,
+                "data-ocid": `recordings.delete_button.${index2 + 1}`,
+                children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { className: "h-3 w-3" })
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-[10px] text-muted-foreground/60", children: formatDate2(recording.createdAt) })
+      ]
+    }
+  );
 }
 function OrderedMap(content) {
   this.content = content;
@@ -85461,7 +85583,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DdHV71WY.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DOkYjGOJ.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);

@@ -5,9 +5,10 @@ import {
   fetchRecordingAudio,
   useDeleteRecording,
   useRecordings,
+  useSetRecordingName,
 } from "@/hooks/useBackend";
-import { Headphones, Mic, Play, Trash2, X } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { Headphones, Mic, Pencil, Play, Trash2, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useActorLocal } from "../../hooks/useActorLocal";
 
 interface RecordingsPanelProps {
@@ -18,6 +19,7 @@ export function RecordingsPanel({ chapterId }: RecordingsPanelProps) {
   const { actor } = useActorLocal(createActor);
   const { data: recordings, isLoading } = useRecordings(Number(chapterId));
   const deleteRecording = useDeleteRecording();
+  const setRecordingName = useSetRecordingName();
   const [playingId, setPlayingId] = useState<bigint | null>(null);
   const [loadingId, setLoadingId] = useState<bigint | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -150,54 +152,162 @@ export function RecordingsPanel({ chapterId }: RecordingsPanelProps) {
             </div>
           ) : (
             recordings.map((recording, index) => (
-              <div
+              <RecordingItem
                 key={String(recording.id)}
-                className="group rounded-md border border-border bg-background p-3 hover:border-primary/40 transition-colors"
-                data-ocid={`recordings.item.${index + 1}`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Mic className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-sm font-medium">
-                      {voiceLabels[recording.voice] ?? recording.voice}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      disabled={loadingId === recording.id}
-                      onClick={() => handlePlay(recording.id)}
-                      data-ocid={`recordings.play_button.${index + 1}`}
-                    >
-                      {loadingId === recording.id ? (
-                        <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                      ) : playingId === recording.id ? (
-                        <span className="h-3 w-3 rounded-full bg-primary" />
-                      ) : (
-                        <Play className="h-3 w-3" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => handleDelete(recording.id)}
-                      data-ocid={`recordings.delete_button.${index + 1}`}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-                <span className="text-[10px] text-muted-foreground/60">
-                  {formatDate(recording.createdAt)}
-                </span>
-              </div>
+                recording={recording}
+                index={index}
+                isPlaying={playingId === recording.id}
+                isLoading={loadingId === recording.id}
+                voiceLabels={voiceLabels}
+                onPlay={() => handlePlay(recording.id)}
+                onDelete={() => handleDelete(recording.id)}
+                onRename={(newName) =>
+                  setRecordingName.mutate({
+                    id: recording.id,
+                    name: newName,
+                    chapterId,
+                  })
+                }
+                formatDate={formatDate}
+              />
             ))
           )}
         </div>
       </ScrollArea>
+    </div>
+  );
+}
+
+interface RecordingItemProps {
+  recording: {
+    id: bigint;
+    voice: string;
+    createdAt: bigint;
+    name?: string;
+  };
+  index: number;
+  isPlaying: boolean;
+  isLoading: boolean;
+  voiceLabels: Record<string, string>;
+  onPlay: () => void;
+  onDelete: () => void;
+  onRename: (newName: string) => void;
+  formatDate: (timestamp: bigint) => string;
+}
+
+function RecordingItem({
+  recording,
+  index,
+  isPlaying,
+  isLoading,
+  voiceLabels,
+  onPlay,
+  onDelete,
+  onRename,
+  formatDate,
+}: RecordingItemProps) {
+  const displayName =
+    recording.name && recording.name.length > 0
+      ? recording.name
+      : (voiceLabels[recording.voice] ?? recording.voice);
+
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(displayName);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (isRenaming && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isRenaming]);
+
+  const submitRename = () => {
+    const trimmed = renameValue.trim();
+    if (trimmed && trimmed !== displayName) {
+      onRename(trimmed);
+    } else {
+      setRenameValue(displayName);
+    }
+    setIsRenaming(false);
+  };
+
+  return (
+    <div
+      className="group rounded-md border border-border bg-background p-3 hover:border-primary/40 transition-colors"
+      data-ocid={`recordings.item.${index + 1}`}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Mic className="h-3 w-3 text-muted-foreground shrink-0" />
+          {isRenaming ? (
+            <input
+              ref={inputRef}
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  submitRename();
+                } else if (e.key === "Escape") {
+                  setRenameValue(displayName);
+                  setIsRenaming(false);
+                }
+              }}
+              onBlur={submitRename}
+              className="text-sm font-medium bg-transparent border-b border-primary/40 outline-none focus:border-primary flex-1 min-w-0"
+              data-ocid={`recordings.rename_input.${index + 1}`}
+            />
+          ) : (
+            <span className="text-sm font-medium truncate">{displayName}</span>
+          )}
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          {!isRenaming && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => {
+                setRenameValue(displayName);
+                setIsRenaming(true);
+              }}
+              data-ocid={`recordings.rename_button.${index + 1}`}
+            >
+              <Pencil className="h-3 w-3" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            disabled={isLoading}
+            onClick={onPlay}
+            data-ocid={`recordings.play_button.${index + 1}`}
+          >
+            {isLoading ? (
+              <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : isPlaying ? (
+              <span className="h-3 w-3 rounded-full bg-primary" />
+            ) : (
+              <Play className="h-3 w-3" />
+            )}
+          </Button>
+          {!isRenaming && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={onDelete}
+              data-ocid={`recordings.delete_button.${index + 1}`}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
+      </div>
+      <span className="text-[10px] text-muted-foreground/60">
+        {formatDate(recording.createdAt)}
+      </span>
     </div>
   );
 }

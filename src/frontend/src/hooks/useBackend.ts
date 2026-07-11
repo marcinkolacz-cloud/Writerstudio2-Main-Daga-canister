@@ -642,6 +642,7 @@ export function useRecordings(chapterId: string | number) {
       id: bigint;
       voice: string;
       createdAt: bigint;
+      name?: string;
     }>
   >({
     queryKey: ["recordings", id],
@@ -745,6 +746,31 @@ export function useDeleteRecording() {
     mutationFn: async ({ id }: { id: bigint; chapterId: bigint }) => {
       if (!actor) throw new Error("Actor not available");
       return actor.deleteRecording(id);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["recordings", variables.chapterId],
+      });
+    },
+  });
+}
+
+export function useSetRecordingName() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      name,
+      chapterId: _chapterId,
+    }: {
+      id: bigint;
+      name: string;
+      chapterId: bigint;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.setRecordingName(id, name);
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
