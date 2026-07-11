@@ -208,6 +208,11 @@ service : {
           nat;
           PendingUpload;
         }) query;
+  __recordingNames: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          text;
+        }) query;
   __recordings: (ko: opt nat, count: opt nat) ->
    (vec record {
           nat;
@@ -279,6 +284,7 @@ service : {
    (vec record {
           createdAt: int;
           id: nat;
+          name: opt text;
           voice: text;
         });
   recordHourlyActivity: (hour: nat, wordsAdded: nat) -> ();
@@ -304,6 +310,7 @@ service : {
    provider: text) -> (nat);
   setAdminPrincipal: (p: principal) -> ();
   setArchiveSummary: (id: nat, summary: text) -> (bool);
+  setRecordingName: (recordingId: nat, name: text) -> (bool);
   startRecordingUpload: (chapterId: nat, bookId: nat, voice: text,
    totalChunks: nat) -> (nat);
   synthesizeSpeech: ("text": text, voice: text, apiKey: text) -> (blob);

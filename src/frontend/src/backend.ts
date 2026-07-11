@@ -202,6 +202,7 @@ export interface backendInterface {
     __nextCommentId(): Promise<bigint>;
     __nextRecordingId(): Promise<bigint>;
     __pendingUploads(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, PendingUpload]>>;
+    __recordingNames(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, string]>>;
     __recordings(ko: bigint | null, count: bigint | null): Promise<Array<[bigint, Recording]>>;
     __uploadChunks(ko: string | null, count: bigint | null): Promise<Array<[string, Uint8Array]>>;
     __writingStats(ko: string | null, count: bigint | null): Promise<Array<[string, DailyWritingStat]>>;
@@ -257,6 +258,7 @@ export interface backendInterface {
     listRecordingsByChapter(chapterId: bigint): Promise<Array<{
         id: bigint;
         voice: string;
+        name?: string;
         createdAt: bigint;
     }>>;
     recordHourlyActivity(hour: bigint, wordsAdded: bigint): Promise<void>;
@@ -276,6 +278,7 @@ export interface backendInterface {
     sendMessage(bookId: bigint, sessionId: string, role: string, content: string, provider: string): Promise<bigint>;
     setAdminPrincipal(p: Principal): Promise<void>;
     setArchiveSummary(id: bigint, summary: string): Promise<boolean>;
+    setRecordingName(recordingId: bigint, name: string): Promise<boolean>;
     startRecordingUpload(chapterId: bigint, bookId: bigint, voice: string, totalChunks: bigint): Promise<bigint>;
     synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
     ttsTransform(raw: {
@@ -626,6 +629,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.__pendingUploads(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async __recordingNames(arg0: bigint | null, arg1: bigint | null): Promise<Array<[bigint, string]>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.__recordingNames(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.__recordingNames(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
@@ -1243,19 +1260,20 @@ export class Backend implements backendInterface {
     async listRecordingsByChapter(arg0: bigint): Promise<Array<{
         id: bigint;
         voice: string;
+        name?: string;
         createdAt: bigint;
     }>> {
         if (this.processError) {
             try {
                 const result = await this.actor.listRecordingsByChapter(arg0);
-                return result;
+                return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.listRecordingsByChapter(arg0);
-            return result;
+            return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
         }
     }
     async recordHourlyActivity(arg0: bigint, arg1: bigint): Promise<void> {
@@ -1351,14 +1369,14 @@ export class Backend implements backendInterface {
     }>): Promise<Array<bigint>> {
         if (this.processError) {
             try {
-                const result = await this.actor.saveAnnotations(arg0, to_candid_vec_n27(this._uploadFile, this._downloadFile, arg1));
+                const result = await this.actor.saveAnnotations(arg0, to_candid_vec_n29(this._uploadFile, this._downloadFile, arg1));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.saveAnnotations(arg0, to_candid_vec_n27(this._uploadFile, this._downloadFile, arg1));
+            const result = await this.actor.saveAnnotations(arg0, to_candid_vec_n29(this._uploadFile, this._downloadFile, arg1));
             return result;
         }
     }
@@ -1415,6 +1433,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.setArchiveSummary(arg0, arg1);
+            return result;
+        }
+    }
+    async setRecordingName(arg0: bigint, arg1: string): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.setRecordingName(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.setRecordingName(arg0, arg1);
             return result;
         }
     }
@@ -1660,6 +1692,24 @@ function from_candid_record_n17(_uploadFile: (file: ExternalBlob) => Promise<Uin
         createdAt: value.createdAt
     };
 }
+function from_candid_record_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    id: bigint;
+    voice: string;
+    name: [] | [string];
+    createdAt: bigint;
+}): {
+    id: bigint;
+    voice: string;
+    name?: string;
+    createdAt: bigint;
+} {
+    return {
+        id: value.id,
+        voice: value.voice,
+        name: record_opt_to_undefined(from_candid_opt_n12(_uploadFile, _downloadFile, value.name)),
+        createdAt: value.createdAt
+    };
+}
 function from_candid_record_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     id: bigint;
     provider: string;
@@ -1717,6 +1767,19 @@ function from_candid_vec_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
 function from_candid_vec_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_InviteCode>): Array<InviteCode> {
     return value.map((x)=>from_candid_InviteCode_n16(_uploadFile, _downloadFile, x));
 }
+function from_candid_vec_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<{
+    id: bigint;
+    voice: string;
+    name: [] | [string];
+    createdAt: bigint;
+}>): Array<{
+    id: bigint;
+    voice: string;
+    name?: string;
+    createdAt: bigint;
+}> {
+    return value.map((x)=>from_candid_record_n28(_uploadFile, _downloadFile, x));
+}
 function from_candid_vec_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<[bigint, _Analysis]>): Array<[bigint, Analysis]> {
     return value.map((x)=>from_candid_tuple_n4(_uploadFile, _downloadFile, x));
 }
@@ -1729,7 +1792,7 @@ function to_candid_opt_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Arr
 function to_candid_opt_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: bigint | null): [] | [bigint] {
     return value === null ? candid_none() : candid_some(value);
 }
-function to_candid_record_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function to_candid_record_n30(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     alternativeProposal?: string;
     explanation: string;
     color: string;
@@ -1750,7 +1813,7 @@ function to_candid_record_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         proposal: value.proposal
     };
 }
-function to_candid_vec_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<{
+function to_candid_vec_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<{
     alternativeProposal?: string;
     explanation: string;
     color: string;
@@ -1763,7 +1826,7 @@ function to_candid_vec_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Arr
     text: string;
     proposal: string;
 }> {
-    return value.map((x)=>to_candid_record_n28(_uploadFile, _downloadFile, x));
+    return value.map((x)=>to_candid_record_n30(_uploadFile, _downloadFile, x));
 }
 export interface CreateActorOptions {
     agent?: Agent;

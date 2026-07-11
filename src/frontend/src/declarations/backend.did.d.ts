@@ -195,6 +195,10 @@ export interface _SERVICE {
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, PendingUpload]>
   >,
+  '__recordingNames' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, string]>
+  >,
   '__recordings' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Recording]>
@@ -263,7 +267,14 @@ export interface _SERVICE {
   'listMessagesByBook' : ActorMethod<[bigint, string], Array<ChatMessage>>,
   'listRecordingsByChapter' : ActorMethod<
     [bigint],
-    Array<{ 'id' : bigint, 'voice' : string, 'createdAt' : bigint }>
+    Array<
+      {
+        'id' : bigint,
+        'voice' : string,
+        'name' : [] | [string],
+        'createdAt' : bigint,
+      }
+    >
   >,
   'recordHourlyActivity' : ActorMethod<[bigint, bigint], undefined>,
   'recordWritingActivity' : ActorMethod<
@@ -296,6 +307,7 @@ export interface _SERVICE {
   'sendMessage' : ActorMethod<[bigint, string, string, string, string], bigint>,
   'setAdminPrincipal' : ActorMethod<[Principal], undefined>,
   'setArchiveSummary' : ActorMethod<[bigint, string], boolean>,
+  'setRecordingName' : ActorMethod<[bigint, string], boolean>,
   'startRecordingUpload' : ActorMethod<
     [bigint, bigint, string, bigint],
     bigint

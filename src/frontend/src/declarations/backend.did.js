@@ -206,6 +206,11 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Tuple(IDL.Nat, PendingUpload))],
       ['query'],
     ),
+  '__recordingNames' : IDL.Func(
+      [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Text))],
+      ['query'],
+    ),
   '__recordings' : IDL.Func(
       [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
       [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
@@ -305,6 +310,7 @@ export const idlService = IDL.Service({
           IDL.Record({
             'id' : IDL.Nat,
             'voice' : IDL.Text,
+            'name' : IDL.Opt(IDL.Text),
             'createdAt' : IDL.Int,
           })
         ),
@@ -353,6 +359,7 @@ export const idlService = IDL.Service({
     ),
   'setAdminPrincipal' : IDL.Func([IDL.Principal], [], []),
   'setArchiveSummary' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
+  'setRecordingName' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
   'startRecordingUpload' : IDL.Func(
       [IDL.Nat, IDL.Nat, IDL.Text, IDL.Nat],
       [IDL.Nat],
@@ -613,6 +620,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, PendingUpload))],
         ['query'],
       ),
+    '__recordingNames' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Text))],
+        ['query'],
+      ),
     '__recordings' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
@@ -716,6 +728,7 @@ export const idlFactory = ({ IDL }) => {
             IDL.Record({
               'id' : IDL.Nat,
               'voice' : IDL.Text,
+              'name' : IDL.Opt(IDL.Text),
               'createdAt' : IDL.Int,
             })
           ),
@@ -764,6 +777,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'setAdminPrincipal' : IDL.Func([IDL.Principal], [], []),
     'setArchiveSummary' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
+    'setRecordingName' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
     'startRecordingUpload' : IDL.Func(
         [IDL.Nat, IDL.Nat, IDL.Text, IDL.Nat],
         [IDL.Nat],

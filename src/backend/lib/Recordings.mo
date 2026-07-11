@@ -33,15 +33,17 @@ module {
 
   public func filterByChapter(
     recordings : Map.Map<Nat, Types.Recording>,
+    recordingNames : Map.Map<Nat, Text>,
     chapterId : Nat,
-  ) : [{ id : Nat; voice : Text; createdAt : Int }] {
-    var result = List.empty<{ id : Nat; voice : Text; createdAt : Int }>();
+  ) : [{ id : Nat; voice : Text; createdAt : Int; name : ?Text }] {
+    var result = List.empty<{ id : Nat; voice : Text; createdAt : Int; name : ?Text }>();
     for ((_, recording) in recordings.entries()) {
       if (recording.chapterId == chapterId) {
         result.add({
           id = recording.id;
           voice = recording.voice;
           createdAt = recording.createdAt;
+          name = recordingNames.get(recording.id);
         });
       };
     };

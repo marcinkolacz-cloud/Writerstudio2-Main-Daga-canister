@@ -10,6 +10,7 @@ mixin (
   recordings : Map.Map<Nat, Types.Recording>,
   pendingUploads : Map.Map<Nat, Types.PendingUpload>,
   uploadChunks : Map.Map<Text, [Nat8]>,
+  recordingNames : Map.Map<Nat, Text>,
 ) {
 
   func recordingGetBookOwner(chapterId : Nat) : ?Principal {
@@ -47,16 +48,30 @@ mixin (
     }
   };
 
-  public shared ({ caller }) func listRecordingsByChapter(chapterId : Nat) : async [{ id : Nat; voice : Text; createdAt : Int }] {
+  public shared ({ caller }) func listRecordingsByChapter(chapterId : Nat) : async [{ id : Nat; voice : Text; createdAt : Int; name : ?Text }] {
     switch (recordingGetBookOwner(chapterId)) {
       case (?ownerId) {
         if (Principal.equal(ownerId, caller)) {
-          RecordingsLib.filterByChapter(recordings, chapterId)
+          RecordingsLib.filterByChapter(recordings, recordingNames, chapterId)
         } else {
           []
         }
       };
       case null { [] }
+    }
+  };
+
+  public shared ({ caller }) func setRecordingName(recordingId : Nat, name : Text) : async Bool {
+    switch (recordings.get(recordingId)) {
+      case (?recording) {
+        if (isRecordingOwner(recording, caller)) {
+          recordingNames.add(recordingId, name);
+          true
+        } else {
+          false
+        }
+      };
+      case null { false }
     }
   };
 

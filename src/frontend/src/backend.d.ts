@@ -185,6 +185,7 @@ export interface backendInterface {
     listRecordingsByChapter(chapterId: bigint): Promise<Array<{
         id: bigint;
         voice: string;
+        name?: string;
         createdAt: bigint;
     }>>;
     recordHourlyActivity(hour: bigint, wordsAdded: bigint): Promise<void>;
@@ -204,6 +205,7 @@ export interface backendInterface {
     sendMessage(bookId: bigint, sessionId: string, role: string, content: string, provider: string): Promise<bigint>;
     setAdminPrincipal(p: Principal): Promise<void>;
     setArchiveSummary(id: bigint, summary: string): Promise<boolean>;
+    setRecordingName(recordingId: bigint, name: string): Promise<boolean>;
     startRecordingUpload(chapterId: bigint, bookId: bigint, voice: string, totalChunks: bigint): Promise<bigint>;
     synthesizeSpeech(text: string, voice: string, apiKey: string): Promise<Uint8Array>;
     ttsTransform(raw: {

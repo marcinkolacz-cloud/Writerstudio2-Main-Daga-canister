@@ -29185,6 +29185,11 @@ Service({
     [Vec(Tuple(Nat, PendingUpload))],
     ["query"]
   ),
+  "__recordingNames": Func(
+    [Opt(Nat), Opt(Nat)],
+    [Vec(Tuple(Nat, Text$3))],
+    ["query"]
+  ),
   "__recordings": Func(
     [Opt(Nat), Opt(Nat)],
     [Vec(Tuple(Nat, Recording))],
@@ -29284,6 +29289,7 @@ Service({
         Record({
           "id": Nat,
           "voice": Text$3,
+          "name": Opt(Text$3),
           "createdAt": Int
         })
       )
@@ -29332,6 +29338,7 @@ Service({
   ),
   "setAdminPrincipal": Func([Principal2], [], []),
   "setArchiveSummary": Func([Nat, Text$3], [Bool], []),
+  "setRecordingName": Func([Nat, Text$3], [Bool], []),
   "startRecordingUpload": Func(
     [Nat, Nat, Text$3, Nat],
     [Nat],
@@ -29588,6 +29595,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, PendingUpload2))],
       ["query"]
     ),
+    "__recordingNames": IDL2.Func(
+      [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
+      [IDL2.Vec(IDL2.Tuple(IDL2.Nat, IDL2.Text))],
+      ["query"]
+    ),
     "__recordings": IDL2.Func(
       [IDL2.Opt(IDL2.Nat), IDL2.Opt(IDL2.Nat)],
       [IDL2.Vec(IDL2.Tuple(IDL2.Nat, Recording2))],
@@ -29691,6 +29703,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
           IDL2.Record({
             "id": IDL2.Nat,
             "voice": IDL2.Text,
+            "name": IDL2.Opt(IDL2.Text),
             "createdAt": IDL2.Int
           })
         )
@@ -29739,6 +29752,7 @@ const idlFactory = ({ IDL: IDL2 }) => {
     ),
     "setAdminPrincipal": IDL2.Func([IDL2.Principal], [], []),
     "setArchiveSummary": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Bool], []),
+    "setRecordingName": IDL2.Func([IDL2.Nat, IDL2.Text], [IDL2.Bool], []),
     "startRecordingUpload": IDL2.Func(
       [IDL2.Nat, IDL2.Nat, IDL2.Text, IDL2.Nat],
       [IDL2.Nat],
@@ -34809,6 +34823,20 @@ class Backend {
       return result;
     }
   }
+  async __recordingNames(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.__recordingNames(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.__recordingNames(to_candid_opt_n2(this._uploadFile, this._downloadFile, arg0), to_candid_opt_n2(this._uploadFile, this._downloadFile, arg1));
+      return result;
+    }
+  }
   async __recordings(arg0, arg1) {
     if (this.processError) {
       try {
@@ -35415,14 +35443,14 @@ class Backend {
     if (this.processError) {
       try {
         const result = await this.actor.listRecordingsByChapter(arg0);
-        return result;
+        return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
       const result = await this.actor.listRecordingsByChapter(arg0);
-      return result;
+      return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
     }
   }
   async recordHourlyActivity(arg0, arg1) {
@@ -35512,14 +35540,14 @@ class Backend {
   async saveAnnotations(arg0, arg1) {
     if (this.processError) {
       try {
-        const result = await this.actor.saveAnnotations(arg0, to_candid_vec_n27(this._uploadFile, this._downloadFile, arg1));
+        const result = await this.actor.saveAnnotations(arg0, to_candid_vec_n29(this._uploadFile, this._downloadFile, arg1));
         return result;
       } catch (e3) {
         this.processError(e3);
         throw new Error("unreachable");
       }
     } else {
-      const result = await this.actor.saveAnnotations(arg0, to_candid_vec_n27(this._uploadFile, this._downloadFile, arg1));
+      const result = await this.actor.saveAnnotations(arg0, to_candid_vec_n29(this._uploadFile, this._downloadFile, arg1));
       return result;
     }
   }
@@ -35576,6 +35604,20 @@ class Backend {
       }
     } else {
       const result = await this.actor.setArchiveSummary(arg0, arg1);
+      return result;
+    }
+  }
+  async setRecordingName(arg0, arg1) {
+    if (this.processError) {
+      try {
+        const result = await this.actor.setRecordingName(arg0, arg1);
+        return result;
+      } catch (e3) {
+        this.processError(e3);
+        throw new Error("unreachable");
+      }
+    } else {
+      const result = await this.actor.setRecordingName(arg0, arg1);
       return result;
     }
   }
@@ -35776,6 +35818,14 @@ function from_candid_record_n17(_uploadFile, _downloadFile, value) {
     createdAt: value.createdAt
   };
 }
+function from_candid_record_n28(_uploadFile, _downloadFile, value) {
+  return {
+    id: value.id,
+    voice: value.voice,
+    name: record_opt_to_undefined(from_candid_opt_n12(_uploadFile, _downloadFile, value.name)),
+    createdAt: value.createdAt
+  };
+}
 function from_candid_record_n6(_uploadFile, _downloadFile, value) {
   return {
     id: value.id,
@@ -35817,6 +35867,9 @@ function from_candid_vec_n25(_uploadFile, _downloadFile, value) {
 function from_candid_vec_n26(_uploadFile, _downloadFile, value) {
   return value.map((x3) => from_candid_InviteCode_n16(_uploadFile, _downloadFile, x3));
 }
+function from_candid_vec_n27(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => from_candid_record_n28(_uploadFile, _downloadFile, x3));
+}
 function from_candid_vec_n3(_uploadFile, _downloadFile, value) {
   return value.map((x3) => from_candid_tuple_n4(_uploadFile, _downloadFile, x3));
 }
@@ -35829,7 +35882,7 @@ function to_candid_opt_n13(_uploadFile, _downloadFile, value) {
 function to_candid_opt_n2(_uploadFile, _downloadFile, value) {
   return value === null ? candid_none() : candid_some(value);
 }
-function to_candid_record_n28(_uploadFile, _downloadFile, value) {
+function to_candid_record_n30(_uploadFile, _downloadFile, value) {
   return {
     alternativeProposal: value.alternativeProposal ? candid_some(value.alternativeProposal) : candid_none(),
     explanation: value.explanation,
@@ -35838,8 +35891,8 @@ function to_candid_record_n28(_uploadFile, _downloadFile, value) {
     proposal: value.proposal
   };
 }
-function to_candid_vec_n27(_uploadFile, _downloadFile, value) {
-  return value.map((x3) => to_candid_record_n28(_uploadFile, _downloadFile, x3));
+function to_candid_vec_n29(_uploadFile, _downloadFile, value) {
+  return value.map((x3) => to_candid_record_n30(_uploadFile, _downloadFile, x3));
 }
 function createActor(canisterId, _uploadFile, _downloadFile, options = {}) {
   const agent2 = options.agent || HttpAgent.createSync({
@@ -85408,7 +85461,7 @@ function htmlToPdfBlocks(html) {
 }
 async function exportToPDF(title, contentHtml) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-B7nE1hOX.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DdHV71WY.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
