@@ -8,6 +8,18 @@ import type {
 } from "docx";
 
 /* ------------------------------------------------------------------ */
+/*  Filename helper                                                   */
+/* ------------------------------------------------------------------ */
+
+function sanitizeFileName(name: string): string {
+  return name
+    .replace(/[\\/:*?"<>|]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+/* ------------------------------------------------------------------ */
 /*  PDF helpers                                                       */
 /* ------------------------------------------------------------------ */
 
@@ -101,6 +113,7 @@ function htmlToPdfBlocks(html: string): PdfBlock[] {
 export async function exportToPDF(
   title: string,
   contentHtml: string,
+  fileName?: string,
 ): Promise<void> {
   const { jsPDF } = await import("jspdf");
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -135,7 +148,7 @@ export async function exportToPDF(
     y += block.spacingAfter;
   }
 
-  doc.save(`${title.replace(/\s+/g, "_")}.pdf`);
+  doc.save(`${sanitizeFileName(fileName ?? title)}.pdf`);
 }
 
 export async function exportToDOCX(
@@ -144,6 +157,7 @@ export async function exportToDOCX(
   indentLeft: number,
   indentRight: number,
   indentFirstLine: number,
+  fileName?: string,
 ): Promise<void> {
   const { Document, Packer, Paragraph, TextRun } = await import("docx");
 
@@ -408,7 +422,7 @@ export async function exportToDOCX(
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${title.replace(/\s+/g, "_")}.docx`;
+  a.download = `${sanitizeFileName(fileName ?? title)}.docx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -444,6 +458,7 @@ export async function exportToDOCXWithRedaction(
   title: string,
   contentHtml: string,
   settings: RedactionSettings,
+  fileName?: string,
 ): Promise<void> {
   const {
     Document,
@@ -755,7 +770,7 @@ export async function exportToDOCXWithRedaction(
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${title.replace(/\s+/g, "_")}.docx`;
+  a.download = `${sanitizeFileName(fileName ?? title)}.docx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

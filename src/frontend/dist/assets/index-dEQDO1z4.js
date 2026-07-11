@@ -85517,6 +85517,9 @@ const __vitePreload = function preload2(baseModule, deps, importerUrl) {
     return baseModule().catch(handlePreloadError);
   });
 };
+function sanitizeFileName(name) {
+  return name.replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "");
+}
 function htmlToPdfBlocks(html) {
   const tmp = document.createElement("div");
   tmp.innerHTML = html;
@@ -85581,9 +85584,9 @@ function htmlToPdfBlocks(html) {
   }
   return blocks;
 }
-async function exportToPDF(title, contentHtml) {
+async function exportToPDF(title, contentHtml, fileName) {
   const { jsPDF } = await __vitePreload(async () => {
-    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-DOkYjGOJ.js").then((n2) => n2.j);
+    const { jsPDF: jsPDF2 } = await import("./jspdf.es.min-BamiQs2o.js").then((n2) => n2.j);
     return { jsPDF: jsPDF2 };
   }, true ? [] : void 0);
   const blocks = htmlToPdfBlocks(contentHtml);
@@ -85613,9 +85616,9 @@ async function exportToPDF(title, contentHtml) {
     }
     y2 += block.spacingAfter;
   }
-  doc2.save(`${title.replace(/\s+/g, "_")}.pdf`);
+  doc2.save(`${sanitizeFileName(fileName ?? title)}.pdf`);
 }
-async function exportToDOCX(title, contentHtml, indentLeft, indentRight, indentFirstLine) {
+async function exportToDOCX(title, contentHtml, indentLeft, indentRight, indentFirstLine, fileName) {
   const { Document: Document2, Packer, Paragraph: Paragraph2, TextRun } = await __vitePreload(async () => {
     const { Document: Document3, Packer: Packer2, Paragraph: Paragraph3, TextRun: TextRun2 } = await import("./index-BqVhswAj.js");
     return { Document: Document3, Packer: Packer2, Paragraph: Paragraph3, TextRun: TextRun2 };
@@ -85845,13 +85848,13 @@ async function exportToDOCX(title, contentHtml, indentLeft, indentRight, indentF
   const url = URL.createObjectURL(blob);
   const a2 = document.createElement("a");
   a2.href = url;
-  a2.download = `${title.replace(/\s+/g, "_")}.docx`;
+  a2.download = `${sanitizeFileName(fileName ?? title)}.docx`;
   document.body.appendChild(a2);
   a2.click();
   document.body.removeChild(a2);
   URL.revokeObjectURL(url);
 }
-async function exportToDOCXWithRedaction(title, contentHtml, settings) {
+async function exportToDOCXWithRedaction(title, contentHtml, settings, fileName) {
   const {
     Document: Document2,
     Packer,
@@ -86129,7 +86132,7 @@ async function exportToDOCXWithRedaction(title, contentHtml, settings) {
   const url = URL.createObjectURL(blob);
   const a2 = document.createElement("a");
   a2.href = url;
-  a2.download = `${title.replace(/\s+/g, "_")}.docx`;
+  a2.download = `${sanitizeFileName(fileName ?? title)}.docx`;
   document.body.appendChild(a2);
   a2.click();
   document.body.removeChild(a2);
@@ -87394,7 +87397,11 @@ ${getPlainText(ch.content)}`
                     onClick: async () => {
                       if (editorRef.current) {
                         try {
-                          await exportToPDF(title, editorRef.current.getHTML());
+                          await exportToPDF(
+                            title,
+                            editorRef.current.getHTML(),
+                            `${book.title} - ${title}`
+                          );
                         } catch (err) {
                           console.error("PDF export failed", err);
                         }
@@ -87419,7 +87426,8 @@ ${getPlainText(ch.content)}`
                             editorRef.current.getHTML(),
                             indents.left,
                             indents.right,
-                            indents.firstLine
+                            indents.firstLine,
+                            `${book.title} - ${title}`
                           );
                         } catch (err) {
                           console.error("DOCX export failed", err);
@@ -87749,7 +87757,12 @@ ${getPlainText(ch.content)}`
           var _a3, _b2, _c2;
           if (!aiParagraphs) {
             const html = ((_a3 = editorRef.current) == null ? void 0 : _a3.getHTML()) ?? "";
-            await exportToDOCXWithRedaction(title, html, settings);
+            await exportToDOCXWithRedaction(
+              title,
+              html,
+              settings,
+              `${book.title} - ${title}`
+            );
             setRedactionModalOpen(false);
             return;
           }
@@ -87762,7 +87775,12 @@ ${getPlainText(ch.content)}`
               provider
             );
             const formattedHtml = formatted.split("\n\n").map((chunk) => chunk.trim()).filter((chunk) => chunk.length > 0).map((chunk) => `<p>${chunk}</p>`).join("");
-            await exportToDOCXWithRedaction(title, formattedHtml, settings);
+            await exportToDOCXWithRedaction(
+              title,
+              formattedHtml,
+              settings,
+              `${book.title} - ${title}`
+            );
           } catch {
             window.alert(
               "Formatowanie AI nie powiodło się. Eksportuję z oryginalnym tekstem."
@@ -87770,7 +87788,8 @@ ${getPlainText(ch.content)}`
             await exportToDOCXWithRedaction(
               title,
               ((_c2 = editorRef.current) == null ? void 0 : _c2.getHTML()) ?? "",
-              settings
+              settings,
+              `${book.title} - ${title}`
             );
           } finally {
             setAiFormatting(false);

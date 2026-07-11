@@ -1280,7 +1280,11 @@ export function ChapterEditorPage() {
                 onClick={async () => {
                   if (editorRef.current) {
                     try {
-                      await exportToPDF(title, editorRef.current.getHTML());
+                      await exportToPDF(
+                        title,
+                        editorRef.current.getHTML(),
+                        `${book.title} - ${title}`,
+                      );
                     } catch (err) {
                       console.error("PDF export failed", err);
                     }
@@ -1302,6 +1306,7 @@ export function ChapterEditorPage() {
                         indents.left,
                         indents.right,
                         indents.firstLine,
+                        `${book.title} - ${title}`,
                       );
                     } catch (err) {
                       console.error("DOCX export failed", err);
@@ -1707,7 +1712,12 @@ export function ChapterEditorPage() {
         onGenerate={async (settings, aiParagraphs) => {
           if (!aiParagraphs) {
             const html = editorRef.current?.getHTML() ?? "";
-            await exportToDOCXWithRedaction(title, html, settings);
+            await exportToDOCXWithRedaction(
+              title,
+              html,
+              settings,
+              `${book.title} - ${title}`,
+            );
             setRedactionModalOpen(false);
             return;
           }
@@ -1725,7 +1735,12 @@ export function ChapterEditorPage() {
               .filter((chunk) => chunk.length > 0)
               .map((chunk) => `<p>${chunk}</p>`)
               .join("");
-            await exportToDOCXWithRedaction(title, formattedHtml, settings);
+            await exportToDOCXWithRedaction(
+              title,
+              formattedHtml,
+              settings,
+              `${book.title} - ${title}`,
+            );
           } catch {
             window.alert(
               "Formatowanie AI nie powiodło się. Eksportuję z oryginalnym tekstem.",
@@ -1734,6 +1749,7 @@ export function ChapterEditorPage() {
               title,
               editorRef.current?.getHTML() ?? "",
               settings,
+              `${book.title} - ${title}`,
             );
           } finally {
             setAiFormatting(false);
