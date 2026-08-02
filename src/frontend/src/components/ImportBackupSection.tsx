@@ -1,39 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/providers/AuthProvider";
-import { createImportActor } from "@/lib/importActor";
-import { runImport, type BackupFile, type ImportProgress, type ImportSummary } from "@/lib/importLogic";
+import { useBackgroundImportStore } from "@/store/backgroundImportStore";
 import { Upload, Loader2 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 export function ImportBackupSection() {
   const { identity } = useAuthContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isImporting, setIsImporting] = useState(false);
-  const [progress, setProgress] = useState<ImportProgress | null>(null);
-  const [summary, setSummary] = useState<ImportSummary | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const isImporting = useBackgroundImportStore((s) => s.isImporting);
+  const start = useBackgroundImportStore((s) => s.start);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !identity) return;
-    setError(null);
-    setSummary(null);
-    setIsImporting(true);
-    setProgress({ total: 0, done: 0, currentLabel: "Wczytywanie pliku..." });
-    try {
-      const text = await file.text();
-      const backup: BackupFile = JSON.parse(text);
-      const actor = await createImportActor(identity);
-      const ownerId = identity.getPrincipal();
-      const result = await runImport(actor, backup, ownerId, setProgress);
-      setSummary(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Nieznany błąd importu");
-    } finally {
-      setIsImporting(false);
-      setProgress(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
+    void start(file, identity);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
@@ -57,23 +38,8 @@ export function ImportBackupSection() {
         ) : (
           <Upload className="h-4 w-4 mr-2" />
         )}
-        Importuj kopię zapasową (JSON)
+        {isImporting ? "Import w tle... (możesz zamknąć to okno)" : "Importuj kopię zapasową (JSON)"}
       </Button>
-      {progress && (
-        <p className="text-xs text-muted-foreground">
-          {progress.currentLabel} ({progress.done}/{progress.total || "?"})
-        </p>
-      )}
-      {error && <p className="text-xs text-destructive">{error}</p>}
-      {summary && (
-        <div className="text-xs text-muted-foreground space-y-1">
-          {Object.keys(summary.imported).map((k) => (
-            <p key={k}>
-              {k}: +{summary.imported[k]} (pominięto {summary.skipped[k]})
-            </p>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

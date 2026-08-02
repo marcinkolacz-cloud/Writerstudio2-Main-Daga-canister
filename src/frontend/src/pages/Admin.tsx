@@ -26,12 +26,34 @@ import { useEffect, useState } from "react";
 export function AdminPage() {
   const principal = useAppStore((s) => s.principal);
   const setAdminMutation = useSetAdminPrincipal();
+  const autoSetAdminMutation = useSetAdminPrincipal();
+  const [newAdminInput, setNewAdminInput] = useState("");
+  const [setAdminError, setSetAdminError] = useState<string | null>(null);
+  const [setAdminSuccess, setSetAdminSuccess] = useState(false);
 
+  const handleSetAdmin = async () => {
+    setSetAdminError(null);
+    setSetAdminSuccess(false);
+    try {
+      const { Principal } = await import("@icp-sdk/core/principal");
+      const p = Principal.fromText(newAdminInput.trim());
+      await setAdminMutation.mutateAsync(p);
+      setSetAdminSuccess(true);
+      setNewAdminInput("");
+    } catch (err) {
+      setSetAdminError(err instanceof Error ? err.message : "Nieznany błąd");
+    }
+  };
+
+  // Run once per principal change only — not on every render (autoSetAdminMutation
+  // is intentionally omitted from deps; it is a stable mutation object we only
+  // fire-and-forget here, and including it previously caused a render loop).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (principal) {
-      setAdminMutation.mutate(principal);
+      autoSetAdminMutation.mutate(principal);
     }
-  }, [principal, setAdminMutation]);
+  }, [principal]);
   const { data: inviteCodes, isLoading } = useListInviteCodes();
   const generateMutation = useGenerateInviteCode();
   const revokeMutation = useRevokeInviteCode();
@@ -78,6 +100,41 @@ export function AdminPage() {
           <p className="text-sm text-muted-foreground mt-1">
             Zarządzanie kodami zaproszeń
           </p>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-border p-4 space-y-2">
+        <h2 className="text-sm font-semibold text-foreground">Zmień administratora</h2>
+        <p className="text-xs text-muted-foreground">
+          Ustaw nowego admina (musisz być zalogowany jako obecny admin).
+        </p>
+        <div className="flex gap-2">
+          <input
+            className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm font-mono"
+            placeholder="nowy-principal-tekst"
+            value={newAdminInput}
+            onChange={(e) => setNewAdminInput(e.target.value)}
+          />
+          <Button
+            size="sm"
+            onClick={handleSetAdmin}
+            disabled={setAdminMutation.isPending || !newAdminInput}
+          >
+            {setAdminMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Ustaw"
+            )}
+          </Button>
+        </div>
+        {setAdminError && <p className="text-xs text-destructive">{setAdminError}</p>}
+        {setAdminSuccess && (
+          <p className="text-xs text-muted-foreground">Admin zmieniony.</p>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <div>
         </div>
         <div className="flex flex-col items-end gap-2">
           {generateError && (

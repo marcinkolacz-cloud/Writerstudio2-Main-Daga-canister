@@ -17,6 +17,7 @@ import HourlyStatsApi "mixins/HourlyStatsApi";
 import RecordingsApi "mixins/RecordingsApi";
 import InvitesApi "mixins/InvitesApi";
 import TtsApi "mixins/TtsApi";
+import ExportApi "mixins/ExportApi";
 import Runtime "mo:core/Runtime";
 
 actor {
@@ -63,6 +64,7 @@ actor {
   include RecordingsApi(books, chapters, recordings, pendingUploads, uploadChunks, recordingNames);
   include TtsApi();
   include InvitesApi(books, inviteCodes);
+  include ExportApi(books, chapters, analyses, annotations, chatMessages, chatArchives, chatSessions, chatSessionMessages, comments);
 
   var adminPrincipal : ?Principal;
 

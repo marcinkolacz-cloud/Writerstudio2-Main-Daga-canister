@@ -141,4 +141,27 @@ module {
     wordsAdded : Nat;
   };
 
+  public type ExportMetadata = {
+    exportedAt : Int;
+    owner : Principal;
+  };
+
+  public type BookExport = {
+    book : Book;
+    chapters : [Chapter];
+    analyses : [Analysis];
+    annotations : [TextAnnotation];
+    comments : [Comment];
+    chatMessages : [ChatMessage];
+    chatArchives : [ChatArchive];
+    chatSessions : [ChatSession];
+    chatSessionMessages : [ChatSessionMessage];
+  };
+
+  public type ExportMetadataResponse = {
+    exportedAt : Int;
+    owner : Principal;
+    bookCount : Nat;
+  };
+
 };

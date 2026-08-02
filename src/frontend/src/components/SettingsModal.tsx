@@ -12,6 +12,7 @@ import { getApiKey, setApiKey } from "@/lib/apiKeyStorage";
 import { useAppStore } from "@/store/useAppStore";
 import { Key, LogOut, Save, Settings } from "lucide-react";
 import { ImportBackupSection } from "@/components/ImportBackupSection";
+import { ExportBackupSection } from "@/components/ExportBackupSection";
 import { useEffect, useState } from "react";
 
 interface SettingsModalProps {
@@ -118,6 +119,17 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 Ten prompt będzie dołączany na końcu każdego zapytania do AI.
               </p>
             </div>
+          </div>
+
+          <div className="h-px bg-border" />
+
+          {/* Section 2.4 — Export Backup */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Settings className="h-4 w-4 text-primary" />
+              Eksport kopii zapasowej
+            </h3>
+            <ExportBackupSection />
           </div>
 
           <div className="h-px bg-border" />

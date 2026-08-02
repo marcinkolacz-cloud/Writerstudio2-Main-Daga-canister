@@ -42,6 +42,12 @@ type HourlyActivityStat =
    ownerId: principal;
    wordsAdded: nat;
  };
+type ExportMetadataResponse = 
+ record {
+   bookCount: nat;
+   exportedAt: int;
+   owner: principal;
+ };
 type DailyWritingStat = 
  record {
    activeMinutes: nat;
@@ -112,6 +118,18 @@ type Chapter =
    title: text;
    updatedAt: int;
    wordCount: nat;
+ };
+type BookExport = 
+ record {
+   analyses: vec Analysis;
+   annotations: vec TextAnnotation;
+   book: Book;
+   chapters: vec Chapter;
+   chatArchives: vec ChatArchive;
+   chatMessages: vec ChatMessage;
+   chatSessionMessages: vec ChatSessionMessage;
+   chatSessions: vec ChatSession;
+   comments: vec Comment;
  };
 type Book = 
  record {
@@ -270,6 +288,8 @@ service : {
   deleteComment: (id: nat) -> (bool);
   deleteMessage: (id: nat) -> (bool);
   deleteRecording: (id: nat) -> (bool);
+  exportBookSlice: (bookIndex: nat) -> (opt BookExport) query;
+  exportMetadata: () -> (ExportMetadataResponse) query;
   finishRecordingUpload: (uploadId: nat) -> (nat);
   generateInviteCode: () -> (text);
   getAnalysis: (id: nat) -> (opt Analysis);
