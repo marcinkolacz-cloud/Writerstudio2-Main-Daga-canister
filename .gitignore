@@ -1,7 +1,11 @@
+.dfx/
+__pycache__/
+*.pyc
 node_modules/
-dist/
+src/declarations/
+dfx.json
+canister_ids.json
+src/backend/dist/
+src/frontend/dist/
+.env
 .mops/
-.old/
-.platform/
-.pnpm-store/
-.cache/

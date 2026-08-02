@@ -1,6 +1,7 @@
 import MixinViews "mo:caffeineai-data-viewer/MixinViews";
 import Types "types";
 import Map "mo:core/Map";
+import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
 import BooksApi "mixins/BooksApi";
 import ChaptersApi "mixins/ChaptersApi";
@@ -102,6 +103,114 @@ actor {
       Runtime.trap("Only admin can list invite codes");
     };
     _listInviteCodes()
+  };
+
+  // ===== TEMPORARY: admin data import from Caffeine backup =====
+  public query ({ caller }) func adminGetAllIds() : async {
+    books : [Nat];
+    chapters : [Nat];
+    analyses : [Nat];
+    annotations : [Nat];
+    comments : [Nat];
+    chatMessages : [Nat];
+    chatArchives : [Nat];
+    chatSessions : [Nat];
+    chatSessionMessages : [Nat];
+    writingStatsKeys : [Text];
+    hourlyStatsKeys : [Text];
+  } {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can list ids"); };
+    {
+      books = Iter.toArray(books.keys());
+      chapters = Iter.toArray(chapters.keys());
+      analyses = Iter.toArray(analyses.keys());
+      annotations = Iter.toArray(annotations.keys());
+      comments = Iter.toArray(comments.keys());
+      chatMessages = Iter.toArray(chatMessages.keys());
+      chatArchives = Iter.toArray(chatArchives.keys());
+      chatSessions = Iter.toArray(chatSessions.keys());
+      chatSessionMessages = Iter.toArray(chatSessionMessages.keys());
+      writingStatsKeys = Iter.toArray(writingStats.keys());
+      hourlyStatsKeys = Iter.toArray(hourlyStats.keys());
+    };
+  };
+
+  public shared ({ caller }) func adminReassignAllBooksOwner(newOwner : Principal) : async Nat {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can reassign ownership"); };
+    var count = 0;
+    for ((id, book) in books.entries()) {
+      let updated = { book with ownerId = newOwner };
+      books.add(id, updated);
+      count += 1;
+    };
+    count;
+  };
+
+  public shared ({ caller }) func adminImportDailyWritingStat(stat : Types.DailyWritingStat) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    let key = stat.ownerId.toText() # "|" # Nat.toText(stat.bookId) # "|" # stat.date;
+    writingStats.add(key, stat);
+  };
+
+  public shared ({ caller }) func adminImportHourlyActivityStat(stat : Types.HourlyActivityStat) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    let key = stat.ownerId.toText() # "|" # Nat.toText(stat.hour);
+    hourlyStats.add(key, stat);
+  };
+
+  public shared ({ caller }) func adminImportBook(book : Types.Book) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    let fixed = { book with ownerId = caller };
+    books.add(fixed.id, fixed);
+    if (fixed.id >= nextBookId) { nextBookId := fixed.id + 1; };
+  };
+
+  public shared ({ caller }) func adminImportChapter(chapter : Types.Chapter) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    chapters.add(chapter.id, chapter);
+    if (chapter.id >= nextChapterId) { nextChapterId := chapter.id + 1; };
+  };
+
+  public shared ({ caller }) func adminImportAnalysis(analysis : Types.Analysis) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    analyses.add(analysis.id, analysis);
+    if (analysis.id >= nextAnalysisId) { nextAnalysisId := analysis.id + 1; };
+  };
+
+  public shared ({ caller }) func adminImportAnnotation(annotation : Types.TextAnnotation) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    annotations.add(annotation.id, annotation);
+    if (annotation.id >= nextAnnotationId) { nextAnnotationId := annotation.id + 1; };
+  };
+
+  public shared ({ caller }) func adminImportComment(comment : Types.Comment) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    comments.add(comment.id, comment);
+    if (comment.id >= nextCommentId) { nextCommentId := comment.id + 1; };
+  };
+
+  public shared ({ caller }) func adminImportChatMessage(msg : Types.ChatMessage) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    chatMessages.add(msg.id, msg);
+    if (msg.id >= nextChatMessageId) { nextChatMessageId := msg.id + 1; };
+  };
+
+  public shared ({ caller }) func adminImportChatArchive(archive : Types.ChatArchive) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    chatArchives.add(archive.id, archive);
+    if (archive.id >= nextChatArchiveId) { nextChatArchiveId := archive.id + 1; };
+  };
+
+  public shared ({ caller }) func adminImportChatSession(session : Types.ChatSession) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    chatSessions.add(session.id, session);
+    if (session.id >= nextChatSessionId) { nextChatSessionId := session.id + 1; };
+  };
+
+  public shared ({ caller }) func adminImportChatSessionMessage(msg : Types.ChatSessionMessage) : async () {
+    if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can import"); };
+    chatSessionMessages.add(msg.id, msg);
+    if (msg.id >= nextChatSessionMessageId) { nextChatSessionMessageId := msg.id + 1; };
   };
 
   public shared ({ caller }) func revokeInviteCode(code : Text) : async Bool {

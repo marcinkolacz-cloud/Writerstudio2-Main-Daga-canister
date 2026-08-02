@@ -229,6 +229,32 @@ service : {
           DailyWritingStat;
         }) query;
   addChatMessage: (sessionId: nat, role: text, content: text) -> (nat);
+  adminGetAllIds: () ->
+   (record {
+      analyses: vec nat;
+      annotations: vec nat;
+      books: vec nat;
+      chapters: vec nat;
+      chatArchives: vec nat;
+      chatMessages: vec nat;
+      chatSessionMessages: vec nat;
+      chatSessions: vec nat;
+      comments: vec nat;
+      hourlyStatsKeys: vec text;
+      writingStatsKeys: vec text;
+    }) query;
+  adminImportAnalysis: (analysis: Analysis) -> ();
+  adminImportAnnotation: (annotation: TextAnnotation) -> ();
+  adminImportBook: (book: Book) -> ();
+  adminImportChapter: (chapter: Chapter) -> ();
+  adminImportChatArchive: (archive: ChatArchive) -> ();
+  adminImportChatMessage: (msg: ChatMessage) -> ();
+  adminImportChatSession: (session: ChatSession) -> ();
+  adminImportChatSessionMessage: (msg: ChatSessionMessage) -> ();
+  adminImportComment: (comment: Comment) -> ();
+  adminImportDailyWritingStat: (stat: DailyWritingStat) -> ();
+  adminImportHourlyActivityStat: (stat: HourlyActivityStat) -> ();
+  adminReassignAllBooksOwner: (newOwner: principal) -> (nat);
   checkAccess: (code: text) -> (bool);
   clearChat: (bookId: nat, sessionId: text) -> (bool);
   createArchive: (bookId: nat, sessionId: text, title: text) -> (nat);

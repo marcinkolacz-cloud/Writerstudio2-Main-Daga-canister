@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getApiKey, setApiKey } from "@/lib/apiKeyStorage";
 import { useAppStore } from "@/store/useAppStore";
 import { Key, LogOut, Save, Settings } from "lucide-react";
+import { ImportBackupSection } from "@/components/ImportBackupSection";
 import { useEffect, useState } from "react";
 
 interface SettingsModalProps {
@@ -117,6 +118,17 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 Ten prompt będzie dołączany na końcu każdego zapytania do AI.
               </p>
             </div>
+          </div>
+
+          <div className="h-px bg-border" />
+
+          {/* Section 2.5 — Import Backup */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+              <Settings className="h-4 w-4 text-primary" />
+              Import kopii zapasowej
+            </h3>
+            <ImportBackupSection />
           </div>
 
           <div className="h-px bg-border" />

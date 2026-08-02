@@ -74,6 +74,7 @@ export function AdminPage() {
           <h1 className="text-2xl font-display font-semibold text-foreground">
             Panel administratora
           </h1>
+          <p className="text-xs font-mono text-muted-foreground break-all">Twój principal: {principal ? principal.toString() : "brak"}</p>
           <p className="text-sm text-muted-foreground mt-1">
             Zarządzanie kodami zaproszeń
           </p>
