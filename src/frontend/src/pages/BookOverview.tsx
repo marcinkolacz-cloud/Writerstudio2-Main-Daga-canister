@@ -14,11 +14,20 @@ import {
   ArrowLeft,
   BookOpen,
   FileText,
+  Layers,
   Plus,
   Settings,
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+
+const CHAPTER_ACCENT_CLASSES = [
+  "bg-chart-1",
+  "bg-chart-2",
+  "bg-chart-3",
+  "bg-chart-4",
+  "bg-chart-5",
+];
 
 function ChapterListItem({
   chapter,
@@ -35,6 +44,7 @@ function ChapterListItem({
   index: number;
 }) {
   const navigate = useNavigate();
+  const accentClass = CHAPTER_ACCENT_CLASSES[index % CHAPTER_ACCENT_CLASSES.length];
 
   return (
     <button
@@ -45,18 +55,22 @@ function ChapterListItem({
           params: { bookId, chapterId: String(chapter.id) },
         })
       }
-      className="w-full flex items-center gap-4 p-4 rounded-lg border border-border bg-card hover:bg-card/80 transition-colors text-left group"
+      className="group relative w-full flex items-center gap-4 overflow-hidden p-4 pl-5 rounded-lg border border-border bg-card hover:shadow-elevated transition-smooth text-left"
       data-ocid={`chapter.item.${index + 1}`}
     >
+      <div className={`absolute inset-y-0 left-0 w-1 ${accentClass}`} aria-hidden="true" />
       <div className="flex-shrink-0 w-8 h-8 rounded-md bg-muted flex items-center justify-center">
-        <FileText className="h-4 w-4 text-muted-foreground" />
+        <span className="text-xs font-display font-semibold text-muted-foreground">
+          {index + 1}
+        </span>
       </div>
       <div className="flex-1 min-w-0">
         <h3 className="font-medium text-foreground truncate">
           {chapter.title}
         </h3>
         <p className="text-sm text-muted-foreground">
-          {Number(chapter.wordCount)} słów · {Number(chapter.charCount)} znaków
+          {Number(chapter.wordCount).toLocaleString("pl-PL")} słów ·{" "}
+          {Number(chapter.charCount).toLocaleString("pl-PL")} znaków
         </p>
       </div>
       <ArrowLeft className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity -rotate-180" />
@@ -167,15 +181,16 @@ export function BookOverviewPage() {
               {book.category}
             </div>
             {bookStats && (
-              <div className="inline-flex items-center gap-3 rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                <span>
-                  {Number(bookStats.totalWords).toLocaleString()} słów
-                </span>
-                <span>·</span>
-                <span>
-                  {Number(bookStats.totalChars).toLocaleString()} znaków
-                </span>
-              </div>
+              <>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                  <FileText className="h-3 w-3" />
+                  {Number(bookStats.totalWords).toLocaleString("pl-PL")} słów
+                </div>
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-chart-2/10 px-2.5 py-0.5 text-xs font-medium text-chart-2">
+                  <Layers className="h-3 w-3" />
+                  {Number(bookStats.chapterCount ?? 0).toLocaleString("pl-PL")} rozdz.
+                </div>
+              </>
             )}
           </div>
           <div className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground hidden">

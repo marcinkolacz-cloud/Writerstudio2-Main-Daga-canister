@@ -26,6 +26,23 @@ mixin (hourlyStats : Map.Map<Text, Types.HourlyActivityStat>) {
     };
   };
 
+  public shared ({ caller }) func resetMyHourlyStats() : async () {
+    var toRemove = List.empty<Text>();
+    for ((key, stat) in hourlyStats.entries()) {
+      if (Principal.equal(stat.ownerId, caller)) {
+        toRemove.add(key);
+      };
+    };
+    var i = 0;
+    while (i < toRemove.size()) {
+      switch (toRemove.get(i)) {
+        case (?key) { hourlyStats.remove(key) };
+        case null {};
+      };
+      i += 1;
+    };
+  };
+
   public shared ({ caller }) func getHourlyDistribution() : async [Types.HourlyActivityStat] {
     var result : List.List<Types.HourlyActivityStat> = List.empty();
     for ((_, stat) in hourlyStats.entries()) {

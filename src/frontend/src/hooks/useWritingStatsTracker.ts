@@ -22,6 +22,7 @@ export function useWritingStatsTracker(
   bookId: bigint | undefined,
   chapterId: string | undefined,
   content: string,
+  ready: boolean,
 ) {
   const recordActivity = useRecordWritingActivity();
   const recordHourly = useRecordHourlyActivity();
@@ -29,6 +30,7 @@ export function useWritingStatsTracker(
   const lastWordCountRef = useRef<number | null>(null);
   const lastChangeTimeRef = useRef<number | null>(null);
   const lastChapterIdRef = useRef<string | undefined>(undefined);
+  const baselineEstablishedRef = useRef(false);
   const pendingWordsAddedRef = useRef(0);
   const pendingWordsRemovedRef = useRef(0);
   const pendingActiveMsRef = useRef(0);
@@ -69,13 +71,29 @@ export function useWritingStatsTracker(
       flush();
       lastWordCountRef.current = null;
       lastChangeTimeRef.current = null;
+      baselineEstablishedRef.current = false;
       lastChapterIdRef.current = chapterId;
     }
   }, [chapterId]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: flush reads refs only, intentional omission
   useEffect(() => {
+    // Don't touch counters until the real chapter content has loaded — the
+    // placeholder "" content on first mount must never be used as a baseline,
+    // otherwise the entire existing chapter length gets miscounted as
+    // freshly-typed words the moment the real content arrives.
+    if (!ready) return;
+
     const newCount = countWords(content);
     const now = Date.now();
+
+    if (!baselineEstablishedRef.current) {
+      // First real content for this chapter: seed the baseline only, no diff.
+      lastWordCountRef.current = newCount;
+      lastChangeTimeRef.current = now;
+      baselineEstablishedRef.current = true;
+      return;
+    }
 
     if (lastWordCountRef.current !== null) {
       const diff = newCount - lastWordCountRef.current;
@@ -94,7 +112,7 @@ export function useWritingStatsTracker(
 
     lastWordCountRef.current = newCount;
     lastChangeTimeRef.current = now;
-  }, [content]);
+  }, [content, ready]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: flush and bookId are intentionally excluded — interval setup should run once
   useEffect(() => {

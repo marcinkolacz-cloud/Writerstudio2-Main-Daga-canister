@@ -249,6 +249,23 @@ export function useGlobalWritingStats(fromDate: string, toDate: string) {
   });
 }
 
+export function useResetWritingStats() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error("Actor not available");
+      await actor.resetMyWritingStats();
+      await actor.resetMyHourlyStats();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["writingStats"] });
+      queryClient.invalidateQueries({ queryKey: ["hourlyDistribution"] });
+    },
+  });
+}
+
 export function useSaveAnalysis() {
   const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();

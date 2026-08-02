@@ -42,6 +42,23 @@ mixin (writingStats : Map.Map<Text, Types.DailyWritingStat>) {
     };
   };
 
+  public shared ({ caller }) func resetMyWritingStats() : async () {
+    var toRemove = List.empty<Text>();
+    for ((key, stat) in writingStats.entries()) {
+      if (Principal.equal(stat.ownerId, caller)) {
+        toRemove.add(key);
+      };
+    };
+    var i = 0;
+    while (i < toRemove.size()) {
+      switch (toRemove.get(i)) {
+        case (?key) { writingStats.remove(key) };
+        case null {};
+      };
+      i += 1;
+    };
+  };
+
   public shared ({ caller }) func getStatsByBook(
     bookId : Nat,
     fromDate : Text,

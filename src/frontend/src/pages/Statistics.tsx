@@ -1,13 +1,27 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBookStats, useBooks, useOverallStats } from "@/hooks/useBackend";
+import {
+  useBookStats,
+  useBooks,
+  useOverallStats,
+  useResetWritingStats,
+} from "@/hooks/useBackend";
 import {
   useGlobalWritingStats,
   useHourlyDistribution,
   useStatsByBook,
 } from "@/hooks/useBackend";
-import { BarChart3, BookOpen, FileText, Layers } from "lucide-react";
-import { useState } from "react";
+import {
+  BarChart3,
+  BookOpen,
+  Flame,
+  FileText,
+  Layers,
+  RotateCcw,
+  Trophy,
+} from "lucide-react";
+import { Fragment, useState } from "react";
+import { toast } from "sonner";
 import {
   Bar,
   BarChart,
@@ -19,7 +33,15 @@ import {
 } from "recharts";
 import { Legend, Line, LineChart } from "recharts";
 
-function StatCard({
+const BOOK_ACCENT_CLASSES = [
+  "bg-chart-1",
+  "bg-chart-2",
+  "bg-chart-3",
+  "bg-chart-4",
+  "bg-chart-5",
+];
+
+function OverviewStat({
   label,
   value,
   icon,
@@ -31,27 +53,25 @@ function StatCard({
   loading: boolean;
 }) {
   return (
-    <Card className="bg-card border-border shadow-subtle transition-smooth hover:shadow-elevated">
-      <CardContent className="flex items-center gap-4 p-6">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          {icon}
-        </div>
-        <div>
-          <p className="text-sm text-muted-foreground font-body">{label}</p>
-          {loading ? (
-            <Skeleton className="mt-1 h-7 w-20" />
-          ) : (
-            <p className="text-2xl font-display font-semibold text-foreground">
-              {value}
-            </p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex flex-1 items-center gap-3 px-5 py-4">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs text-muted-foreground font-body">{label}</p>
+        {loading ? (
+          <Skeleton className="mt-1 h-5 w-14" />
+        ) : (
+          <p className="text-lg font-display font-semibold text-foreground leading-tight">
+            {value}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 
-function BookStatsRow({
+function BookAccentCard({
   book,
   index,
 }: {
@@ -59,59 +79,44 @@ function BookStatsRow({
   index: number;
 }) {
   const { data: stats, isLoading } = useBookStats(book.id.toString());
+  const accentClass = BOOK_ACCENT_CLASSES[index % BOOK_ACCENT_CLASSES.length];
 
   return (
     <div
       data-ocid={`statistics.book_row.item.${index + 1}`}
-      className="flex items-center justify-between rounded-lg border border-border bg-card p-4 transition-smooth hover:bg-muted/40"
+      className="group relative overflow-hidden rounded-lg border border-border bg-card transition-smooth hover:shadow-elevated"
     >
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-display font-medium text-foreground">
+      <div
+        className={`absolute inset-y-0 left-0 w-1 ${accentClass}`}
+        aria-hidden="true"
+      />
+      <div className="flex items-center justify-between gap-4 p-4 pl-5">
+        <p className="min-w-0 truncate font-display font-medium text-foreground">
           {book.title}
         </p>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          ID: {book.id.toString()}
-        </p>
-      </div>
-      <div className="flex items-center gap-6 text-sm text-muted-foreground">
         {isLoading ? (
-          <>
-            <Skeleton className="h-5 w-16" />
-            <Skeleton className="h-5 w-16" />
-            <Skeleton className="h-5 w-16" />
-            <Skeleton className="h-5 w-20" />
-          </>
+          <Skeleton className="h-5 w-40 shrink-0" />
         ) : (
-          <>
-            <span className="flex items-center gap-1.5">
-              <FileText className="h-4 w-4 text-primary" />
-              <span className="font-medium text-foreground">
-                {Number(stats?.totalWords ?? 0).toLocaleString()}
-              </span>{" "}
+          <div className="flex shrink-0 items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <span className="font-display font-semibold text-foreground">
+                {Number(stats?.totalWords ?? 0).toLocaleString("pl-PL")}
+              </span>
               słów
             </span>
-            <span className="flex items-center gap-1.5">
-              <FileText className="h-4 w-4 text-chart-4" />
-              <span className="font-medium text-foreground">
-                {Number(stats?.totalChars ?? 0).toLocaleString()}
-              </span>{" "}
-              znaków
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Layers className="h-4 w-4 text-chart-2" />
-              <span className="font-medium text-foreground">
-                {Number(stats?.chapterCount ?? 0).toLocaleString()}
-              </span>{" "}
+            <span className="hidden items-center gap-1 sm:flex">
+              <span className="font-display font-semibold text-foreground">
+                {Number(stats?.chapterCount ?? 0).toLocaleString("pl-PL")}
+              </span>
               rozdz.
             </span>
-            <span className="flex items-center gap-1.5">
-              <BarChart3 className="h-4 w-4 text-chart-3" />
-              <span className="font-medium text-foreground">
-                {Number(stats?.avgWordsPerChapter ?? 0).toLocaleString()}
-              </span>{" "}
+            <span className="hidden items-center gap-1 md:flex">
+              <span className="font-display font-semibold text-foreground">
+                {Number(stats?.avgWordsPerChapter ?? 0).toLocaleString("pl-PL")}
+              </span>
               śr./rozdz.
             </span>
-          </>
+          </div>
         )}
       </div>
     </div>
@@ -140,6 +145,27 @@ export function StatisticsPage() {
   const [selectedStatsBookId, setSelectedStatsBookId] = useState<string>("");
   const [fromDate, setFromDate] = useState(defaultFromDate());
   const [toDate, setToDate] = useState(defaultToDate());
+  const [confirmingReset, setConfirmingReset] = useState(false);
+  const resetStatsMutation = useResetWritingStats();
+
+  const handleResetStats = async () => {
+    if (!confirmingReset) {
+      setConfirmingReset(true);
+      setTimeout(() => setConfirmingReset(false), 4000);
+      return;
+    }
+    setConfirmingReset(false);
+    try {
+      await resetStatsMutation.mutateAsync();
+      toast.success("Statystyki zresetowane", {
+        description: "Liczenie słów/aktywności zaczyna się od zera.",
+      });
+    } catch (err) {
+      toast.error("Nie udało się zresetować statystyk", {
+        description: err instanceof Error ? err.message : "Nieznany błąd",
+      });
+    }
+  };
 
   const { data: globalStats, isLoading: globalStatsLoading } =
     useGlobalWritingStats(fromDate, toDate);
@@ -151,10 +177,11 @@ export function StatisticsPage() {
   const writingStatsLoading =
     statsScope === "global" ? globalStatsLoading : bookScopedStatsLoading;
 
+  const HEATMAP_WEEKS = 53;
   const heatmapToDate = defaultToDate();
   const heatmapFromDate = (() => {
     const d = new Date();
-    d.setDate(d.getDate() - 89);
+    d.setDate(d.getDate() - (HEATMAP_WEEKS * 7 - 1));
     return isoDate(d);
   })();
 
@@ -168,34 +195,122 @@ export function StatisticsPage() {
   const heatmapLoading =
     statsScope === "global" ? heatmapGlobalLoading : heatmapBookScopedLoading;
 
-  const heatmapCells = (() => {
+  const byDateWords = (() => {
     const byDate = new Map<string, number>();
     for (const stat of heatmapStatsData ?? []) {
       const words = Number(stat.wordsAdded);
       byDate.set(stat.date, (byDate.get(stat.date) ?? 0) + words);
     }
-    const cells: Array<{ date: string; words: number }> = [];
-    const start = new Date();
-    start.setDate(start.getDate() - 89);
-    for (let i = 0; i < 90; i++) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      const dateStr = isoDate(d);
-      cells.push({ date: dateStr, words: byDate.get(dateStr) ?? 0 });
-    }
-    return cells;
+    return byDate;
   })();
 
-  const maxHeatmapWords = Math.max(1, ...heatmapCells.map((c) => c.words));
+  // Align the grid to full weeks (Mon..Sun) like GitHub's contribution
+  // calendar: find the Monday on/before the range start, and the Sunday
+  // on/after the range end, so every column is a complete week.
+  const gridStart = (() => {
+    const d = new Date(heatmapFromDate);
+    const dow = (d.getDay() + 6) % 7; // 0=Mon .. 6=Sun
+    d.setDate(d.getDate() - dow);
+    return d;
+  })();
+  const gridEnd = (() => {
+    const d = new Date(heatmapToDate);
+    const dow = (d.getDay() + 6) % 7;
+    d.setDate(d.getDate() + (6 - dow));
+    return d;
+  })();
 
-  const { data: hourlyData, isLoading: hourlyLoading } =
-    useHourlyDistribution();
-  const hourlyChartData = Array.from({ length: 24 }, (_, h) => {
-    const found = (hourlyData ?? []).find((s) => Number(s.hour) === h);
-    return { hour: `${h}:00`, words: found ? Number(found.wordsAdded) : 0 };
-  });
+  const heatmapWeeks: Array<Array<{ date: string; words: number; inRange: boolean }>> = (() => {
+    const weeks: Array<Array<{ date: string; words: number; inRange: boolean }>> = [];
+    let cursor = new Date(gridStart);
+    let week: Array<{ date: string; words: number; inRange: boolean }> = [];
+    while (cursor <= gridEnd) {
+      const dateStr = isoDate(cursor);
+      week.push({
+        date: dateStr,
+        words: byDateWords.get(dateStr) ?? 0,
+        inRange: dateStr >= heatmapFromDate && dateStr <= heatmapToDate,
+      });
+      if (week.length === 7) {
+        weeks.push(week);
+        week = [];
+      }
+      cursor = new Date(cursor);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    if (week.length > 0) weeks.push(week);
+    return weeks;
+  })();
 
-  function heatmapIntensityClass(words: number): string {
+  const monthLabels = (() => {
+    const labels: Array<{ weekIndex: number; label: string }> = [];
+    let lastMonth = -1;
+    heatmapWeeks.forEach((week, i) => {
+      const firstInRangeDay = week.find((d) => d.inRange);
+      if (!firstInRangeDay) return;
+      const month = new Date(firstInRangeDay.date).getMonth();
+      if (month !== lastMonth) {
+        labels.push({
+          weekIndex: i,
+          label: new Date(firstInRangeDay.date).toLocaleDateString("pl-PL", {
+            month: "short",
+          }),
+        });
+        lastMonth = month;
+      }
+    });
+    return labels;
+  })();
+
+  const maxHeatmapWords = Math.max(
+    1,
+    ...heatmapWeeks.flatMap((w) => w.map((c) => c.words)),
+  );
+
+  const { currentStreak, bestStreak, wordsToday } = (() => {
+    const today = defaultToDate();
+    const sortedDates = Array.from(byDateWords.keys()).sort();
+    let best = 0;
+    let running = 0;
+    let prevDate: string | null = null;
+    for (const date of sortedDates) {
+      if (byDateWords.get(date)! <= 0) continue;
+      if (prevDate) {
+        const prev = new Date(prevDate);
+        prev.setDate(prev.getDate() + 1);
+        if (isoDate(prev) === date) {
+          running += 1;
+        } else {
+          running = 1;
+        }
+      } else {
+        running = 1;
+      }
+      best = Math.max(best, running);
+      prevDate = date;
+    }
+
+    let current = 0;
+    const cursor = new Date(today);
+    // A streak "counts" today only once today has words; otherwise it looks
+    // back from yesterday so an unbroken streak isn't reset to 0 mid-day.
+    if ((byDateWords.get(today) ?? 0) <= 0) {
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    while ((byDateWords.get(isoDate(cursor)) ?? 0) > 0) {
+      current += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+
+    return {
+      currentStreak: current,
+      bestStreak: best,
+      wordsToday: byDateWords.get(today) ?? 0,
+    };
+  })();
+
+  function heatmapIntensityClass(words: number, inRange: boolean): string {
+    if (!inRange) return "bg-transparent";
     if (words === 0) return "bg-muted";
     const ratio = words / maxHeatmapWords;
     if (ratio < 0.25) return "bg-primary/25";
@@ -203,6 +318,13 @@ export function StatisticsPage() {
     if (ratio < 0.75) return "bg-primary/75";
     return "bg-primary";
   }
+
+  const { data: hourlyData, isLoading: hourlyLoading } =
+    useHourlyDistribution();
+  const hourlyChartData = Array.from({ length: 24 }, (_, h) => {
+    const found = (hourlyData ?? []).find((s) => Number(s.hour) === h);
+    return { hour: `${h}:00`, words: found ? Number(found.wordsAdded) : 0 };
+  });
 
   const dailyChartData = (() => {
     const byDate = new Map<
@@ -279,119 +401,214 @@ export function StatisticsPage() {
 
   const chartLoading = bookStatsQueries.some((q) => q.isLoading);
 
+  const tooltipStyle = {
+    backgroundColor: "oklch(var(--card))",
+    border: "1px solid oklch(var(--border))",
+    borderRadius: "var(--radius)",
+    color: "oklch(var(--foreground))",
+  };
+  const axisTick = { fill: "oklch(var(--muted-foreground))", fontSize: 11 };
+
   return (
-    <div className="mx-auto max-w-5xl space-y-8 p-6">
-      <div>
-        <h1 className="text-3xl font-display font-bold text-foreground">
-          Statystyki pisarskie
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Podsumowanie Twoich książek i postępów
-        </p>
+    <div className="mx-auto max-w-6xl space-y-6 p-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-display font-bold text-foreground">
+            Statystyki pisarskie
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            Podsumowanie Twoich książek i postępów
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleResetStats}
+          disabled={resetStatsMutation.isPending}
+          data-ocid="statistics.reset_stats_button"
+          className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
+            confirmingReset
+              ? "border-destructive bg-destructive text-destructive-foreground"
+              : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/40"
+          }`}
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          {resetStatsMutation.isPending
+            ? "Resetowanie..."
+            : confirmingReset
+              ? "Kliknij ponownie, aby potwierdzić"
+              : "Resetuj statystyki"}
+        </button>
       </div>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard
-          label="Książki"
-          value={Number(overall?.totalBooks ?? 0).toLocaleString()}
-          icon={<BookOpen className="h-6 w-6" />}
-          loading={overallLoading}
-        />
-        <StatCard
-          label="Słowa"
-          value={Number(overall?.totalWords ?? 0).toLocaleString()}
-          icon={<FileText className="h-6 w-6" />}
-          loading={overallLoading}
-        />
-        <StatCard
-          label="Rozdziały"
-          value={Number(overall?.totalChapters ?? 0).toLocaleString()}
-          icon={<Layers className="h-6 w-6" />}
-          loading={overallLoading}
-        />
-      </section>
-
-      {books && books.length > 0 && (
-        <section>
-          <Card className="bg-card border-border shadow-subtle">
-            <CardHeader>
-              <CardTitle className="font-display text-lg text-foreground">
-                Liczba słów na książkę
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-72 w-full">
-                {chartLoading ? (
-                  <div className="flex h-full items-center justify-center">
-                    <Skeleton className="h-48 w-full" />
-                  </div>
+      {/* Hero: streak + today, the emotional anchor of the page */}
+      <Card className="border-border bg-gradient-to-br from-primary/10 via-card to-card shadow-subtle overflow-hidden">
+        <CardContent className="p-0">
+          <div className="grid divide-y divide-border sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+            <div className="flex items-center gap-4 p-6">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+                <Flame className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground font-body">
+                  Aktualna seria
+                </p>
+                {heatmapLoading ? (
+                  <Skeleton className="mt-1 h-9 w-24" />
                 ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={chartData}
-                      margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="oklch(var(--border))"
-                      />
-                      <XAxis
-                        dataKey="name"
-                        tick={{
-                          fill: "oklch(var(--muted-foreground))",
-                          fontSize: 12,
-                        }}
-                        interval={0}
-                        angle={-30}
-                        textAnchor="end"
-                        height={60}
-                      />
-                      <YAxis
-                        tick={{
-                          fill: "oklch(var(--muted-foreground))",
-                          fontSize: 12,
-                        }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "oklch(var(--card))",
-                          border: "1px solid oklch(var(--border))",
-                          borderRadius: "var(--radius)",
-                          color: "oklch(var(--foreground))",
-                        }}
-                        formatter={(value: number) => [
-                          `${value.toLocaleString()} słów`,
-                          "Słowa",
-                        ]}
-                      />
-                      <Bar
-                        dataKey="words"
-                        fill="oklch(var(--primary))"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <p className="font-display text-4xl font-bold leading-none text-foreground">
+                    {currentStreak}
+                    <span className="ml-1.5 text-base font-medium text-muted-foreground">
+                      {currentStreak === 1 ? "dzień" : "dni"}
+                    </span>
+                  </p>
+                )}
+                {!heatmapLoading && (
+                  <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground">
+                    <Trophy className="h-3 w-3" />
+                    Rekord: {bestStreak} {bestStreak === 1 ? "dzień" : "dni"}
+                  </p>
                 )}
               </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
+            </div>
+            <div className="flex items-center gap-4 p-6">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-chart-2/15 text-chart-2">
+                <FileText className="h-7 w-7" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground font-body">
+                  Napisane dziś
+                </p>
+                {heatmapLoading ? (
+                  <Skeleton className="mt-1 h-9 w-24" />
+                ) : (
+                  <p className="font-display text-4xl font-bold leading-none text-foreground">
+                    {wordsToday.toLocaleString("pl-PL")}
+                    <span className="ml-1.5 text-base font-medium text-muted-foreground">
+                      słów
+                    </span>
+                  </p>
+                )}
+                <p className="mt-1.5 text-xs text-muted-foreground">
+                  Odśwież po zapisaniu rozdziału
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <section className="space-y-4">
-        <h2 className="text-xl font-display font-semibold text-foreground">
-          Szczegóły książek
+      {/* Compact overview strip */}
+      <Card className="bg-card border-border shadow-subtle">
+        <CardContent className="p-0">
+          <div className="flex divide-x divide-border">
+            <OverviewStat
+              label="Książki"
+              value={Number(overall?.totalBooks ?? 0).toLocaleString("pl-PL")}
+              icon={<BookOpen className="h-4 w-4" />}
+              loading={overallLoading}
+            />
+            <OverviewStat
+              label="Słowa łącznie"
+              value={Number(overall?.totalWords ?? 0).toLocaleString("pl-PL")}
+              icon={<FileText className="h-4 w-4" />}
+              loading={overallLoading}
+            />
+            <OverviewStat
+              label="Rozdziały"
+              value={Number(overall?.totalChapters ?? 0).toLocaleString("pl-PL")}
+              icon={<Layers className="h-4 w-4" />}
+              loading={overallLoading}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Calendar — the signature element */}
+      <Card className="bg-card border-border shadow-subtle">
+        <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="font-display text-lg text-foreground">
+            Regularność pisania
+          </CardTitle>
+          <span className="text-xs text-muted-foreground">ostatni rok</span>
+        </CardHeader>
+        <CardContent>
+          {heatmapLoading ? (
+            <Skeleton className="h-32 w-full" />
+          ) : (
+            <div className="overflow-x-auto pb-2">
+              <div
+                className="inline-grid gap-[3px]"
+                style={{
+                  gridTemplateColumns: `auto repeat(${heatmapWeeks.length}, minmax(11px, 1fr))`,
+                  gridTemplateRows: "14px repeat(7, minmax(11px, 1fr))",
+                }}
+                data-ocid="statistics.writing_stats.heatmap"
+              >
+                <div />
+                {heatmapWeeks.map((_, weekIndex) => {
+                  const found = monthLabels.find((m) => m.weekIndex === weekIndex);
+                  return (
+                    <div
+                      key={`month-${weekIndex}`}
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      {found?.label ?? ""}
+                    </div>
+                  );
+                })}
+
+                {["Pon", "", "Śr", "", "Pt", "", "Nie"].map((label, dayOfWeek) => (
+                  <Fragment key={`row-${dayOfWeek}`}>
+                    <div className="pr-1.5 text-[10px] text-muted-foreground text-right leading-[11px]">
+                      {label}
+                    </div>
+                    {heatmapWeeks.map((week, weekIndex) => {
+                      const cell = week[dayOfWeek];
+                      if (!cell) return <div key={`empty-${weekIndex}-${dayOfWeek}`} />;
+                      return (
+                        <div
+                          key={cell.date}
+                          title={`${cell.date}: ${cell.words.toLocaleString("pl-PL")} słów`}
+                          className={`aspect-square rounded-sm ${heatmapIntensityClass(cell.words, cell.inRange)}`}
+                        />
+                      );
+                    })}
+                  </Fragment>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+            <span>Intensywność koloru = liczba słów dodanych danego dnia.</span>
+            <span className="flex items-center gap-1">
+              Mniej
+              <span className="h-2.5 w-2.5 rounded-sm bg-muted" />
+              <span className="h-2.5 w-2.5 rounded-sm bg-primary/25" />
+              <span className="h-2.5 w-2.5 rounded-sm bg-primary/50" />
+              <span className="h-2.5 w-2.5 rounded-sm bg-primary/75" />
+              <span className="h-2.5 w-2.5 rounded-sm bg-primary" />
+              Więcej
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Books */}
+      <div className="space-y-3">
+        <h2 className="text-lg font-display font-semibold text-foreground">
+          Twoje książki
         </h2>
         {booksLoading ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={`skeleton-${i + 1}`} className="h-16 w-full" />
+              <Skeleton key={`skeleton-${i + 1}`} className="h-14 w-full" />
             ))}
           </div>
         ) : books && books.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {books.map((book, i) => (
-              <BookStatsRow key={book.id.toString()} book={book} index={i} />
+              <BookAccentCard key={book.id.toString()} book={book} index={i} />
             ))}
           </div>
         ) : (
@@ -405,75 +622,77 @@ export function StatisticsPage() {
             </p>
           </div>
         )}
-      </section>
+      </div>
 
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-display font-semibold text-foreground">
-            Aktywność pisania
-          </h2>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center h-8 rounded-md border border-border overflow-hidden">
-              <button
-                type="button"
-                className={`h-8 px-3 text-xs font-medium transition-colors ${statsScope === "global" ? "bg-primary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setStatsScope("global")}
-                data-ocid="statistics.writing_stats.scope_global_button"
-              >
-                Wszystkie książki
-              </button>
-              <button
-                type="button"
-                className={`h-8 px-3 text-xs font-medium transition-colors ${statsScope === "book" ? "bg-primary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setStatsScope("book")}
-                data-ocid="statistics.writing_stats.scope_book_button"
-              >
-                Jedna książka
-              </button>
-            </div>
-            {statsScope === "book" && (
-              <select
-                value={selectedStatsBookId}
-                onChange={(e) => setSelectedStatsBookId(e.target.value)}
-                className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
-                data-ocid="statistics.writing_stats.book_select"
-              >
-                <option value="">Wybierz książkę</option>
-                {(books ?? []).map((b) => (
-                  <option key={b.id.toString()} value={b.id.toString()}>
-                    {b.title}
-                  </option>
-                ))}
-              </select>
-            )}
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
-              data-ocid="statistics.writing_stats.from_date_input"
-            />
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
-              data-ocid="statistics.writing_stats.to_date_input"
-            />
+      {/* Filters for the chart grid below */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-lg font-display font-semibold text-foreground">
+          Wykresy
+        </h2>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex h-8 items-center overflow-hidden rounded-md border border-border">
+            <button
+              type="button"
+              className={`h-8 px-3 text-xs font-medium transition-colors ${statsScope === "global" ? "bg-primary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
+              onClick={() => setStatsScope("global")}
+              data-ocid="statistics.writing_stats.scope_global_button"
+            >
+              Wszystkie książki
+            </button>
+            <button
+              type="button"
+              className={`h-8 px-3 text-xs font-medium transition-colors ${statsScope === "book" ? "bg-primary text-primary-foreground" : "bg-transparent text-muted-foreground hover:text-foreground"}`}
+              onClick={() => setStatsScope("book")}
+              data-ocid="statistics.writing_stats.scope_book_button"
+            >
+              Jedna książka
+            </button>
           </div>
+          {statsScope === "book" && (
+            <select
+              value={selectedStatsBookId}
+              onChange={(e) => setSelectedStatsBookId(e.target.value)}
+              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
+              data-ocid="statistics.writing_stats.book_select"
+            >
+              <option value="">Wybierz książkę</option>
+              {(books ?? []).map((b) => (
+                <option key={b.id.toString()} value={b.id.toString()}>
+                  {b.title}
+                </option>
+              ))}
+            </select>
+          )}
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
+            data-ocid="statistics.writing_stats.from_date_input"
+          />
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
+            data-ocid="statistics.writing_stats.to_date_input"
+          />
         </div>
+      </div>
 
+      {/* Chart grid — 2 columns on desktop */}
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card className="bg-card border-border shadow-subtle">
           <CardHeader>
-            <CardTitle className="font-display text-lg text-foreground">
+            <CardTitle className="font-display text-base text-foreground">
               Słowa napisane dziennie
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-72 w-full">
+            <div className="h-64 w-full">
               {writingStatsLoading ? (
                 <div className="flex h-full items-center justify-center">
-                  <Skeleton className="h-48 w-full" />
+                  <Skeleton className="h-40 w-full" />
                 </div>
               ) : dailyChartData.length === 0 ? (
                 <div
@@ -488,37 +707,16 @@ export function StatisticsPage() {
                     data={dailyChartData}
                     margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
                   >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="oklch(var(--border))"
-                    />
-                    <XAxis
-                      dataKey="date"
-                      tick={{
-                        fill: "oklch(var(--muted-foreground))",
-                        fontSize: 11,
-                      }}
-                    />
-                    <YAxis
-                      tick={{
-                        fill: "oklch(var(--muted-foreground))",
-                        fontSize: 12,
-                      }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "oklch(var(--card))",
-                        border: "1px solid oklch(var(--border))",
-                        borderRadius: "var(--radius)",
-                        color: "oklch(var(--foreground))",
-                      }}
-                    />
+                    <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
+                    <XAxis dataKey="date" tick={axisTick} />
+                    <YAxis tick={axisTick} />
+                    <Tooltip contentStyle={tooltipStyle} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
                     <Line
                       type="monotone"
                       dataKey="wordsAdded"
                       name="Dodane słowa"
-                      stroke="oklch(var(--primary))"
+                      stroke="oklch(var(--chart-1))"
                       strokeWidth={2}
                       dot={false}
                     />
@@ -539,46 +737,15 @@ export function StatisticsPage() {
 
         <Card className="bg-card border-border shadow-subtle">
           <CardHeader>
-            <CardTitle className="font-display text-lg text-foreground">
-              Regularność pisania (ostatnie 90 dni)
+            <CardTitle className="font-display text-base text-foreground">
+              Tempo pisania (słowa/min)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {heatmapLoading ? (
-              <Skeleton className="h-32 w-full" />
-            ) : (
-              <div
-                className="grid gap-1"
-                style={{ gridTemplateColumns: "repeat(18, minmax(0, 1fr))" }}
-                data-ocid="statistics.writing_stats.heatmap"
-              >
-                {heatmapCells.map((cell) => (
-                  <div
-                    key={cell.date}
-                    title={`${cell.date}: ${cell.words.toLocaleString("pl-PL")} słów`}
-                    className={`aspect-square rounded-sm ${heatmapIntensityClass(cell.words)}`}
-                  />
-                ))}
-              </div>
-            )}
-            <p className="mt-3 text-xs text-muted-foreground">
-              Intensywność koloru odzwierciedla liczbę słów dodanych danego
-              dnia. Ciemniejszy odcień = więcej napisanego tekstu.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-card border-border shadow-subtle">
-          <CardHeader>
-            <CardTitle className="font-display text-lg text-foreground">
-              Tempo pisania (słowa na minutę)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-72 w-full">
+            <div className="h-64 w-full">
               {writingStatsLoading ? (
                 <div className="flex h-full items-center justify-center">
-                  <Skeleton className="h-48 w-full" />
+                  <Skeleton className="h-40 w-full" />
                 </div>
               ) : dailyChartData.length === 0 ? (
                 <div
@@ -593,36 +760,16 @@ export function StatisticsPage() {
                     data={dailyChartData}
                     margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
                   >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="oklch(var(--border))"
-                    />
-                    <XAxis
-                      dataKey="date"
-                      tick={{
-                        fill: "oklch(var(--muted-foreground))",
-                        fontSize: 11,
-                      }}
-                    />
-                    <YAxis
-                      tick={{
-                        fill: "oklch(var(--muted-foreground))",
-                        fontSize: 12,
-                      }}
-                    />
+                    <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
+                    <XAxis dataKey="date" tick={axisTick} />
+                    <YAxis tick={axisTick} />
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: "oklch(var(--card))",
-                        border: "1px solid oklch(var(--border))",
-                        borderRadius: "var(--radius)",
-                        color: "oklch(var(--foreground))",
-                      }}
+                      contentStyle={tooltipStyle}
                       formatter={(value: number) => [
                         `${value.toLocaleString("pl-PL")} słów/min`,
                         "Tempo",
                       ]}
                     />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
                     <Line
                       type="monotone"
                       dataKey="wpm"
@@ -640,8 +787,51 @@ export function StatisticsPage() {
 
         <Card className="bg-card border-border shadow-subtle">
           <CardHeader>
-            <CardTitle className="font-display text-lg text-foreground">
-              Rozkład godzinowy (cała historia)
+            <CardTitle className="font-display text-base text-foreground">
+              Słowa na książkę
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 w-full">
+              {chartLoading ? (
+                <div className="flex h-full items-center justify-center">
+                  <Skeleton className="h-40 w-full" />
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={chartData}
+                    margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
+                    <XAxis
+                      dataKey="name"
+                      tick={axisTick}
+                      interval={0}
+                      angle={-30}
+                      textAnchor="end"
+                      height={60}
+                    />
+                    <YAxis tick={axisTick} />
+                    <Tooltip
+                      contentStyle={tooltipStyle}
+                      formatter={(value: number) => [
+                        `${value.toLocaleString("pl-PL")} słów`,
+                        "Słowa",
+                      ]}
+                    />
+                    <Bar dataKey="words" fill="oklch(var(--chart-2))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card border-border shadow-subtle">
+          <CardHeader>
+            <CardTitle className="font-display text-base text-foreground">
+              Kiedy piszesz (godziny)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -654,52 +844,31 @@ export function StatisticsPage() {
                     data={hourlyChartData}
                     margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
                   >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke="oklch(var(--border))"
-                    />
+                    <CartesianGrid strokeDasharray="3 3" stroke="oklch(var(--border))" />
                     <XAxis
                       dataKey="hour"
-                      tick={{
-                        fill: "oklch(var(--muted-foreground))",
-                        fontSize: 10,
-                      }}
+                      tick={{ ...axisTick, fontSize: 10 }}
                       interval={1}
                     />
-                    <YAxis
-                      tick={{
-                        fill: "oklch(var(--muted-foreground))",
-                        fontSize: 12,
-                      }}
-                    />
+                    <YAxis tick={axisTick} />
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: "oklch(var(--card))",
-                        border: "1px solid oklch(var(--border))",
-                        borderRadius: "var(--radius)",
-                        color: "oklch(var(--foreground))",
-                      }}
+                      contentStyle={tooltipStyle}
                       formatter={(value: number) => [
                         `${value.toLocaleString("pl-PL")} słów`,
                         "Słowa",
                       ]}
                     />
-                    <Bar
-                      dataKey="words"
-                      fill="oklch(var(--chart-4))"
-                      radius={[4, 4, 0, 0]}
-                    />
+                    <Bar dataKey="words" fill="oklch(var(--chart-4))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
-              Suma słów napisanych o danej godzinie, ze wszystkich dni
-              (niezależnie od filtra dat powyżej).
+            <p className="mt-2 text-xs text-muted-foreground">
+              Suma słów o danej godzinie, cała historia.
             </p>
           </CardContent>
         </Card>
-      </section>
+      </div>
     </div>
   );
 }

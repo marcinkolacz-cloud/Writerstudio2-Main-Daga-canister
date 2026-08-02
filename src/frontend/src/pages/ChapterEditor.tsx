@@ -346,7 +346,7 @@ export function ChapterEditorPage() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  useWritingStatsTracker(book?.id, chapterId, content);
+  useWritingStatsTracker(book?.id, chapterId, content, !!chapter);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const [saveErrorBannerVisible, setSaveErrorBannerVisible] = useState(false);
 

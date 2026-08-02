@@ -338,6 +338,8 @@ service : {
    wordsRemoved: nat, activeMinutes: nat) -> ();
   renameArchive: (id: nat, newTitle: text) -> (bool);
   reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);
+  resetMyHourlyStats: () -> ();
+  resetMyWritingStats: () -> ();
   revokeInviteCode: (code: text) -> (bool);
   saveAnalysis: (bookId: nat, chapterId: opt nat, analysisType: text,
    provider: text, resultContent: text) -> (nat);
