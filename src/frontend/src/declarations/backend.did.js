@@ -124,6 +124,22 @@ export const idlFactory = ({ IDL }) => {
     'sessionCount' : IDL.Nat,
     'wordsRemoved' : IDL.Nat,
   });
+  const BookExport = IDL.Record({
+    'chatArchives' : IDL.Vec(ChatArchive),
+    'chatSessionMessages' : IDL.Vec(ChatSessionMessage),
+    'book' : Book,
+    'chatMessages' : IDL.Vec(ChatMessage),
+    'annotations' : IDL.Vec(TextAnnotation),
+    'chapters' : IDL.Vec(Chapter),
+    'chatSessions' : IDL.Vec(ChatSession),
+    'comments' : IDL.Vec(Comment),
+    'analyses' : IDL.Vec(Analysis),
+  });
+  const ExportMetadataResponse = IDL.Record({
+    'owner' : IDL.Principal,
+    'bookCount' : IDL.Nat,
+    'exportedAt' : IDL.Int,
+  });
   return IDL.Service({
     '__adminPrincipal' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
     '__analyses' : IDL.Func(
@@ -263,6 +279,8 @@ export const idlFactory = ({ IDL }) => {
     'deleteComment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'exportBookSlice' : IDL.Func([IDL.Nat], [IDL.Opt(BookExport)], ['query']),
+    'exportMetadata' : IDL.Func([], [ExportMetadataResponse], ['query']),
     'finishRecordingUpload' : IDL.Func([IDL.Nat], [IDL.Nat], []),
     'generateInviteCode' : IDL.Func([], [IDL.Text], []),
     'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
@@ -350,6 +368,8 @@ export const idlFactory = ({ IDL }) => {
       ),
     'renameArchive' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
     'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
+    'resetMyHourlyStats' : IDL.Func([], [], []),
+    'resetMyWritingStats' : IDL.Func([], [], []),
     'revokeInviteCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'saveAnalysis' : IDL.Func(
         [IDL.Nat, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text],

@@ -1422,6 +1422,34 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async resetMyWritingStats(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.resetMyWritingStats();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.resetMyWritingStats();
+            return result;
+        }
+    }
+    async resetMyHourlyStats(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.resetMyHourlyStats();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.resetMyHourlyStats();
+            return result;
+        }
+    }
     async setArchiveSummary(arg0: bigint, arg1: string): Promise<boolean> {
         if (this.processError) {
             try {

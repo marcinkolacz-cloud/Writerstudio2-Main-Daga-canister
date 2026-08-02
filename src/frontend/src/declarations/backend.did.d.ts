@@ -24,6 +24,17 @@ export interface Book {
   'category' : string,
   'ageCategory' : string,
 }
+export interface BookExport {
+  'chatArchives' : Array<ChatArchive>,
+  'chatSessionMessages' : Array<ChatSessionMessage>,
+  'book' : Book,
+  'chatMessages' : Array<ChatMessage>,
+  'annotations' : Array<TextAnnotation>,
+  'chapters' : Array<Chapter>,
+  'chatSessions' : Array<ChatSession>,
+  'comments' : Array<Comment>,
+  'analyses' : Array<Analysis>,
+}
 export interface Chapter {
   'id' : bigint,
   'charCount' : bigint,
@@ -87,6 +98,11 @@ export interface DailyWritingStat {
   'netWords' : bigint,
   'sessionCount' : bigint,
   'wordsRemoved' : bigint,
+}
+export interface ExportMetadataResponse {
+  'owner' : Principal,
+  'bookCount' : bigint,
+  'exportedAt' : bigint,
 }
 export interface HourlyActivityStat {
   'id' : bigint,
@@ -253,6 +269,8 @@ export interface _SERVICE {
   'deleteComment' : ActorMethod<[bigint], boolean>,
   'deleteMessage' : ActorMethod<[bigint], boolean>,
   'deleteRecording' : ActorMethod<[bigint], boolean>,
+  'exportBookSlice' : ActorMethod<[bigint], [] | [BookExport]>,
+  'exportMetadata' : ActorMethod<[], ExportMetadataResponse>,
   'finishRecordingUpload' : ActorMethod<[bigint], bigint>,
   'generateInviteCode' : ActorMethod<[], string>,
   'getAnalysis' : ActorMethod<[bigint], [] | [Analysis]>,
@@ -309,6 +327,8 @@ export interface _SERVICE {
   >,
   'renameArchive' : ActorMethod<[bigint, string], boolean>,
   'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
+  'resetMyHourlyStats' : ActorMethod<[], undefined>,
+  'resetMyWritingStats' : ActorMethod<[], undefined>,
   'revokeInviteCode' : ActorMethod<[string], boolean>,
   'saveAnalysis' : ActorMethod<
     [bigint, [] | [bigint], string, string, string],
