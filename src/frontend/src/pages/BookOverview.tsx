@@ -1,5 +1,6 @@
 import { BookCharactersTab } from "@/components/book/BookCharactersTab";
 import { BookSettingsTab } from "@/components/book/BookSettingsTab";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +9,7 @@ import {
   useBookStats,
   useChapters,
   useCreateChapter,
+  useDeleteChapter,
 } from "@/hooks/useBackend";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import {
@@ -17,8 +19,10 @@ import {
   Layers,
   Plus,
   Settings,
+  Trash2,
   Users,
 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 const CHAPTER_ACCENT_CLASSES = [
@@ -45,36 +49,76 @@ function ChapterListItem({
 }) {
   const navigate = useNavigate();
   const accentClass = CHAPTER_ACCENT_CLASSES[index % CHAPTER_ACCENT_CLASSES.length];
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const deleteChapter = useDeleteChapter();
+
+  const handleDelete = async () => {
+    try {
+      await deleteChapter.mutateAsync({ chapterId: chapter.id, bookId: BigInt(bookId) });
+      toast.success("Rozdział przeniesiony do kosza", {
+        description: "Możesz go przywrócić ze strony Kosz.",
+      });
+      setConfirmOpen(false);
+    } catch (err) {
+      toast.error("Nie udało się usunąć rozdziału", {
+        description: err instanceof Error ? err.message : "Nieznany błąd",
+      });
+    }
+  };
 
   return (
-    <button
-      type="button"
-      onClick={() =>
-        navigate({
-          to: "/books/$bookId/chapters/$chapterId",
-          params: { bookId, chapterId: String(chapter.id) },
-        })
-      }
+    <div
       className="group relative w-full flex items-center gap-4 overflow-hidden p-4 pl-5 rounded-lg border border-border bg-card hover:shadow-elevated transition-smooth text-left"
       data-ocid={`chapter.item.${index + 1}`}
     >
       <div className={`absolute inset-y-0 left-0 w-1 ${accentClass}`} aria-hidden="true" />
-      <div className="flex-shrink-0 w-8 h-8 rounded-md bg-muted flex items-center justify-center">
-        <span className="text-xs font-display font-semibold text-muted-foreground">
-          {index + 1}
-        </span>
-      </div>
-      <div className="flex-1 min-w-0">
-        <h3 className="font-medium text-foreground truncate">
-          {chapter.title}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          {Number(chapter.wordCount).toLocaleString("pl-PL")} słów ·{" "}
-          {Number(chapter.charCount).toLocaleString("pl-PL")} znaków
-        </p>
-      </div>
-      <ArrowLeft className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity -rotate-180" />
-    </button>
+      <button
+        type="button"
+        onClick={() =>
+          navigate({
+            to: "/books/$bookId/chapters/$chapterId",
+            params: { bookId, chapterId: String(chapter.id) },
+          })
+        }
+        className="flex flex-1 items-center gap-4 min-w-0 text-left"
+      >
+        <div className="flex-shrink-0 w-8 h-8 rounded-md bg-muted flex items-center justify-center">
+          <span className="text-xs font-display font-semibold text-muted-foreground">
+            {index + 1}
+          </span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-foreground truncate">
+            {chapter.title}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {Number(chapter.wordCount).toLocaleString("pl-PL")} słów ·{" "}
+            {Number(chapter.charCount).toLocaleString("pl-PL")} znaków
+          </p>
+        </div>
+        <ArrowLeft className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity -rotate-180" />
+      </button>
+      <button
+        type="button"
+        onClick={() => setConfirmOpen(true)}
+        className="shrink-0 rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+        aria-label="Usuń rozdział"
+        data-ocid={`chapter.item.${index + 1}.delete_button`}
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
+      <ConfirmDeleteDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        expectedText={chapter.title}
+        title="Usunąć rozdział?"
+        description="Rozdział trafi do kosza. Będziesz mógł go przywrócić w każdej chwili ze strony Kosz."
+        confirmLabel="Przenieś do kosza"
+        onConfirm={handleDelete}
+        isPending={deleteChapter.isPending}
+        variant="trash"
+      />
+    </div>
   );
 }
 

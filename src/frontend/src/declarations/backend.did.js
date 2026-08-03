@@ -147,6 +147,11 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, Analysis))],
         ['query'],
       ),
+    '__analysesTrashed' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Int))],
+        ['query'],
+      ),
     '__annotations' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, TextAnnotation))],
@@ -157,9 +162,19 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, Book))],
         ['query'],
       ),
+    '__booksTrashed' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Int))],
+        ['query'],
+      ),
     '__chapters' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Chapter))],
+        ['query'],
+      ),
+    '__chaptersTrashed' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Int))],
         ['query'],
       ),
     '__chatArchives' : IDL.Func(
@@ -185,6 +200,11 @@ export const idlFactory = ({ IDL }) => {
     '__comments' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Comment))],
+        ['query'],
+      ),
+    '__commentsTrashed' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Int))],
         ['query'],
       ),
     '__hourlyStats' : IDL.Func(
@@ -220,6 +240,11 @@ export const idlFactory = ({ IDL }) => {
     '__recordings' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Recording))],
+        ['query'],
+      ),
+    '__recordingsTrashed' : IDL.Func(
+        [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Int))],
         ['query'],
       ),
     '__uploadChunks' : IDL.Func(
@@ -360,6 +385,33 @@ export const idlFactory = ({ IDL }) => {
         ],
         [],
       ),
+    'listTrashedAnalysesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Analysis)], []),
+    'listTrashedBooks' : IDL.Func([], [IDL.Vec(Book)], []),
+    'listTrashedChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
+    'listTrashedCommentsByChapter' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Vec(Comment)],
+        [],
+      ),
+    'listTrashedRecordingsByChapter' : IDL.Func(
+        [IDL.Nat],
+        [
+          IDL.Vec(
+            IDL.Record({
+              'id' : IDL.Nat,
+              'voice' : IDL.Text,
+              'name' : IDL.Opt(IDL.Text),
+              'createdAt' : IDL.Int,
+            })
+          ),
+        ],
+        [],
+      ),
+    'permanentlyDeleteAnalysis' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'permanentlyDeleteBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'permanentlyDeleteChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'permanentlyDeleteComment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'permanentlyDeleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'recordHourlyActivity' : IDL.Func([IDL.Nat, IDL.Nat], [], []),
     'recordWritingActivity' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat],
@@ -370,6 +422,11 @@ export const idlFactory = ({ IDL }) => {
     'reorderChapters' : IDL.Func([IDL.Nat, IDL.Vec(IDL.Nat)], [IDL.Bool], []),
     'resetMyHourlyStats' : IDL.Func([], [], []),
     'resetMyWritingStats' : IDL.Func([], [], []),
+    'restoreAnalysis' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'restoreBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'restoreChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'restoreComment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'restoreRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'revokeInviteCode' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'saveAnalysis' : IDL.Func(
         [IDL.Nat, IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text],

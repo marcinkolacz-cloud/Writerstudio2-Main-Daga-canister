@@ -149,6 +149,10 @@ export interface _SERVICE {
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Analysis]>
   >,
+  '__analysesTrashed' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, bigint]>
+  >,
   '__annotations' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, TextAnnotation]>
@@ -157,9 +161,17 @@ export interface _SERVICE {
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Book]>
   >,
+  '__booksTrashed' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, bigint]>
+  >,
   '__chapters' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Chapter]>
+  >,
+  '__chaptersTrashed' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, bigint]>
   >,
   '__chatArchives' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
@@ -180,6 +192,10 @@ export interface _SERVICE {
   '__comments' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Comment]>
+  >,
+  '__commentsTrashed' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, bigint]>
   >,
   '__hourlyStats' : ActorMethod<
     [[] | [string], [] | [bigint]],
@@ -210,6 +226,10 @@ export interface _SERVICE {
   '__recordings' : ActorMethod<
     [[] | [bigint], [] | [bigint]],
     Array<[bigint, Recording]>
+  >,
+  '__recordingsTrashed' : ActorMethod<
+    [[] | [bigint], [] | [bigint]],
+    Array<[bigint, bigint]>
   >,
   '__uploadChunks' : ActorMethod<
     [[] | [string], [] | [bigint]],
@@ -320,6 +340,26 @@ export interface _SERVICE {
       }
     >
   >,
+  'listTrashedAnalysesByBook' : ActorMethod<[bigint], Array<Analysis>>,
+  'listTrashedBooks' : ActorMethod<[], Array<Book>>,
+  'listTrashedChaptersByBook' : ActorMethod<[bigint], Array<Chapter>>,
+  'listTrashedCommentsByChapter' : ActorMethod<[bigint], Array<Comment>>,
+  'listTrashedRecordingsByChapter' : ActorMethod<
+    [bigint],
+    Array<
+      {
+        'id' : bigint,
+        'voice' : string,
+        'name' : [] | [string],
+        'createdAt' : bigint,
+      }
+    >
+  >,
+  'permanentlyDeleteAnalysis' : ActorMethod<[bigint], boolean>,
+  'permanentlyDeleteBook' : ActorMethod<[bigint], boolean>,
+  'permanentlyDeleteChapter' : ActorMethod<[bigint], boolean>,
+  'permanentlyDeleteComment' : ActorMethod<[bigint], boolean>,
+  'permanentlyDeleteRecording' : ActorMethod<[bigint], boolean>,
   'recordHourlyActivity' : ActorMethod<[bigint, bigint], undefined>,
   'recordWritingActivity' : ActorMethod<
     [bigint, string, bigint, bigint, bigint],
@@ -329,6 +369,11 @@ export interface _SERVICE {
   'reorderChapters' : ActorMethod<[bigint, Array<bigint>], boolean>,
   'resetMyHourlyStats' : ActorMethod<[], undefined>,
   'resetMyWritingStats' : ActorMethod<[], undefined>,
+  'restoreAnalysis' : ActorMethod<[bigint], boolean>,
+  'restoreBook' : ActorMethod<[bigint], boolean>,
+  'restoreChapter' : ActorMethod<[bigint], boolean>,
+  'restoreComment' : ActorMethod<[bigint], boolean>,
+  'restoreRecording' : ActorMethod<[bigint], boolean>,
   'revokeInviteCode' : ActorMethod<[string], boolean>,
   'saveAnalysis' : ActorMethod<
     [bigint, [] | [bigint], string, string, string],

@@ -162,6 +162,11 @@ service : {
           nat;
           Analysis;
         }) query;
+  __analysesTrashed: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          int;
+        }) query;
   __annotations: (ko: opt nat, count: opt nat) ->
    (vec record {
           nat;
@@ -171,10 +176,20 @@ service : {
                                                    nat;
                                                    Book;
                                                  }) query;
+  __booksTrashed: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          int;
+        }) query;
   __chapters: (ko: opt nat, count: opt nat) ->
    (vec record {
           nat;
           Chapter;
+        }) query;
+  __chaptersTrashed: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          int;
         }) query;
   __chatArchives: (ko: opt nat, count: opt nat) ->
    (vec record {
@@ -200,6 +215,11 @@ service : {
    (vec record {
           nat;
           Comment;
+        }) query;
+  __commentsTrashed: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          int;
         }) query;
   __hourlyStats: (ko: opt text, count: opt nat) ->
    (vec record {
@@ -235,6 +255,11 @@ service : {
    (vec record {
           nat;
           Recording;
+        }) query;
+  __recordingsTrashed: (ko: opt nat, count: opt nat) ->
+   (vec record {
+          nat;
+          int;
         }) query;
   __uploadChunks: (ko: opt text, count: opt nat) ->
    (vec record {
@@ -272,7 +297,7 @@ service : {
   adminImportComment: (comment: Comment) -> ();
   adminImportDailyWritingStat: (stat: DailyWritingStat) -> ();
   adminImportHourlyActivityStat: (stat: HourlyActivityStat) -> ();
-  adminReassignAllBooksOwner: (newOwner: principal) -> (nat);
+  adminReassignBooksOwner: (bookIds: vec nat, newOwner: principal) -> (nat);
   checkAccess: (code: text) -> (bool);
   clearChat: (bookId: nat, sessionId: text) -> (bool);
   createArchive: (bookId: nat, sessionId: text, title: text) -> (nat);
@@ -333,6 +358,22 @@ service : {
           name: opt text;
           voice: text;
         });
+  listTrashedAnalysesByBook: (bookId: nat) -> (vec Analysis);
+  listTrashedBooks: () -> (vec Book);
+  listTrashedChaptersByBook: (bookId: nat) -> (vec Chapter);
+  listTrashedCommentsByChapter: (chapterId: nat) -> (vec Comment);
+  listTrashedRecordingsByChapter: (chapterId: nat) ->
+   (vec record {
+          createdAt: int;
+          id: nat;
+          name: opt text;
+          voice: text;
+        });
+  permanentlyDeleteAnalysis: (id: nat) -> (bool);
+  permanentlyDeleteBook: (id: nat) -> (bool);
+  permanentlyDeleteChapter: (id: nat) -> (bool);
+  permanentlyDeleteComment: (id: nat) -> (bool);
+  permanentlyDeleteRecording: (id: nat) -> (bool);
   recordHourlyActivity: (hour: nat, wordsAdded: nat) -> ();
   recordWritingActivity: (bookId: nat, date: text, wordsAdded: nat,
    wordsRemoved: nat, activeMinutes: nat) -> ();
@@ -340,6 +381,11 @@ service : {
   reorderChapters: (bookId: nat, orderedIds: vec nat) -> (bool);
   resetMyHourlyStats: () -> ();
   resetMyWritingStats: () -> ();
+  restoreAnalysis: (id: nat) -> (bool);
+  restoreBook: (id: nat) -> (bool);
+  restoreChapter: (id: nat) -> (bool);
+  restoreComment: (id: nat) -> (bool);
+  restoreRecording: (id: nat) -> (bool);
   revokeInviteCode: (code: text) -> (bool);
   saveAnalysis: (bookId: nat, chapterId: opt nat, analysisType: text,
    provider: text, resultContent: text) -> (nat);

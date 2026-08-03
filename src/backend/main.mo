@@ -37,6 +37,11 @@ actor {
   let inviteCodes : Map.Map<Text, Types.InviteCode>;
   let writingStats : Map.Map<Text, Types.DailyWritingStat>;
   let hourlyStats : Map.Map<Text, Types.HourlyActivityStat>;
+  let booksTrashed : Map.Map<Nat, Int>;
+  let chaptersTrashed : Map.Map<Nat, Int>;
+  let analysesTrashed : Map.Map<Nat, Int>;
+  let commentsTrashed : Map.Map<Nat, Int>;
+  let recordingsTrashed : Map.Map<Nat, Int>;
 
   var nextBookId : Nat;
   var nextChapterId : Nat;
@@ -50,19 +55,19 @@ actor {
   var nextRecordingId : Nat;
 
   include MixinViews();
-  include BooksApi(books, chapters, inviteCodes);
-  include ChaptersApi(books, chapters);
-  include AnalysesApi(books, chapters, analyses);
+  include BooksApi(books, chapters, inviteCodes, booksTrashed, chaptersTrashed);
+  include ChaptersApi(books, chapters, chaptersTrashed);
+  include AnalysesApi(books, chapters, analyses, analysesTrashed);
   include TextAnnotationsApi(books, analyses, annotations);
   include ChatApi(books, chatMessages);
   include ChatArchivesApi(books, chatArchives);
   include ChatsApi(books, chapters, chatSessions, chatSessionMessages);
-  include CommentsApi(books, chapters, comments);
-  include StatsApi(books, chapters);
+  include CommentsApi(books, chapters, comments, commentsTrashed);
+  include StatsApi(books, chapters, booksTrashed, chaptersTrashed);
   include WritingStatsApi(writingStats);
   include HourlyStatsApi(hourlyStats);
-  include RecordingsApi(books, chapters, recordings, pendingUploads, uploadChunks, recordingNames);
-  include TtsApi();
+  include RecordingsApi(books, chapters, recordings, pendingUploads, uploadChunks, recordingNames, recordingsTrashed);
+  include TtsApi(books, inviteCodes);
   include InvitesApi(books, inviteCodes);
   include ExportApi(books, chapters, analyses, annotations, chatMessages, chatArchives, chatSessions, chatSessionMessages, comments);
 
@@ -137,13 +142,23 @@ actor {
     };
   };
 
-  public shared ({ caller }) func adminReassignAllBooksOwner(newOwner : Principal) : async Nat {
+  // SAFETY: this used to reassign ownership of EVERY book on the canister
+  // in one call with no way to limit the blast radius — a typo'd
+  // `newOwner` principal could instantly orphan every user's work. It now
+  // takes an explicit list of book ids, so a mistake affects at most the
+  // books you named, not the entire canister.
+  public shared ({ caller }) func adminReassignBooksOwner(bookIds : [Nat], newOwner : Principal) : async Nat {
     if (not _callerIsAdmin(caller)) { Runtime.trap("Only admin can reassign ownership"); };
     var count = 0;
-    for ((id, book) in books.entries()) {
-      let updated = { book with ownerId = newOwner };
-      books.add(id, updated);
-      count += 1;
+    for (id in bookIds.vals()) {
+      switch (books.get(id)) {
+        case (?book) {
+          let updated = { book with ownerId = newOwner };
+          books.add(id, updated);
+          count += 1;
+        };
+        case null {};
+      };
     };
     count;
   };

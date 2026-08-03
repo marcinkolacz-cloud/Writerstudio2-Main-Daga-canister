@@ -38,7 +38,10 @@ module {
 
     let request = {
       url = "https://writerstudio-tts.marcinkolacz.workers.dev";
-      max_response_bytes = null;
+      // Was null (unbounded) — an attacker could force the canister to
+      // pay for an arbitrarily large response. 10 MB comfortably covers
+      // a few minutes of MP3 audio.
+      max_response_bytes = ?(10_000_000 : Nat64);
       method = #post;
       headers = [
         { name = "Content-Type"; value = "application/json" },

@@ -923,6 +923,117 @@ export function useUpdateBookMetadata() {
   });
 }
 
+export function useDeleteBook() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (bookId: bigint) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteBook(bookId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["books"] });
+    },
+  });
+}
+
+export function useRestoreBook() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (bookId: bigint) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.restoreBook(bookId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["books"] });
+      queryClient.invalidateQueries({ queryKey: ["trashedBooks"] });
+    },
+  });
+}
+
+export function usePermanentlyDeleteBook() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (bookId: bigint) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.permanentlyDeleteBook(bookId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["trashedBooks"] });
+    },
+  });
+}
+
+export function useTrashedBooks() {
+  const { actor } = useActorLocal(createActor);
+  return useQuery<Book[]>({
+    queryKey: ["trashedBooks"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listTrashedBooks();
+    },
+    enabled: !!actor,
+  });
+}
+
+export function useDeleteChapter() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ chapterId }: { chapterId: bigint; bookId: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteChapter(chapterId);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["chapters", variables.bookId] });
+    },
+  });
+}
+
+export function useRestoreChapter() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ chapterId }: { chapterId: bigint; bookId: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.restoreChapter(chapterId);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["chapters", variables.bookId] });
+      queryClient.invalidateQueries({ queryKey: ["trashedChapters", variables.bookId] });
+    },
+  });
+}
+
+export function usePermanentlyDeleteChapter() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ chapterId }: { chapterId: bigint; bookId: bigint }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.permanentlyDeleteChapter(chapterId);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["trashedChapters", variables.bookId] });
+    },
+  });
+}
+
+export function useTrashedChaptersByBook(bookId: string | number) {
+  const { actor } = useActorLocal(createActor);
+  const id = BigInt(bookId);
+  return useQuery<Chapter[]>({
+    queryKey: ["trashedChapters", id],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listTrashedChaptersByBook(id);
+    },
+    enabled: !!actor && !!bookId,
+  });
+}
+
 export function useReorderChapters() {
   const { actor } = useActorLocal(createActor);
   const queryClient = useQueryClient();

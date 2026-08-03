@@ -2,11 +2,13 @@ import Map "mo:core/Map";
 import Types "../types";
 import CommentsLib "../lib/Comments";
 import Principal "mo:core/Principal";
+import Time "mo:core/Time";
 
 mixin (
   books : Map.Map<Nat, Types.Book>,
   chapters : Map.Map<Nat, Types.Chapter>,
   comments : Map.Map<Nat, Types.Comment>,
+  commentsTrashed : Map.Map<Nat, Int>,
 ) {
 
   func commentGetBookOwner(chapterId : Nat) : ?Principal {
@@ -48,7 +50,7 @@ mixin (
     switch (commentGetBookOwner(chapterId)) {
       case (?ownerId) {
         if (Principal.equal(ownerId, caller)) {
-          CommentsLib.filterByChapter(comments, chapterId)
+          CommentsLib.filterByChapter(comments, chapterId).filter(func(c : Types.Comment) : Bool { commentsTrashed.get(c.id) == null })
         } else {
           []
         }
@@ -61,7 +63,51 @@ mixin (
     switch (comments.get(id)) {
       case (?comment) {
         if (isCommentOwner(comment, caller)) {
+          commentsTrashed.add(id, Time.now());
+          true
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
+  public shared ({ caller }) func restoreComment(id : Nat) : async Bool {
+    switch (comments.get(id)) {
+      case (?comment) {
+        if (isCommentOwner(comment, caller)) {
+          switch (commentsTrashed.get(id)) {
+            case (?_) { commentsTrashed.remove(id); true };
+            case null { false };
+          };
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
+  public shared ({ caller }) func listTrashedCommentsByChapter(chapterId : Nat) : async [Types.Comment] {
+    switch (commentGetBookOwner(chapterId)) {
+      case (?ownerId) {
+        if (Principal.equal(ownerId, caller)) {
+          CommentsLib.filterByChapter(comments, chapterId).filter(func(c : Types.Comment) : Bool { commentsTrashed.get(c.id) != null })
+        } else {
+          []
+        }
+      };
+      case null { [] }
+    }
+  };
+
+  public shared ({ caller }) func permanentlyDeleteComment(id : Nat) : async Bool {
+    switch (comments.get(id)) {
+      case (?comment) {
+        if (isCommentOwner(comment, caller)) {
           comments.remove(id);
+          commentsTrashed.remove(id);
           true
         } else {
           false

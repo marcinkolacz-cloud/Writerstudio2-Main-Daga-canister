@@ -3,11 +3,13 @@ import List "mo:core/List";
 import Types "../types";
 import AnalysesLib "../lib/Analyses";
 import Principal "mo:core/Principal";
+import Time "mo:core/Time";
 
 mixin (
   books : Map.Map<Nat, Types.Book>,
   chapters : Map.Map<Nat, Types.Chapter>,
   analyses : Map.Map<Nat, Types.Analysis>,
+  analysesTrashed : Map.Map<Nat, Int>,
 ) {
 
   func analysesGetBookOwner(bookId : Nat) : ?Principal {
@@ -72,7 +74,7 @@ mixin (
         switch (analysesGetBookOwner(bookId)) {
           case (?ownerId) {
             if (Principal.equal(ownerId, caller)) {
-              AnalysesLib.filterByChapter(analyses, chapterId)
+              AnalysesLib.filterByChapter(analyses, chapterId).filter(func(a : Types.Analysis) : Bool { analysesTrashed.get(a.id) == null })
             } else {
               []
             }
@@ -88,7 +90,7 @@ mixin (
     switch (analysesGetBookOwner(bookId)) {
       case (?ownerId) {
         if (Principal.equal(ownerId, caller)) {
-          AnalysesLib.filterByBook(analyses, bookId)
+          AnalysesLib.filterByBook(analyses, bookId).filter(func(a : Types.Analysis) : Bool { analysesTrashed.get(a.id) == null })
         } else {
           []
         }
@@ -97,11 +99,57 @@ mixin (
     }
   };
 
+  // SAFETY: this used to permanently destroy the analysis with no recovery
+  // path. It now moves it to trash instead.
   public shared ({ caller }) func deleteAnalysis(id : Nat) : async Bool {
     switch (analyses.get(id)) {
       case (?analysis) {
         if (isAnalysisOwner(analysis, caller)) {
+          analysesTrashed.add(id, Time.now());
+          true
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
+  public shared ({ caller }) func restoreAnalysis(id : Nat) : async Bool {
+    switch (analyses.get(id)) {
+      case (?analysis) {
+        if (isAnalysisOwner(analysis, caller)) {
+          switch (analysesTrashed.get(id)) {
+            case (?_) { analysesTrashed.remove(id); true };
+            case null { false };
+          };
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
+  public shared ({ caller }) func listTrashedAnalysesByBook(bookId : Nat) : async [Types.Analysis] {
+    switch (analysesGetBookOwner(bookId)) {
+      case (?ownerId) {
+        if (Principal.equal(ownerId, caller)) {
+          AnalysesLib.filterByBook(analyses, bookId).filter(func(a : Types.Analysis) : Bool { analysesTrashed.get(a.id) != null })
+        } else {
+          []
+        }
+      };
+      case null { [] }
+    }
+  };
+
+  public shared ({ caller }) func permanentlyDeleteAnalysis(id : Nat) : async Bool {
+    switch (analyses.get(id)) {
+      case (?analysis) {
+        if (isAnalysisOwner(analysis, caller)) {
           analyses.remove(id);
+          analysesTrashed.remove(id);
           true
         } else {
           false

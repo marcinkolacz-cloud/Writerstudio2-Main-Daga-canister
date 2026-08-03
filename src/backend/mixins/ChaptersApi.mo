@@ -8,7 +8,7 @@ import Time "mo:core/Time";
 import Order "mo:core/Order";
 import Set "mo:core/Set";
 
-mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>) {
+mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>, chaptersTrashed : Map.Map<Nat, Int>) {
 
   func getBookOwner(bookId : Nat) : ?Principal {
     switch (books.get(bookId)) {
@@ -68,8 +68,8 @@ mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>)
       case (?ownerId) {
         if (Principal.equal(ownerId, caller)) {
           var result = List.empty<Types.Chapter>();
-          for ((_, chapter) in chapters.entries()) {
-            if (chapter.bookId == bookId) {
+          for ((cid, chapter) in chapters.entries()) {
+            if (chapter.bookId == bookId and chaptersTrashed.get(cid) == null) {
               result.add(chapter);
             };
           };
@@ -100,11 +100,63 @@ mixin (books : Map.Map<Nat, Types.Book>, chapters : Map.Map<Nat, Types.Chapter>)
     }
   };
 
+  // SAFETY: this used to permanently destroy the chapter with no recovery
+  // path. It now moves it to trash instead.
   public shared ({ caller }) func deleteChapter(id : Nat) : async Bool {
     switch (chapters.get(id)) {
       case (?chapter) {
         if (isChapterOwner(chapter, caller)) {
+          chaptersTrashed.add(id, Time.now());
+          true
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
+  public shared ({ caller }) func restoreChapter(id : Nat) : async Bool {
+    switch (chapters.get(id)) {
+      case (?chapter) {
+        if (isChapterOwner(chapter, caller)) {
+          switch (chaptersTrashed.get(id)) {
+            case (?_) { chaptersTrashed.remove(id); true };
+            case null { false };
+          };
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
+  public shared ({ caller }) func listTrashedChaptersByBook(bookId : Nat) : async [Types.Chapter] {
+    switch (getBookOwner(bookId)) {
+      case (?ownerId) {
+        if (Principal.equal(ownerId, caller)) {
+          var result = List.empty<Types.Chapter>();
+          for ((cid, chapter) in chapters.entries()) {
+            if (chapter.bookId == bookId and chaptersTrashed.get(cid) != null) {
+              result.add(chapter);
+            };
+          };
+          result.toArray()
+        } else {
+          []
+        }
+      };
+      case null { [] }
+    }
+  };
+
+  public shared ({ caller }) func permanentlyDeleteChapter(id : Nat) : async Bool {
+    switch (chapters.get(id)) {
+      case (?chapter) {
+        if (isChapterOwner(chapter, caller)) {
           chapters.remove(id);
+          chaptersTrashed.remove(id);
           true
         } else {
           false

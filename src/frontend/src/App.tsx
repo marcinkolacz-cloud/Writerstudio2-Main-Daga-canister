@@ -13,6 +13,7 @@ import { layoutRoute } from "./routes/layout";
 import { loginRoute } from "./routes/login";
 import { rootRoute } from "./routes/root";
 import { statisticsRoute } from "./routes/statistics";
+import { trashRoute } from "./routes/trash";
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -23,6 +24,7 @@ const routeTree = rootRoute.addChildren([
     chapterRoute,
     statisticsRoute,
     adminRoute,
+    trashRoute,
   ]),
 ]);
 

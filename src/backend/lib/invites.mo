@@ -19,11 +19,18 @@ module {
   ];
   let charCount = 36;
 
+  // Explicitly uses the documented-secure Random.crypto() generator
+  // (backed by the IC's raw_rand entropy) rather than calling
+  // Random.natRange directly — that bare form isn't the pattern the
+  // Motoko docs actually document as cryptographically secure, so this
+  // removes any ambiguity for a value (invite codes) that grants real
+  // write/admin access.
   public func generateRandomCode() : async Text {
+    let rng = Random.crypto();
     var code = "";
     var i = 0;
     while (i < 8) {
-      let idx = await Random.natRange(0, charCount);
+      let idx = await* rng.natRange(0, charCount);
       code := code # charArray[idx].toText();
       i += 1;
     };

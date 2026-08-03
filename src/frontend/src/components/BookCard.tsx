@@ -1,9 +1,12 @@
 import type { Book } from "@/backend";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useBookStats } from "@/hooks/useBackend";
+import { ConfirmDeleteDialog } from "@/components/ConfirmDeleteDialog";
+import { useBookStats, useDeleteBook } from "@/hooks/useBackend";
 import { useNavigate } from "@tanstack/react-router";
-import { BookOpen, FileText, Layers } from "lucide-react";
+import { BookOpen, FileText, Layers, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface BookCardProps {
   book: Book;
@@ -24,6 +27,22 @@ export function BookCard({ book, index }: BookCardProps) {
     book.id.toString(),
   );
   const accentClass = ACCENT_CLASSES[index % ACCENT_CLASSES.length];
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const deleteBook = useDeleteBook();
+
+  const handleDelete = async () => {
+    try {
+      await deleteBook.mutateAsync(book.id);
+      toast.success("Książka przeniesiona do kosza", {
+        description: "Możesz ją przywrócić ze strony Kosz.",
+      });
+      setConfirmOpen(false);
+    } catch (err) {
+      toast.error("Nie udało się usunąć książki", {
+        description: err instanceof Error ? err.message : "Nieznany błąd",
+      });
+    }
+  };
 
   return (
     <Card
@@ -34,11 +53,23 @@ export function BookCard({ book, index }: BookCardProps) {
       data-ocid={`book.item.${index + 1}`}
     >
       <div className={`absolute inset-x-0 top-0 h-1 ${accentClass}`} aria-hidden="true" />
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setConfirmOpen(true);
+        }}
+        className="absolute right-2 top-3 z-10 rounded-md p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+        aria-label="Usuń książkę"
+        data-ocid={`book.item.${index + 1}.delete_button`}
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
       <CardHeader className="pb-3 pt-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <BookOpen className="h-4 w-4 text-primary flex-shrink-0" />
-            <CardTitle className="text-base font-semibold leading-tight truncate">
+            <CardTitle className="text-base font-semibold leading-tight truncate pr-6">
               {book.title}
             </CardTitle>
           </div>
@@ -74,6 +105,19 @@ export function BookCard({ book, index }: BookCardProps) {
           )}
         </div>
       </CardContent>
+      <div onClick={(e) => e.stopPropagation()}>
+        <ConfirmDeleteDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          expectedText={book.title}
+          title="Usunąć książkę?"
+          description="Książka i wszystkie jej rozdziały trafią do kosza. Będziesz mógł je przywrócić w każdej chwili ze strony Kosz."
+          confirmLabel="Przenieś do kosza"
+          onConfirm={handleDelete}
+          isPending={deleteBook.isPending}
+          variant="trash"
+        />
+      </div>
     </Card>
   );
 }

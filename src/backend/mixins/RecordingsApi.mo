@@ -3,6 +3,7 @@ import Types "../types";
 import RecordingsLib "../lib/Recordings";
 import Principal "mo:core/Principal";
 import Array "mo:core/Array";
+import Time "mo:core/Time";
 
 mixin (
   books : Map.Map<Nat, Types.Book>,
@@ -11,6 +12,7 @@ mixin (
   pendingUploads : Map.Map<Nat, Types.PendingUpload>,
   uploadChunks : Map.Map<Text, [Nat8]>,
   recordingNames : Map.Map<Nat, Text>,
+  recordingsTrashed : Map.Map<Nat, Int>,
 ) {
 
   func recordingGetBookOwner(chapterId : Nat) : ?Principal {
@@ -52,7 +54,7 @@ mixin (
     switch (recordingGetBookOwner(chapterId)) {
       case (?ownerId) {
         if (Principal.equal(ownerId, caller)) {
-          RecordingsLib.filterByChapter(recordings, recordingNames, chapterId)
+          RecordingsLib.filterByChapter(recordings, recordingNames, chapterId).filter(func(r : { id : Nat; voice : Text; createdAt : Int; name : ?Text }) : Bool { recordingsTrashed.get(r.id) == null })
         } else {
           []
         }
@@ -88,11 +90,57 @@ mixin (
     }
   };
 
+  // SAFETY: this used to permanently destroy the recording (audio data
+  // included) with no recovery path. It now moves it to trash instead.
   public shared ({ caller }) func deleteRecording(id : Nat) : async Bool {
     switch (recordings.get(id)) {
       case (?recording) {
         if (isRecordingOwner(recording, caller)) {
+          recordingsTrashed.add(id, Time.now());
+          true
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
+  public shared ({ caller }) func restoreRecording(id : Nat) : async Bool {
+    switch (recordings.get(id)) {
+      case (?recording) {
+        if (isRecordingOwner(recording, caller)) {
+          switch (recordingsTrashed.get(id)) {
+            case (?_) { recordingsTrashed.remove(id); true };
+            case null { false };
+          };
+        } else {
+          false
+        }
+      };
+      case null { false }
+    }
+  };
+
+  public shared ({ caller }) func listTrashedRecordingsByChapter(chapterId : Nat) : async [{ id : Nat; voice : Text; createdAt : Int; name : ?Text }] {
+    switch (recordingGetBookOwner(chapterId)) {
+      case (?ownerId) {
+        if (Principal.equal(ownerId, caller)) {
+          RecordingsLib.filterByChapter(recordings, recordingNames, chapterId).filter(func(r : { id : Nat; voice : Text; createdAt : Int; name : ?Text }) : Bool { recordingsTrashed.get(r.id) != null })
+        } else {
+          []
+        }
+      };
+      case null { [] }
+    }
+  };
+
+  public shared ({ caller }) func permanentlyDeleteRecording(id : Nat) : async Bool {
+    switch (recordings.get(id)) {
+      case (?recording) {
+        if (isRecordingOwner(recording, caller)) {
           recordings.remove(id);
+          recordingsTrashed.remove(id);
           true
         } else {
           false
