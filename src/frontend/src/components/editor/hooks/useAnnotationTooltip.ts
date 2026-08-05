@@ -103,10 +103,16 @@ export function useAnnotationTooltip(
         return;
       }
 
-      // Find the exact range of the annotation mark by searching the document
+      // Find the exact range of the annotation mark by searching the document.
+      // Only extend across a CONTIGUOUS run of matching text nodes — stop as
+      // soon as a non-matching node follows a match, so a stray duplicate
+      // annotation id elsewhere in the document can never widen the range.
       let foundFrom: number | null = null;
       let foundTo: number | null = null;
+      let inRun = false;
+      let runDone = false;
       editor.state.doc.descendants((n, p) => {
+        if (runDone) return false;
         if (!n.isText) return true;
         const mark = n.marks.find(
           (m) =>
@@ -116,6 +122,9 @@ export function useAnnotationTooltip(
         if (mark) {
           if (foundFrom === null) foundFrom = p;
           foundTo = p + n.nodeSize;
+          inRun = true;
+        } else if (inRun) {
+          runDone = true;
         }
         return true;
       });

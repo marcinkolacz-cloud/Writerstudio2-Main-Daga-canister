@@ -121,6 +121,12 @@ export function RichTextEditor({
 
       // Validate the range is valid
       if (from < 0 || from >= to) return;
+      if (!proposal?.trim()) {
+        window.alert(
+          "Ta propozycja jest pusta (AI jej nie wygenerowało) — nie da się jej wstawić. Spróbuj ponownej analizy tego fragmentu.",
+        );
+        return;
+      }
 
       const actualFrom = from;
       const actualTo = to;

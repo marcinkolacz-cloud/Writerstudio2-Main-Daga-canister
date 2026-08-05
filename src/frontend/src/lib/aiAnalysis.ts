@@ -188,7 +188,7 @@ function parsePipeAnnotations(responseText: string): Annotation[] {
     .filter((line) => line.includes("|||"));
 
   const annotations = lines
-    .map((line) => {
+    .map((line, index) => {
       // Remove everything before the first recognized color
       let workingLine = line;
       const colorMatch = workingLine.match(
@@ -203,9 +203,15 @@ function parsePipeAnnotations(responseText: string): Annotation[] {
       }
 
       const parts = workingLine.split("|||");
-      if (parts.length < 3) return null;
+      if (parts.length < 4) return null;
       const [color, text, explanation, proposal] = parts;
-      if (!color?.trim() || !text?.trim() || !explanation?.trim()) return null;
+      if (
+        !color?.trim() ||
+        !text?.trim() ||
+        !explanation?.trim() ||
+        !proposal?.trim()
+      )
+        return null;
       const colorLower = color.trim().toLowerCase();
       if (!validColors.has(colorLower)) return null;
       const rawProposal = (proposal || "").trim();
@@ -215,7 +221,7 @@ function parsePipeAnnotations(responseText: string): Annotation[] {
         proposalParts.length > 1 ? proposalParts[1].trim() : undefined;
 
       return {
-        id: 0n,
+        id: 1_000_000_000n + BigInt(index),
         color: color.trim().toLowerCase() as Annotation["color"],
         text: text.trim(),
         explanation: explanation.trim(),
@@ -250,9 +256,10 @@ function validateAnnotations(annotations: Annotation[]): Annotation[] {
       if (
         typeof text !== "string" ||
         typeof explanation !== "string" ||
-        typeof proposal !== "string"
+        typeof proposal !== "string" ||
+        !proposal.trim()
       ) {
-        console.warn(`Element ${idx} ma nieprawidłowy typ pól — pominięto`);
+        console.warn(`Element ${idx} ma nieprawidłowy typ pól lub pustą propozycję — pominięto`);
         return null;
       }
       const colorStr = String(color).toLowerCase();
@@ -263,7 +270,7 @@ function validateAnnotations(annotations: Annotation[]): Annotation[] {
         return null;
       }
       return {
-        id: 0n,
+        id: 1_000_000_000n + BigInt(idx),
         text,
         color: colorStr as Annotation["color"],
         explanation,
