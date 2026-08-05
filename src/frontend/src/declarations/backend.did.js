@@ -288,7 +288,11 @@ export const idlFactory = ({ IDL }) => {
     'adminImportComment' : IDL.Func([Comment], [], []),
     'adminImportDailyWritingStat' : IDL.Func([DailyWritingStat], [], []),
     'adminImportHourlyActivityStat' : IDL.Func([HourlyActivityStat], [], []),
-    'adminReassignAllBooksOwner' : IDL.Func([IDL.Principal], [IDL.Nat], []),
+    'adminReassignBooksOwner' : IDL.Func(
+        [IDL.Vec(IDL.Nat), IDL.Principal],
+        [IDL.Nat],
+        [],
+      ),
     'checkAccess' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'clearChat' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
     'createArchive' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),

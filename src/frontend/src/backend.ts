@@ -261,6 +261,26 @@ export interface backendInterface {
         name?: string;
         createdAt: bigint;
     }>>;
+    listTrashedAnalysesByBook(bookId: bigint): Promise<Array<Analysis>>;
+    listTrashedBooks(): Promise<Array<Book>>;
+    listTrashedChaptersByBook(bookId: bigint): Promise<Array<Chapter>>;
+    listTrashedCommentsByChapter(chapterId: bigint): Promise<Array<Comment>>;
+    listTrashedRecordingsByChapter(chapterId: bigint): Promise<Array<{
+        id: bigint;
+        voice: string;
+        name?: string;
+        createdAt: bigint;
+    }>>;
+    permanentlyDeleteAnalysis(id: bigint): Promise<boolean>;
+    permanentlyDeleteBook(id: bigint): Promise<boolean>;
+    permanentlyDeleteChapter(id: bigint): Promise<boolean>;
+    permanentlyDeleteComment(id: bigint): Promise<boolean>;
+    permanentlyDeleteRecording(id: bigint): Promise<boolean>;
+    restoreAnalysis(id: bigint): Promise<boolean>;
+    restoreBook(id: bigint): Promise<boolean>;
+    restoreChapter(id: bigint): Promise<boolean>;
+    restoreComment(id: bigint): Promise<boolean>;
+    restoreRecording(id: bigint): Promise<boolean>;
     recordHourlyActivity(hour: bigint, wordsAdded: bigint): Promise<void>;
     recordWritingActivity(bookId: bigint, date: string, wordsAdded: bigint, wordsRemoved: bigint, activeMinutes: bigint): Promise<void>;
     renameArchive(id: bigint, newTitle: string): Promise<boolean>;
@@ -1274,6 +1294,221 @@ export class Backend implements backendInterface {
         } else {
             const result = await this.actor.listRecordingsByChapter(arg0);
             return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async listTrashedAnalysesByBook(arg0: bigint): Promise<Array<Analysis>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listTrashedAnalysesByBook(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listTrashedAnalysesByBook(arg0);
+            return result;
+        }
+    }
+    async listTrashedBooks(): Promise<Array<Book>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listTrashedBooks();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listTrashedBooks();
+            return result;
+        }
+    }
+    async listTrashedChaptersByBook(arg0: bigint): Promise<Array<Chapter>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listTrashedChaptersByBook(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listTrashedChaptersByBook(arg0);
+            return result;
+        }
+    }
+    async listTrashedCommentsByChapter(arg0: bigint): Promise<Array<Comment>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listTrashedCommentsByChapter(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listTrashedCommentsByChapter(arg0);
+            return result;
+        }
+    }
+    async listTrashedRecordingsByChapter(arg0: bigint): Promise<Array<{
+        id: bigint;
+        voice: string;
+        name?: string;
+        createdAt: bigint;
+    }>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.listTrashedRecordingsByChapter(arg0);
+                return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.listTrashedRecordingsByChapter(arg0);
+            return from_candid_vec_n27(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async permanentlyDeleteAnalysis(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.permanentlyDeleteAnalysis(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.permanentlyDeleteAnalysis(arg0);
+            return result;
+        }
+    }
+    async permanentlyDeleteBook(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.permanentlyDeleteBook(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.permanentlyDeleteBook(arg0);
+            return result;
+        }
+    }
+    async permanentlyDeleteChapter(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.permanentlyDeleteChapter(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.permanentlyDeleteChapter(arg0);
+            return result;
+        }
+    }
+    async permanentlyDeleteComment(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.permanentlyDeleteComment(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.permanentlyDeleteComment(arg0);
+            return result;
+        }
+    }
+    async permanentlyDeleteRecording(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.permanentlyDeleteRecording(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.permanentlyDeleteRecording(arg0);
+            return result;
+        }
+    }
+    async restoreAnalysis(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.restoreAnalysis(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.restoreAnalysis(arg0);
+            return result;
+        }
+    }
+    async restoreBook(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.restoreBook(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.restoreBook(arg0);
+            return result;
+        }
+    }
+    async restoreChapter(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.restoreChapter(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.restoreChapter(arg0);
+            return result;
+        }
+    }
+    async restoreComment(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.restoreComment(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.restoreComment(arg0);
+            return result;
+        }
+    }
+    async restoreRecording(arg0: bigint): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.restoreRecording(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.restoreRecording(arg0);
+            return result;
         }
     }
     async recordHourlyActivity(arg0: bigint, arg1: bigint): Promise<void> {

@@ -273,7 +273,7 @@ export interface _SERVICE {
     [HourlyActivityStat],
     undefined
   >,
-  'adminReassignAllBooksOwner' : ActorMethod<[Principal], bigint>,
+  'adminReassignBooksOwner' : ActorMethod<[Array<bigint>, Principal], bigint>,
   'checkAccess' : ActorMethod<[string], boolean>,
   'clearChat' : ActorMethod<[bigint, string], boolean>,
   'createArchive' : ActorMethod<[bigint, string, string], bigint>,

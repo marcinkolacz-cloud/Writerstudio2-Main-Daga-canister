@@ -933,6 +933,7 @@ export function useDeleteBook() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["books"] });
+      queryClient.invalidateQueries({ queryKey: ["trashedBooks"] });
     },
   });
 }
@@ -988,6 +989,7 @@ export function useDeleteChapter() {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["chapters", variables.bookId] });
+      queryClient.invalidateQueries({ queryKey: ["trashedChapters", variables.bookId] });
     },
   });
 }
