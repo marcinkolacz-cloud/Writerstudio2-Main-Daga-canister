@@ -18,19 +18,6 @@ export const idlFactory = ({ IDL }) => {
     'analysisId' : IDL.Nat,
     'proposal' : IDL.Text,
   });
-  const Book = IDL.Record({
-    'id' : IDL.Nat,
-    'title' : IDL.Text,
-    'ownerId' : IDL.Principal,
-    'authorSummary' : IDL.Text,
-    'characters' : IDL.Text,
-    'description' : IDL.Text,
-    'updatedAt' : IDL.Int,
-    'themes' : IDL.Text,
-    'keyContext' : IDL.Text,
-    'category' : IDL.Text,
-    'ageCategory' : IDL.Text,
-  });
   const Chapter = IDL.Record({
     'id' : IDL.Nat,
     'charCount' : IDL.Nat,
@@ -45,6 +32,34 @@ export const idlFactory = ({ IDL }) => {
     'updatedAt' : IDL.Int,
     'sessionId' : IDL.Text,
     'orderIndex' : IDL.Nat,
+  });
+  const Book = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'ownerId' : IDL.Principal,
+    'authorSummary' : IDL.Text,
+    'characters' : IDL.Text,
+    'description' : IDL.Text,
+    'updatedAt' : IDL.Int,
+    'themes' : IDL.Text,
+    'keyContext' : IDL.Text,
+    'category' : IDL.Text,
+    'ageCategory' : IDL.Text,
+  });
+  const Comment = IDL.Record({
+    'id' : IDL.Nat,
+    'content' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'chapterId' : IDL.Nat,
+    'anchorText' : IDL.Text,
+  });
+  const BackupSnapshot = IDL.Record({
+    'annotations' : IDL.Vec(TextAnnotation),
+    'chapters' : IDL.Vec(Chapter),
+    'timestamp' : IDL.Int,
+    'books' : IDL.Vec(Book),
+    'comments' : IDL.Vec(Comment),
+    'analyses' : IDL.Vec(Analysis),
   });
   const ChatArchive = IDL.Record({
     'id' : IDL.Nat,
@@ -76,13 +91,6 @@ export const idlFactory = ({ IDL }) => {
     'title' : IDL.Text,
     'createdAt' : IDL.Int,
     'chapterId' : IDL.Nat,
-  });
-  const Comment = IDL.Record({
-    'id' : IDL.Nat,
-    'content' : IDL.Text,
-    'createdAt' : IDL.Int,
-    'chapterId' : IDL.Nat,
-    'anchorText' : IDL.Text,
   });
   const HourlyActivityStat = IDL.Record({
     'id' : IDL.Nat,
@@ -140,6 +148,14 @@ export const idlFactory = ({ IDL }) => {
     'bookCount' : IDL.Nat,
     'exportedAt' : IDL.Int,
   });
+  const BackupSummary = IDL.Record({
+    'bookCount' : IDL.Nat,
+    'timestamp' : IDL.Int,
+    'commentCount' : IDL.Nat,
+    'chapterCount' : IDL.Nat,
+    'annotationCount' : IDL.Nat,
+    'analysisCount' : IDL.Nat,
+  });
   return IDL.Service({
     '__adminPrincipal' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
     '__analyses' : IDL.Func(
@@ -157,6 +173,15 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(IDL.Nat, TextAnnotation))],
         ['query'],
       ),
+    '__backupEnabled' : IDL.Func([], [IDL.Bool], ['query']),
+    '__backupIntervalSeconds' : IDL.Func([], [IDL.Nat], ['query']),
+    '__backupMaxSnapshots' : IDL.Func([], [IDL.Nat], ['query']),
+    '__backupSnapshots' : IDL.Func(
+        [IDL.Opt(IDL.Int), IDL.Opt(IDL.Nat)],
+        [IDL.Vec(IDL.Tuple(IDL.Int, BackupSnapshot))],
+        ['query'],
+      ),
+    '__backupTimerId' : IDL.Func([], [IDL.Nat], ['query']),
     '__books' : IDL.Func(
         [IDL.Opt(IDL.Nat), IDL.Opt(IDL.Nat)],
         [IDL.Vec(IDL.Tuple(IDL.Nat, Book))],
@@ -295,6 +320,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'checkAccess' : IDL.Func([IDL.Text], [IDL.Bool], []),
     'clearChat' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Bool], []),
+    'configureBackupSchedule' : IDL.Func([IDL.Nat, IDL.Bool, IDL.Nat], [], []),
     'createArchive' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
     'createBook' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [IDL.Nat], []),
     'createChapter' : IDL.Func([IDL.Nat, IDL.Text], [IDL.Nat], []),
@@ -302,6 +328,7 @@ export const idlFactory = ({ IDL }) => {
     'createComment' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
     'deleteAnalysis' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteArchive' : IDL.Func([IDL.Nat], [IDL.Bool], []),
+    'deleteBackup' : IDL.Func([IDL.Int], [], []),
     'deleteBook' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteChapter' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteChatSession' : IDL.Func([IDL.Nat], [], []),
@@ -315,6 +342,22 @@ export const idlFactory = ({ IDL }) => {
     'getAnalysis' : IDL.Func([IDL.Nat], [IDL.Opt(Analysis)], []),
     'getAnnotation' : IDL.Func([IDL.Nat], [IDL.Opt(TextAnnotation)], []),
     'getAnnotations' : IDL.Func([IDL.Nat], [IDL.Vec(TextAnnotation)], []),
+    'getBackupConfig' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'enabled' : IDL.Bool,
+            'intervalSeconds' : IDL.Nat,
+            'maxSnapshots' : IDL.Nat,
+          }),
+        ],
+        ['query'],
+      ),
+    'getBackupSnapshot' : IDL.Func(
+        [IDL.Int],
+        [IDL.Opt(BackupSnapshot)],
+        ['query'],
+      ),
     'getBook' : IDL.Func([IDL.Nat], [IDL.Opt(Book)], []),
     'getBookStats' : IDL.Func(
         [IDL.Nat],
@@ -366,6 +409,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'listArchivesByBook' : IDL.Func([IDL.Nat], [IDL.Vec(ChatArchive)], []),
+    'listBackups' : IDL.Func([], [IDL.Vec(BackupSummary)], ['query']),
     'listBooksByOwner' : IDL.Func([], [IDL.Vec(Book)], []),
     'listChaptersByBook' : IDL.Func([IDL.Nat], [IDL.Vec(Chapter)], []),
     'listCommentsByChapter' : IDL.Func([IDL.Nat], [IDL.Vec(Comment)], []),
@@ -476,6 +520,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Nat8)],
         [],
       ),
+    'triggerBackupNow' : IDL.Func([], [], []),
     'ttsTransform' : IDL.Func(
         [
           IDL.Record({

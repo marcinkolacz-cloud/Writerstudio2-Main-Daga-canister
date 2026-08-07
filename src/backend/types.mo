@@ -141,6 +141,24 @@ module {
     wordsAdded : Nat;
   };
 
+  public type BackupSnapshot = {
+    timestamp : Int;
+    books : [Book];
+    chapters : [Chapter];
+    analyses : [Analysis];
+    annotations : [TextAnnotation];
+    comments : [Comment];
+  };
+
+  public type BackupSummary = {
+    timestamp : Int;
+    bookCount : Nat;
+    chapterCount : Nat;
+    analysisCount : Nat;
+    annotationCount : Nat;
+    commentCount : Nat;
+  };
+
   public type ExportMetadata = {
     exportedAt : Int;
     owner : Principal;

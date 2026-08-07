@@ -1241,6 +1241,165 @@ export function useSetAdminPrincipal() {
   });
 }
 
+export function useBackupConfig() {
+  const { actor } = useActorLocal(createActor);
+  return useQuery({
+    queryKey: ["backupConfig"],
+    queryFn: async () => {
+      if (!actor) return null;
+      return actor.getBackupConfig();
+    },
+    enabled: !!actor,
+  });
+}
+
+export function useListBackups() {
+  const { actor } = useActorLocal(createActor);
+  return useQuery({
+    queryKey: ["backups"],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.listBackups();
+    },
+    enabled: !!actor,
+  });
+}
+
+export function useConfigureBackupSchedule() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      intervalSeconds,
+      enabled,
+      maxSnapshots,
+    }: {
+      intervalSeconds: bigint;
+      enabled: boolean;
+      maxSnapshots: bigint;
+    }) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.configureBackupSchedule(intervalSeconds, enabled, maxSnapshots);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["backupConfig"] });
+    },
+  });
+}
+
+export function useTriggerBackupNow() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.triggerBackupNow();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["backups"] });
+    },
+  });
+}
+
+export function useDeleteBackup() {
+  const { actor } = useActorLocal(createActor);
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (timestamp: bigint) => {
+      if (!actor) throw new Error("Actor not available");
+      return actor.deleteBackup(timestamp);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["backups"] });
+    },
+  });
+}
+
+export function useDownloadBackup() {
+  const { actor } = useActorLocal(createActor);
+  return useMutation({
+    mutationFn: async (timestamp: bigint) => {
+      if (!actor) throw new Error("Actor not available");
+      const snapshot = await actor.getBackupSnapshot(timestamp);
+      if (!snapshot) throw new Error("Kopia nie znaleziona");
+
+      // Reshape the flat on-chain snapshot into the same
+      // { metadata, books: [{ book, chapters, analyses, ... }] } shape the
+      // existing import feature (importLogic.ts / ImportBackupSection)
+      // already understands, so this file can be restored through the
+      // normal "Importuj kopię" UI without a separate restore path.
+      type Entry = {
+        book: (typeof snapshot.books)[number];
+        chapters: typeof snapshot.chapters;
+        analyses: typeof snapshot.analyses;
+        annotations: typeof snapshot.annotations;
+        comments: typeof snapshot.comments;
+        chatMessages: never[];
+        chatArchives: never[];
+        chatSessions: never[];
+        chatSessionMessages: never[];
+      };
+      const byBook = new Map<string, Entry>();
+      for (const book of snapshot.books) {
+        byBook.set(book.id.toString(), {
+          book,
+          chapters: [],
+          analyses: [],
+          annotations: [],
+          comments: [],
+          chatMessages: [],
+          chatArchives: [],
+          chatSessions: [],
+          chatSessionMessages: [],
+        });
+      }
+      for (const ch of snapshot.chapters) {
+        byBook.get(ch.bookId.toString())?.chapters.push(ch);
+      }
+      for (const an of snapshot.analyses) {
+        byBook.get(an.bookId.toString())?.analyses.push(an);
+      }
+      const analysisBookId = new Map(
+        snapshot.analyses.map((a) => [a.id.toString(), a.bookId.toString()]),
+      );
+      for (const ann of snapshot.annotations) {
+        const bookId = analysisBookId.get(ann.analysisId.toString());
+        if (bookId) byBook.get(bookId)?.annotations.push(ann);
+      }
+      const chapterBookId = new Map(
+        snapshot.chapters.map((c) => [c.id.toString(), c.bookId.toString()]),
+      );
+      for (const cm of snapshot.comments) {
+        const bookId = chapterBookId.get(cm.chapterId.toString());
+        if (bookId) byBook.get(bookId)?.comments.push(cm);
+      }
+
+      const backupFile = {
+        metadata: {
+          exportedAt: snapshot.timestamp,
+          source: "WriterStudio — automatyczna kopia zapasowa",
+        },
+        books: Array.from(byBook.values()),
+      };
+
+      const json = JSON.stringify(
+        backupFile,
+        (_key, value) => (typeof value === "bigint" ? value.toString() : value),
+        2,
+      );
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `writerstudio-backup-${timestamp.toString()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+  });
+}
+
 export function useIsAdmin() {
   const { actor } = useActorLocal(createActor);
   return useQuery<boolean>({

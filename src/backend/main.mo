@@ -1,7 +1,10 @@
 import MixinViews "mo:caffeineai-data-viewer/MixinViews";
 import Types "types";
 import Map "mo:core/Map";
+import List "mo:core/List";
 import Iter "mo:core/Iter";
+import Nat "mo:core/Nat";
+import Int "mo:core/Int";
 import Principal "mo:core/Principal";
 import BooksApi "mixins/BooksApi";
 import ChaptersApi "mixins/ChaptersApi";
@@ -19,6 +22,8 @@ import InvitesApi "mixins/InvitesApi";
 import TtsApi "mixins/TtsApi";
 import ExportApi "mixins/ExportApi";
 import Runtime "mo:core/Runtime";
+import Timer "mo:base/Timer";
+import Time "mo:core/Time";
 
 actor {
   let books : Map.Map<Nat, Types.Book>;
@@ -42,6 +47,7 @@ actor {
   let analysesTrashed : Map.Map<Nat, Int>;
   let commentsTrashed : Map.Map<Nat, Int>;
   let recordingsTrashed : Map.Map<Nat, Int>;
+  let backupSnapshots : Map.Map<Int, Types.BackupSnapshot>;
 
   var nextBookId : Nat;
   var nextChapterId : Nat;
@@ -53,6 +59,10 @@ actor {
   var nextChatSessionMessageId : Nat;
   var nextCommentId : Nat;
   var nextRecordingId : Nat;
+  var backupEnabled : Bool;
+  var backupIntervalSeconds : Nat;
+  var backupMaxSnapshots : Nat;
+  var backupTimerId : Nat;
 
   include MixinViews();
   include BooksApi(books, chapters, inviteCodes, booksTrashed, chaptersTrashed);
@@ -235,5 +245,119 @@ actor {
       Runtime.trap("Only admin can revoke invite codes");
     };
     _revokeInviteCode(code)
+  };
+  // ===== Scheduled on-chain backup =====
+  // Deliberately excludes Recording (audioData blobs would multiply
+  // stable-memory usage on every scheduled run) — books, chapters,
+  // analyses, annotations and comments only.
+
+  func _performBackup() : async () {
+    let snapshot : Types.BackupSnapshot = {
+      timestamp = Time.now();
+      books = Iter.toArray(books.values());
+      chapters = Iter.toArray(chapters.values());
+      analyses = Iter.toArray(analyses.values());
+      annotations = Iter.toArray(annotations.values());
+      comments = Iter.toArray(comments.values());
+    };
+    backupSnapshots.add(snapshot.timestamp, snapshot);
+
+    // Prune down to backupMaxSnapshots by repeatedly removing the oldest.
+    while (backupSnapshots.size() > backupMaxSnapshots) {
+      var oldest : ?Int = null;
+      for (ts in backupSnapshots.keys()) {
+        switch (oldest) {
+          case null { oldest := ?ts };
+          case (?o) { if (ts < o) { oldest := ?ts } };
+        };
+      };
+      switch (oldest) {
+        case (?ts) { backupSnapshots.remove(ts) };
+        case null {};
+      };
+    };
+  };
+
+  func _rescheduleBackupTimer<system>() : () {
+    if (backupTimerId != 0) {
+      Timer.cancelTimer(backupTimerId);
+      backupTimerId := 0;
+    };
+    if (backupEnabled and backupIntervalSeconds > 0) {
+      backupTimerId := Timer.recurringTimer<system>(
+        #seconds backupIntervalSeconds,
+        func() : async () { await _performBackup() },
+      );
+    };
+  };
+
+  // intervalSeconds: e.g. 86400 = codziennie, 604800 = co tydzień.
+  // maxSnapshots: ile ostatnich kopii trzymać (starsze auto-usuwane).
+  public shared ({ caller }) func configureBackupSchedule(
+    intervalSeconds : Nat,
+    enabled : Bool,
+    maxSnapshots : Nat,
+  ) : async () {
+    if (not _callerIsAdmin(caller)) {
+      Runtime.trap("Only admin can configure backups");
+    };
+    backupIntervalSeconds := intervalSeconds;
+    backupEnabled := enabled;
+    backupMaxSnapshots := (if (maxSnapshots > 0) maxSnapshots else 10);
+    _rescheduleBackupTimer<system>();
+  };
+
+  public shared ({ caller }) func triggerBackupNow() : async () {
+    if (not _callerIsAdmin(caller)) {
+      Runtime.trap("Only admin can trigger a backup");
+    };
+    await _performBackup();
+  };
+
+  public query ({ caller }) func listBackups() : async [Types.BackupSummary] {
+    if (not _callerIsAdmin(caller)) {
+      Runtime.trap("Only admin can list backups");
+    };
+    var result : List.List<Types.BackupSummary> = List.empty();
+    for ((_, s) in backupSnapshots.entries()) {
+      result.add({
+        timestamp = s.timestamp;
+        bookCount = s.books.size();
+        chapterCount = s.chapters.size();
+        analysisCount = s.analyses.size();
+        annotationCount = s.annotations.size();
+        commentCount = s.comments.size();
+      });
+    };
+    result.toArray();
+  };
+
+  public query ({ caller }) func getBackupSnapshot(timestamp : Int) : async ?Types.BackupSnapshot {
+    if (not _callerIsAdmin(caller)) {
+      Runtime.trap("Only admin can read backups");
+    };
+    backupSnapshots.get(timestamp);
+  };
+
+  public shared ({ caller }) func deleteBackup(timestamp : Int) : async () {
+    if (not _callerIsAdmin(caller)) {
+      Runtime.trap("Only admin can delete backups");
+    };
+    backupSnapshots.remove(timestamp);
+  };
+
+  public query ({ caller }) func getBackupConfig() : async {
+    enabled : Bool;
+    intervalSeconds : Nat;
+    maxSnapshots : Nat;
+  } {
+    if (not _callerIsAdmin(caller)) {
+      Runtime.trap("Only admin can read backup config");
+    };
+    {
+      enabled = backupEnabled;
+      intervalSeconds = backupIntervalSeconds;
+      maxSnapshots = backupMaxSnapshots;
+    };
   };
 };

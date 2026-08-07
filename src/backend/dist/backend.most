@@ -19,6 +19,15 @@ type Analysis__819022578 =
     provider : Text;
     resultContent : Text
   };
+type BackupSnapshot__1060984976 =
+  {
+    analyses : [Analysis__50785574];
+    annotations : [TextAnnotation__564580974];
+    books : [Book__668250280];
+    chapters : [Chapter__479822198];
+    comments : [Comment__940949541];
+    timestamp : Int
+  };
 type Book__668250280 =
   {
     ageCategory : Text;
@@ -156,6 +165,47 @@ type NewActor__1000285290 =
     chapters : Map__246123559<Nat, Chapter__753794875>;
     nextBookId : Nat;
     nextChapterId : Nat
+  };
+type NewActor__1020417639 =
+  {
+    adminPrincipal : ?Principal;
+    analyses : Map__246123559<Nat, NewAnalysis__568092761>;
+    analysesTrashed : Map__246123559<Nat, Int>;
+    annotations : Map__246123559<Nat, NewTextAnnotation__185011814>;
+    backupEnabled : Bool;
+    backupIntervalSeconds : Nat;
+    backupMaxSnapshots : Nat;
+    backupSnapshots : Map__246123559<Int, NewBackupSnapshot__335072829>;
+    backupTimerId : Nat;
+    books : Map__246123559<Nat, NewBook__400715289>;
+    booksTrashed : Map__246123559<Nat, Int>;
+    chapters : Map__246123559<Nat, NewChapter__1057960710>;
+    chaptersTrashed : Map__246123559<Nat, Int>;
+    chatArchives : Map__246123559<Nat, NewChatArchive__282637414>;
+    chatMessages : Map__246123559<Nat, NewChatMessage__601794756>;
+    chatSessionMessages :
+      Map__246123559<Nat, NewChatSessionMessage__684405945>;
+    chatSessions : Map__246123559<Nat, NewChatSession__951892748>;
+    comments : Map__246123559<Nat, NewComment__109527365>;
+    commentsTrashed : Map__246123559<Nat, Int>;
+    hourlyStats : Map__246123559<Text, NewHourlyActivityStat__796123848>;
+    inviteCodes : Map__246123559<Text, NewInviteCode__685556992>;
+    nextAnalysisId : Nat;
+    nextAnnotationId : Nat;
+    nextBookId : Nat;
+    nextChapterId : Nat;
+    nextChatArchiveId : Nat;
+    nextChatMessageId : Nat;
+    nextChatSessionId : Nat;
+    nextChatSessionMessageId : Nat;
+    nextCommentId : Nat;
+    nextRecordingId : Nat;
+    pendingUploads : Map__246123559<Nat, NewPendingUpload__877200039>;
+    recordingNames : Map__246123559<Nat, Text>;
+    recordings : Map__246123559<Nat, NewRecording__113983879>;
+    recordingsTrashed : Map__246123559<Nat, Int>;
+    uploadChunks : Map__246123559<Text, [Nat8]>;
+    writingStats : Map__246123559<Text, NewDailyWritingStat__684916992>
   };
 type NewActor__1025786769 =
   {
@@ -712,6 +762,7 @@ type NewAnalysis__435575462 = OldAnalysis__278087299;
 type NewAnalysis__441571328 = OldAnalysis__517331570;
 type NewAnalysis__494122526 = OldAnalysis__52662189;
 type NewAnalysis__533350048 = OldAnalysis__573399780;
+type NewAnalysis__568092761 = OldAnalysis__437541707;
 type NewAnalysis__648516776 = OldAnalysis__79071886;
 type NewAnalysis__692223606 =
   {
@@ -743,6 +794,15 @@ type NewAnalysis__970953091 =
     id : Nat;
     provider : Text;
     resultContent : Text
+  };
+type NewBackupSnapshot__335072829 =
+  {
+    analyses : [NewAnalysis__568092761];
+    annotations : [NewTextAnnotation__185011814];
+    books : [NewBook__400715289];
+    chapters : [NewChapter__1057960710];
+    comments : [NewComment__109527365];
+    timestamp : Int
   };
 type NewBook__1011028876 =
   {
@@ -812,6 +872,7 @@ type NewBook__374036952 =
     title : Text;
     updatedAt : Int
   };
+type NewBook__400715289 = OldBook__228893210;
 type NewBook__519770441 = OldBook__640839227;
 type NewBook__593158192 = OldBook__126108061;
 type NewBook__604794191 = OldBook__147729144;
@@ -898,6 +959,7 @@ type NewChapter__103669124 =
     updatedAt : Int;
     wordCount : Nat
   };
+type NewChapter__1057960710 = OldChapter__982202223;
 type NewChapter__1071952868 = OldChapter__871803883;
 type NewChapter__107536507 =
   {
@@ -1069,6 +1131,7 @@ type NewChatArchive__255589726 =
     title : Text;
     updatedAt : Int
   };
+type NewChatArchive__282637414 = OldChatArchive__40059601;
 type NewChatArchive__413591010 = OldChatArchive__753218377;
 type NewChatArchive__81164361 = OldChatArchive__2783534;
 type NewChatArchive__96248221 = OldChatArchive__659203716;
@@ -1097,6 +1160,7 @@ type NewChatMessage__575043926 =
     provider : Text;
     role : Text
   };
+type NewChatMessage__601794756 = OldChatMessage__589441591;
 type NewChatMessage__685317328 = OldChatMessage__508342279;
 type NewChatMessage__699172688 = OldChatMessage__594523663;
 type NewChatMessage__736561087 = OldChatMessage__429145603;
@@ -1164,6 +1228,7 @@ type NewChatSessionMessage__321270861 = OldChatSessionMessage__834843915;
 type NewChatSessionMessage__586687511 = OldChatSessionMessage__276521920;
 type NewChatSessionMessage__593816263 = OldChatSessionMessage__860276441;
 type NewChatSessionMessage__619254744 = OldChatSessionMessage__113542949;
+type NewChatSessionMessage__684405945 = OldChatSessionMessage__3823431;
 type NewChatSessionMessage__817093815 = OldChatSessionMessage__586180864;
 type NewChatSessionMessage__904035847 = OldChatSessionMessage__1029818666;
 type NewChatSession__112864048 = OldChatSession__1033054159;
@@ -1177,6 +1242,8 @@ type NewChatSession__749736846 = OldChatSession__996925813;
 type NewChatSession__77907904 = OldChatSession__712983985;
 type NewChatSession__830314518 = OldChatSession__158090388;
 type NewChatSession__912510581 = OldChatSession__679430570;
+type NewChatSession__951892748 = OldChatSession__597548259;
+type NewComment__109527365 = OldComment__972723119;
 type NewComment__207891628 = OldComment__404533396;
 type NewComment__249136658 = OldComment__64623632;
 type NewComment__259698092 = OldComment__298667855;
@@ -1241,6 +1308,7 @@ type NewDailyWritingStat__235056183 = OldDailyWritingStat__385420605;
 type NewDailyWritingStat__419809126 = OldDailyWritingStat__411787970;
 type NewDailyWritingStat__640886177 = OldDailyWritingStat__436843535;
 type NewDailyWritingStat__674212441 = OldDailyWritingStat__946042435;
+type NewDailyWritingStat__684916992 = OldDailyWritingStat__425286923;
 type NewDailyWritingStat__745555993 =
   {
     activeMinutes : Nat;
@@ -1258,6 +1326,7 @@ type NewHourlyActivityStat__502760434 = OldHourlyActivityStat__939943972;
 type NewHourlyActivityStat__555080756 =
   {hour : Nat; id : Nat; ownerId : Principal; wordsAdded : Nat};
 type NewHourlyActivityStat__627371201 = OldHourlyActivityStat__262231948;
+type NewHourlyActivityStat__796123848 = OldHourlyActivityStat__53626946;
 type NewHourlyActivityStat__919321294 = OldHourlyActivityStat__535804354;
 type NewInviteCode__1017770922 =
   {code : Text; createdAt : Int; usedAt : ?Int; usedBy : ?Principal};
@@ -1270,6 +1339,7 @@ type NewInviteCode__543525224 = OldInviteCode__862456692;
 type NewInviteCode__63741951 = OldInviteCode__180158439;
 type NewInviteCode__637468931 = OldInviteCode__1040522366;
 type NewInviteCode__657672959 = OldInviteCode__481476134;
+type NewInviteCode__685556992 = OldInviteCode__735370964;
 type NewInviteCode__932944925 = OldInviteCode__639961898;
 type NewPendingUpload__1012959346 =
   {
@@ -1283,7 +1353,9 @@ type NewPendingUpload__1012959346 =
   };
 type NewPendingUpload__327363230 = OldPendingUpload__1021549674;
 type NewPendingUpload__342395490 = OldPendingUpload__766058323;
+type NewPendingUpload__877200039 = OldPendingUpload__646723799;
 type NewRecording__1034004656 = OldRecording__615519264;
+type NewRecording__113983879 = OldRecording__785291452;
 type NewRecording__156900150 = OldRecording__724202264;
 type NewRecording__2334776 =
   {
@@ -1361,6 +1433,7 @@ type NewTextAnnotation__184374095 =
     proposal : Text;
     text : Text
   };
+type NewTextAnnotation__185011814 = OldTextAnnotation__872222257;
 type NewTextAnnotation__197356883 =
   {
     analysisId : Nat;
@@ -1693,6 +1766,41 @@ type OldActor__597324399 =
     uploadChunks : Map__246123559<Text, [Nat8]>;
     writingStats : Map__246123559<Text, OldDailyWritingStat__436843535>
   };
+type OldActor__61107913 =
+  {
+    adminPrincipal : ?Principal;
+    analyses : Map__246123559<Nat, OldAnalysis__437541707>;
+    analysesTrashed : Map__246123559<Nat, Int>;
+    annotations : Map__246123559<Nat, OldTextAnnotation__872222257>;
+    books : Map__246123559<Nat, OldBook__228893210>;
+    booksTrashed : Map__246123559<Nat, Int>;
+    chapters : Map__246123559<Nat, OldChapter__982202223>;
+    chaptersTrashed : Map__246123559<Nat, Int>;
+    chatArchives : Map__246123559<Nat, OldChatArchive__40059601>;
+    chatMessages : Map__246123559<Nat, OldChatMessage__589441591>;
+    chatSessionMessages : Map__246123559<Nat, OldChatSessionMessage__3823431>;
+    chatSessions : Map__246123559<Nat, OldChatSession__597548259>;
+    comments : Map__246123559<Nat, OldComment__972723119>;
+    commentsTrashed : Map__246123559<Nat, Int>;
+    hourlyStats : Map__246123559<Text, OldHourlyActivityStat__53626946>;
+    inviteCodes : Map__246123559<Text, OldInviteCode__735370964>;
+    nextAnalysisId : Nat;
+    nextAnnotationId : Nat;
+    nextBookId : Nat;
+    nextChapterId : Nat;
+    nextChatArchiveId : Nat;
+    nextChatMessageId : Nat;
+    nextChatSessionId : Nat;
+    nextChatSessionMessageId : Nat;
+    nextCommentId : Nat;
+    nextRecordingId : Nat;
+    pendingUploads : Map__246123559<Nat, OldPendingUpload__646723799>;
+    recordingNames : Map__246123559<Nat, Text>;
+    recordings : Map__246123559<Nat, OldRecording__785291452>;
+    recordingsTrashed : Map__246123559<Nat, Int>;
+    uploadChunks : Map__246123559<Text, [Nat8]>;
+    writingStats : Map__246123559<Text, OldDailyWritingStat__425286923>
+  };
 type OldActor__663269474 =
   {
     analyses : Map__246123559<Nat, OldAnalysis__775884614>;
@@ -1978,6 +2086,16 @@ type OldAnalysis__417869937 =
     provider : Text;
     resultContent : Text
   };
+type OldAnalysis__437541707 =
+  {
+    analysisType : Text;
+    bookId : Nat;
+    chapterId : ?Nat;
+    createdAt : Int;
+    id : Nat;
+    provider : Text;
+    resultContent : Text
+  };
 type OldAnalysis__517331570 =
   {
     analysisType : Text;
@@ -2168,6 +2286,20 @@ type OldBook__208327022 =
     description : Text;
     id : Nat;
     ownerId : Principal;
+    title : Text;
+    updatedAt : Int
+  };
+type OldBook__228893210 =
+  {
+    ageCategory : Text;
+    authorSummary : Text;
+    category : Text;
+    characters : Text;
+    description : Text;
+    id : Nat;
+    keyContext : Text;
+    ownerId : Principal;
+    themes : Text;
     title : Text;
     updatedAt : Int
   };
@@ -2674,7 +2806,33 @@ type OldChapter__95151920 =
     updatedAt : Int;
     wordCount : Nat
   };
+type OldChapter__982202223 =
+  {
+    bookId : Nat;
+    charCount : Nat;
+    content : Text;
+    createdAt : Int;
+    id : Nat;
+    indentFirstLine : Nat;
+    indentLeft : Nat;
+    indentRight : Nat;
+    orderIndex : Nat;
+    sessionId : Text;
+    title : Text;
+    updatedAt : Int;
+    wordCount : Nat
+  };
 type OldChatArchive__2783534 =
+  {
+    bookId : Nat;
+    createdAt : Int;
+    id : Nat;
+    sessionId : Text;
+    summary : Text;
+    title : Text;
+    updatedAt : Int
+  };
+type OldChatArchive__40059601 =
   {
     bookId : Nat;
     createdAt : Int;
@@ -2817,6 +2975,16 @@ type OldChatMessage__508342279 =
     role : Text;
     sessionId : Text
   };
+type OldChatMessage__589441591 =
+  {
+    bookId : Nat;
+    content : Text;
+    createdAt : Int;
+    id : Nat;
+    provider : Text;
+    role : Text;
+    sessionId : Text
+  };
 type OldChatMessage__594523663 =
   {
     bookId : Nat;
@@ -2880,6 +3048,8 @@ type OldChatSessionMessage__276521920 =
   {content : Text; createdAt : Int; id : Nat; role : Text; sessionId : Nat};
 type OldChatSessionMessage__34089623 =
   {content : Text; createdAt : Int; id : Nat; role : Text; sessionId : Nat};
+type OldChatSessionMessage__3823431 =
+  {content : Text; createdAt : Int; id : Nat; role : Text; sessionId : Nat};
 type OldChatSessionMessage__464525544 =
   {content : Text; createdAt : Int; id : Nat; role : Text; sessionId : Nat};
 type OldChatSessionMessage__511359159 =
@@ -2905,6 +3075,8 @@ type OldChatSession__355932908 =
 type OldChatSession__475079388 =
   {chapterId : Nat; createdAt : Int; id : Nat; title : Text};
 type OldChatSession__591159409 =
+  {chapterId : Nat; createdAt : Int; id : Nat; title : Text};
+type OldChatSession__597548259 =
   {chapterId : Nat; createdAt : Int; id : Nat; title : Text};
 type OldChatSession__679430570 =
   {chapterId : Nat; createdAt : Int; id : Nat; title : Text};
@@ -3052,6 +3224,14 @@ type OldComment__844527035 =
     createdAt : Int;
     id : Nat
   };
+type OldComment__972723119 =
+  {
+    anchorText : Text;
+    chapterId : Nat;
+    content : Text;
+    createdAt : Int;
+    id : Nat
+  };
 type OldDailyWritingStat__385420605 =
   {
     activeMinutes : Nat;
@@ -3065,6 +3245,18 @@ type OldDailyWritingStat__385420605 =
     wordsRemoved : Nat
   };
 type OldDailyWritingStat__411787970 =
+  {
+    activeMinutes : Nat;
+    bookId : Nat;
+    date : Text;
+    id : Nat;
+    netWords : Int;
+    ownerId : Principal;
+    sessionCount : Nat;
+    wordsAdded : Nat;
+    wordsRemoved : Nat
+  };
+type OldDailyWritingStat__425286923 =
   {
     activeMinutes : Nat;
     bookId : Nat;
@@ -3116,6 +3308,8 @@ type OldHourlyActivityStat__262231948 =
   {hour : Nat; id : Nat; ownerId : Principal; wordsAdded : Nat};
 type OldHourlyActivityStat__535804354 =
   {hour : Nat; id : Nat; ownerId : Principal; wordsAdded : Nat};
+type OldHourlyActivityStat__53626946 =
+  {hour : Nat; id : Nat; ownerId : Principal; wordsAdded : Nat};
 type OldHourlyActivityStat__939943972 =
   {hour : Nat; id : Nat; ownerId : Principal; wordsAdded : Nat};
 type OldHourlyActivityStat__939950279 =
@@ -3148,9 +3342,21 @@ type OldInviteCode__692118268 =
   {code : Text; createdAt : Int; usedAt : ?Int; usedBy : ?Principal};
 type OldInviteCode__733946084 =
   {code : Text; createdAt : Int; usedAt : ?Int; usedBy : ?Principal};
+type OldInviteCode__735370964 =
+  {code : Text; createdAt : Int; usedAt : ?Int; usedBy : ?Principal};
 type OldInviteCode__862456692 =
   {code : Text; createdAt : Int; usedAt : ?Int; usedBy : ?Principal};
 type OldPendingUpload__1021549674 =
+  {
+    bookId : Nat;
+    chapterId : Nat;
+    createdAt : Int;
+    id : Nat;
+    receivedChunks : Nat;
+    totalChunks : Nat;
+    voice : Text
+  };
+type OldPendingUpload__646723799 =
   {
     bookId : Nat;
     chapterId : Nat;
@@ -3279,6 +3485,15 @@ type OldRecording__704523299 =
     voice : Text
   };
 type OldRecording__724202264 =
+  {
+    audioData : [Nat8];
+    bookId : Nat;
+    chapterId : Nat;
+    createdAt : Int;
+    id : Nat;
+    voice : Text
+  };
+type OldRecording__785291452 =
   {
     audioData : [Nat8];
     bookId : Nat;
@@ -3470,6 +3685,17 @@ type OldTextAnnotation__815453198 =
     proposal : Text;
     text : Text
   };
+type OldTextAnnotation__872222257 =
+  {
+    alternativeProposal : ?Text;
+    analysisId : Nat;
+    approved : Bool;
+    color : Text;
+    explanation : Text;
+    id : Nat;
+    proposal : Text;
+    text : Text
+  };
 type OldTextAnnotation__878777187 =
   {
     alternativeProposal : ?Text;
@@ -3601,7 +3827,9 @@ type TextAnnotation__849925922 =
   "20260711_000000" : (old : OldActor__271346904) -> NewActor__18621474;
   "20260711_120000" : (old : OldActor__597324399) -> NewActor__485919909;
   "20260803_000000_AddTrashMaps" :
-    (old : OldActor__681193633) -> NewActor__310575132
+    (old : OldActor__681193633) -> NewActor__310575132;
+  "20260806_000000_AddBackupState" :
+    (old : OldActor__61107913) -> NewActor__1020417639
 }
 actor  {
   stable var adminPrincipal : ?Principal;
@@ -3617,6 +3845,15 @@ actor  {
       var root : Node__279997185<Nat, TextAnnotation__564580974>;
       var size : Nat__93962160
     };
+  stable var backupEnabled : Bool;
+  stable var backupIntervalSeconds : Nat;
+  stable var backupMaxSnapshots : Nat;
+  stable backupSnapshots :
+    {
+      var root : Node__279997185<Int, BackupSnapshot__1060984976>;
+      var size : Nat__93962160
+    };
+  stable var backupTimerId : Nat;
   stable books :
     {
       var root : Node__279997185<Nat, Book__668250280>;
