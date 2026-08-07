@@ -145,15 +145,6 @@ type Book =
    title: text;
    updatedAt: int;
  };
-type BackupSummary = 
- record {
-   analysisCount: nat;
-   annotationCount: nat;
-   bookCount: nat;
-   chapterCount: nat;
-   commentCount: nat;
-   timestamp: int;
- };
 type BackupSnapshot = 
  record {
    analyses: vec Analysis;
@@ -327,8 +318,6 @@ service : {
   adminReassignBooksOwner: (bookIds: vec nat, newOwner: principal) -> (nat);
   checkAccess: (code: text) -> (bool);
   clearChat: (bookId: nat, sessionId: text) -> (bool);
-  configureBackupSchedule: (intervalSeconds: nat, enabled: bool,
-   maxSnapshots: nat) -> ();
   createArchive: (bookId: nat, sessionId: text, title: text) -> (nat);
   createBook: (title: text, description: text, category: text) -> (nat);
   createChapter: (bookId: nat, title: text) -> (nat);
@@ -336,7 +325,6 @@ service : {
   createComment: (chapterId: nat, anchorText: text, content: text) -> (nat);
   deleteAnalysis: (id: nat) -> (bool);
   deleteArchive: (id: nat) -> (bool);
-  deleteBackup: (timestamp: int) -> ();
   deleteBook: (id: nat) -> (bool);
   deleteChapter: (id: nat) -> (bool);
   deleteChatSession: (sessionId: nat) -> ();
@@ -350,13 +338,6 @@ service : {
   getAnalysis: (id: nat) -> (opt Analysis);
   getAnnotation: (id: nat) -> (opt TextAnnotation);
   getAnnotations: (analysisId: nat) -> (vec TextAnnotation);
-  getBackupConfig: () ->
-   (record {
-      enabled: bool;
-      intervalSeconds: nat;
-      maxSnapshots: nat;
-    }) query;
-  getBackupSnapshot: (timestamp: int) -> (opt BackupSnapshot) query;
   getBook: (id: nat) -> (opt Book);
   getBookStats: (bookId: nat) ->
    (record {
@@ -383,7 +364,6 @@ service : {
   listAnalysesByChapter: (chapterId: nat) -> (vec Analysis);
   listAnnotationsByAnalysis: (analysisId: nat) -> (vec TextAnnotation);
   listArchivesByBook: (bookId: nat) -> (vec ChatArchive);
-  listBackups: () -> (vec BackupSummary) query;
   listBooksByOwner: () -> (vec Book);
   listChaptersByBook: (bookId: nat) -> (vec Chapter);
   listCommentsByChapter: (chapterId: nat) -> (vec Comment);
@@ -446,7 +426,6 @@ service : {
   startRecordingUpload: (chapterId: nat, bookId: nat, voice: text,
    totalChunks: nat) -> (nat);
   synthesizeSpeech: ("text": text, voice: text, apiKey: text) -> (blob);
-  triggerBackupNow: () -> ();
   ttsTransform: (raw:
    record {
      context: blob;

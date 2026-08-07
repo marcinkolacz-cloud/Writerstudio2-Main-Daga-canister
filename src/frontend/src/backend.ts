@@ -67,22 +67,6 @@ export interface Comment {
     chapterId: bigint;
     anchorText: string;
 }
-export interface BackupSnapshot {
-    timestamp: bigint;
-    books: Array<Book>;
-    chapters: Array<Chapter>;
-    analyses: Array<Analysis>;
-    annotations: Array<TextAnnotation>;
-    comments: Array<Comment>;
-}
-export interface BackupSummary {
-    timestamp: bigint;
-    bookCount: bigint;
-    chapterCount: bigint;
-    analysisCount: bigint;
-    annotationCount: bigint;
-    commentCount: bigint;
-}
 export interface Analysis {
     id: bigint;
     provider: string;
@@ -297,12 +281,6 @@ export interface backendInterface {
     restoreChapter(id: bigint): Promise<boolean>;
     restoreComment(id: bigint): Promise<boolean>;
     restoreRecording(id: bigint): Promise<boolean>;
-    configureBackupSchedule(intervalSeconds: bigint, enabled: boolean, maxSnapshots: bigint): Promise<void>;
-    triggerBackupNow(): Promise<void>;
-    listBackups(): Promise<Array<BackupSummary>>;
-    getBackupSnapshot(timestamp: bigint): Promise<BackupSnapshot | undefined>;
-    deleteBackup(timestamp: bigint): Promise<void>;
-    getBackupConfig(): Promise<{ enabled: boolean; intervalSeconds: bigint; maxSnapshots: bigint }>;
     recordHourlyActivity(hour: bigint, wordsAdded: bigint): Promise<void>;
     recordWritingActivity(bookId: bigint, date: string, wordsAdded: bigint, wordsRemoved: bigint, activeMinutes: bigint): Promise<void>;
     renameArchive(id: bigint, newTitle: string): Promise<boolean>;
@@ -1530,84 +1508,6 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.restoreRecording(arg0);
-            return result;
-        }
-    }
-    async configureBackupSchedule(arg0: bigint, arg1: boolean, arg2: bigint): Promise<void> {
-        if (this.processError) {
-            try {
-                await this.actor.configureBackupSchedule(arg0, arg1, arg2);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            await this.actor.configureBackupSchedule(arg0, arg1, arg2);
-        }
-    }
-    async triggerBackupNow(): Promise<void> {
-        if (this.processError) {
-            try {
-                await this.actor.triggerBackupNow();
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            await this.actor.triggerBackupNow();
-        }
-    }
-    async listBackups(): Promise<Array<BackupSummary>> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.listBackups();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.listBackups();
-            return result;
-        }
-    }
-    async getBackupSnapshot(arg0: bigint): Promise<BackupSnapshot | undefined> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getBackupSnapshot(arg0);
-                return result[0];
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getBackupSnapshot(arg0);
-            return result[0];
-        }
-    }
-    async deleteBackup(arg0: bigint): Promise<void> {
-        if (this.processError) {
-            try {
-                await this.actor.deleteBackup(arg0);
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            await this.actor.deleteBackup(arg0);
-        }
-    }
-    async getBackupConfig(): Promise<{ enabled: boolean; intervalSeconds: bigint; maxSnapshots: bigint }> {
-        if (this.processError) {
-            try {
-                const result = await this.actor.getBackupConfig();
-                return result;
-            } catch (e) {
-                this.processError(e);
-                throw new Error("unreachable");
-            }
-        } else {
-            const result = await this.actor.getBackupConfig();
             return result;
         }
     }

@@ -19,14 +19,6 @@ export interface BackupSnapshot {
   'comments' : Array<Comment>,
   'analyses' : Array<Analysis>,
 }
-export interface BackupSummary {
-  'bookCount' : bigint,
-  'timestamp' : bigint,
-  'commentCount' : bigint,
-  'chapterCount' : bigint,
-  'annotationCount' : bigint,
-  'analysisCount' : bigint,
-}
 export interface Book {
   'id' : bigint,
   'title' : string,
@@ -300,7 +292,6 @@ export interface _SERVICE {
   'adminReassignBooksOwner' : ActorMethod<[Array<bigint>, Principal], bigint>,
   'checkAccess' : ActorMethod<[string], boolean>,
   'clearChat' : ActorMethod<[bigint, string], boolean>,
-  'configureBackupSchedule' : ActorMethod<[bigint, boolean, bigint], undefined>,
   'createArchive' : ActorMethod<[bigint, string, string], bigint>,
   'createBook' : ActorMethod<[string, string, string], bigint>,
   'createChapter' : ActorMethod<[bigint, string], bigint>,
@@ -308,7 +299,6 @@ export interface _SERVICE {
   'createComment' : ActorMethod<[bigint, string, string], bigint>,
   'deleteAnalysis' : ActorMethod<[bigint], boolean>,
   'deleteArchive' : ActorMethod<[bigint], boolean>,
-  'deleteBackup' : ActorMethod<[bigint], undefined>,
   'deleteBook' : ActorMethod<[bigint], boolean>,
   'deleteChapter' : ActorMethod<[bigint], boolean>,
   'deleteChatSession' : ActorMethod<[bigint], undefined>,
@@ -322,11 +312,6 @@ export interface _SERVICE {
   'getAnalysis' : ActorMethod<[bigint], [] | [Analysis]>,
   'getAnnotation' : ActorMethod<[bigint], [] | [TextAnnotation]>,
   'getAnnotations' : ActorMethod<[bigint], Array<TextAnnotation>>,
-  'getBackupConfig' : ActorMethod<
-    [],
-    { 'enabled' : boolean, 'intervalSeconds' : bigint, 'maxSnapshots' : bigint }
-  >,
-  'getBackupSnapshot' : ActorMethod<[bigint], [] | [BackupSnapshot]>,
   'getBook' : ActorMethod<[bigint], [] | [Book]>,
   'getBookStats' : ActorMethod<
     [bigint],
@@ -355,7 +340,6 @@ export interface _SERVICE {
   'listAnalysesByChapter' : ActorMethod<[bigint], Array<Analysis>>,
   'listAnnotationsByAnalysis' : ActorMethod<[bigint], Array<TextAnnotation>>,
   'listArchivesByBook' : ActorMethod<[bigint], Array<ChatArchive>>,
-  'listBackups' : ActorMethod<[], Array<BackupSummary>>,
   'listBooksByOwner' : ActorMethod<[], Array<Book>>,
   'listChaptersByBook' : ActorMethod<[bigint], Array<Chapter>>,
   'listCommentsByChapter' : ActorMethod<[bigint], Array<Comment>>,
@@ -442,7 +426,6 @@ export interface _SERVICE {
     [string, string, string],
     Uint8Array | number[]
   >,
-  'triggerBackupNow' : ActorMethod<[], undefined>,
   'ttsTransform' : ActorMethod<
     [
       {

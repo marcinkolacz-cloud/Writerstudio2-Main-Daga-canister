@@ -18,15 +18,9 @@ import {
   useListInviteCodes,
   useRevokeInviteCode,
   useSetAdminPrincipal,
-  useBackupConfig,
-  useListBackups,
-  useConfigureBackupSchedule,
-  useTriggerBackupNow,
-  useDeleteBackup,
-  useDownloadBackup,
 } from "@/hooks/useBackend";
 import { useAppStore } from "@/store/useAppStore";
-import { AlertCircle, Copy, Download, Loader2, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Copy, Loader2, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function AdminPage() {
@@ -95,50 +89,6 @@ export function AdminPage() {
     return new Date(Number(ts) / 1_000_000).toLocaleString("pl-PL");
   };
 
-  // ===== Kopie zapasowe =====
-  const { data: backupConfig } = useBackupConfig();
-  const { data: backups, isLoading: backupsLoading } = useListBackups();
-  const configureBackupMutation = useConfigureBackupSchedule();
-  const triggerBackupMutation = useTriggerBackupNow();
-  const deleteBackupMutation = useDeleteBackup();
-  const downloadBackupMutation = useDownloadBackup();
-  const [intervalChoice, setIntervalChoice] = useState<string>("86400");
-  const [maxSnapshotsInput, setMaxSnapshotsInput] = useState<string>("10");
-  const [backupSaveError, setBackupSaveError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (backupConfig) {
-      setIntervalChoice(backupConfig.intervalSeconds.toString());
-      setMaxSnapshotsInput(backupConfig.maxSnapshots.toString());
-    }
-  }, [backupConfig]);
-
-  const handleSaveBackupSchedule = async (enabled: boolean) => {
-    setBackupSaveError(null);
-    try {
-      await configureBackupMutation.mutateAsync({
-        intervalSeconds: BigInt(intervalChoice),
-        enabled,
-        maxSnapshots: BigInt(maxSnapshotsInput || "10"),
-      });
-    } catch (err) {
-      setBackupSaveError(err instanceof Error ? err.message : "Nieznany błąd");
-    }
-  };
-
-  const handleTriggerBackupNow = async () => {
-    setBackupSaveError(null);
-    try {
-      await triggerBackupMutation.mutateAsync();
-    } catch (err) {
-      setBackupSaveError(err instanceof Error ? err.message : "Nieznany błąd");
-    }
-  };
-
-  const handleDeleteBackup = async (timestamp: bigint) => {
-    await deleteBackupMutation.mutateAsync(timestamp);
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -180,120 +130,6 @@ export function AdminPage() {
         {setAdminError && <p className="text-xs text-destructive">{setAdminError}</p>}
         {setAdminSuccess && (
           <p className="text-xs text-muted-foreground">Admin zmieniony.</p>
-        )}
-      </div>
-
-      <div className="rounded-lg border border-border p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-foreground">Kopie zapasowe</h2>
-        <p className="text-xs text-muted-foreground">
-          Automatyczny snapshot książek/rozdziałów/analiz/adnotacji/komentarzy
-          (bez nagrań audio) zapisywany on-chain wg harmonogramu. Trzymane jest
-          maksymalnie tyle ostatnich kopii, ile ustawisz poniżej — starsze są
-          usuwane automatycznie.
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <select
-            className="rounded-md border border-input bg-background px-2 py-1.5 text-sm"
-            value={intervalChoice}
-            onChange={(e) => setIntervalChoice(e.target.value)}
-          >
-            <option value="86400">Codziennie</option>
-            <option value="604800">Co tydzień</option>
-            <option value="43200">Co 12 godzin</option>
-          </select>
-          <input
-            className="w-20 rounded-md border border-input bg-background px-2 py-1.5 text-sm"
-            type="number"
-            min={1}
-            value={maxSnapshotsInput}
-            onChange={(e) => setMaxSnapshotsInput(e.target.value)}
-            title="Ile ostatnich kopii trzymać"
-          />
-          <Button
-            size="sm"
-            onClick={() => handleSaveBackupSchedule(true)}
-            disabled={configureBackupMutation.isPending}
-          >
-            {configureBackupMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : backupConfig?.enabled ? (
-              "Zapisz harmonogram"
-            ) : (
-              "Włącz harmonogram"
-            )}
-          </Button>
-          {backupConfig?.enabled && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => handleSaveBackupSchedule(false)}
-              disabled={configureBackupMutation.isPending}
-            >
-              Wyłącz
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleTriggerBackupNow}
-            disabled={triggerBackupMutation.isPending}
-          >
-            {triggerBackupMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "Zrób kopię teraz"
-            )}
-          </Button>
-        </div>
-        {backupConfig && (
-          <p className="text-xs text-muted-foreground">
-            Status: {backupConfig.enabled ? "włączony" : "wyłączony"}
-            {backupConfig.enabled &&
-              ` — co ${backupConfig.intervalSeconds.toString()} s, max ${backupConfig.maxSnapshots.toString()} kopii`}
-          </p>
-        )}
-        {backupSaveError && <p className="text-xs text-destructive">{backupSaveError}</p>}
-
-        {backupsLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-        ) : backups && backups.length > 0 ? (
-          <div className="space-y-1">
-            {backups
-              .slice()
-              .sort((a, b) => Number(b.timestamp - a.timestamp))
-              .map((b) => (
-                <div
-                  key={b.timestamp.toString()}
-                  className="flex items-center justify-between rounded-md border border-border px-2 py-1.5 text-xs"
-                >
-                  <span className="text-muted-foreground">
-                    {formatDate(b.timestamp)} — {b.bookCount.toString()} książek,{" "}
-                    {b.chapterCount.toString()} rozdz., {b.analysisCount.toString()} analiz
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => downloadBackupMutation.mutate(b.timestamp)}
-                      disabled={downloadBackupMutation.isPending}
-                      title="Pobierz na dysk"
-                    >
-                      <Download className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteBackup(b.timestamp)}
-                      disabled={deleteBackupMutation.isPending}
-                    >
-                      <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-          </div>
-        ) : (
-          <p className="text-xs text-muted-foreground">Brak zapisanych kopii.</p>
         )}
       </div>
 
