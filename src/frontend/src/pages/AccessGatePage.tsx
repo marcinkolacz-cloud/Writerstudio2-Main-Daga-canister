@@ -41,10 +41,14 @@ export function AccessGatePage() {
     // breaks the gesture chain and the popup is silently blocked.
     // clear() performs full II session teardown (signOut + fresh AuthClient),
     // so no manual indexedDB/localStorage cleanup is needed.
-    clear().catch(() => setIsSwitching(false));
     // login() opens the real Internet Identity window so the user can
     // choose/confirm a different identity via passkey. No page reload.
-    login().catch(() => setIsSwitching(false));
+    // Both are tracked via allSettled purely to reset isSwitching once the
+    // flow finishes, instead of spinning forever on the success path (the
+    // original code never cleared isSwitching after a successful login()).
+    Promise.allSettled([clear(), login()]).finally(() =>
+      setIsSwitching(false),
+    );
   };
 
   return (

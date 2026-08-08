@@ -1,5 +1,6 @@
 import { AccessGatePage } from "@/pages/AccessGatePage";
 import { useAuthContext } from "@/providers/AuthProvider";
+import { useHasBookAccess } from "@/hooks/useBackend";
 import { useAppStore } from "@/store/useAppStore";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { useEffect, useSyncExternalStore } from "react";
@@ -70,24 +71,51 @@ function AuthGate({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-export default function App() {
-  const accessGranted = useSyncExternalStore(
+function AccessCheck({ children }: { children: ReactNode }) {
+  const localAccessGranted = useSyncExternalStore(
     subscribeAccess,
     getAccessGranted,
     getAccessGranted,
   );
+  const { identity, isInitializing } = useAuthContext();
+  const hasIdentity = !!identity && !identity.getPrincipal().isAnonymous();
 
-  if (!accessGranted) {
+  // Backend fallback: this browser never locally recorded
+  // ws_access_granted (fresh profile, cleared storage, identity switch,
+  // etc.), but the authenticated principal may already own books from a
+  // prior session elsewhere. Without this check such a principal gets
+  // stuck on the invite-code screen despite having real access.
+  const { data: hasBookAccess, isLoading: isCheckingBooks } =
+    useHasBookAccess(!localAccessGranted && hasIdentity && !isInitializing);
+
+  useEffect(() => {
+    if (hasBookAccess) {
+      localStorage.setItem("ws_access_granted", "true");
+      window.dispatchEvent(new Event("storage"));
+    }
+  }, [hasBookAccess]);
+
+  if (localAccessGranted || hasBookAccess) {
+    return <>{children}</>;
+  }
+
+  if (!isInitializing && hasIdentity && isCheckingBooks) {
     return (
-      <AuthGate>
-        <AccessGatePage />
-      </AuthGate>
+      <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+        Sprawdzanie dostępu...
+      </div>
     );
   }
 
+  return <AccessGatePage />;
+}
+
+export default function App() {
   return (
     <AuthGate>
-      <RouterProvider router={router} />
+      <AccessCheck>
+        <RouterProvider router={router} />
+      </AccessCheck>
     </AuthGate>
   );
 }

@@ -17,6 +17,26 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useActorLocal } from "./useActorLocal";
 
+/**
+ * Checks whether the currently authenticated principal already owns at
+ * least one book. Used by the top-level access gate so a browser that
+ * never locally recorded `ws_access_granted` (e.g. after clearing storage,
+ * or a fresh browser profile) doesn't get stuck on the invite-code screen
+ * for a principal that already has real backend access.
+ */
+export function useHasBookAccess(enabled: boolean) {
+  const { actor } = useActorLocal(createActor);
+  return useQuery<boolean>({
+    queryKey: ["hasBookAccess"],
+    queryFn: async () => {
+      if (!actor) return false;
+      const books = await actor.listBooksByOwner();
+      return books.length > 0;
+    },
+    enabled: enabled && !!actor,
+  });
+}
+
 export function useBooks() {
   const { actor } = useActorLocal(createActor);
   return useQuery<Book[]>({
