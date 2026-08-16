@@ -48,7 +48,10 @@ ZASADY TWORZENIA PROPOZYCJI:
 1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
 2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
 3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
-4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
+4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie
+5. NIGDY nie wprowadzaj nowych postaci, sprawców ani faktów nieobecnych w oryginalnym tekście (np. nie zamieniaj "miała ręce związane" na "ktoś związał jej ręce", jeśli w tekście nie ma wzmianki kto to zrobił)
+6. Konstrukcja "mieć/mieć+imiesłów przymiotnikowy bierny" opisująca stan (np. "miała wygięte ręce", "miała skrępowane dłonie") to NIE jest strona bierna wymagająca poprawy — to normalna, poprawna polska konstrukcja opisowa. Nie przerabiaj jej na siłę
+7. Przed zwróceniem PROPOZYCJI przeczytaj ją jeszcze raz jako całe, samodzielne zdanie — jeśli brzmi nienaturalnie, jest niegramatyczna lub nie ma sensu, popraw ją zanim ją zwrócisz. Nigdy nie zwracaj niegramatycznej propozycji`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -78,7 +81,10 @@ ZASADY TWORZENIA PROPOZYCJI:
 1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
 2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
 3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
-4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
+4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie
+5. NIGDY nie wprowadzaj nowych postaci, sprawców ani faktów nieobecnych w oryginalnym tekście (np. nie zamieniaj "miała ręce związane" na "ktoś związał jej ręce", jeśli w tekście nie ma wzmianki kto to zrobił)
+6. Konstrukcja "mieć/mieć+imiesłów przymiotnikowy bierny" opisująca stan (np. "miała wygięte ręce", "miała skrępowane dłonie") to NIE jest strona bierna wymagająca poprawy — to normalna, poprawna polska konstrukcja opisowa. Nie przerabiaj jej na siłę
+7. Przed zwróceniem PROPOZYCJI przeczytaj ją jeszcze raz jako całe, samodzielne zdanie — jeśli brzmi nienaturalnie, jest niegramatyczna lub nie ma sensu, popraw ją zanim ją zwrócisz. Nigdy nie zwracaj niegramatycznej propozycji`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -97,7 +103,10 @@ ZASADY TWORZENIA PROPOZYCJI:
 1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
 2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
 3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
-4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
+4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie
+5. NIGDY nie wprowadzaj nowych postaci, sprawców ani faktów nieobecnych w oryginalnym tekście (np. nie zamieniaj "miała ręce związane" na "ktoś związał jej ręce", jeśli w tekście nie ma wzmianki kto to zrobił)
+6. Konstrukcja "mieć/mieć+imiesłów przymiotnikowy bierny" opisująca stan (np. "miała wygięte ręce", "miała skrępowane dłonie") to NIE jest strona bierna wymagająca poprawy — to normalna, poprawna polska konstrukcja opisowa. Nie przerabiaj jej na siłę
+7. Przed zwróceniem PROPOZYCJI przeczytaj ją jeszcze raz jako całe, samodzielne zdanie — jeśli brzmi nienaturalnie, jest niegramatyczna lub nie ma sensu, popraw ją zanim ją zwrócisz. Nigdy nie zwracaj niegramatycznej propozycji`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -119,7 +128,10 @@ ZASADY TWORZENIA PROPOZYCJI:
 1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
 2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
 3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
-4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
+4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie
+5. NIGDY nie wprowadzaj nowych postaci, sprawców ani faktów nieobecnych w oryginalnym tekście (np. nie zamieniaj "miała ręce związane" na "ktoś związał jej ręce", jeśli w tekście nie ma wzmianki kto to zrobił)
+6. Konstrukcja "mieć/mieć+imiesłów przymiotnikowy bierny" opisująca stan (np. "miała wygięte ręce", "miała skrępowane dłonie") to NIE jest strona bierna wymagająca poprawy — to normalna, poprawna polska konstrukcja opisowa. Nie przerabiaj jej na siłę
+7. Przed zwróceniem PROPOZYCJI przeczytaj ją jeszcze raz jako całe, samodzielne zdanie — jeśli brzmi nienaturalnie, jest niegramatyczna lub nie ma sensu, popraw ją zanim ją zwrócisz. Nigdy nie zwracaj niegramatycznej propozycji`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
@@ -138,7 +150,10 @@ ZASADY TWORZENIA PROPOZYCJI:
 1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
 2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
 3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
-4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie`;
+4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie
+5. NIGDY nie wprowadzaj nowych postaci, sprawców ani faktów nieobecnych w oryginalnym tekście (np. nie zamieniaj "miała ręce związane" na "ktoś związał jej ręce", jeśli w tekście nie ma wzmianki kto to zrobił)
+6. Konstrukcja "mieć/mieć+imiesłów przymiotnikowy bierny" opisująca stan (np. "miała wygięte ręce", "miała skrępowane dłonie") to NIE jest strona bierna wymagająca poprawy — to normalna, poprawna polska konstrukcja opisowa. Nie przerabiaj jej na siłę
+7. Przed zwróceniem PROPOZYCJI przeczytaj ją jeszcze raz jako całe, samodzielne zdanie — jeśli brzmi nienaturalnie, jest niegramatyczna lub nie ma sensu, popraw ją zanim ją zwrócisz. Nigdy nie zwracaj niegramatycznej propozycji`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
