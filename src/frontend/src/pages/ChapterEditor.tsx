@@ -59,6 +59,7 @@ import {
   analyzeDialogue,
   analyzeEmotion,
   analyzeGrammarStyle,
+  analyzeResearch,
   analyzeSceneExpansion,
   analyzeWithContext,
   formatParagraphsWithAI,
@@ -86,6 +87,7 @@ import {
   Download,
   FileEdit,
   FileText,
+  FlaskConical,
   Headphones,
   Heart,
   History,
@@ -115,7 +117,8 @@ type AnalysisMode =
   | "summary"
   | "scene"
   | "emotion"
-  | "consistency";
+  | "consistency"
+  | "research";
 type SummaryType = "short" | "long" | "hooks";
 
 function SaveIndicator({ status }: { status: SaveStatus }) {
@@ -795,8 +798,20 @@ export function ChapterEditorPage() {
                   Streszczenie książki
                 </div>
               </SelectItem>
+              <SelectItem value="research">
+                <div className="flex items-center gap-2">
+                  <FlaskConical className="h-3.5 w-3.5" />
+                  Analiza badawcza
+                </div>
+              </SelectItem>
             </SelectContent>
           </Select>
+
+          {analysisMode === "research" && (
+            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 w-full">
+              ⚠️ Tryb badawczy — model nie generuje fikcji ani nie uzupełnia danych
+            </div>
+          )}
 
           {analysisMode === "summary" && (
             <Select
@@ -977,6 +992,12 @@ export function ChapterEditorPage() {
                     apiKey.trim(),
                     provider,
                     bookContext,
+                  );
+                } else if (analysisMode === "research") {
+                  annotations = await analyzeResearch(
+                    text,
+                    apiKey.trim(),
+                    provider,
                   );
                 }
 

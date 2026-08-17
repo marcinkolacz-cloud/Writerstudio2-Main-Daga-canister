@@ -698,3 +698,64 @@ export async function chatWithBook(
     16000,
   );
 }
+
+// ============================================================
+// TRYB BADAWCZY — Analiza dokumentacji naukowej
+// ============================================================
+
+function buildResearchPrompt(text: string): string {
+  return `WAŻNE: To jest rzeczywista dokumentacja badań medycznych przeznaczona do oficjalnej publikacji naukowej. NIE jest to proza literacka ani fikcja. Zakazy bezwzględne:
+- Nie generuj fikcyjnych treści
+- Nie uzupełniaj brakujących danych własnymi domysłami
+- Nie upiększaj wniosków ani nie wzmacniaj ich brzmienia
+- Nie interpretuj kreatywnie niejasności — flaguj je jako problem
+- Nie oceniaj wartości naukowej odkryć — tylko spójność logiczną i formalną
+
+Dane w tabelach są rzeczywistymi wynikami badań klinicznych. Imiona i nazwiska pacjentów są fikcyjne (pseudonimizacja), wszystkie wartości liczbowe i kliniczne są prawdziwe.
+
+Przeanalizuj tekst pod kątem WYŁĄCZNIE następujących problemów:
+1. NIESPÓJNOŚCI WEWNĘTRZNE — sprzeczne liczby, różna liczba pacjentów (n) w różnych sekcjach, sprzeczne daty lub okresy obserwacji
+2. NIEZGODNOŚĆ metodologia ↔ wyniki ↔ wnioski — wnioski niewynikające z przedstawionych danych, metody opisane inaczej niż zastosowane
+3. LOGIKA STATYSTYCZNA — wnioski nieuzasadnione statystycznie, niepoprawne użycie p-value, zbyt mała próba dla stawianych tez, brak przedziału ufności tam gdzie jest wymagany
+4. TERMINOLOGIA MEDYCZNA — błędna, niespójna lub niestandardowa dla danej dziedziny
+5. STRUKTURA IMRAD — brakujące lub nieprawidłowo umiejscowione sekcje (Wstęp, Metody, Wyniki, Dyskusja, Wnioski)
+
+Jeśli w danej kategorii nie ma problemów — pomiń ją. Nie wymyślaj zastrzeżeń.
+
+Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE PROBLEMU|||KATEGORIA: co autor powinien sprawdzić
+
+Kolory:
+red = niespójność/błąd logiczny/sprzeczność — wymaga korekty
+orange = problem statystyczny lub metodologiczny — wymaga weryfikacji
+yellow = terminologia lub struktura — wymaga sprawdzenia
+blue = sugestia terminów do wyszukania (np. "PubMed: hypertension beta-blocker RCT 2021-2026")
+
+NIE używaj JSON. NIE używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
+
+Tekst do analizy:
+"""
+${text}
+"""`;
+}
+
+export async function analyzeResearch(
+  text: string,
+  apiKey: string,
+  provider: "openai" | "claude",
+): Promise<Annotation[]> {
+  if (text.length > 16000) {
+    throw new Error("Tekst za długi do analizy badawczej (max 16 000 znaków)");
+  }
+  const prompt = buildResearchPrompt(text);
+  const responseText = await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-4-6",
+    8000,
+    0.1,
+  );
+  return parsePipeAnnotations(responseText);
+}
