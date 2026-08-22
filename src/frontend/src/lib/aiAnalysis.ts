@@ -118,20 +118,20 @@ function buildSceneExpansionPrompt(
   bookContext?: BookContext,
 ): string {
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź miejsca, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego fragmentu, który warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź zdania, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego zdania, które warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
 COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
 Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
 red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
-ZASADY TWORZENIA PROPOZYCJI:
-1. Przed napisaniem propozycji przeczytaj CAŁE zdanie — propozycja musi mieć sens po wstawieniu w miejsce oryginału
-2. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
-3. Zmieniaj tylko to co jest błędem — nie przepisuj całego zdania
-4. Propozycja po wstawieniu musi tworzyć poprawne gramatycznie i stylistycznie zdanie
-5. NIGDY nie wprowadzaj nowych postaci, sprawców ani faktów nieobecnych w oryginalnym tekście (np. nie zamieniaj "miała ręce związane" na "ktoś związał jej ręce", jeśli w tekście nie ma wzmianki kto to zrobił)
-6. Konstrukcja "mieć/mieć+imiesłów przymiotnikowy bierny" opisująca stan (np. "miała wygięte ręce", "miała skrępowane dłonie") to NIE jest strona bierna wymagająca poprawy — to normalna, poprawna polska konstrukcja opisowa. Nie przerabiaj jej na siłę
-7. Przed zwróceniem PROPOZYCJI przeczytaj ją jeszcze raz jako całe, samodzielne zdanie — jeśli brzmi nienaturalnie, jest niegramatyczna lub nie ma sensu, popraw ją zanim ją zwrócisz. Nigdy nie zwracaj niegramatycznej propozycji`;
+ZASADY TWORZENIA PROPOZYCJI (TRYB ROZSZERZANIA SCENY):
+1. ZAKAZ zmiany szyku zdania i ZAKAZ zamiany istniejących wyrazów — wolno WYŁĄCZNIE dopisywać nowe fragmenty (słowa, zwroty, zdania) do oryginalnego tekstu, nigdy nie przestawiaj ani nie podmieniaj tego, co już jest napisane
+2. PROPOZYCJA = oryginalne zdanie + dopisany fragment rozszerzający (na początku, w środku lub na końcu) — nigdy przepisane od nowa zdanie
+3. Rozszerzaj tylko tam, gdzie to naprawdę wzbogaca scenę i jest spójne z fabułą oraz stylem książki — NIE szukaj zdań do rozszerzenia na siłę; jeśli w danym fragmencie nic nie warto dopisać, pomiń go i nie zwracaj dla niego adnotacji
+4. Nie przesadzaj z długością i ilością dopisanych szczegółów — rozszerzenie ma być stonowane, na korzyść książki, a nie rozdymać tekst bez potrzeby; nie musi wystąpić w każdym zdaniu
+5. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
+6. NIGDY nie wprowadzaj nowych postaci, sprawców ani faktów nieobecnych w oryginalnym tekście ani niezgodnych z fabułą
+7. Przed zwróceniem PROPOZYCJI przeczytaj ją jeszcze raz jako całe zdanie — jeśli brzmi nienaturalnie, jest niegramatyczna lub nie ma sensu, popraw ją zanim ją zwrócisz. Nigdy nie zwracaj niegramatycznej propozycji`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
