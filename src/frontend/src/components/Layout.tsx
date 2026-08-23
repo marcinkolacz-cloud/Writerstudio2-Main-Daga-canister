@@ -14,6 +14,7 @@ import {
   BookOpen,
   FileText,
   GripVertical,
+  HelpCircle,
   LogOut,
   Moon,
   Settings,
@@ -231,6 +232,15 @@ export function Layout() {
                 <Trash2 className="h-4 w-4" />
                 Kosz
               </button>
+              <button
+                type="button"
+                onClick={() => navigate({ to: "/help" })}
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                data-ocid="nav.help_link"
+              >
+                <HelpCircle className="h-4 w-4" />
+                Instrukcja
+              </button>
             </>
           )}
         </div>
@@ -250,6 +260,16 @@ export function Layout() {
           </div>
           {isAuthenticated && (
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate({ to: "/help" })}
+                aria-label="Instrukcja obsługi"
+                title="Instrukcja obsługi"
+                data-ocid="nav.help_button"
+              >
+                <HelpCircle className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"

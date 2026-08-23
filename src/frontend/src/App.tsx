@@ -9,6 +9,7 @@ import { adminRoute } from "./routes/admin";
 import { bookRoute } from "./routes/book";
 import { chapterRoute } from "./routes/chapter";
 import { dashboardRoute } from "./routes/dashboard";
+import { helpRoute } from "./routes/help";
 import { indexRoute } from "./routes/index";
 import { layoutRoute } from "./routes/layout";
 import { loginRoute } from "./routes/login";
@@ -26,6 +27,7 @@ const routeTree = rootRoute.addChildren([
     statisticsRoute,
     adminRoute,
     trashRoute,
+    helpRoute,
   ]),
 ]);
 

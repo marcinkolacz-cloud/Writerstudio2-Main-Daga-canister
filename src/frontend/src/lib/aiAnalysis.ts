@@ -118,20 +118,22 @@ function buildSceneExpansionPrompt(
   bookContext?: BookContext,
 ): string {
   const customPrompt = localStorage.getItem("ws_system_prompt");
-  let system = `${buildBookContextPrompt(bookContext)}Przeanalizuj poniższy tekst i znajdź zdania, które można rozbudować o więcej szczegółów sensorycznych (wzrok, dźwięk, dotyk, zapach), opis otoczenia, tempo sceny lub nastrój. Dla każdego zdania, które warto rozbudować, zaproponuj rozszerzoną wersję jako propozycję poprawy. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
+  let system = `${buildBookContextPrompt(bookContext)}To NIE jest tryb korekty ani poprawiania interpunkcji/gramatyki. To tryb ROZSZERZANIA SCENY: znajdź zdania, w których warto zatrzymać akcję i rozwinąć to, co już się dzieje — zamiast przeskakiwać do kolejnego wydarzenia, dopisz co bohater widzi, słyszy, czuje, o czym myśli oraz jak reagują inni obecni w scenie. Dla każdego takiego zdania zaproponuj wersję rozszerzoną o realny, treściowy fragment (kilka słów do kilku zdań), a nie drobną poprawkę interpunkcyjną. Zwróć listę adnotacji w formacie tekstowym. Każda adnotacja na osobnej linii, pola oddzielone sekwencją |||:
 COLOR|||TEKST ORYGINALNY|||WYJAŚNIENIE|||PROPOZYCJA
 Możliwe wartości COLOR: red, yellow, blue, orange, purple
 Przykład:
-red|||mając nadzieję że|||Brak przecinka przed że|||mając nadzieję, że
+blue|||Wszedł do pokoju i usiadł przy biurku|||Można rozwinąć to, co bohater dostrzega i czuje w tym momencie|||Wszedł do pokoju i usiadł przy biurku. Powietrze pachniało kurzem starych książek, a deski podłogi skrzypiały pod każdym krokiem. Poczuł, jak napięcie ostatnich godzin powoli opada
 Nie używaj JSON. Nie używaj cudzysłowów jako separatorów. Zwróć TYLKO linie z adnotacjami, bez żadnego dodatkowego tekstu.
 ZASADY TWORZENIA PROPOZYCJI (TRYB ROZSZERZANIA SCENY):
 1. ZAKAZ zmiany szyku zdania i ZAKAZ zamiany istniejących wyrazów — wolno WYŁĄCZNIE dopisywać nowe fragmenty (słowa, zwroty, zdania) do oryginalnego tekstu, nigdy nie przestawiaj ani nie podmieniaj tego, co już jest napisane
-2. PROPOZYCJA = oryginalne zdanie + dopisany fragment rozszerzający (na początku, w środku lub na końcu) — nigdy przepisane od nowa zdanie
+2. PROPOZYCJA = oryginalne zdanie + dopisany, treściowy fragment rozszerzający (na początku, w środku lub na końcu) — dopisany fragment musi realnie rozwijać scenę (spostrzeżenia, myśli, dźwięki, odczucia, reakcje innych postaci), a NIE być samą poprawką przecinka, kropki czy szyku
 3. Rozszerzaj tylko tam, gdzie to naprawdę wzbogaca scenę i jest spójne z fabułą oraz stylem książki — NIE szukaj zdań do rozszerzenia na siłę; jeśli w danym fragmencie nic nie warto dopisać, pomiń go i nie zwracaj dla niego adnotacji
-4. Nie przesadzaj z długością i ilością dopisanych szczegółów — rozszerzenie ma być stonowane, na korzyść książki, a nie rozdymać tekst bez potrzeby; nie musi wystąpić w każdym zdaniu
-5. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
-6. NIGDY nie wprowadzaj nowych postaci, sprawców ani faktów nieobecnych w oryginalnym tekście ani niezgodnych z fabułą
-7. Przed zwróceniem PROPOZYCJI przeczytaj ją jeszcze raz jako całe zdanie — jeśli brzmi nienaturalnie, jest niegramatyczna lub nie ma sensu, popraw ją zanim ją zwrócisz. Nigdy nie zwracaj niegramatycznej propozycji`;
+4. Rozszerzenie ma być pełne i treściowe — kilka zdań, nie pojedyncze słowo czy fragment zdania; nie musi wystąpić w każdym zdaniu, ale tam gdzie występuje, ma realnie wzbogacić scenę
+5. NIE używaj imiesłowów odczasownikowych (np. formy na "-ąc", "-wszy": "widząc", "czując", "usłyszawszy", "westchnąwszy") — pisz pełnymi zdaniami
+6. Unikaj powtarzania tych samych słów i zwrotów między różnymi propozycjami w jednej analizie — różnicuj słownictwo i konstrukcje zdań
+7. Używaj wyłącznie klasycznej interpunkcji: przecinki, kropki, średniki. Nie używaj myślnika narracyjnego (—) w propozycjach
+8. NIGDY nie wprowadzaj nowych postaci, sprawców ani faktów nieobecnych w oryginalnym tekście ani niezgodnych z fabułą
+9. Przed zwróceniem PROPOZYCJI przeczytaj ją jeszcze raz jako całe zdanie — jeśli brzmi nienaturalnie, jest niegramatyczna lub nie ma sensu, popraw ją zanim ją zwrócisz. Nigdy nie zwracaj niegramatycznej propozycji`;
   if (customPrompt) {
     system += `\n\nDodatkowe instrukcje autora:\n${customPrompt}`;
   }
