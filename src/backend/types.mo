@@ -176,6 +176,29 @@ module {
     chatSessionMessages : [ChatSessionMessage];
   };
 
+  public type BookExportOffsets = {
+    chapters : Nat;
+    analyses : Nat;
+    annotations : Nat;
+    comments : Nat;
+    chatMessages : Nat;
+    chatArchives : Nat;
+    chatSessions : Nat;
+    chatSessionMessages : Nat;
+  };
+
+  public type BookExportChunk = {
+    book : ?Book;
+    chapters : [Chapter]; chaptersHasMore : Bool;
+    analyses : [Analysis]; analysesHasMore : Bool;
+    annotations : [TextAnnotation]; annotationsHasMore : Bool;
+    comments : [Comment]; commentsHasMore : Bool;
+    chatMessages : [ChatMessage]; chatMessagesHasMore : Bool;
+    chatArchives : [ChatArchive]; chatArchivesHasMore : Bool;
+    chatSessions : [ChatSession]; chatSessionsHasMore : Bool;
+    chatSessionMessages : [ChatSessionMessage]; chatSessionMessagesHasMore : Bool;
+  };
+
   public type ExportMetadataResponse = {
     exportedAt : Int;
     owner : Principal;

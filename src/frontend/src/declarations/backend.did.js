@@ -143,6 +143,35 @@ export const idlFactory = ({ IDL }) => {
     'comments' : IDL.Vec(Comment),
     'analyses' : IDL.Vec(Analysis),
   });
+  const BookExportOffsets = IDL.Record({
+    'chatArchives' : IDL.Nat,
+    'chatSessionMessages' : IDL.Nat,
+    'chatMessages' : IDL.Nat,
+    'annotations' : IDL.Nat,
+    'chapters' : IDL.Nat,
+    'chatSessions' : IDL.Nat,
+    'comments' : IDL.Nat,
+    'analyses' : IDL.Nat,
+  });
+  const BookExportChunk = IDL.Record({
+    'chatArchives' : IDL.Vec(ChatArchive),
+    'chatSessionMessagesHasMore' : IDL.Bool,
+    'chatSessionMessages' : IDL.Vec(ChatSessionMessage),
+    'book' : IDL.Opt(Book),
+    'chatMessages' : IDL.Vec(ChatMessage),
+    'annotationsHasMore' : IDL.Bool,
+    'commentsHasMore' : IDL.Bool,
+    'analysesHasMore' : IDL.Bool,
+    'annotations' : IDL.Vec(TextAnnotation),
+    'chapters' : IDL.Vec(Chapter),
+    'chatSessions' : IDL.Vec(ChatSession),
+    'chaptersHasMore' : IDL.Bool,
+    'chatSessionsHasMore' : IDL.Bool,
+    'comments' : IDL.Vec(Comment),
+    'chatMessagesHasMore' : IDL.Bool,
+    'chatArchivesHasMore' : IDL.Bool,
+    'analyses' : IDL.Vec(Analysis),
+  });
   const ExportMetadataResponse = IDL.Record({
     'owner' : IDL.Principal,
     'bookCount' : IDL.Nat,
@@ -326,6 +355,11 @@ export const idlFactory = ({ IDL }) => {
     'deleteMessage' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'deleteRecording' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'exportBookSlice' : IDL.Func([IDL.Nat], [IDL.Opt(BookExport)], ['query']),
+    'exportBookSliceChunk' : IDL.Func(
+        [IDL.Nat, BookExportOffsets],
+        [IDL.Opt(BookExportChunk)],
+        ['query'],
+      ),
     'exportMetadata' : IDL.Func([], [ExportMetadataResponse], ['query']),
     'finishRecordingUpload' : IDL.Func([IDL.Nat], [IDL.Nat], []),
     'generateInviteCode' : IDL.Func([], [IDL.Text], []),

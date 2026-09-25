@@ -37,4 +37,11 @@ mixin (
       bookIndex,
     );
   };
+    public shared query ({ caller }) func exportBookSliceChunk(bookIndex : Nat, offsets : Types.BookExportOffsets) : async ?Types.BookExportChunk {
+      ExportLib.buildBookSliceChunk(
+        books, chapters, analyses, annotations, chatMessages, chatArchives, chatSessions, chatSessionMessages, comments,
+        caller, bookIndex, offsets,
+      );
+    };
+
 };

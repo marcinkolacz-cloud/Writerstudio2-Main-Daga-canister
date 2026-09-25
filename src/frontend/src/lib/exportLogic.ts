@@ -165,19 +165,47 @@ export async function runExport(
 
   const books: any[] = [];
   for (let i = 0; i < bookCount; i++) {
-    const slice = await actor.exportBookSlice(BigInt(i));
-    const b = opt(slice);
-    if (b) {
+    let offsets = {
+      chapters: 0n, analyses: 0n, annotations: 0n, comments: 0n,
+      chatMessages: 0n, chatArchives: 0n, chatSessions: 0n, chatSessionMessages: 0n,
+    };
+    let bookRec: any = null;
+    let chapters: any[] = [], analyses: any[] = [], annotations: any[] = [], comments: any[] = [];
+    let chatMessages: any[] = [], chatArchives: any[] = [], chatSessions: any[] = [], chatSessionMessages: any[] = [];
+    let hasMore = true;
+    while (hasMore) {
+      const res = await actor.exportBookSliceChunk(BigInt(i), offsets);
+      const c = opt(res);
+      if (!c) { hasMore = false; break; }
+      const ob = opt(c.book);
+      if (ob) bookRec = fromBook(ob);
+      chapters = chapters.concat(c.chapters.map(fromChapter));
+      analyses = analyses.concat(c.analyses.map(fromAnalysis));
+      annotations = annotations.concat(c.annotations.map(fromAnnotation));
+      comments = comments.concat(c.comments.map(fromComment));
+      chatMessages = chatMessages.concat(c.chatMessages.map(fromChatMessage));
+      chatArchives = chatArchives.concat(c.chatArchives.map(fromChatArchive));
+      chatSessions = chatSessions.concat(c.chatSessions.map(fromChatSession));
+      chatSessionMessages = chatSessionMessages.concat(c.chatSessionMessages.map(fromChatSessionMessage));
+
+      offsets = {
+        chapters: offsets.chapters + BigInt(c.chapters.length),
+        analyses: offsets.analyses + BigInt(c.analyses.length),
+        annotations: offsets.annotations + BigInt(c.annotations.length),
+        comments: offsets.comments + BigInt(c.comments.length),
+        chatMessages: offsets.chatMessages + BigInt(c.chatMessages.length),
+        chatArchives: offsets.chatArchives + BigInt(c.chatArchives.length),
+        chatSessions: offsets.chatSessions + BigInt(c.chatSessions.length),
+        chatSessionMessages: offsets.chatSessionMessages + BigInt(c.chatSessionMessages.length),
+      };
+      hasMore = c.chaptersHasMore || c.analysesHasMore || c.annotationsHasMore || c.commentsHasMore ||
+        c.chatMessagesHasMore || c.chatArchivesHasMore || c.chatSessionsHasMore || c.chatSessionMessagesHasMore;
+    }
+    if (bookRec) {
       books.push({
-        book: fromBook(b.book),
-        chapters: b.chapters.map(fromChapter),
-        analyses: b.analyses.map(fromAnalysis),
-        annotations: b.annotations.map(fromAnnotation),
-        comments: b.comments.map(fromComment),
-        chatMessages: b.chatMessages.map(fromChatMessage),
-        chatArchives: b.chatArchives.map(fromChatArchive),
-        chatSessions: b.chatSessions.map(fromChatSession),
-        chatSessionMessages: b.chatSessionMessages.map(fromChatSessionMessage),
+        book: bookRec,
+        chapters, analyses, annotations, comments,
+        chatMessages, chatArchives, chatSessions, chatSessionMessages,
       });
     }
     tick("Book " + (i + 1) + "/" + bookCount);

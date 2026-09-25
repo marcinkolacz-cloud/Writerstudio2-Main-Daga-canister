@@ -43,6 +43,35 @@ export interface BookExport {
   'comments' : Array<Comment>,
   'analyses' : Array<Analysis>,
 }
+export interface BookExportChunk {
+  'chatArchives' : Array<ChatArchive>,
+  'chatSessionMessagesHasMore' : boolean,
+  'chatSessionMessages' : Array<ChatSessionMessage>,
+  'book' : [] | [Book],
+  'chatMessages' : Array<ChatMessage>,
+  'annotationsHasMore' : boolean,
+  'commentsHasMore' : boolean,
+  'analysesHasMore' : boolean,
+  'annotations' : Array<TextAnnotation>,
+  'chapters' : Array<Chapter>,
+  'chatSessions' : Array<ChatSession>,
+  'chaptersHasMore' : boolean,
+  'chatSessionsHasMore' : boolean,
+  'comments' : Array<Comment>,
+  'chatMessagesHasMore' : boolean,
+  'chatArchivesHasMore' : boolean,
+  'analyses' : Array<Analysis>,
+}
+export interface BookExportOffsets {
+  'chatArchives' : bigint,
+  'chatSessionMessages' : bigint,
+  'chatMessages' : bigint,
+  'annotations' : bigint,
+  'chapters' : bigint,
+  'chatSessions' : bigint,
+  'comments' : bigint,
+  'analyses' : bigint,
+}
 export interface Chapter {
   'id' : bigint,
   'charCount' : bigint,
@@ -306,6 +335,10 @@ export interface _SERVICE {
   'deleteMessage' : ActorMethod<[bigint], boolean>,
   'deleteRecording' : ActorMethod<[bigint], boolean>,
   'exportBookSlice' : ActorMethod<[bigint], [] | [BookExport]>,
+  'exportBookSliceChunk' : ActorMethod<
+    [bigint, BookExportOffsets],
+    [] | [BookExportChunk]
+  >,
   'exportMetadata' : ActorMethod<[], ExportMetadataResponse>,
   'finishRecordingUpload' : ActorMethod<[bigint], bigint>,
   'generateInviteCode' : ActorMethod<[], string>,

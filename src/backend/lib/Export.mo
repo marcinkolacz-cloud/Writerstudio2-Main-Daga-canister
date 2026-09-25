@@ -116,4 +116,67 @@ module {
       chatSessionMessages = bChatSessionMessages;
     };
   };
+  func pageOf<T>(xs : [T], offset : Nat, limit : Nat) : ([T], Bool) {
+    if (offset >= xs.size()) { return ([], false) };
+    let end = if (offset + limit > xs.size()) { xs.size() } else { offset + limit };
+    (xs.range(offset, end).toArray(), end < xs.size());
+  };
+
+  public func buildBookSliceChunk(
+    books : Map.Map<Nat, Types.Book>,
+    chapters : Map.Map<Nat, Types.Chapter>,
+    analyses : Map.Map<Nat, Types.Analysis>,
+    annotations : Map.Map<Nat, Types.TextAnnotation>,
+    chatMessages : Map.Map<Nat, Types.ChatMessage>,
+    chatArchives : Map.Map<Nat, Types.ChatArchive>,
+    chatSessions : Map.Map<Nat, Types.ChatSession>,
+    chatSessionMessages : Map.Map<Nat, Types.ChatSessionMessage>,
+    comments : Map.Map<Nat, Types.Comment>,
+    owner : Principal,
+    bookIndex : Nat,
+    off : Types.BookExportOffsets,
+  ) : ?Types.BookExportChunk {
+    let owned = ownerBooks(books, owner);
+    if (bookIndex >= owned.size()) { return null };
+    let b = owned[bookIndex];
+    let singleBookId = [b.id];
+
+    let allChapters = chaptersForBooks(chapters, singleBookId);
+    let allChapterIds = mapNatField(allChapters, func(c) { c.id });
+
+    let allAnalyses = analysesForBooks(analyses, singleBookId);
+    let allAnalysisIds = mapNatField(allAnalyses, func(a) { a.id });
+
+    let allAnnotations = annotationsForAnalyses(annotations, allAnalysisIds);
+    let allComments = commentsForChapters(comments, allChapterIds);
+    let allChatMessages = chatMessagesForBooks(chatMessages, singleBookId);
+    let allChatArchives = chatArchivesForBooks(chatArchives, singleBookId);
+    let allChatSessions = chatSessionsForChapters(chatSessions, allChapterIds);
+    let allSessionIds = mapNatField(allChatSessions, func(s) { s.id });
+    let allChatSessionMessages = chatSessionMessagesForSessions(chatSessionMessages, allSessionIds);
+
+    let (pChapters, chaptersMore) = pageOf(allChapters, off.chapters, 10);
+    let (pAnalyses, analysesMore) = pageOf(allAnalyses, off.analyses, 5);
+    let (pAnnotations, annotationsMore) = pageOf(allAnnotations, off.annotations, 100);
+    let (pComments, commentsMore) = pageOf(allComments, off.comments, 100);
+    let (pChatMessages, chatMessagesMore) = pageOf(allChatMessages, off.chatMessages, 100);
+    let (pChatArchives, chatArchivesMore) = pageOf(allChatArchives, off.chatArchives, 10);
+    let (pChatSessions, chatSessionsMore) = pageOf(allChatSessions, off.chatSessions, 50);
+    let (pChatSessionMessages, chatSessionMessagesMore) = pageOf(allChatSessionMessages, off.chatSessionMessages, 100);
+
+    let firstCall = off.chapters == 0 and off.analyses == 0 and off.annotations == 0 and off.comments == 0 and off.chatMessages == 0 and off.chatArchives == 0 and off.chatSessions == 0 and off.chatSessionMessages == 0;
+
+    ?{
+      book = if (firstCall) { ?b } else { null };
+      chapters = pChapters; chaptersHasMore = chaptersMore;
+      analyses = pAnalyses; analysesHasMore = analysesMore;
+      annotations = pAnnotations; annotationsHasMore = annotationsMore;
+      comments = pComments; commentsHasMore = commentsMore;
+      chatMessages = pChatMessages; chatMessagesHasMore = chatMessagesMore;
+      chatArchives = pChatArchives; chatArchivesHasMore = chatArchivesMore;
+      chatSessions = pChatSessions; chatSessionsHasMore = chatSessionsMore;
+      chatSessionMessages = pChatSessionMessages; chatSessionMessagesHasMore = chatSessionMessagesMore;
+    };
+  };
+
 };

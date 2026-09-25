@@ -119,6 +119,37 @@ type Chapter =
    updatedAt: int;
    wordCount: nat;
  };
+type BookExportOffsets = 
+ record {
+   analyses: nat;
+   annotations: nat;
+   chapters: nat;
+   chatArchives: nat;
+   chatMessages: nat;
+   chatSessionMessages: nat;
+   chatSessions: nat;
+   comments: nat;
+ };
+type BookExportChunk = 
+ record {
+   analyses: vec Analysis;
+   analysesHasMore: bool;
+   annotations: vec TextAnnotation;
+   annotationsHasMore: bool;
+   book: opt Book;
+   chapters: vec Chapter;
+   chaptersHasMore: bool;
+   chatArchives: vec ChatArchive;
+   chatArchivesHasMore: bool;
+   chatMessages: vec ChatMessage;
+   chatMessagesHasMore: bool;
+   chatSessionMessages: vec ChatSessionMessage;
+   chatSessionMessagesHasMore: bool;
+   chatSessions: vec ChatSession;
+   chatSessionsHasMore: bool;
+   comments: vec Comment;
+   commentsHasMore: bool;
+ };
 type BookExport = 
  record {
    analyses: vec Analysis;
@@ -332,6 +363,8 @@ service : {
   deleteMessage: (id: nat) -> (bool);
   deleteRecording: (id: nat) -> (bool);
   exportBookSlice: (bookIndex: nat) -> (opt BookExport) query;
+  exportBookSliceChunk: (bookIndex: nat, offsets: BookExportOffsets) ->
+   (opt BookExportChunk) query;
   exportMetadata: () -> (ExportMetadataResponse) query;
   finishRecordingUpload: (uploadId: nat) -> (nat);
   generateInviteCode: () -> (text);
