@@ -121,6 +121,29 @@ type AnalysisMode =
   | "research";
 type SummaryType = "short" | "long" | "hooks";
 
+const ANALYSIS_MODE_KEY = "ws_analysis_mode";
+const ANALYSIS_MODES: AnalysisMode[] = [
+  "grammar",
+  "context",
+  "dialogue",
+  "summary",
+  "scene",
+  "emotion",
+  "consistency",
+  "research",
+];
+
+function loadAnalysisMode(): AnalysisMode {
+  try {
+    const v = localStorage.getItem(ANALYSIS_MODE_KEY);
+    return ANALYSIS_MODES.includes(v as AnalysisMode)
+      ? (v as AnalysisMode)
+      : "grammar";
+  } catch {
+    return "grammar";
+  }
+}
+
 function SaveIndicator({ status }: { status: SaveStatus }) {
   const labels: Record<SaveStatus, string> = {
     saved: "Zapisano",
@@ -356,7 +379,7 @@ export function ChapterEditorPage() {
   // AI analysis state
   const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>("idle");
   const [analysisError, setAnalysisError] = useState<string | null>(null);
-  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("grammar");
+  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>(loadAnalysisMode);
   const [summaryType, setSummaryType] = useState<SummaryType>("short");
   const [analysisTextLength, setAnalysisTextLength] = useState(0);
   const [lastAnalysisCost, setLastAnalysisCost] =
@@ -744,6 +767,11 @@ export function ChapterEditorPage() {
             value={analysisMode}
             onValueChange={(v) => {
               setAnalysisMode(v as AnalysisMode);
+              try {
+                localStorage.setItem(ANALYSIS_MODE_KEY, v);
+              } catch {
+                // ignore storage errors
+              }
               setAnalysisStatus("idle");
               setAnalysisError(null);
               setSummaryResult(null);
