@@ -909,7 +909,7 @@ export function ChapterEditorPage() {
                       const modelUsed =
                         provider === "claude"
                           ? analysisMode === "summary"
-                            ? "claude-sonnet-5"
+                            ? "claude-sonnet-5-5"
                             : "claude-sonnet-4-6"
                           : "gpt-4o-mini";
                       const cost = await estimateAnalysisCost(

@@ -1,4 +1,8 @@
-type ModelId = "claude-sonnet-5" | "claude-sonnet-4-6" | "gpt-4o-mini";
+type ModelId =
+  | "claude-sonnet-5-5"
+  | "claude-sonnet-5"
+  | "claude-sonnet-4-6"
+  | "gpt-4o-mini";
 
 interface ModelPricing {
   inputPerMillion: number; // USD
@@ -10,6 +14,9 @@ function getPricing(model: ModelId): ModelPricing {
   const sonnet5PromoEnds = new Date("2026-08-31T23:59:59Z");
   const now = new Date();
 
+  if (model === "claude-sonnet-5-5") {
+    return { inputPerMillion: 2, outputPerMillion: 10 };
+  }
   if (model === "claude-sonnet-5") {
     return now < sonnet5PromoEnds
       ? { inputPerMillion: 2, outputPerMillion: 10 }

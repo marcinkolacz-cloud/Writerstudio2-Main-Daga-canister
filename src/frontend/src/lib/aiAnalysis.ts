@@ -306,6 +306,7 @@ export async function callAi(
   model: string,
   maxTokens = 8000,
   temperature?: number,
+  effort?: "low" | "medium" | "high",
 ): Promise<string> {
   // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional ISO-8859-1 range filter
   const safeApiKey = apiKey.replace(/[^\x00-\xFF]/g, "").trim();
@@ -341,8 +342,11 @@ export async function callAi(
     max_tokens: maxTokens,
     messages: [{ role: "user", content: prompt }],
   };
-  if (temperature !== undefined && model !== "claude-sonnet-5") {
+  if (temperature !== undefined && !model.startsWith("claude-sonnet-5")) {
     body.temperature = temperature;
+  }
+  if (effort && model.startsWith("claude-sonnet-5")) {
+    body.output_config = { effort };
   }
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -360,8 +364,12 @@ export async function callAi(
   }
   const data = (await res.json()) as {
     content?: Array<{ type?: string; text?: string }>;
+    stop_reason?: string;
   };
   const responseText = data.content?.find((c) => c.type === "text")?.text ?? "";
+  if (!responseText && data.stop_reason === "max_tokens") {
+    throw new Error("Claude: limit tokenów wyczerpany przed odpowiedzią");
+  }
   console.log("[AI RESPONSE]", responseText.substring(0, 500));
   return responseText;
 }
@@ -554,7 +562,16 @@ export async function generateSummary(
     throw new Error("Tekst za długi");
   }
   const prompt = buildSummaryPrompt(allChaptersText, summaryType);
-  return await callAi(prompt, apiKey, provider, false, "claude-sonnet-5");
+  return await callAi(
+    prompt,
+    apiKey,
+    provider,
+    false,
+    "claude-sonnet-5-5",
+    16000,
+    undefined,
+    "low",
+  );
 }
 
 export interface ChatMessage {
@@ -696,8 +713,10 @@ export async function chatWithBook(
     apiKey,
     provider,
     false,
-    "claude-sonnet-5",
+    "claude-sonnet-5-5",
     16000,
+    undefined,
+    "medium",
   );
 }
 
